@@ -76,7 +76,7 @@ Yes, that is correct, in Rails, emails are used by creating Models that inherit 
 <div class="paragraph"><p>Let&#8217;s say you want to send a welcome email to a user after they signup. Here is how you would go about this:</p></div>
 <h3 id="_1_create_the_mailer">2.1. 1. Create the mailer:</h3>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -90,7 +90,7 @@ create  test/unit/user_mailer_test<span style="color: #990000">.</span>rb</tt></
 <div class="paragraph"><p>So we got the model, the fixtures, and the tests all created for us</p></div>
 <h3 id="_2_edit_the_model">2.2. 2. Edit the model:</h3>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -99,7 +99,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Lets add a method called welcome_email, that will send an email to the user&#8217;s registered email address:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -126,7 +126,7 @@ content_type: The content type, by default is text/plain</p></div>
 <div class="paragraph"><p></p></div>
 <div class="paragraph"><p>The file can look like:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -149,7 +149,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>There are 3 was to achieve this. One is to send the email from the controller that sends the email, another is to put it in a before_create block in the user model, and the last one is to use an observer on the user model. Whether you use the second or third methods is up to you, but staying away from the first is recommended. Not because it&#8217;s wrong, but because it keeps your controller clean, and keeps all logic related to the user model within the user model. This way, whichever way a user is created (from a web form, or from an API call, for example), we are guaranteed that the email will be sent.</p></div>
 <div class="paragraph"><p></p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -164,7 +164,7 @@ Rails<span style="color: #990000">::</span>Initializer<span style="color: #99000
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p></p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -181,7 +181,7 @@ Rails<span style="color: #990000">::</span>Initializer<span style="color: #99000
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>ALMOST THERE :) Now all we need is that danged observer, and we&#8217;re done:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -197,7 +197,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="sectionbody">
 <div class="paragraph"><p>Testing mailers involves 2 things. One is that the mail was queued and the other that the body contains what we expect it to contain. With that in mind, we could test our example mailer from above like so:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->

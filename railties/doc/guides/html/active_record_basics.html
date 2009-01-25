@@ -279,7 +279,7 @@ cellspacing="0" cellpadding="4">
 <div class="paragraph"><p>By default rails assumes all tables will use “id” as their primary key to identify each record. Though fortunately you won’t have explicitly declare this, Rails will automatically create that field unless you tell it not to.</p></div>
 <div class="paragraph"><p>For example suppose you created a database table called cars:</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -292,7 +292,7 @@ http://www.gnu.org/software/src-highlite -->
        <span style="color: #990000">);</span></tt></pre></div></div>
 <div class="paragraph"><p>Now you created a class named Car, which is to represent an instance of a record from your table.</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -300,7 +300,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>As you might expect without defining the explicit mappings between your class and the table it is impossible for Rails or any other program to correctly map those relationships.</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -313,7 +313,7 @@ NoMethodError<span style="color: #990000">:</span> undefined method `doors' <spa
 “Active Record objects don‘t specify their attributes directly, but rather infer them from the table definition with which they‘re linked. Adding, removing, and changing attributes and their type is done directly in the database. Any change is instantly reflected in the Active Record objects. The mapping that binds a given Active Record class to a certain database table will happen automatically in most common cases, but can be overwritten for the uncommon ones.”
 Lets try our Car class again, this time inheriting from ActiveRecord.</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
@@ -321,7 +321,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Now if we try to access an attribute of the table ActiveRecord automatically handles the mappings for us, as you can see in the following example.</p></div>
 <div class="listingblock">
-<div class="content"><!-- Generator: GNU source-highlight 2.9
+<div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->

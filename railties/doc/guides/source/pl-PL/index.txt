@@ -1,72 +1,84 @@
-Ruby on Rails Guides
-====================
+Przewodniki po Ruby on Rails
+============================
 
-These guides are designed to make you immediately productive with Rails, and to help you understand how all of the pieces fit together. There are two different versions of the Guides site, and you should be sure to use the one that applies to your situation:
+Przewodniki te zostały napisane, abyś mógł jak najszybciej zacząć efektywnie
+pracować z platformą Rails oraz by pomóc Ci zrozumieć jak poszczególne jej elementy
+tworzą spójną całość. W chwili obecnej dostępne są dwie wersje tej
+strony i powinieneś wybrać tę, która odpowiada używanej przez Ciebie wersji
+platformy:
 
-* http://guides.rubyonrails.org/[Current Release version] - based on Rails 2.2
-* http://guides.rails.info/[Edge Rails version] - based on the Rails 2.3 branch
+* http://guides.rubyonrails.org/[wersja stabilna] - bazująca na Rails 2.2
+* http://guides.rails.info/[wersja rozwojowa] - bazująca na branchu Rails 2.3
 
-WARNING: This page is the result of ongoing http://hackfest.rubyonrails.org/guide[Rails Guides hackfest] and a work in progress.
+WARNING: Ta strona jest wynikiem http://hackfest.rubyonrails.org/guide[Rails
+Guides hackfest] i nie została jeszcze ukończona.
 
-CAUTION: Guides marked with this icon are currently being worked on. While they might still be useful to you, they may contain incomplete information and even errors. You can help by reviewing them and posting your comments and corrections at the respective Lighthouse ticket.
+CAUTION: Przewodniki oznaczone tą ikoną nie zostały jeszcze ukończone
+(przetłumaczone). Chociaż mogą być dla Ciebie przydatne, mogą również zawierać
+niekompletne lub nawet błędne informacje. Możesz nam pomóc przeglądając je
+i publikując stosowne komentarze oraz poprawki w odpowiednim zgłoszeniu w
+systemie Lighthouse.
 
 ++++++++++++++++++++++++++++++++++++++
-<h2>Start Here</h2>
+<h2>Na początek</h2>
 ++++++++++++++++++++++++++++++++++++++
 
-.link:getting_started_with_rails.html[Getting Started with Rails]
+.link:getting_started_with_rails.html[Zaczynamy z Rails]
 ***********************************************************
-Everything you need to know to install Rails and create your first application.
+Wszystko co musisz wiedzieć aby zainstalować Railsy oraz stworzyć swoją
+pierwszą aplikację.
 ***********************************************************
 
 ++++++++++++++++++++++++++++++++++++++
-<h2>Models</h2>
+<h2>Modele</h2>
 ++++++++++++++++++++++++++++++++++++++
 
-.link:migrations.html[Rails Database Migrations]
+.link:migrations.html[Migracje]
 ***********************************************************
-This guide covers how you can use Active Record migrations to alter your database in a structured and organized manner.
+Ten przewodnik omawia mechanizm migracji modułu Active Record
+pozwalającego na ustrukturyzowaną i zorganizowaną zmianę (schematu) bazy
+danych.
 ***********************************************************
 
-.link:activerecord_validations_callbacks.html[Active Record Validations and Callbacks]
+.link:activerecord_validations_callbacks.html[Walidacje i Callbacki w Active Record]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/26[Lighthouse Ticket]
-
-This guide covers how you can use Active Record validations and callbacks.
+Ten przewodnik omawia mechanizmy walidacji i callbacków modułu Active
+Record.
 ***********************************************************
 
-.link:association_basics.html[Active Record Associations]
+.link:association_basics.html[Asocjacje modułu Active Record]
 ***********************************************************
-This guide covers all the associations provided by Active Record.
+Ten przewodnik omawia wszystkie asocjacje występujące w module Active
+Record.
 ***********************************************************
 
-.link:active_record_querying.html[Active Record Query Interface]
+.link:active_record_querying.html[Zapytania w module Active Record]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/16[Lighthouse Ticket]
-
-This guide covers the database query interface provided by Active Record.
+Ten przewodnik omawia interfejs zapytań modułu Active Record.
 ***********************************************************
 
 ++++++++++++++++++++++++++++++++++++++
-<h2>Views</h2>
+<h2>Widoki</h2>
 ++++++++++++++++++++++++++++++++++++++
 
-.link:layouts_and_rendering.html[Layouts and Rendering in Rails]
+.link:layouts_and_rendering.html[Layouty oraz renderowanie]
 ***********************************************************
-This guide covers the basic layout features of Action Controller and Action View,
-including rendering and redirecting, using +content_for+ blocks, and working
-with partials.
+Ten przewodnik omawia podstawowe cechy layoutów wykorzystywanych w modułach
+Action Controller oraz Action View, włączając w to renderowanie,
+przekierowania, bloki +content_for+ oraz pracę z fragmentami widoków.
 ***********************************************************
 
-.link:form_helpers.html[Action View Form Helpers]
+.link:form_helpers.html[Helpery formularzy modułu Action View]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/1[Lighthouse Ticket]
-
-Guide to using built in Form helpers.
+Ten przewodnik omawia sposób wykorzystania wbudowanych helperów do tworzenia
+formularzy.
 ***********************************************************
 
 ++++++++++++++++++++++++++++++++++++++
-<h2>Controllers</h2>
+<h2>Kontrolery</h2>
 ++++++++++++++++++++++++++++++++++++++
 
 .link:routing_outside_in.html[Rails Routing from the Outside In]

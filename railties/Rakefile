@@ -272,12 +272,57 @@ Rake::RDocTask.new { |rdoc|
   rdoc.rdoc_files.include('lib/commands/**/*.rb')
 }
 
+# Set available guide locales .....................................
+
+locale_directory = "doc/guides/source/"
+locale_name_patterns = [/\A[a-z]{2}\z/, /\A[a-z]{2}-[A-Z]{2}\z/]
+available_locales = []
+
+Dir.entries(locale_directory).each do |entry|
+	if File.directory?(File.join(locale_directory, entry))
+		for pattern in locale_name_patterns
+			unless entry.scan(pattern).empty?
+				available_locales << entry
+			end
+		end
+	end
+end
+
+desc "Displays currently available guide locales"
+task :guides_locales do
+	unless available_locales.empty?
+		puts "While the guides are generated in English by default, any of the following locales can be passed as an argument to 'rake guides' to obtain documentation in that locale:"
+		for locale in available_locales
+			puts "- " + locale
+		end
+	else
+		puts "The guides are currently only available in English."
+	end
+end
+
 desc "Generate guides for the framework. Use ONLY='migrations i18n.txt' option to build just specific ones."
 task :guides do
   require 'mizuho/generator'
+  
+  ignore = ['..', 'icons', 'images', 'templates', 'stylesheets']
+  
+  if !(ENV["LOCALE"]).empty? && available_locales.include?(ENV["LOCALE"])
+  	# Localized settings
+  	source = "doc/guides/source/#{ENV['LOCALE']}/"
+  	html = "doc/guides/html/#{ENV['LOCALE']}/"
+	else
+		# English settings
+		source = "doc/guides/source/"
+  	html   = "doc/guides/html/"
+  	
+  	# Exclude locale directories since they are in the source directory
+  	# and we don't need them for English guides.
+  	for l in available_locales
+  		l << ignore
+		end
+	end
 
-  source = "doc/guides/source/"
-  html   = "doc/guides/html/"
+
   FileUtils.rm_r(html) if File.directory?(html)
   FileUtils.mkdir(html)
 

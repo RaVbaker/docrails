@@ -1,12 +1,12 @@
-Getting Started With Rails
-==========================
+Zaczynamy z Rails
+=================
 
-This guide covers getting up and running with Ruby on Rails.  After reading it, you should be familiar with:
+Ten przewodnik jest wprowadzeniem do Ruby on Rails. Po jego przeczytaniu będziesz zaznajomiony z:
 
-* Installing Rails, creating a new Rails application, and connecting your application to a database
-* The general layout of a Rails application
-* The basic principles of MVC (Model, View Controller) and RESTful design
-* How to quickly generate the starting pieces of a Rails application.
+* Instalowaniem Railsów, tworzeniem nowej aplikacji oraz zestawianiem połączenia z bazę danych
+* Ogólnym układem aplikacji
+* Podstawami modelu MVC (Model, View, Controller) oraz architektury RESTful
+* Szybkim generowaniem podstawowych elementów aplikacji
 
 == This Guide Assumes
 
@@ -18,7 +18,7 @@ This guide is designed for beginners who want to get started with a Rails applic
 
 It is highly recommended that you *familiarize yourself with Ruby before diving into Rails*. You will find it much easier to follow what's going on with a Rails application if you understand basic Ruby syntax. Rails isn't going to magically revolutionize the way you write web applications if you have no experience with the language it uses. There are some good free resources on the net for learning Ruby, including:
 
-* link:http://www.humblelittlerubybook.com/[Mr. Neigborly’s Humble Little Ruby Book]
+* link:http://www.humblelittlerubybook.com/[Mr. Neigborlyâs Humble Little Ruby Book]
 * link:http://www.rubycentral.com/book/[Programming Ruby]
 * link:http://poignantguide.net/ruby/[Why's (Poignant) Guide to Ruby]
 
@@ -107,7 +107,7 @@ For example, to a Rails application a request such as this:
 
 would be understood to refer to a photo resource with the ID of 17, and to indicate a desired action - deleting that resource. REST is a natural style for the architecture of web applications, and Rails makes it even more natural by using conventions to shield you from some of the RESTful complexities.
 
-If you’d like more details on REST as an architectural style, these resources are more approachable than Fielding’s thesis:
+If youâd like more details on REST as an architectural style, these resources are more approachable than Fieldingâs thesis:
 
 * link:http://www.infoq.com/articles/rest-introduction[A Brief Introduction to REST] by Stefan Tilkov
 * link:http://bitworking.org/news/373/An-Introduction-to-REST[An Introduction to REST] (video tutorial) by Joe Gregorio
@@ -528,7 +528,7 @@ This view iterates over the contents of the +@posts+ array to display content an
 
 * +h+ is a Rails helper method to sanitize displayed data, preventing cross-site scripting attacks
 * +link_to+ builds a hyperlink to a particular destination
-* +edit_post_path+ is a helper that Rails provides as part of RESTful routing. You’ll see a variety of these helpers for the different actions that the controller includes.
+* +edit_post_path+ is a helper that Rails provides as part of RESTful routing. Youâll see a variety of these helpers for the different actions that the controller includes.
 
 TIP: For more details on the rendering process, see link:../layouts_and_rendering.html[Layouts and Rendering in Rails].
 
@@ -735,7 +735,7 @@ end
 
 In the +update+ action, Rails first uses the +:id+ parameter passed back from the edit view to locate the database record that's being edited. The +update_attributes+ call then takes the rest of the parameters from the request and applies them to this record. If all goes well, the user is redirected to the post's +show+ view. If there are any problems, it's back to +edit+ to correct them.
 
-NOTE: Sharp-eyed readers will have noticed that the +form_for+ declaration is identical for the +new+ and +edit+ views. Rails generates different code for the two forms because it's smart enough to notice that in the one case it's being passed a new record that has never been saved, and in the other case an existing record that has already been saved to the database. In a production Rails application, you would ordinarily eliminate this duplication by moving identical code to a _partial template_, which you could then include in both parent templates. But the scaffold generator tries not to make too many assumptions, and generates code that’s easy to modify if you want different forms for +create+ and +edit+.
+NOTE: Sharp-eyed readers will have noticed that the +form_for+ declaration is identical for the +new+ and +edit+ views. Rails generates different code for the two forms because it's smart enough to notice that in the one case it's being passed a new record that has never been saved, and in the other case an existing record that has already been saved to the database. In a production Rails application, you would ordinarily eliminate this duplication by moving identical code to a _partial template_, which you could then include in both parent templates. But the scaffold generator tries not to make too many assumptions, and generates code thatâs easy to modify if you want different forms for +create+ and +edit+.
 
 === Destroying a Post
 
@@ -758,7 +758,7 @@ The +destroy+ method of an Active Record model instance removes the correspondin
 
 == DRYing up the Code
 
-At this point, it’s worth looking at some of the tools that Rails provides to eliminate duplication in your code. In particular, you can use _partials_ to clean up duplication in views and _filters_ to help with duplication in controllers.
+At this point, itâs worth looking at some of the tools that Rails provides to eliminate duplication in your code. In particular, you can use _partials_ to clean up duplication in views and _filters_ to help with duplication in controllers.
 
 === Using Partials to Eliminate View Duplication
 
@@ -818,7 +818,7 @@ For more information on partials, refer to the link:../layouts_and_rendering.htm
 
 === Using Filters to Eliminate Controller Duplication
 
-At this point, if you look at the controller for posts, you’ll see some duplication:
+At this point, if you look at the controller for posts, youâll see some duplication:
 
 [source, ruby]
 -------------------------------------------------------
@@ -845,7 +845,7 @@ class PostsController < ApplicationController
 end
 -------------------------------------------------------
 
-Four instances of the exact same line of code doesn’t seem very DRY. Rails provides _filters_ as a way to address this sort of repeated code. In this case, you can DRY things up by using a +before_filter+:
+Four instances of the exact same line of code doesnât seem very DRY. Rails provides _filters_ as a way to address this sort of repeated code. In this case, you can DRY things up by using a +before_filter+:
 
 [source, ruby]
 -------------------------------------------------------
