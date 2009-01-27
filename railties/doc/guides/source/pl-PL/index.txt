@@ -1,7 +1,7 @@
 Przewodniki po Ruby on Rails
 ============================
 
-Przewodniki te zostały napisane, abyś mógł jak najszybciej zacząć efektywnie
+Przewodniki te zostały napisane, abyś mógł szybko zacząć efektywnie
 pracować z platformą Rails oraz by pomóc Ci zrozumieć jak poszczególne jej elementy
 tworzą spójną całość. W chwili obecnej dostępne są dwie wersje tej
 strony i powinieneś wybrać tę, która odpowiada używanej przez Ciebie wersji
