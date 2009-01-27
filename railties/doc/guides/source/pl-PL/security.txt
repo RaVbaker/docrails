@@ -3,13 +3,13 @@ Bezpieczeństwo w Ruby On Rails
  
 Ten przewodnik opisuje częste problemy związane z bezpieczeństwem w aplikacjach internetowych i pokazuje jak ich uniknąć stosując Railsy. Jeśli masz jakiekolwiek pytania lub sugestie, wyślij wiadomość do Heiko Webers'a na maila: 42 {_et_} rorsecurity.info. Po przeczytaniu tego przewodnika powinieneś znać takie zagadnienia jak:
 
-- Wszystkie [,#fffcdb]#podświetlone przeciwdziałania#
-- Pojęcie sesji w Railsach, co w niej umieścić i popularne metody ataku.
-- Jak odwiedzanie witryny może stać się problemem związanym z bezpieczeństwem (z CSRF).
+- Wszystkie [,#fffcdb]#najistotniejsze sposoby obrony#
+- Sesje w Railsach, jak są obsługiwane, co można w nich przechowywać oraz jak mogą być atakowane
+- Jak zwykłe odwiedzenie witryny może stać się problemem związanym z bezpieczeństwem (przez atak CSRF)
 - Na co musisz zwracać uwagę przy pracy z plikami lub dostarczaniu interfejsu administracyjnego. 
-- Swoisty dla Ruby problem z mass assignment.
-- Jak zarządzać użytkownikami: logowanie, wylogowanie i metody ataku na wszystkich warstwach.
-- I najbardziej popularne metody injection attack.
+- Swoisty dla Railsów problem z masowym przypisaniem
+- Jak zarządzać użytkownikami: logowanie, wylogowanie i metody ataku na wszystkich poziomach
+- I najbardziej popularne metody ataku typu injection
 
 == Introduction
 
