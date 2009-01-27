@@ -1,5 +1,5 @@
 Bezpieczeństwo w Ruby On Rails
-============================
+================================
  
 Ten przewodnik opisuje częste problemy związane z bezpieczeństwem w aplikacjach internetowych i pokazuje jak ich uniknąć stosując Railsy. Jeśli masz jakiekolwiek pytania lub sugestie, wyślij wiadomość do Heiko Webers'a na maila: 42 {_et_} rorsecurity.info. Po przeczytaniu tego przewodnika powinieneś znać takie zagadnienia jak:
 

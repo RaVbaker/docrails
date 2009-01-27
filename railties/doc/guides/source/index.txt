@@ -43,7 +43,7 @@ This guide covers all the associations provided by Active Record.
 .link:active_record_querying.html[Active Record Query Interface]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/16[Lighthouse Ticket]
-
+ 
 This guide covers the database query interface provided by Active Record.
 ***********************************************************
 
@@ -61,7 +61,7 @@ with partials.
 .link:form_helpers.html[Action View Form Helpers]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/1[Lighthouse Ticket]
-
+ 
 Guide to using built in Form helpers.
 ***********************************************************
 

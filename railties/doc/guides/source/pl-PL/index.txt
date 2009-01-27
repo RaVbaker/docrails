@@ -2,22 +2,31 @@ Przewodniki po Ruby on Rails
 ============================
 
 Przewodniki te zostały napisane, abyś mógł szybko zacząć efektywnie
-pracować z platformą Rails oraz by pomóc Ci zrozumieć jak poszczególne jej elementy
-tworzą spójną całość. W chwili obecnej dostępne są dwie wersje tej
-strony i powinieneś wybrać tę, która odpowiada używanej przez Ciebie wersji
-platformy:
+pracować z platformą Ruby on Rails oraz by pomóc Ci zrozumieć jak poszczególne jej elementy
+tworzą spójną całość. Strona ta dostępna jest w kilku wersjach:
 
-* http://guides.rubyonrails.org/[wersja stabilna] - bazująca na Rails 2.2
-* http://guides.rails.info/[wersja rozwojowa] - bazująca na branchu Rails 2.3
+* http://guides.rubyonrails.org/[angielska wersja stabilna] - opisuje Railsy w
+  wersji stabilnej 2.2
+* http://guides.rails.info/[angielska wersja rozwojowa] - opisuje Railsy w
+  wersji rozwojowej 2.3
+* http://apohllo.pl/guides[polska wersja rozwojowa] - powstaje na podstawie
+  angielskiej wersji rozwojowej 
 
-WARNING: Ta strona jest wynikiem http://hackfest.rubyonrails.org/guide[Rails
-Guides hackfest] i nie została jeszcze ukończona.
+Docelowo polskie tłumaczenie pojawi się na
+http://www.rubyonrails.pl[oficjalnej stronie frameworku]. 
 
-CAUTION: Przewodniki oznaczone tą ikoną nie zostały jeszcze ukończone
-(przetłumaczone). Chociaż mogą być dla Ciebie przydatne, mogą również zawierać
-niekompletne lub nawet błędne informacje. Możesz nam pomóc przeglądając je
-i publikując stosowne komentarze oraz poprawki w odpowiednim zgłoszeniu w
-systemie Lighthouse.
+WARNING: Ta strona nie jest jeszcze ukończona. Co więcej - powstaje na
+podstawie przewodników angielskich, które również nie zostały jeszcze
+ukończone. 
+
+CAUTION: Przewodniki oznaczone tą ikoną nie zostały jeszcze ukończone i
+obecnie nie są tłumaczone. 
+Chociaż mogą być dla Ciebie przydatne, mogą również zawierać
+niekompletne lub nawet błędne informacje. Możesz nam pomóc w ich poprawieniu
+przeglądając je i publikując stosowne komentarze oraz poprawki w odpowiednim 
+zgłoszeniu w systemie http://www.lighthouseapp.com[Lighthouse]. Jeśli
+chciałbyś je przetłumaczyć zajrzyj na 
+http://wiki.github.com/apohllo/docrails[stronę polskiego tłumaczenia].
 
 ++++++++++++++++++++++++++++++++++++++
 <h2>Na początek</h2>
@@ -40,7 +49,7 @@ pozwalającego na ustrukturyzowaną i zorganizowaną zmianę (schematu) bazy
 danych.
 ***********************************************************
 
-.link:activerecord_validations_callbacks.html[Walidacje i Callbacki w Active Record]
+.link:activerecord_validations_callbacks.html[Walidacje i callbacki w module Active Record]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/26[Lighthouse Ticket]
 Ten przewodnik omawia mechanizmy walidacji i callbacków modułu Active
@@ -49,7 +58,7 @@ Record.
 
 .link:association_basics.html[Asocjacje modułu Active Record]
 ***********************************************************
-Ten przewodnik omawia wszystkie asocjacje występujące w module Active
+Ten przewodnik omawia wszystkie typy asocjacji występujących w module Active
 Record.
 ***********************************************************
 
@@ -67,7 +76,7 @@ Ten przewodnik omawia interfejs zapytań modułu Active Record.
 ***********************************************************
 Ten przewodnik omawia podstawowe cechy layoutów wykorzystywanych w modułach
 Action Controller oraz Action View, włączając w to renderowanie,
-przekierowania, bloki +content_for+ oraz pracę z fragmentami widoków.
+przekierowania, bloki +content_for+ oraz pracę z szablonami i podszablonami.
 ***********************************************************
 
 .link:form_helpers.html[Helpery formularzy modułu Action View]
@@ -81,84 +90,98 @@ formularzy.
 <h2>Kontrolery</h2>
 ++++++++++++++++++++++++++++++++++++++
 
-.link:routing_outside_in.html[Rails Routing from the Outside In]
+.link:routing_outside_in.html[Routing w Rails]
 ***********************************************************
-This guide covers the user-facing features of Rails routing. If you want to 
-understand how to use routing in your own Rails applications, start here.
-***********************************************************
-
-.link:actioncontroller_basics.html[Basics of Action Controller]
-***********************************************************
-This guide covers how controllers work and how they fit into the request cycle in your application. It includes sessions, filters, and cookies, data streaming, and dealing with exceptions raised by a request, among other topics.
+Ten przewodnik omawia występujący w Rails mechanizm routingu z punktu
+widzenia jego użytkownika. Zacznij od niego jeśli chcesz zrozumieć jak 
+używać routingu w swojej aplikacji railsowej. 
 ***********************************************************
 
-.link:caching_with_rails.html[Rails Caching]
+.link:actioncontroller_basics.html[Podstawowe informacje o module Action Controller]
+***********************************************************
+Ten przewodnik omawia sposób działania kontrolerów oraz ich
+rolę w obsłudze żądań przychodzących do twojej aplikacji.
+Obejmuje m.in. obsługę sesji, filtry, cookies, strumieniowanie danych
+oraz obsługę wyjątków generowanych przez żądania.
+***********************************************************
+
+.link:caching_with_rails.html[Cache'owanie w Rails]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/10[Lighthouse Ticket]
 
-This guide covers the three types of caching that Rails provides by default.
+Ten przewodnik omawia trzy typy cache'owania dostarczane standardowo
+przez platformę Rails.
 ***********************************************************
 
 ++++++++++++++++++++++++++++++++++++++
-<h2>Digging Deeper</h2>
+<h2>W głąb Railsów</h2>
 ++++++++++++++++++++++++++++++++++++++
 
-.link:action_mailer_basics.html[Action Mailer Basics]
+.link:action_mailer_basics.html[Podstawowe informacje o module Action Mailer]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/25[Lighthouse ticket]
 
-This guide describes how to use Action Mailer to send and receive emails.
+Ten przewodnik opisuje sposób używania modułu Action Mailer do wysyłania i
+odbierania wiadomości elektronicznych. 
 ***********************************************************
 
-.link:testing_rails_applications.html[Testing Rails Applications]
+.link:testing_rails_applications.html[Testowanie aplikacji railsowej]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/8[Lighthouse Ticket]
 
-This is a rather comprehensive guide to doing both unit and functional tests
-in Rails. It covers everything from ``What is a test?'' to the testing APIs.
-Enjoy.
+Przewodnik ten stanowi dosyć obszerne wprowadzenie do jednostkowego
+oraz funkcjonalnego testowania aplikacji railsowej. Obejmuje wszystko
+począwszy od pytania ,,Czym jest test?'' skończywszy na API dostępnym w
+testach.
 ***********************************************************
 
-.link:security.html[Securing Rails Applications]
+.link:security.html[Bezpieczeństwo w Ruby on Rails]
 ***********************************************************
-This guide describes common security problems in web applications and how to
-avoid them with Rails.
-***********************************************************
-
-.link:debugging_rails_applications.html[Debugging Rails Applications]
-***********************************************************
-This guide describes how to debug Rails applications. It covers the different
-ways of achieving this and how to understand what is happening "behind the scenes"
-of your code.
+Ten przewodnik opisuje częste problemy związane z bezpieczeństwem 
+w aplikacjach internetowych i pokazuje jak ich uniknąć stosując Railsy.
 ***********************************************************
 
-.link:performance_testing.html[Performance Testing Rails Applications]
+.link:debugging_rails_applications.html[Debugowanie w Ruby on Rails]
 ***********************************************************
-This guide covers ways to benchmark and profile your Rails application.
-***********************************************************
-
-.link:creating_plugins.html[The Basics of Creating Rails Plugins]
-***********************************************************
-This guide covers how to build a plugin to extend the functionality of Rails.
+Ten przewodnik opisuje jak debugować aplikację railsową. Obejmuje różne
+sposoby usuwania błędów oraz jak zrozumieć to co dzieje się ,,pod
+powierzchnią'' twojego kodu.
 ***********************************************************
 
-.link:i18n.html[The Rails Internationalization API]
+.link:performance_testing.html[Testowanie wydajności aplikacji railsowej]
+***********************************************************
+Ten przewodnik obejmuje sposobu mierzenia wydajności oraz profilowania
+aplikacji railsowej.
+***********************************************************
+
+.link:creating_plugins.html[Podstawy tworzenia pluginów dla Ruby on Rails]
+***********************************************************
+Ten przewodnik omawia sposób budowania plaginów, w celu rozszerzenia
+funkcjonalności Railsów. 
+***********************************************************
+
+.link:i18n.html[Obsługa I18N w Rails]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/23[Lighthouse ticket]
 
-This guide introduces you to the basic concepts and features of the Rails I18n API and shows you how to localize your application.
+Ten przewodnik stanowi wprowadzenie do podstawowych koncepcji oraz 
+funkcjonalności interfejsu programistycznego Rails związanych
+z tworzeniem aplikacji w różnych wersjach językowych oraz lokalizacyjnych.
 ***********************************************************
 
-.link:configuring.html[Configuring Rails Applications]
+.link:configuring.html[Konfiguracja aplikacji]
 ***********************************************************
-This guide covers the basic configuration settings for a Rails application.
-***********************************************************
-
-.link:command_line.html[Rails Command Line Tools and Rake tasks]
-***********************************************************
-This guide covers the command line tools and rake tasks provided by Rails.
+Ten przewodnik omawia konfigurację podstawowych ustawień w aplikacji 
+railsowej. 
 ***********************************************************
 
-Authors who have contributed to complete guides are listed link:authors.html[here].
+.link:command_line.html[Narzędzia linii poleceń oraz zadania Rake]
+***********************************************************
+Ten przewodnik omawia narzędzia dostępne w linii poleceń oraz
+zadania Rake dostarczane wraz z Railsami.
+***********************************************************
 
-This work is licensed under a link:http://creativecommons.org/licenses/by-nc-sa/3.0/[Creative Commons Attribution-Noncommercial-Share Alike 3.0  License]
+* link:authors.html[Lista autorów] oryginalnych przewodników
+* link:translators.html[Lista tłumaczy] polskie wersji językowej
+
+Ta praca licencjonowana jest na zasadach licencji link:http://creativecommons.org/licenses/by-nc-sa/3.0/[Creative Commons Attribution-Noncommercial-Share Alike 3.0]
