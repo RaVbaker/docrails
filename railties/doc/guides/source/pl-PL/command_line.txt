@@ -1,21 +1,21 @@
-A Guide to The Rails Command Line
+Przewodnik po linii poleceń Railsów
 =================================
 
-Rails comes with every command line tool you'll need to
+Railsy dają Ci wszystkie potrzebne narzędzia linii poleceń
 
-* Create a Rails application
-* Generate models, controllers, database migrations, and unit tests
-* Start a development server
-* Mess with objects through an interactive shell
-* Profile and benchmark your new creation
+* Tworzenie aplikacji
+* Tworzenie modelów, kontrolerów, migracje baz danych i testy jednostkowe
+* Startowanie serwera produkcyjnego
+* Mess(bałagan?) obiektów przez interaktywną powłokę
+* Profilowanie i benchmarki dla twoich aplikacji
  
-... and much, much more! (Buy now!)
+... i wiele, wiele więcej! (Buy now!)
 
-This tutorial assumes you have basic Rails knowledge from reading the Getting Started with Rails Guide.
+Ten tutorial zakłada, że posiadasz podstawową wiedzę na temat Railsów po zapoznaniu się z Getting Started with Rails Guide.
 
-== Command Line Basics ==
+== Podstawy linii poleceń ==
 
-There are a few commands that are absolutely critical to your everyday usage of Rails. In the order of how much you'll probably use them are:
+Jest kilka poleceń, które należy bezwzględnie znać, gdyż są one używane praktycznie codziennie. Oto one, ułożone według prawdopodobnej częstotliwości, z jaką będziesz ich używał:
 
 * console
 * server
@@ -23,13 +23,13 @@ There are a few commands that are absolutely critical to your everyday usage of 
 * generate
 * rails
  
-Let's create a simple Rails application to step through each of these commands in context.
+Stwórzmy prostą railsową aplikację, żeby przećwiczyć te polecenia.
 
 === rails ===
 
-The first thing we'll want to do is create a new Rails application by running the `rails` command after installing Rails.
+Pierwszą rzeczą, jaką należy zrobić jest stworzenie nowej aplikacji za pomocą polecenia 'rails', jeśli oczywiście Railsy są zainstalowane w systemie.
 
-NOTE: You know you need the rails gem installed by typing `gem install rails` first, right? Okay, okay, just making sure.
+UWAGA: Na pewno wiesz, że musisz mieć zainstalowany gem railsów poprzez polecenie 'gem install rails'.
 
 [source,shell]
 ------------------------------------------------------
