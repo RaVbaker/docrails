@@ -9,7 +9,7 @@ Niniejszy przewodnik obejmuje opis asocjacji (_associations_) – elementów mod
 
 == Dlaczego Asocjacje?
 
-Dlaczego potrzebne są asocjacje(_powiązania_, _połączenia_ - przyp. tłum.) między modelami? Ponieważ sprawiają one, że wspólne operacje (xyli operacje na kilku modelach – przyp.tłum.) stają się mniej skomplikowane i łatwe do implementacji w kodzie.
+Dlaczego potrzebne są asocjacje(_powiązania_, _połączenia_ - przyp. tłum.) między modelami? Ponieważ sprawiają one, że wspólne operacje (czyli operacje na kilku modelach – przyp.tłum.) stają się mniej skomplikowane i łatwe do implementacji w kodzie.
 Na przykład, pomyśl o prostej aplikacji zawierającej dwa modele – klienta (_customer_) oraz zamówień (_order(s)_). Każdy klient może składać wiele zamówień.
 Bez zdefiniowania powiązania deklaracja modelu mogłaby wyglądać tak:
 
@@ -60,7 +60,7 @@ Dzięki tej zmianie stworzenie nowego zamówienia dla konkretnego klienta jest �
 @order = @customer.orders.create(:order_date => Time.now)
 -------------------------------------------------------
 
-Także usuwanie klienta i jego wszystkich zamówień jest _o wiele_ prostsze.
+Także usuwanie klienta i jego wszystkich zamówień jest _o_ _wiele_ prostsze.
 
 [source, ruby]
 -------------------------------------------------------
@@ -71,7 +71,7 @@ Aby dowiedzieć się więcej o różnych rodzajach asocjacji, przeczytaj następ
 
 == Typy asocjacji
 
-W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących Active Record. Asocjacje są realizowane poprzez makro-połączenia, a więc dzięki dodaniu stosownej funkcji do modelu poprzez jej zadeklarowanie. Na przykład, deklarując, że jeden model _należy do_ [+belongs_to+] innego, instruujesz Railsy by utrzymywały powiązanie klucza podstawowego z obcym kluczem między instancjami tych dwóch modeli, a dzięki temu otrzymujesz także szereg narzędzi (metod), które możesz wykorzystać w swoim modelu. Rails obsługuje sześć typów asocjacji:
+W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących moduł Active Record. Asocjacje są realizowane poprzez makro-połączenia, a więc dzięki dodaniu stosownej funkcji do modelu poprzez jej zadeklarowanie. Na przykład, deklarując, że jeden model _należy do_ [+belongs_to+] innego, instruujesz Railsy by utrzymywały powiązanie klucza podstawowego z obcym kluczem między instancjami tych dwóch modeli, a dzięki temu otrzymujesz także szereg narzędzi (metod), które możesz wykorzystać w swoim modelu. Rails obsługuje sześć typów asocjacji:
 
 * +belongs_to+
 * +has_one+
@@ -80,7 +80,7 @@ W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących Active R
 * +has_one :through+
 * +has_and_belongs_to_many+
 
-W dalszej części przewodnika dowiesz się jak deklarować asocjacje i jak używać różnych asocjacji. Ale najpierw – krótkie wprowadzenie do przypadków właściwych użyć poszczególnych z nich. 
+W dalszej części przewodnika dowiesz się jak deklarować asocjacje i jak używać różnych z nich. Ale najpierw – krótkie wprowadzenie do przypadków właściwych użyć poszczególnych asocjacji. 
 
 === Asocjacja +belongs_to+
 
