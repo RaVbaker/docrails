@@ -372,46 +372,46 @@ end
 
 Dzięki takiemu ustawieniu możesz "wyciągnąć" +@employee.subordinates+ (podwładni pracownika) i +@employee.manager+ (manager pracownika).
 
-== Tips, Tricks, and Warnings
+== Porady, triki i ostrzeżenia
 
-Here are a few things you should know to make efficient use of Active Record associations in your Rails applications:
+W tym rozdziale znajdziesz kilka rzeczy, które powinieneś wiedzieć, by skutecznie używać modułu Active Record w twoich aplikacjach Rails. 
 
-* Controlling caching
-* Avoiding name collisions
-* Updating the schema
-* Controlling association scope
+* Kontrolowanie cachingu
+* Unikanie kolizji w nazwach 
+* Aktualizacje schematów 
+* Kontrolowanie zakresu asocjacji
+ 
+=== Kontrolowanie cachingu
 
-=== Controlling Caching
+Wszystkie metody asocjacji są cache-owane tak, że wynik ostatniego zapytania dostępny jest dla następnych operacji. Zawartość _cache_ jest nawet widoczna z innych metod. Na przykład:
+ 
+[source, ruby]
+-------------------------------------------------------
+customer.orders               # pobiera zamówienia z bazy danych
+customer.orders.size          # używa kopii zamówień z cache
+customer.orders.empty?        # używa kopii zamówień z cache
+-------------------------------------------------------
 
-All of the association methods are built around caching that keeps the result of the most recent query available for further operations. The cache is even shared across methods. For example:
+Ale co zrobić, gdy potrzeba uaktualnić _cache_, bo dane być może zostały zmienione przez jakąś inną część aplikacji? Po prostu ustaw +true+ dla wywołania asocjacji:
 
 [source, ruby]
 -------------------------------------------------------
-customer.orders                 # retrieves orders from the database
-customer.orders.size            # uses the cached copy of orders
-customer.orders.empty?          # uses the cached copy of orders
+customer.orders               # pobiera zamówienia z bazy danych
+customer.orders.size          # używa kopii zamówień z cache
+customer.orders(true).empty?  # odrzuca kopię zamówień będącą w cache i "wraca" do bazy danych
 -------------------------------------------------------
 
-But what if you want to reload the cache, because data might have been changed by some other part of the application? Just pass +true+ to the association call:
+=== Unikanie kolizji nazw
+ 
+Nazwy twoich asocjacji nie mgą być dowolne. Ponieważ tworzenie asocjacji automatycznie dodaje do modelu metodę z taką samą nazwą, złym pomysłem jest nazywanie asocjacji tak samo jak metody instancji ActiveRecord::Base. Metoda asocjacji w takim przypadku przesłoni metodę bazy, a to nie jest pożądane. Przykładem złych nazw asocjacji są +attributes+ albo +connection+. 
+ 
+=== Aktualizacja schematu
+ 
+Asocjacje są bardzo przydatne, ale nie są magiczne. Jesteś odpowiedzialny za utrzymanie schematu  bazy danych w dopasowaniu do swoich asocjacji. W praktyce oznacza to dwie rzeczy, w zależności od tego, którego rodzaju asocjacji użyłeś w swoim modelu. Dla asocjacji +belongs_to+ porzebujesz stworzyć klucze obce, a dla +has_and_belongs_to_many+ - stosowną wiążącą tabelę (w bazie).
+ 
+==== Tworzenie kluczy obcych dla asocjacji +belongs_to+
 
-[source, ruby]
--------------------------------------------------------
-customer.orders                 # retrieves orders from the database
-customer.orders.size            # uses the cached copy of orders
-customer.orders(true).empty?    # discards the cached copy of orders and goes back to the database
--------------------------------------------------------
-
-=== Avoiding Name Collisions
-
-You are not free to use just any name for your associations. Because creating an association adds a method with that name to the model, it is a bad idea to give an association a name that is already used for an instance method of +ActiveRecord::Base+. The association method would override the base method and break things. For instance, +attributes+ or +connection+ are bad names for associations.
-
-=== Updating the Schema
-
-Associations are extremely useful, but they are not magic. You are responsible for maintaining your database schema to match your associations. In practice, this means two things, depending on what sort of associations you are creating. For +belongs_to+ associations you need to create foreign keys, and for +has_and_belongs_to_many+ associations you need to create the appropriate join table.
-
-==== Creating Foreign Keys for +belongs_to+ Associations
-
-When you declare a +belongs_to+ association, you need to create foreign keys as appropriate. For example, consider this model:
+Kiedy deklarujesz asocjację +belongs_to+, powinieneś stworzyć odpowiednie klucze obce. Na przykład, rozważ taki model:
 
 [source, ruby]
 -------------------------------------------------------
@@ -420,7 +420,7 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-This declaration needs to be backed up by the proper foreign key declaration on the orders table:
+Taka deklaracja  powinna być uwzgleniona i "wsparta" odpowiednią deklaracją klucza obcego w tabeli zamówień:
 
 [source, ruby]
 -------------------------------------------------------
@@ -439,15 +439,15 @@ class CreateOrders < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-If you create an association some time after you build the underlying model, you need to remember to create an +add_column+ migration to provide the necessary foreign key.
+Jeśli tworzysz asocjację po jakimś czasie od stworzenia modelu bazowego, musisz pamiętać o stworzeniu migracji +add_column+ (dodaj kolumnę) by zapewnić modelowi odpowiedni klucz obcy.
 
 ==== Creating Join Tables for +has_and_belongs_to_many+ Associations
 
-If you create a +has_and_belongs_to_many+ association, you need to explicitly create the joining table. Unless the name of the join table is explicitly specified by using the +:join_table+ option, Active Record create the name by using the lexical order of the class names. So a join between customer and order models will give the default join table name of "customers_orders" because "c" outranks "o" in lexical ordering. 
+Jeśli tworzysz asocjację +has_and_belongs_to_many+ potrzebujesz stworzyć wiążącą tabelę. Dopóki nazwa dołączanej tabeli nie jest wyraźnie określona poprzez użycie opcji +:join_table+, moduł Active Record utworzy nazwę używając leksykalnego (alfabetycznego) )porządku tworzenia nazw. Zatem: połączenie między modelem  klienta (customer) a zamówieniem (order) otrzyma domyślną nazwę tabeli "customers_orders" (zamówienia klientów), bo "c" jest w alfabecie przed "o".
 
-WARNING: The precedence between model names is calculated using the +<+ operator for +String+. This means that if the strings are of different lengths, and the strings are equal when compared up to the shortest length, then the longer string is considered of higher lexical precedence than the shorter one. For example, one would expect the tables "paper_boxes" and "papers" to generate a join table name of "papers_paper_boxes" because of the length of the name "paper_boxes", but it in fact generates a join table name of "paper_boxes_papers".
-
-Whatever the name, you must manually generate the join table with an appropriate migration. For example, consider these associations:
+WARNING: Pierwszeństwo między nazwami modeli jest "obliczane" przy użyciu operatora „<” (mniejszości) dla stringów (łańcuchów znaków). To znaczy, ze jeśli słowa są różnej długości, ale początkowy łańcuch jest jednakowy – wtedy wyżej w tym porządku jest słowo dłuższe. Na przykład, możnaby oczekiwać, że dla tabeli paper_boxes i papers wygenerowana nazwa wiążącej tabeli będzie brzmiała "papers_paper_boxes", ze względu na długość łańcucha "paper_boxes". Jednak w rzeczywistości wygenerowana zostanie nazwa "paper_boxes_papers".
+ 
+Niezależnie od nazwy, musisz "ręcznie" wygenerować wiążącą tabelę za pomocą odpowiedniej migracji. Na przykład, rozważ takie asocjacje:
 
 [source, ruby]
 -------------------------------------------------------
@@ -460,7 +460,7 @@ class Part < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-These need to be backed up by a migration to create the +assemblies_parts+ table. This table should be created without a primary key:
+Powinny one zostać zaktualizowane za pomocą migracji, która wygeneruje tabelę +assemblies_parts+.Taka tabela powinna być stworzona bez klucza podstawowego:
 
 [source, ruby]
 -------------------------------------------------------
@@ -478,9 +478,9 @@ class CreateAssemblyPartJoinTable < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-=== Controlling Association Scope
-
-By default, associations look for objects only within the current module's scope. This can be important when you declare Active Record models within a module. For example:
+=== Kontrolowanie zakresu asocjacji
+ 
+Domyślnie asocjacje "szukają" obiektów tylko w ramach bieżącego zakresu modułów. To może być ważne, gdy deklarujesz modele wykorzystujące ActiveRecord wewnątrz modułu, na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -497,7 +497,7 @@ module MyApplication
 end
 -------------------------------------------------------
 
-This will work fine, because both the +Supplier+ and the +Account+ class are defined within the same scope. But this will not work, because +Supplier+ and +Account+ are defined in different scopes:
+Ten kod będzie działał dobrze, bo zarówno klasa dostawcy, jak i klasa konta są zdefiniowane w ramach tego samego zakresu (zakresu modelu). Ale już poniższy przykład nie będzie działać, bo dostawca i konto są zdefiniowane w różnych zakresach:
 
 [source, ruby]
 -------------------------------------------------------
@@ -516,7 +516,7 @@ module MyApplication
 end
 -------------------------------------------------------
 
-To associate a model with a model in a different scope, you must specify the complete class name in your association declaration:
+By powiązać dwa modele istniejące w ramach różnych zakresów – musisz podać pełną nazwę klasy w deklaracji asocjacji:  
 
 [source, ruby]
 -------------------------------------------------------
