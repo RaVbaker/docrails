@@ -1,15 +1,17 @@
-A Guide to Active Record Associations
-=====================================
+Przewodnik po asocjacjach modułu Active Record
+==============================================
 
-This guide covers the association features of Active Record. By referring to this guide, you will be able to:
+Niniejszy przewodnik obejmuje opis asocjacji (_associations_) – elementów modułu Active Record. Za pomocą tego przewodnika będziesz w stanie:
 
-* Declare associations between Active Record models
-* Understand the various types of Active Record associations
-* Use the methods added to your models by creating associations
+* Zadeklarować asocjacje w modelach wykorzystujących moduł Active Record
+* Zrozumieć różne typy asocjacji dostępnych w ramach modułu Active Record
+* Stosować metody dodane do twoich modeli dzięki stworzeniu asocjacji
 
-== Why Associations?
+== Dlaczego Asocjacje?
 
-Why do we need associations between models? Because they make common operations simpler and easier in your code. For example, consider a simple Rails application that includes a model for customers and a model for orders. Each customer can have many orders. Without associations, the model declarations would look like this:
+Dlaczego potrzebne są asocjacje(_powiązania_, _połączenia_ - przyp. tłum.) między modelami? Ponieważ sprawiają one, że wspólne operacje (xyli operacje na kilku modelach – przyp.tłum.) stają się mniej skomplikowane i łatwe do implementacji w kodzie.
+Na przykład, pomyśl o prostej aplikacji zawierającej dwa modele – klienta (_customer_) oraz zamówień (_order(s)_). Każdy klient może składać wiele zamówień.
+Bez zdefiniowania powiązania deklaracja modelu mogłaby wyglądać tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -20,14 +22,14 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Now, suppose we wanted to add a new order for an existing customer. We'd need to do something like this:
+Teraz załóżmy, że chcielibyśmy dodać nowe zamówienie złożone przez istniejącego klienta. Należałoby zrobić coś takiego:
 
 [source, ruby]
 -------------------------------------------------------
 @order = Order.create(:order_date => Time.now, :customer_id => @customer.id)
 -------------------------------------------------------
 
-Or consider deleting a customer, and ensuring that all of its orders get deleted as well:
+Przypuśćmy, że chcemy teraz usunąć klienta. W takim przypadku powinniśmy zadbać, by wszystkie zamówienia złożone przez niego zostały również usunięte:
 
 [source, ruby]
 -------------------------------------------------------
@@ -38,7 +40,7 @@ end
 @customer.destroy
 -------------------------------------------------------
 
-With Active Record associations, we can streamline these - and other - operations by declaratively telling Rails that there is a connection between the two models. Here's the revised code for setting up customers and orders:
+Z asocjacjami modułu Active Record można znacznie usprawnić tego typu operacje (i wiele innych). Poprzez deklarację możemy _powiedzieć_ Railsom, że istnieje relacja między dwoma modelami. Oto poprawione zgodnie z tymi założeniami modele - klienta i zamówienia:
 
 [source, ruby]
 -------------------------------------------------------
@@ -51,25 +53,25 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-With this change, creating a new order for a particular customer is easier:
+Dzięki tej zmianie stworzenie nowego zamówienia dla konkretnego klienta jest łatwiejsze:
 
 [source, ruby]
 -------------------------------------------------------
 @order = @customer.orders.create(:order_date => Time.now)
 -------------------------------------------------------
 
-Deleting a customer and all of its orders is _much_ easier:
+Także usuwanie klienta i jego wszystkich zamówień jest _o wiele_ prostsze.
 
 [source, ruby]
 -------------------------------------------------------
 @customer.destroy
 -------------------------------------------------------
 
-To learn more about the different types of associations, read the next section of this Guide. That's followed by some tips and tricks for working with associations, and then by a complete reference to the methods and options for associations in Rails.
+Aby dowiedzieć się więcej o różnych rodzajach asocjacji, przeczytaj następny rozdział tego przewodnika. Zapoznasz się tam z kilkoma wskazówkami i trikami przydatnymi w pracy z asocjacjami, a także z kompletnym spisem metod i opcji dla asocjacji w Railsach.
 
-== The Types of Associations
+== Typy asocjacji
 
-In Rails, an _association_ is a connection between two Active Record models. Associations are implemented using macro-style calls, so that you can declaratively add features to your models. For example, by declaring that one model +belongs_to+ another, you instruct Rails to maintain Primary Key-Foreign Key information between instances of the two models, and you also get a number of utility methods added to your model. Rails supports six types of association:
+W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących Active Record. Asocjacje są realizowane poprzez makro-połączenia, a więc dzięki dodaniu stosownej funkcji do modelu poprzez jej zadeklarowanie. Na przykład, deklarując, że jeden model _należy do_ [+belongs_to+] innego, instruujesz Railsy by utrzymywały powiązanie klucza podstawowego z obcym kluczem między instancjami tych dwóch modeli, a dzięki temu otrzymujesz także szereg narzędzi (metod), które możesz wykorzystać w swoim modelu. Rails obsługuje sześć typów asocjacji:
 
 * +belongs_to+
 * +has_one+
@@ -78,9 +80,9 @@ In Rails, an _association_ is a connection between two Active Record models. Ass
 * +has_one :through+
 * +has_and_belongs_to_many+
 
-In the remainder of this guide, you'll learn how to declare and use the various forms of associations. But first, a quick introduction to the situations where each association type is appropriate.
+W dalszej części przewodnika dowiesz się jak deklarować asocjacje i jak używać różnych asocjacji. Ale najpierw – krótkie wprowadzenie do przypadków właściwych użyć poszczególnych z nich. 
 
-=== The +belongs_to+ Association
+=== Asocjacja +belongs_to+
 
 A +belongs_to+ association sets up a one-to-one connection with another model, such that each instance of the declaring model "belongs to" one instance of the other model. For example, if your application includes customers and orders, and each order can be assigned to exactly one customer, you'd declare the order model this way:
 

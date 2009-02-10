@@ -171,7 +171,7 @@ Jak zwykłe odwiedzenie witryny może stać się problemem związanym z bezpiecz
 </li>
 <li>
 <p>
-Na co musisz zwracać uwagę przy pracy z plikami lub dostarczaniu interfejsu administracyjnego.
+Na co musisz zwracać uwagę przy pracy z plikami lub dostarczaniu interfejsu administracyjnego
 </p>
 </li>
 <li>
@@ -181,7 +181,7 @@ Swoisty dla Railsów problem z masowym przypisaniem
 </li>
 <li>
 <p>
-Jak zarządzać użytkownikami: logowanie, wylogowanie i metody ataku na wszystkich poziomach
+Jak zarządzać użytkownikami: logowanie, wylogowanie i metody ataku na wszystkich poziomach.
 </p>
 </li>
 <li>
@@ -194,11 +194,11 @@ I najbardziej popularne metody ataku typu injection
 </div>
 <h2 id="_introduction">1. Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Web application frameworks are made to help developers building web applications. Some of them also help you with securing the web application. In fact one framework is not more secure than another: If you use it correctly, you will be able to build secure apps with many frameworks. Ruby on Rails has some clever helper methods, for example against SQL injection, so that this is hardly a problem. It‘s nice to see that all of the Rails applications I audited had a good level of security.</p></div>
-<div class="paragraph"><p>In general there is no such thing as plug-n-play security. Security depends on the people using the framework, and sometimes on the development method. And it depends on all layers of a web application environment: The back-end storage, the web server and the web application itself (and possibly other layers or applications).</p></div>
-<div class="paragraph"><p>The Gartner Group however estimates that 75% of attacks are at the web application layer, and found out "that out of 300 audited sites, 97% are vulnerable to attack". This is because web applications are relatively easy to attack, as they are simple to understand and manipulate, even by the lay person.</p></div>
-<div class="paragraph"><p>The threats against web applications include user account hijacking, bypass of access control, reading or modifying sensitive data, or presenting fraudulent content. Or an attacker might be able to install a Trojan horse program or unsolicited e-mail sending software, aim at financial enrichment or cause brand name damage by modifying company resources. In order to prevent attacks, minimize their impact and remove points of attack, first of all, you have to fully understand the attack methods in order to find the correct countermeasures. That is what this guide aims at.</p></div>
-<div class="paragraph"><p>In order to develop secure web applications you have to keep up to date on all layers and know your enemies. To keep up to date subscribe to security mailing lists, read security blogs and make updating and security checks a habit (check the Additional Resources chapter). I do it manually because that‘s how you find the nasty logical security problems.</p></div>
+<div class="paragraph"><p>Frameworki powstały by pomagać projektantom w tworzeniu aplikacji internetowych. Niektóre z nich mogą być pomocne także przy ochronie aplikacji przed atakami. W rzeczywistości wszystkie frameworki są tak samo bezpieczne: jeśli stosujesz je prawidłowo będziesz w stanie stworzyć bezpieczne aplikacje używając niemalże każdego z frameworków. W Ruby on Rails można znaleźć kilka helperów rozwiązujących takie problemy jak np. ataki typu injection. Z przyjemnością muszę stwierdzić, że wszystkie Railsowe aplikacje, które audytowałem miały wysoki poziom bezpieczeństwa.</p></div>
+<div class="paragraph"><p>Ogólnie rzecz biorąc nie ma sposobu na zapewnienie natychmiastowej ochrony aplikacji przed wszystkimi rodzajami ataku. Bezpieczeństwo zależy od ludzi używających frameworka, od metody projektowania jak również od wszystkich poziomów środowiska aplikacji internetowej: silnika aplikacji, serwera, lub aplikacji samej w sobie (i prawdopodobnie od innych poziomów aplikacji).</p></div>
+<div class="paragraph"><p>Gartner Group oszacowała jednak, że 75% ataków dotyczy poziomu aplikacji internetowej. Okazało się, „że spośród 300 audytowanych stron 97% było narażonych na atak”. Dzieje się tak dlatego, ponieważ aplikacje internetowe są stosunkowo łatwym celem ataku. Nawet laik bez trudu może zrozumieć ich działanie i w prosty sposób nimi manipulować.</p></div>
+<div class="paragraph"><p>Zagrożenia wobec aplikacji internetowych to między innymi: przejęcie konta użytkownika, ominięcie kontroli dostępu, czytanie lub modyfikowanie poufnych danych, prezentacja fałszywych treści. Atakujący może również zainstalować konia trojańskiego, lub oprogramowanie rozsyłające niepożądane maile w celu uzyskania korzyści finansowych lub w celu zniszczenia dobrego imienia firmy poprzez modyfikację cennych materiałów. Jeśli chcesz zapobiegać atakom, zminimalizować ich działanie i wyeliminować potencjalne miejsca, w których mógłby nastąpić atak, musisz najpierw w pełni zrozumieć metody ataku. I to właśnie jest celem tego przewodnika.</p></div>
+<div class="paragraph"><p>W celu rozwoju bezpiecznej aplikacji internetowej musisz aktualizować wszystkie jej poziomy i poznać swoich wrogów. Żeby być na bieżąco z aktualnymi informacjami o bezpieczeństwie dopisz się do odpowiednich list mailingowych, czytaj blogi i postaraj się, żeby aktualizowanie i kontrolowanie bezpieczeństwa Twojej aplikacji weszło Ci w nawyk (sprawdź w rozdziale „Dodatkowe materiały”). Ja robię to ręcznie ponieważ to najlepszy sposób, żeby znaleźć złośliwe problemy związane z bezpieczeństwem.</p></div>
 </div>
 <h2 id="_sessions">2. Sessions</h2>
 <div class="sectionbody">

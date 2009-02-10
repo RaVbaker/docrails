@@ -1,32 +1,32 @@
-Layouty i Renderowanie w Rails
+Layouts and Rendering in Rails
 ==============================
 
-Ten przewodnik opisuje podstawowe możliwości layoutów w modułach Action Controller i Action View. Po jego przeczytaniu powinieneś umieć:
+This guide covers the basic layout features of Action Controller and Action View. By referring to this guide, you will be able to:
 
-* Używać różnorodnych metod renderujących wbudowanych w Rails
-* Tworzyć layouty podzielone na wiele sekcji
-* Używać podszablonów (ang. partials) by zastosować regułę DRY do swoich widoków
-* Używać zagnieżdżonych szablonów (sub-szablony ang. nested layouts, sub-templates)
+* Use the various rendering methods built in to Rails
+* Create layouts with multiple content sections
+* Use partials to DRY up your views
+* Use nested layouts (sub-templates)
 
-== Opis zawartości: Jak wszystko razem współgra
+== Overview: How the Pieces Fit Together
 
-Ten poradnik skupia się na wzajemnym oddziaływaniu pomiędzy Kontrolerem a Widokiem we wzorcu Model-View-Controller (MVC). Jak wiesz, Kontroler jest odpowiedzialny za nadzorowanie całego procesu obsługi zapytań w Rails, pomimo że zazwyczaj przekazuje on każdy większy kod do Modelu. Natomiast gdy dojdzie do wysłania odpowiedzi użytkownikowi, Kontroler przekazuje to zadanie Widokowi. Tematem tego tutoriala jest właśnie to przekazywanie.
+This guide focuses on the interaction between Controller and View in the Model-View-Controller triangle. As you know, the Controller is responsible for orchestrating the whole process of handling a request in Rails, though it normally hands off any heavy code to the Model. But then, when it's time to send a response back to the user, the Controller hands things off to the View. It's that handoff that is the subject of this guide.
 
-Ogólnie mówiąc to nadzorowanie wymaga zadecydowania, co powinno być przesłane jako odpowiedź, a następnie wywołania odpowiedniej metody w celu jej stworzenia. Jeśli odpowiedź jest rozwiniętym, skomplikowanym widokiem, Rails wykonuje dodatkową pracę by opakować widok w layout i ewentualnie dołączyć częściowe widoki. Te wszystkie możliwości zobaczysz w późniejszej części poradnika.
+In broad strokes, this involves deciding what should be sent as the response and calling an appropriate method to create that response. If the response is a full-blown view, Rails also does some extra work to wrap the view in a layout and possibly to pull in partial views. You'll see all of those paths later in this guide.
 
-== Tworzenie odpowiedzi
+== Creating Responses
 
-Z punktu widzenia kontrolera, są trzy drogi, aby stworzyć odpowiedź HTTP:
+From the controller's point of view, there are three ways to create an HTTP response:
 
-* Wywołać +render+ by stworzyć pełną odpowiedź do odesłania przeglądarce
-* Wywołać +redirect_to+ by wysłać kod HTTP informujący o przekierowaniu do przeglądarki
-* Wywołać +head+ by stworzyć odpowiedź zawierającą tylko nagłówki HTTP i odesłać ją do przeglądarki
+* Call +render+ to create a full response to send back to the browser
+* Call +redirect_to+ to send an HTTP redirect status code to the browser
+* Call +head+ to create a response consisting solely of HTTP headers to send back to the browser
 
-Wytłumaczę po kolei każdą z tych metod, ale najpierw kilka słów o najprostszej rzeczy, którą może wykonać kontroler w odpowiedzi na żądanie – nie robić nic :)
+I'll cover each of these methods in turn. But first, a few words about the very easiest thing that the controller can do to create a response: nothing at all.
 
-=== Domyślne renderowanie: strategia Convention Over Configuration w akcji
+=== Rendering by Default: Convention Over Configuration in Action
 
-Słyszałeś zapewne, że Rails promuje strategię „convention over configuration”. Domyślny rendering jest wspaniałym tego przykładem. Standardowo, kontrolery w Rails automatycznie renderują widoki z nazwami odpowiadającymi akcjom. Na przykład, jeśli masz poniższy kod w klasie +BooksController+:
+You've heard that Rails promotes "convention over configuration." Default rendering is an excellent example of this. By default, controllers in Rails automatically render views with names that correspond to actions. For example, if you have this code in your +BooksController+ class:
 
 [source, ruby]
 -------------------------------------------------------
@@ -35,11 +35,11 @@ def show
 end
 -------------------------------------------------------
 
-Rails automatycznie po wykonaniu metody wyrenderuje plik +app/views/books/show.html.erb+. Właściwie, jeśli masz domyślną regułę (route) catch-all w odpowiednim miejscu (+map.connect \':controller/:action/:id'+), Rails wyrenderuje nawet widoki, które nie mają żadnego kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną regułę i nadejdzie żądanie dla +/books/sale_list+, Rails w odpowiedzi wyrenderuje +app/views/books/sale_list.html.erb+.
+Rails will automatically render +app/views/books/show.html.erb+ after running the method. In fact, if you have the default catch-all route in place (+map.connect \':controller/:action/:id'+), Rails will even render views that don't have any code at all in the controller. For example, if you have the default route in place and a request comes in for +/books/sale_list+, Rails will render +app/views/books/sale_list.html.erb+ in response.
 
-NOTE: Właściwe renderowanie jest wykonywane przez podklasę +ActionView::TemplateHandlers+. Ten tutorial nie zagłębia się w ten proces, ale należy pamiętać, że rozszerzenie pliku twojego widoku wpływa na wybór szablonu obsługi. W Rails 2, standardowymi rozszerzeniami są +.erb+dla ERB (HTML z osadzonym Rubim), +.rjs+dla RJS (JavaScript z Rubim) i +.builder+ dla Buildera (generator XML). Dodatkowo znajdziesz również pliki +.rhtml+ używane dla szablonów ERB i +.rxml+ dla szablonów Buildera, jednak obecnie te rozszerzenia są niezalecane i będą usuniętę w przyszłych wersjach Rails.
+NOTE: The actual rendering is done by subclasses of +ActionView::TemplateHandlers+. This guide does not dig into that process, but it's important to know that the file extension on your view controls the choice of template handler. In Rails 2, the standard extensions are +.erb+ for ERB (HTML with embedded Ruby), +.rjs+ for RJS (javascript with embedded ruby) and +.builder+ for Builder (XML generator). You'll also find +.rhtml+ used for ERB templates and +.rxml+ for Builder templates, but those extensions are now formally deprecated and will be removed from a future version of Rails.
 
-=== Używanie +render+
+=== Using +render+
 
 In most cases, the +ActionController::Base#render+ method does the heavy lifting of rendering your application's content for use by a browser. There are a variety of ways to customize the behavior of +render+. You can render the default view for a Rails template, or a specific template, or a file, or inline code, or nothing at all. You can render text, JSON, or XML. You can specify the content type or HTTP status of the rendered response as well.
 

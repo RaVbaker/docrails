@@ -9,7 +9,7 @@ tworzą spójną całość. Strona ta dostępna jest w kilku wersjach:
   wersji stabilnej 2.2
 * http://guides.rails.info/[angielska wersja rozwojowa] - opisuje Railsy w
   wersji rozwojowej 2.3
-* http://apohllo.pl/guides[polska wersja rozwojowa] - powstaje na podstawie
+* http://apohllo.pl/guides/index.html[polska wersja rozwojowa] - powstaje na podstawie
   angielskiej wersji rozwojowej 
 
 Docelowo polskie tłumaczenie pojawi się na
@@ -32,7 +32,7 @@ http://wiki.github.com/apohllo/docrails[stronę polskiego tłumaczenia].
 <h2>Na początek</h2>
 ++++++++++++++++++++++++++++++++++++++
 
-.link:getting_started_with_rails.html[Zaczynamy z Rails]
+.link:getting_started_with_rails.html[Zaczynamy z Ruby on Rails]
 ***********************************************************
 Wszystko co musisz wiedzieć aby zainstalować Railsy oraz stworzyć swoją
 pierwszą aplikację.
@@ -90,7 +90,7 @@ formularzy.
 <h2>Kontrolery</h2>
 ++++++++++++++++++++++++++++++++++++++
 
-.link:routing_outside_in.html[Routing w Rails]
+.link:routing_outside_in.html[Routing w Ruby on Rails]
 ***********************************************************
 Ten przewodnik omawia występujący w Rails mechanizm routingu z punktu
 widzenia jego użytkownika. Zacznij od niego jeśli chcesz zrozumieć jak 
@@ -105,7 +105,7 @@ Obejmuje m.in. obsługę sesji, filtry, cookies, strumieniowanie danych
 oraz obsługę wyjątków generowanych przez żądania.
 ***********************************************************
 
-.link:caching_with_rails.html[Cache'owanie w Rails]
+.link:caching_with_rails.html[Cache'owanie w Ruby on Rails]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/10[Lighthouse Ticket]
 
@@ -156,7 +156,7 @@ aplikacji railsowej.
 
 .link:creating_plugins.html[Podstawy tworzenia pluginów dla Ruby on Rails]
 ***********************************************************
-Ten przewodnik omawia sposób budowania plaginów, w celu rozszerzenia
+Ten przewodnik omawia sposób budowania pluginów, w celu rozszerzenia
 funkcjonalności Railsów. 
 ***********************************************************
 
