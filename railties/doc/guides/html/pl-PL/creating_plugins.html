@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>The Basics of Creating Rails Plugins</title>
+  <title>Podstawy tworzenia pluginów Railsowych</title>
   <!--[if lt IE 8]>
   <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js" type="text/javascript"></script>
   <![endif]-->
@@ -132,95 +132,90 @@
     </div>
     
     <div id="content">
-        <h1>The Basics of Creating Rails Plugins</h1>
+        <h1>Podstawy tworzenia pluginów Railsowych</h1>
       <div id="preamble">
 <div class="sectionbody">
-<div class="paragraph"><p>A Rails plugin is either an extension or a modification of the core framework. Plugins provide:</p></div>
+<div class="paragraph"><p>Plugin w Rails to rozszerzenie lub modyfikacja oryginalnego frameworka. Pluginy umożliwiają:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-a way for developers to share bleeding-edge ideas without hurting the stable code base
+programiści mogą dzielić się nowatorskimi pomysłami bez naruszania stabilnego kodu
 </p>
 </li>
 <li>
 <p>
-a segmented architecture so that units of code can be fixed or updated on their own release schedule
+a segmented architecture so that units of code can be fixed or updated on their own release schedule ???
 </p>
 </li>
 <li>
 <p>
-an outlet for the core developers so that they don’t have to include every cool new feature under the sun
+miejsce na super-ekstra-cool funkcjonalności, które niekoniecznie są warte umieszczenia w głównym kodzie
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>After reading this guide you should be familiar with:</p></div>
+<div class="paragraph"><p>Po przeczytaniu tego przewodnika będziesz potrafił:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Creating a plugin from scratch
+Stworzyć od podstaw plugin
 </p>
 </li>
 <li>
 <p>
-Writing and running tests for the plugin
+Pisać i uruchamiać testy dla pluginów
 </p>
 </li>
 <li>
 <p>
-Storing models, views, controllers, helpers and even other plugins in your plugins
+Umieszczać w swoich pluginach modele, widoki, helpery, a nawet inne pluginy
 </p>
 </li>
 <li>
 <p>
-Writing generators
+Pisać generatory
 </p>
 </li>
 <li>
 <p>
-Writing custom Rake tasks in your plugin
+Pisać własne polecenia modułu Rake w Twoim pluginie
 </p>
 </li>
 <li>
 <p>
-Generating RDoc documentation for your plugin
+Generować dokumentację RDoc w Twoim pluginie
 </p>
 </li>
 <li>
 <p>
-Avoiding common pitfalls with <em>init.rb</em>
+Unikać popularnych błędów w <em>init.rb</em>
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>This guide describes how to build a test-driven plugin that will:</p></div>
+<div class="paragraph"><p>Ten przewodnik opisuje jak stworzyć plugin, który będzie:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Extend core ruby classes like Hash and String
+Rozszerzał klasy wbudowane Ruby, takie jak Hash czy String
 </p>
 </li>
 <li>
 <p>
-Add methods to ActiveRecord::Base in the tradition of the <em>acts_as</em> plugins
+Dodawał metody do modułu ActiveRecord::Base zgodnie z zasadą pluginów <em>acts_as</em>
 </p>
 </li>
 <li>
 <p>
-Add a view helper that can be used in erb templates
+Dodawał helpera widoku, który może być używany w szablonach erb
 </p>
 </li>
 <li>
 <p>
-Add a new generator that will generate a migration
+Dodawał własne polecenie generatora
 </p>
 </li>
 <li>
 <p>
-Add a custom generator command
-</p>
-</li>
-<li>
-<p>
-A custom route method that can be used in routes.rb
+Dodawał własną metodę routingu, która może być użyta w routes.rb
 </p>
 </li>
 </ul></div>
