@@ -535,25 +535,25 @@ module MyApplication
 end
 -------------------------------------------------------
 
-== Detailed Association Reference
+== Szczegółowy spis asocjacji
 
-The following sections give the details of each type of association, including the methods that they add and the options that you can use when declaring an association.
+Niniejszy rozdział ukaże ci szczegóły każdego typu asocjacji, w tym informacje o metodach, które dzięki nim zyskujesz oraz opcji, których możesz uzywać dzięki zadeklarowaniu asocjacji.
 
-=== The +belongs_to+ Association
+=== Asocjacja belongs_to
+ 
+Asocjacja +belongs_to+ tworzy relację typu jeden-do-jeden z innym modelem. Wwarunkach bazy danych, oznacza to że dana klasa zawiera klucz obcy. Jeśli inna klasa zawiera klucz obcy, powinieneś raczej użyć asocjacji +has_one+
 
-The +belongs_to+ association creates a one-to-one match with another model. In database terms, this association says that this class contains the foreign key. If the other class contains the foreign key, then you should use +has_one+ instead.
+==== Metody dodane dzięki +belongs_to+
 
-==== Methods Added by +belongs_to+
-
-When you declare a +belongs_to+ assocation, the declaring class automatically gains five methods related to the association:
-
+Kiedy zadeklarujesz asocjację belongs_to, deklarowana klasa automatycznie zyskuje pięć metod odnoszących się do asocjacji:
+ 
 * +_association_(force_reload = false)+
 * +_association_=(associate)+
 * +_association_.nil?+
 * +build___association__(attributes = {})+
 * +create___association__(attributes = {})+
-
-In all of these methods, +_association_+ is replaced with the symbol passed as the first argument to +belongs_to+. For example, given the declaration:
+ 
+We wszystkich tych medodach +_association_+ zastępuje się symbolem przekazanym jako pierwszy argument do belongs_to. Na przykład gdy mamy deklarację:
 
 [source, ruby]
 -------------------------------------------------------
@@ -562,7 +562,7 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Each instance of the order model will have these methods:
+Każda instancja wybranego modelu będzie posiadała poniższe metody:
 
 [source, ruby]
 -------------------------------------------------------
@@ -576,17 +576,18 @@ create_customer
 ===== +_association_(force_reload = false)+
 
 The +_association_+ method returns the associated object, if any. If no associated object is found, it returns +nil+.
+Metoda +_association_+ zwraca wiązany obiekt, jeśli tylko taki istnieje. Jeśli wiązany obiekt nie został znaleziony, metoda zwraca +nil+.
 
 [source, ruby]
 -------------------------------------------------------
 @customer = @order.customer
 -------------------------------------------------------
 
-If the associated object has already been retrieved from the database for this object, the cached version will be returned. To override this behavior (and force a database read), pass +true+ as the +force_reload+ argument.
-
+Jeśli wiązany obiekt został już pobrany z bazy danych, zwrócona będzie jego wersja przechowywana w _cache_. Aby to zmienić  (i wymusić czytanie z bazy), ustaw +true+ przy argumencie +force_reload+
+ 
 ===== +_association_=(associate)+
 
-The +_association_=+ method assigns an associated object to this object. Behind the scenes, this means extracting the primary key from the associate object and setting this object's foreign key to the same value.
+metoda +_association_=+ przydziela wiązanemy obiekt do naszego obiektu. Od środka wygląda to tak, że wydobywa ona z wiązanego obiektu klucz postawowy i ustawia naszemu obiektowi klucz obcy na tę samą wartość.
 
 [source, ruby]
 -------------------------------------------------------
@@ -595,7 +596,7 @@ The +_association_=+ method assigns an associated object to this object. Behind 
 
 ===== +_association_.nil?+
 
-The +_association_.nil?+ method returns +true+ if there is no associated object.
+metoda +_association_.nil?+ zwraca wartość +true+ jeśli nie znaleziono wiązanego obiektu.
 
 [source, ruby]
 -------------------------------------------------------
@@ -606,7 +607,7 @@ end
 
 ===== +build___association__(attributes = {})+
 
-The +build__\_association__+ method returns a new object of the associated type. This object will be instantiated from the passed attributes, and the link through this object's foreign key will be set, but the associated object will _not_ yet be saved.
+Metoda +build__\_association__+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów,  będzie ustawiony odnośnik do obcego klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany. 
 
 [source, ruby]
 -------------------------------------------------------
@@ -615,16 +616,16 @@ The +build__\_association__+ method returns a new object of the associated type.
 
 ===== +create___association__(attributes = {})+
 
-The +create__\_association__+ method returns a new object of the associated type. This object will be instantiated from the passed attributes, and the link through this object's foreign key will be set. In addition, the associated object _will_ be saved (assuming that it passes any validations).
+Metoda +create__\_association__+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do obcego klucza tego obiektu. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
 
 [source, ruby]
 -------------------------------------------------------
 @customer = @order.create_customer({:customer_number => 123, :customer_name => "John Doe"})
 -------------------------------------------------------
 
-==== Options for +belongs_to+
+==== Opcje dla +belongs_to+
 
-In many situations, you can use the default behavior of +belongs_to+ without any customization. But despite Rails' emphasis of convention over customization, you can alter that behavior in a number of ways. This section covers the options that you can pass when you create a +belongs_to+ association. For example, an association with several options might look like this:
+W wielu sytuacjach możesz użyć asocjacji +belongs_to+ bez potrzeby jej dostosowywania. Ale pomimo Ralisowego nacisku na górowanie konwencji nad dostosowaniem do własnych potrzeb, możesz zmieniać domyślne ustawienia na kilka sposobów. Ten rozdział przedstawi ci opcje, których możesz używać, kiedy zadeklarujesz asocjację +belongs_to+. Na przykład asocjacja z kilkoma opcjami może wyglądać tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -633,7 +634,7 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-The +belongs_to+ association supports these options:
+Asocjacja +belongs_to+ wspiera następujące opcje
 
 // * +:accessible+
 * +:class_name+
@@ -653,7 +654,7 @@ The +belongs_to+ association supports these options:
 //
 ===== +:class_name+
 
-If the name of the other model cannot be derived from the association name, you can use the +:class_name+ option to supply the model name. For example, if an order belongs to a customer, but the actual name of the model containing customers is +Patron+, you'd set things up this way:
+Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji +:class-name+, by dostarczyć własną nazwę modelu. Na przykład, jeśli zamówienie należy [_belongs to_] do klienta, ale aktualna nazwa zawierająca klientów to +Patron+, możesz to ustawić w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -664,7 +665,7 @@ end
 
 ===== +:conditions+
 
-The +:conditions+ option lets you specify the conditions that the associated object must meet (in the syntax used by a SQL +WHERE+ clause).
+Opcja +:conditions+ pozwala określić warunki, jakie wiązany obiekt musi spełniać (W składni SQL użyłbyś klauzuli WHERE).
 
 [source, ruby]
 -------------------------------------------------------
@@ -675,7 +676,7 @@ end
 
 ===== +:counter_cache+
 
-The +:counter_cache+ option can be used to make finding the number of belonging objects more efficient. Consider these models:
+Opcja +:counter_cache+ może sprawić, że znajdowanie liczby powiązanych obiektów będzie bardziej wydajne (szybsze). Rozważ te modele:
 
 [source, ruby]
 -------------------------------------------------------
@@ -687,7 +688,7 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-With these declarations, asking for the value of +@customer.orders.size+ requires making a call to the database to perform a +COUNT(*)+ query. To avoid this call, you can add a counter cache to the _belonging_ model:
+Z powyższymi deklaracjami, znalezienie wartości +@customer.orders.size+ (wielkość [ilość] zamówień klientów) wymaga zapytania do bazy wykorzystującego +COUNT(*)+. Aby uniknąć tego połączenia możesz dodać :counter_cache ("licznik cache") do modelu: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -698,10 +699,10 @@ class Customer < ActiveRecord::Base
   has_many :orders
 end
 -------------------------------------------------------
+ 
+Dzięki tej deklaracji Railsy będą pobierały bieżącą wartość cache i zwrócą ją w odpowiedzi na metodę +.size+.
 
-With this declaration, Rails will keep the cache value up to date, and then return that value in response to the +.size+ method. 
-
-Although the +:counter_cache+ option is specified on the model that includes the +belongs_to+ declaration, the actual column must be added to the _associated_ model. In the case above, you would need to add a column named +orders_count+ to the +Customer+ model. You can override the default column name if you need to:
+Pomimo, że opcja +:counter_cache+ jest określona dla modelu zawierającego deklarację +belongs_to+, bieżąca kolumna musi być dodana do wiązanego modelu. W powyższym przypadku musisz dodać kolumnę o nazwie+orders_count+ do modelu klienta [+Customer+]. Możesz zamienić domyślną nazwę kolumny, jeśli tylko chcesz:
 
 [source, ruby]
 -------------------------------------------------------
@@ -713,17 +714,17 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Counter cache columns are added to the containing model's list of read-only attributes through +attr_readonly+.
+Kolumny _licznika_ są dodawane do listy atrybutów tylko-do-odczytu wiązanego modelu (poprzez +attr_readonly+)
 
 ===== +:dependent+
 
-If you set the +:dependent+ option to +:destroy+, then deleting this object will call the destroy method on the associated object to delete that object. If you set the +:dependent+ option to +:delete+, then deleting this object will delete the associated object _without_ calling its +destroy+ method.
+Jeśli ustawisz opcję +:dependent+ na :destroy, wtedy usunięcie tego obiektu wywoła metodę destroy na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję +:dependent+ na +:delete+, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu wiązanego _bez_ wywoływania dla niego metody +destroy+.
 
-WARNING: You should not specify this option on a +belongs_to+ association that is connected with a +has_many+ association on the other class. Doing so can lead to orphaned records in your database.
+WARNING: Nie używaj tej opcji w asocjacji +belongs_to+, która jest połączona z asocjacją +has_many+ w innej klasie. W przeciwnym wypadku w twojej bazie pojawią się rekordy osierocone.
 
 ===== +:foreign_key+
 
-By convention, Rails guesses that the column used to hold the foreign key on this model is the name of the association with the suffix +_id+ added. The +:foreign_key+ option lets you set the name of the foreign key directly:
+Zgodnie z konwencją, Railsy "domyślają się", że kolumna używana do przechowywania klucza obcego to nazwa asocjacji z dodanym przyrostkiem +_id+. Opcja +:foreign_key+ umożliwia ustawienie nazwy klucza obcego bezpośrednio:
 
 [source, ruby]
 -------------------------------------------------------
@@ -732,11 +733,11 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-TIP: In any case, Rails will not create foreign key columns for you. You need to explicitly define them as part of your migrations.
+TIP: W żadnym z wypadków Railsy nie będą same tworzyły dla ciebie kolumn klucza obcego. Musisz zdefiniować teklucze w swoich migracjach.
 
 ===== +:include+
 
-You can use the :include option to specify second-order associations that should be eager-loaded when this association is used. For example, consider these models:
+Możesz użyć opcji +:include+ do podania drugorzędnych asocjacji, które zostaną załadowane wtedy, gdy zostanie użyta dana asocjacja. Na przykład, rozważmy takie modele:
 
 [source, ruby]
 -------------------------------------------------------
@@ -752,7 +753,8 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-If you frequently retrieve customers directly from line items (+@line_item.order.customer+), then you can make your code somewhat more efficient by including customers in the association from line items to orders:
+Jeśli często pobierasz klienta bezpośrednio z pozycji w jego zamówieniu [_line item_] (+@line_item.order.customer+), możesz sprawić, żetwój kod będzie wydajniejszy, włączając klienta w asocjacji z pozycją w zamówieniu do zamówienia:
+
 
 [source, ruby]
 -------------------------------------------------------
@@ -769,28 +771,30 @@ end
 -------------------------------------------------------
 
 NOTE: There's no need to use +:include+ for immediate associations - that is, if you have +Order belongs_to :customer+, then the customer is eager-loaded automatically when it's needed.
+NOTE:Nie ma potrzeby stosowanie +:include+ do bezpośrednich asocjacji, to znaczy: jeśli masz zdefiniowaną w modelu relację zamówień należących do  (_belongs to_) klientów, wtedy "klient" jest przygotowany do wczytania zawsze, kiedy tylko jest potrzebny.
 
 ===== +:polymorphic+
 
-Passing +true+ to the +:polymorphic+ option indicates that this is a polymorphic association. Polymorphic associations were discussed in detail earlier in this guide.
+Ustawienie +true+ dla opcji +:polymorphic+ wskazuje, że asocjacja jest polimorficzna. Asocjacje polimorficzne zostały omówione wcześniej w tym przewodniku.
 
 ===== +:readonly+
 
-If you set the +:readonly+ option to +true+, then the associated object will be read-only when retrieved via the association.
+jeśli ustawisz +true+ dla opcji +:readonly+, asocjowany obiekt będzie tylko do odczytu, gdy wywoływana jest asocjacja.
 
 ===== +:select+
 
-The +:select+ option lets you override the SQL +SELECT+ clause that is used to retrieve data about the associated object. By default, Rails retrieves all columns.
+Użyj opcji : select by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Rails pobiera wszystkie kolumny. 
 
-TIP: If you set the +:select+ option on a +belongs_to+ association, you should also set the +foreign_key+ option to guarantee the correct results.
+TIP: Po ustawieniu opcji +:select+ dla asocjacji +belongs_to+, powinieneś też ustawić opcję +:foreign_key+, by mieć pewność, że uzyskasz poprawny wynik zapytania
 
 ===== +:validate+
 
-If you set the +:validate+ option to +true+, then associated objects will be validated whenever you save this object. By default, this is +false+: associated objects will not be validated when this object is saved.
+Kiedy ustawisz na +true+ opcję +:validate+,  wiązane obiekty będą walidowane zawsze, kiedy będziesz je zapisywać. Domyślne ustawienie to +false+: wiązane obiekty nie są walidowane kiedy je zapisujesz.
 
 ==== When are Objects Saved?
 
 Assigning an object to a +belongs_to+ association does _not_ automatically save the object. It does not save the associated object either.
+Przypisywanie obiektu do asocjacji +belongs_to+ nie zapisuje go automatycznie. Nie zapisuje to także wiązanego obiektu.
 
 === The has_one Association
 
