@@ -71,7 +71,7 @@ Aby dowiedzieć się więcej o różnych rodzajach asocjacji, przeczytaj następ
 
 == Typy asocjacji
 
-W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących moduł Active Record. Asocjacje są realizowane poprzez makro-połączenia, a więc dzięki dodaniu stosownej funkcji do modelu poprzez jej zadeklarowanie. Na przykład, deklarując, że jeden model _należy do_ [+belongs_to+] innego, instruujesz Railsy by utrzymywały powiązanie klucza podstawowego z obcym kluczem między instancjami tych dwóch modeli, a dzięki temu otrzymujesz także szereg narzędzi (metod), które możesz wykorzystać w swoim modelu. Rails obsługuje sześć typów asocjacji:
+W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących moduł Active Record. Asocjacje są realizowane poprzez makro-połączenia, a więc dzięki dodaniu stosownej funkcji do modelu poprzez jej zadeklarowanie. Na przykład, deklarując, że jeden model _należy do_ (+belongs_to+) innego, instruujesz Railsy by utrzymywały powiązanie klucza podstawowego z obcym kluczem między instancjami tych dwóch modeli, a dzięki temu otrzymujesz także szereg narzędzi (metod), które możesz wykorzystać w swoim modelu. Rails obsługuje sześć typów asocjacji:
 
 * +belongs_to+
 * +has_one+
@@ -84,33 +84,36 @@ W dalszej części przewodnika dowiesz się jak deklarować asocjacje i jak uży
 
 === Asocjacja +belongs_to+
 
-A +belongs_to+ association sets up a one-to-one connection with another model, such that each instance of the declaring model "belongs to" one instance of the other model. For example, if your application includes customers and orders, and each order can be assigned to exactly one customer, you'd declare the order model this way:
-
+Asocjacja +belongs_to+ ustanawia relację  typu jeden-do-jeden z innym modelem w taki sposób, że każda instancja  zadeklarowanego modelu "należy do" (_belongs_ _to_) jednej instancji innego modelu.
+Na przykład: jeśli twoja aplikacja zawiera modele klientów i ich zamówienia, a każde zamówienie przypisane jest dokładnie do jednego klienta, można zadeklarować model zamówienia w ten sposób:
+ 
 [source, ruby]
 -------------------------------------------------------
 class Order < ActiveRecord::Base
   belongs_to :customer
 end
 -------------------------------------------------------
+ 
+image:images/belongs_to.png[diagram asocjacji belongs_to]
 
-image:images/belongs_to.png[belongs_to Association Diagram]
+=== Asocjacja +has_one+
 
-=== The +has_one+ Association
-
-A +has_one+ association also sets up a one-to-one connection with another model, but with somewhat different semantics (and consequences). This association indicates that each instance of a model contains or possesses one instance of another model. For example, if each supplier in your application has only one account, you'd declare the supplier model like this:
-
+Asocjacja +has_one+ również ustanawia relację typu jeden-do-jeden pomiędzy dwoma modelami, jednak posiada inną semantykę (i jej konsekwencje). Ta asocjacja wskazuje, iż każda instancja jednego modelu posiada jedną instancję drugiego. 
+Na przykład: Każdy dostawca (_supplier_) w twojej aplikacji ma tylko jedno konto – możesz zadeklarować model dostawcy w taki sposób:
+ 
 [source, ruby]
 -------------------------------------------------------
 class Supplier < ActiveRecord::Base
   has_one :account
 end
 -------------------------------------------------------
+ 
+image:images/has_one.png[diagram asocjacji has_one]
 
-image:images/has_one.png[has_one Association Diagram]
-
-=== The +has_many+ Association
-
-A +has_many+ association indicates a one-to-many connection with another model. You'll often find this association on the "other side" of a +belongs_to+ association. This association indicates that each instance of the model has zero or more instances of another model. For example, in an application containing customers and orders, the customer model could be declared like this:
+=== Asocjacja +has_many+
+ 
+Asocjacja +has_many+ wskazuje relację typu jeden-do-wiele. Będziesz mógł często znaleźć tę asocjację "po drugiej stronie" asocjacji +belongs_to+. Ta relacja wskazuje, że każda instancja modelu posiada zero i więcej instancji innego modelu. 
+Na przykład, w aplikacji zawierającej klientów i zamówienia, model klienta mógłby zostać zadeklarowany następująco:
 
 [source, ruby]
 -------------------------------------------------------
@@ -118,14 +121,15 @@ class Customer < ActiveRecord::Base
   has_many :orders
 end
 -------------------------------------------------------
+ 
+NOTE: Kiedy deklarujemy asocjację +has_many+, nazwa wiązanego modelu jest zamieniana na jej liczbę mnogą (oczywiście mowa tu o gramatyce języka angielskiego - przyp. tłum.).
+ 
+image:images/has_many.png[diagram asocjacji has_many]
 
-NOTE: The name of the other model is pluralized when declaring a +has_many+ association.
-
-image:images/has_many.png[has_many Association Diagram]
-
-=== The +has_many :through+ Association
-
-A +has_many :through+ association is often used to set up a many-to-many connection with another model. This association indicates that the declaring model can be matched with zero or more instances of another model by proceeding _through_ a third model. For example, consider a medical practice where patients make appointments to see physicians. The relevant association declarations could look like this:
+=== Asocjacja has_many :through
+ 
+Asocjacja +has_many :through+ (_posiada_wiele :poprzez_) często używana jest do stworzenia relacji wiele-do-wiele z innym modelem. Asocjacja wskazuje, że zadeklarowany model może być powiązany z zerem i większą ilością instancji innego modelu poprzez trzeci model (dzięki użyciu _through_).
+Na przykład, wyobraź sobie praktykę lekarską, gdzie pacjenci (_patient(s)_) rezerwują wizyty (_appointment(s)_) u lekarzy (_physician(s)_). Odpowiednio zadeklarowana asocjacja mogłaby wyglądać tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -145,9 +149,9 @@ class Patient < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-image:images/has_many_through.png[has_many :through Association Diagram]
-
-The +has_many :through+ association is also useful for setting up "shortcuts" through nested :+has_many+ associations. For example, if a document has many sections, and a section has many paragraphs, you may sometimes want to get a simple collection of all paragraphs in the document. You could set that up this way:
+image:images/has_many_through.png[diagram asocjacji has_many :through]
+ 
+Asocjacja +has_many :through+ przydaje się także do tworzenia "skrótów" poprzez zagnieżdżone asocjacje +has_many+. Na przykład, jeśli dokument ma wiele rozdziałów (_sections_), a rozdział wiele paragrafów (_paragraph_), możesz czasem chcieć utworzyć prosty zbiór (in. kolekcję - _collection_) wszystkich paragrafów w dokumencie. Da się to zrobić w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -166,9 +170,10 @@ class Paragraph < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-=== The +has_one :through+ Association
+=== Asocjacja +has_one :through+
 
-A +has_one :through+ association sets up a one-to-one connection with another model. This association indicates that the declaring model can be matched with one instance of another model by proceeding _through_ a third model. For example, if each supplier has one account, and each account is associated with one account history, then the customer model could look like this:
+Asocjacja +has_one :through+ (_posiada jeden :poprzez_) ustanawia relację typu jeden-do-jeden z innym modelem. Asocjacja ta wskazuje, że deklaracja jednego modelu może być dopasowana do instancji innego modelu poprzez model trzeci. 
+Na przykład, jeśli każdy dostawca posiada jedno konto (_account_), a każde konto jest powiązane (_associate_) z jedną historią konta (_account history_), wtedy model klienta  mógłby wyglądać następująco:
 
 [source, ruby]
 -------------------------------------------------------
@@ -187,11 +192,12 @@ class AccountHistory < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-image:images/has_one_through.png[has_one :through Association Diagram]
+image:images/has_one_through.png[diagram asocjacji has_one :through]
 
-=== The +has_and_belongs_to_many+ Association
+=== Asocjacja +has_and_belongs_to_many+
 
-A +has_and_belongs_to_many+ association creates a direct many-to-many connection with another model, with no intervening model. For example, if your application includes assemblies and parts, with each assembly having many parts and each part appearing in many assemblies, you could declare the models this way:
+Asocjacja has_and_belongs_to_many tworzy bezpośrednią relację typu wiele-do-wiele z innym modelem bez ingerencji modelu pośredniego (nie ma potrzeby deklarowania go, jednak zauważyć należy, iż jest tworzona automatycznie stosowna tabela wiążąca -przyp.tłum.).
+Na przykład, jeżeli projekt miałby zawierać zbiory (zestawy - _assembly(ies)_)  i części (_part(s)_) oraz każdy zbiór posiadałby wiele części, a każda część mogłaby pojawić się w wielu zbiorach,  modele można zadeklarować w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -204,13 +210,14 @@ class Part < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-image:images/habtm.png[has_and_belongs_to_many Association Diagram]
+image:images/habtm.png[diagram asocjacji has_and_belongs_to_many]
+ 
+=== Wybór pomiędzy +belongs_to+ i +has_one+
+ 
+Jeśli chcesz ustawić relację typu jeden-do-jeden między dwoma modelami, powinieneś użyć asocjacji +belongs_to+ do jednego i +has_one+ do drugiego. Ale skąd wiedzieć która powinna być w którym modelu?
 
-=== Choosing Between +belongs_to+ and +has_one+
-
-If you want to set up a 1-1 relationship between two models, you'll need to add +belongs_to+ to one, and +has_one+ to the other. How do you know which is which?
-
-The distinction is in where you place the foreign key (it goes on the table for the class declaring the +belongs_to+ association), but you should give some thought to the actual meaning of the data as well. The +has_one+ relationship says that one of something is yours - that is, that something points back to you. For example, it makes more sense to say that a supplier owns an account than that an account owns a supplier. This suggests that the correct relationships are like this:
+Rozróżnić to należy sprawdzając, w której tabeli (w którym modelu) ustawiłeś klucz obcy (foreign key) (dla klasy tej tabeli potrzebujesz asocjacji +belongs_to+), ale powinieneś pomyśleć także nad znaczeniem danych. Relacja +has_one+ mówi, że "jednen ze zbioru” należy do ciebie – tzn. że coś wskazuje z powrotem na ciebie. 
+Na przykład: Ma większy sens powiedzenie, że dostawca posiada konto, aniżeli konto posiada dostawcę. To sugeruje nam, że poprawne relacje wyglądają tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -223,7 +230,7 @@ class Account < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-The corresponding migration might look like this:
+Powiązana relacja może wyglądać tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -248,11 +255,12 @@ class CreateSuppliers < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-NOTE: Using +t.integer :supplier_id+ makes the foreign key naming obvious and implicit. In current versions of Rails, you can abstract away this implementation detail by using +t.references :supplier+ instead.
+NOTE: Użycie t.integer :supplier_id powoduje, że nazwa klucza obcego jest podana wprost, ale jednocześnie samo użycie
+klucza jest niejawne. W obecnej wersji Rails można ukryć ten szczegół implementacyjny używając składni t.references :supplier
+ 
+=== Wybór pomiędzy +has_many :through+ i +has_and_belongs_to_many+
 
-=== Choosing Between +has_many :through+ and +has_and_belongs_to_many+
-
-Rails offers two different ways to declare a many-to-many relationship between models. The simpler way is to use +has_and_belongs_to_many+, which allows you to make the association directly:
+Rails oferuje dwa sposoby deklaracji relacji tyou wiele-do-wiele między modelami. Łatwiejszym wyjściem jest użycie +has_and_belongs_to_many+, które umożliwia bezpośrednie ustanowienie asocjacji:
 
 [source, ruby]
 -------------------------------------------------------
@@ -265,7 +273,7 @@ class Part < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-The second way to declare a many-to-many relationship is to use +has_many :through+. This makes the association indirectly, through a join model:
+Druga opcja implementacji relacji tyou wiele-do-wiele to użycie +has_many :through+. Ustanawia to asocjację pośrednio, poprzed dołączenie dodatkowego modelu (_join model_): 
 
 [source, ruby]
 -------------------------------------------------------
@@ -285,13 +293,14 @@ class Part < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-The simplest rule of thumb is that you should set up a +has_many :through+ relationship if you need to work with the relationship model as an independent entity. If you don't need to do anything with the relationship model, it may be simpler to set up a +has_and_belongs_to_many+ relationship (though you'll need to remember to create the joining table). 
+Najłatwiejsza zasada polega na tym, że ustawiasz relację +has_many :through+ jeśli chcesz pracować z pośrednim (wiążącym pozostałe dwa) modelem jako niezależnym bytem. Jeśli jednak nie potrzebujesz niczego z nim robić, łatwiejsze będzie wykorzystanie asocjacji +has_and_belongs_to_many+ (choć musisz pamiętać, że należy stworzyć tabelę łączącą)
 
-You should use +has_many :through+ if you need validations, callbacks, or extra attributes on the join model.
+Należy używać :has_many :through: jeśli potrzebujesz opcji walidacji, callback-ów lub dodatkowych atrybutów dla wiążącego modelu.
+ 
+=== Asocjacje polimorficzne
 
-=== Polymorphic Associations
-
-A slightly more advanced twist on associations is the _polymorphic association_. With polymorphic associations, a model can belong to more than one other model, on a single association. For example, you might have a picture model that belongs to either an employee model or a product model. Here's how this could be declared:
+Nieco bardziej zaawansowanym typem asocjacji jest asocjacja polimorficzna. Dzięki polimorficznym asocjacjom model może być powiązany z więcej niż jednym innym modelem, za pomocją pojedynczej asocjacji. 
+Na przykład, chcesz mieć model  "zdjęcia" (_picture_), który należy do (+belongs_to+) modelu pracownika (_employee_) lub produktu (_product_). Oto w jaki sposób mogłoby to zostać zadeklarowane:
 
 [source, ruby]
 -------------------------------------------------------
@@ -308,7 +317,7 @@ class Product < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-You can think of a polymorphic +belongs_to+ declaration as setting up an interface that any other model can use. From an instance of the +Employee+ model, you can retrieve a collection of pictures: +@employee.pictures+. Similarly, you can retrieve +@product.pictures+. If you have an instance of the +Picture+ model, you can get to its parent via +@picture.imageable+. To make this work, you need to declare both a foreign key column and a type column in the model that declares the polymorphic interface:
+Mógłbyś pomyśleć, że polimofriczna deklaracja +belongs_to+ ustanawia taki interfejs, że żaden inny model nie może go użyć. Z instancji modelu pracownika (+Employee+) można pobrać zbiór zdjęć: +@employee.pictures+. Podobnie, możesz pobrać zdjęcia produktów - +@product.pictures+. Jeśli masz instancję modelu zdjęcia (+Picture+), możesz "dostać się" do jego rodzica dzięki +@picture.imageable+. By to zadziałało, potrzebujesz zadeklarować w modelu, który ma mieć polimorficzny interfejs (tu: +Picture+) dwie rzeczy: klucz obcy (dla id pracownika lub produktu – przyp. tłum.), jak i "typ” wiązanego modelu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -328,7 +337,7 @@ class CreatePictures < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-This migration can be simplified by using the +t.references+ form:
+Migracja dla takiego modelu może być uproszczona dzięki użyciu t.references: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -347,11 +356,11 @@ class CreatePictures < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-image:images/polymorphic.png[Polymorphic Association Diagram]
+image:images/polymorphic.png[diagram asocjacji polimorficznej]
+ 
+=== Samoodniesienie (wiązanie rekurencyjne)
 
-=== Self Joins
-
-In designing a data model, you will sometimes find a model that should have a relation to itself. For example, you may want to store all employees in a single database model, but be able to trace relationships such as manager and subordinates. This situation can be modeled with self-joining associations:
+Przy projektowaniu modeli danych, możesz czasem natknąć się na model, który powinien mieć odniesienie do siebie samego. Na przykład, chcesz przechowywać wszystkich pracowników w jednym modelu bazy danych (w jednej tabeli w bazie), ale też chciałbyś móc prześledzić hierarchie między pracownikami (takie jak manager i jego podwładni). Takie powiązanie może być zadeklarowane za pomocą asocjacji samoodniesienia:
 
 [source, ruby]
 -------------------------------------------------------
@@ -361,7 +370,7 @@ class Employee < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-With this setup, you can retrieve +@employee.subordinates+ and +@employee.manager+.
+Dzięki takiemu ustawieniu możesz "wyciągnąć" +@employee.subordinates+ (podwładni pracownika) i +@employee.manager+ (manager pracownika).
 
 == Tips, Tricks, and Warnings
 
