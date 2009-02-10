@@ -92,7 +92,7 @@ formularzy.
 
 .link:routing_outside_in.html[Routing w Ruby on Rails]
 ***********************************************************
-Ten przewodnik omawia występujący w Rails mechanizm routingu z punktu
+Ten przewodnik omawia występujący w Railsach mechanizm routingu z punktu
 widzenia jego użytkownika. Zacznij od niego jeśli chcesz zrozumieć jak 
 używać routingu w swojej aplikacji railsowej. 
 ***********************************************************
@@ -110,7 +110,7 @@ oraz obsługę wyjątków generowanych przez żądania.
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/10[Lighthouse Ticket]
 
 Ten przewodnik omawia trzy typy cache'owania dostarczane standardowo
-przez platformę Rails.
+przez platformę Ruby on Rails.
 ***********************************************************
 
 ++++++++++++++++++++++++++++++++++++++
@@ -160,12 +160,12 @@ Ten przewodnik omawia sposób budowania pluginów, w celu rozszerzenia
 funkcjonalności Railsów. 
 ***********************************************************
 
-.link:i18n.html[Obsługa I18N w Rails]
+.link:i18n.html[Obsługa I18N w Ruby on Rails]
 ***********************************************************
 CAUTION: link:http://rails.lighthouseapp.com/projects/16213/tickets/23[Lighthouse ticket]
 
 Ten przewodnik stanowi wprowadzenie do podstawowych koncepcji oraz 
-funkcjonalności interfejsu programistycznego Rails związanych
+funkcjonalności interfejsu programistycznego Railsów związanych
 z tworzeniem aplikacji w różnych wersjach językowych oraz lokalizacyjnych.
 ***********************************************************
 
