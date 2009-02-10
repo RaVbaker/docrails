@@ -91,7 +91,7 @@ def update
 end
 -------------------------------------------------------
 
-Uściślając, możesz użyć +render+ z opcją +:action +(chociaż nie jest to już konieczne od Rails 2.3):
+Uściślając, możesz użyć +render+ z opcją +:action+ (chociaż nie jest to już konieczne od Rails 2.3):
 
 [source, ruby]
 -------------------------------------------------------
@@ -186,7 +186,7 @@ Możesz wysyłać zwykły tekst – bez jakichkolwiek znaczników – z powrotem
 render :text => "OK"
 -------------------------------------------------------
 
-TIP: Rendering zwykłego tekstu jest najbardziej użyteczne kiedy odpowiadasz na AJAX-owe zapytania, które spodziewają się czegoś więcej niż tylko kodu HTML.
+TIP: Rendering zwykłego tekstu jest najbardziej użyteczny kiedy odpowiadasz na AJAX-owe zapytania, które spodziewają się czegoś więcej niż tylko kodu HTML.
 
 NOTE: Domyślnie, jeśli korzystasz z opcji +:text+, plik zostanie wyrenderowany bez użycia aktualnego layoutu. Jeśli chcesz by Rails umieściło text wewnątrz aktualnego layoutu, musisz skorzystać z opcji +:layout=>true+.
 
@@ -232,7 +232,7 @@ Wywołanie metody +render+ generalnie akceptuje cztery opcje:
 * +:status+
 * +:location+
 
-===== The +:content_type+ Option
+===== Opcja +:content_type+
 
 Domyślnie Rails dostarczy wynik operacji renderowania z typem zawartości MIME +text/html+ (lub +application/json+ jeśli używasz opcji +:json+ lub +application/xm+l dla opcji +:xml+). Możliwe, że będziesz chciał to zmienić i możesz to zrobić  poprzez ustawienie opcji +:content_type+:
 
