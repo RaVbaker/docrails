@@ -22,7 +22,7 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Teraz załóżmy, że chcieliśmy dodać nowe zamówienie złożone przez istniejącego klienta. Należałoby zrobić coś takiego:
+Teraz załóżmy, że chcielibyśmy dodać nowe zamówienie złożone przez istniejącego klienta. Należałoby zrobić coś takiego:
 
 [source, ruby]
 -------------------------------------------------------
