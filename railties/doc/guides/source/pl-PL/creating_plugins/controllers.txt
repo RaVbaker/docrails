@@ -1,8 +1,8 @@
-== Controllers ==
+== Kontrolery ==
 
-This section describes how to add a controller named 'woodpeckers' to your plugin that will behave the same as a controller in your main app.  This is very similar to adding a model.
+W tym rozdziale dowiemy się, jak stworzyć kontroler dla naszych pluginowych dzięciołów. Nazwiemy go 'woodpeckers' i będzie zachowywał się tak samo jak kontroler w głównej aplikacji. Wszystko będzie przebiegać bardzo podobnie jak w przypadku dodawania modelu.
 
-You can test your plugin's controller as you would test any other controller:
+Możemy przetestować kontroler pluginu tak jak każdy inny kontroler:
 
 *vendor/plugins/yaffle/test/woodpeckers_controller_test.rb:*
 
@@ -32,7 +32,7 @@ class WoodpeckersControllerTest < Test::Unit::TestCase
 end
 ----------------------------------------------
 
-This is just a simple test to make sure the controller is being loaded correctly.  After watching it fail with `rake`, you can make it pass like so:
+Tak jak poprzednio, ten test sprawdza tylko czy poprawnie załadowaliśmy kontroler. Na chwilę obecną `rake` sypnie błędami, więc do pracy:
 
 *vendor/plugins/yaffle/lib/yaffle.rb:*
 
@@ -60,4 +60,4 @@ class WoodpeckersController < ActionController::Base
 end
 ----------------------------------------------
 
-Now your test should be passing, and you should be able to use the Woodpeckers controller in your app.  If you add a route for the woodpeckers controller you can start up your server and go to http://localhost:3000/woodpeckers to see your controller in action.
+Teraz test powinien przebiegać poprawnie i powinniśmy być w stanie używać kontrolera 'woodpeckers' w naszej aplikacji. Jeśli dodamy ścieżkę (route) do 'woodpeckers' możemy uruchomić serwer i zobaczyć nasz kontroler w akcji pod adresem http://localhost:3000/woodpeckers.

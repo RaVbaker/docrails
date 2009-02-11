@@ -1,10 +1,10 @@
 == PluginGems ==
 
-Turning your rails plugin into a gem is a simple and straightforward task.  This section will cover how to turn your plugin into a gem.  It will not cover how to distribute that gem.
+Przekształcenie naszego plugina w gema jest bardzo prostym zadaniem. Właśnie tym zajmiemy się w tym rozdziale. Nie będziemy natomiast omawiac sposobu dystrybucji tego gema.
 
-Historically rails plugins loaded the plugin's 'init.rb' file.  In fact some plugins contain all of their code in that one file.  To be compatible with plugins, 'init.rb' was moved to 'rails/init.rb'.
+Tradycyjnie pluginy railsowe ładowały plik 'init.rb' pluginu. Faktycznie niektóre pluginy zawierają cały swój kod w tym jednym pliku. Dla kompatybilności z pluginami, 'init.rb' został przeniesiony do 'rails/init.rb'.
 
-It's common practice to put any developer-centric rake tasks (such as tests, rdoc and gem package tasks) in 'Rakefile'.  A rake task that packages the gem might look like this:
+Powszechną praktyką jest umieszczanie wszelkich deweloperskich zadań modułu rake (takich jak testy, rdoc i tworzenie paczek gemów) w 'Rakefile'. Zadanie modułu rake, które tworzy gema, może wyglądać np. tak:
 
 *vendor/plugins/yaffle/Rakefile:*
 
@@ -39,7 +39,7 @@ Rake::GemPackageTask.new(spec) do |pkg|
 end 
 ----------------------------------------------
 
-To build and install the gem locally, run the following commands:
+Aby zbudować i zainstalować gema lokalnie, należy wykonać następujące polecenia:
 
 ----------------------------------------------
 cd vendor/plugins/yaffle
@@ -47,4 +47,4 @@ rake gem
 sudo gem install pkg/yaffle-0.0.1.gem
 ----------------------------------------------
 
-To test this, create a new rails app, add 'config.gem "yaffle"' to environment.rb and all of your plugin's functionality will be available to you.
+Aby to przetestować, należy stworzyć nową aplikację i dodać 'config.gem "yaffle"' do 'environment'rb', a wszystkie funkcjonalności plugina będą dostępne.

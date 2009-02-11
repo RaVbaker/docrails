@@ -1,8 +1,8 @@
-== Extending core classes ==
+== Rozszerzanie klas wbudowanych ==
 
-This section will explain how to add a method to String that will be available anywhere in your rails app.
+Z tego rozdziału dowiemy się jak do klasy String dodać metodę, która będzie dostępna w całej naszej aplikacji.
 
-In this example you will add a method to String named `to_squawk`.  To begin, create a new test file with a few assertions:
+W tym przykładzie dodamy do klasy String metodę `to_squawk`, dzięki której nasz dzięcioł będzie potrafił skrzeczeć. Na początek utwórzmy nowy plik z testem:
 
 *vendor/plugins/yaffle/test/core_ext_test.rb*
 
@@ -17,14 +17,14 @@ class CoreExtTest < Test::Unit::TestCase
 end
 --------------------------------------------------------
 
-Navigate to your plugin directory and run `rake test`:
+Przechodzimy do katalogu z naszym pluginem i uruchamiamy `rake test`:
 
 --------------------------------------------------------
 cd vendor/plugins/yaffle
 rake test
 --------------------------------------------------------
 
-The test above should fail with the message:
+Powyższy test powinien zakończyć się niepowodzeniem:
 
 --------------------------------------------------------
  1) Error:
@@ -33,9 +33,9 @@ NoMethodError: undefined method `to_squawk' for "Hello World":String
     ./test/core_ext_test.rb:5:in `test_to_squawk_prepends_the_word_squawk'
 --------------------------------------------------------
 
-Great - now you are ready to start development.
+Bez paniki - o to nam chodziło. Zaczynamy właściwą pracę.
 
-Then in 'lib/yaffle.rb' require 'lib/core_ext.rb':
+W 'lib/yaffle.rb' musimy dołączyć 'lib/core_ext.rb':
 
 *vendor/plugins/yaffle/lib/yaffle.rb*
 
@@ -44,7 +44,7 @@ Then in 'lib/yaffle.rb' require 'lib/core_ext.rb':
 require "yaffle/core_ext"
 --------------------------------------------------------
 
-Finally, create the 'core_ext.rb' file and add the 'to_squawk' method:
+Na koniec tworzymy plik 'core_ext.rb' i dodajemy metodę 'to_squawk':
 
 *vendor/plugins/yaffle/lib/yaffle/core_ext.rb*
 
@@ -57,7 +57,7 @@ String.class_eval do
 end
 --------------------------------------------------------
 
-To test that your method does what it says it does, run the unit tests with `rake` from your plugin directory.  To see this in action, fire up a console and start squawking:
+Czas sprawdzić czy nasza metoda robi to, co chcemy aby robiła. Uruchamiamy przez `rake` testy jednostkowe z katalogu naszego pluginu. Aby zobaczyć nasz plugin w akcji, odpalamy konsolę i możemy zacząć skrzeczeć:
 
 --------------------------------------------------------
 $ ./script/console
@@ -65,13 +65,13 @@ $ ./script/console
 => "squawk! Hello World"
 --------------------------------------------------------
 
-=== Working with init.rb ===
+=== Praca z init.rb ===
 
-When rails loads plugins it looks for the file named 'init.rb' or 'rails/init.rb'.  However, when the plugin is initialized, 'init.rb' is invoked via `eval` (not `require`) so it has slightly different behavior.
+Kiedy railsy ładują pluginy, szukają pliku o nazwie 'init.rb' lub 'rails/init.rb'. Inaczej jest w przypadku inicjalizacji pluginu - wtedy 'init.rb' jest wywoływany przez metodę `eval` (a nie `require`), co skutkuje troszkę innym zachowaniem.
 
-Under certain circumstances if you reopen classes or modules in 'init.rb' you may inadvertently create a new class, rather than reopening an existing class.  A better alternative is to reopen the class in a different file, and require that file from `init.rb`, as shown above.
+W pewnych sytuacjach, jeśli ponownie otworzymy klasy lub moduły w 'init.rb', możemy omyłkowo utworzyć nową klasę zamiast ponownie otworzyć istniejącą. Lepszym sposobem jest ponowne otworzenie klasy w innym pliku i załączenie go w `init.rb`, tak jak w powyższym przykładzie.
 
-If you must reopen a class in `init.rb` you can use `module_eval` or `class_eval` to avoid any issues:
+Jeśli już koniecznie musimy ponownie otworzyć klasę w `init.rb` możemy użyć metody `module_eval` lub `class_eval`, co pozwoli uniknąć problemów:
 
 *vendor/plugins/yaffle/rails/init.rb*
 
@@ -84,7 +84,7 @@ Hash.class_eval do
 end
 ---------------------------------------------------
 
-Another way is to explicitly define the top-level module space for all modules and classes, like `::Hash`:
+Innym sposobem jest dokładne zdefiniowanie przestrzeniu modułu najwyższego poziomu (top-level module space) dla wszystkich modułów i klas, np. `::Hash`:
 
 *vendor/plugins/yaffle/rails/init.rb*
 
