@@ -1,8 +1,8 @@
-== Setup ==
+== Konfiguracja ==
 
-=== Create the basic app ===
+=== Tworzenie podstawowej aplikacji ===
 
-The examples in this guide require that you have a working rails application.  To create a simple rails app execute:
+Wszystkie zawarte dalej przykłady wymagają działającej aplikacji railsowej. Aby ją stworzyć, wykonajmy następujące polecenia:
 
 ------------------------------------------------
 gem install rails
@@ -13,33 +13,32 @@ rake db:migrate
 script/server
 ------------------------------------------------
 
-Then navigate to http://localhost:3000/birds.  Make sure you have a functioning rails app before continuing.
+Następnie uruchamiamy w przeglądarce adres http://localhost:3000/birds. Jeśli nie otrzymamy żadnych komunikatów o błędach to nasza aplikacja działa i możemy przystąpić do pracy.
 
-.Editor's note:
-NOTE: The aforementioned instructions will work for sqlite3.  For more detailed instructions on how to create a rails app for other databases see the API docs.
+.Od autora:
+NOTE: Powyższe komendy zakładają użycie sqlite3. Szczegółowe instrukcje tworzenia aplikacji Rails dla innych silników bazodanowych znajdują się w dokumentacji API.
 
+=== Generowanie szkieletu pluginu ===
 
-=== Generate the plugin skeleton ===
+Railsy są wyposażone w generator, którzy tworzy podstawowy szkielet pluginu. Jako argument należy podać nazwę pluginu, w 'NotacjiWielbłądziej' lub 'z_podkreśleniem'. Aby automatycznie dodać przykładowy generator należy użyć parametru `\--with-generator`.
 
-Rails ships with a plugin generator which creates a basic plugin skeleton. Pass the plugin name, either 'CamelCased' or 'under_scored', as an argument. Pass `\--with-generator` to add an example generator also.
+Polecenie to tworzy plugin w katalogu 'vendor/plugins', pliki 'init.rb' i 'README' oraz standardowe katalogi 'lib', 'task' i 'test'.
 
-This creates a plugin in 'vendor/plugins' including an 'init.rb' and 'README' as well as standard 'lib', 'task', and 'test' directories.
-
-Examples:
+Przykłady:
 ----------------------------------------------
 ./script/generate plugin yaffle
 ./script/generate plugin yaffle --with-generator
 ----------------------------------------------
 
-To get more detailed help on the plugin generator, type `./script/generate plugin`.
+Aby dowiedzieć się o pozostałych możliwościach generatora pluginów, wystarczy wywołać go bez argumentów: `./script/generate plugin`.
 
-Later on this guide will describe how to work with generators, so go ahead and generate your plugin with the `\--with-generator` option now:
+W dalszej części tego przewodnika opiszemy jak posługiwać się generatorami. Póki co, utworzymy nasz plugin z opcją `\--with-generator`:
 
 ----------------------------------------------
 ./script/generate plugin yaffle --with-generator
 ----------------------------------------------
 
-You should see the following output:
+Efekt polecenia powinien być następujący:
 
 ----------------------------------------------
 create  vendor/plugins/yaffle/lib
@@ -61,9 +60,9 @@ create  vendor/plugins/yaffle/generators/yaffle/yaffle_generator.rb
 create  vendor/plugins/yaffle/generators/yaffle/USAGE
 ----------------------------------------------
 
-=== Organize your files ===
+=== Organizacja plików ===
 
-To make it easy to organize your files and to make the plugin more compatible with GemPlugins, start out by altering your file system to look like this:
+Aby ułatwić organizację plików i sprawić, aby plugin był bardziej kompatybilny z GemPlugins, zaczniemy od lekkiej modyfikacji systemu plików. Powinien wyglądać następująco:
 
 --------------------------------------------------------
 |-- lib
@@ -81,4 +80,4 @@ To make it easy to organize your files and to make the plugin more compatible wi
 require 'yaffle'
 --------------------------------------------------------
 
-Now you can add any 'require' statements to 'lib/yaffle.rb' and keep 'init.rb' clean.  
+Teraz możesz umieszczać wszystkie deklaracje 'require' do 'lib/yaffle.rb', dzięki czemu 'init.rb' pozostanie bardziej czytelny.

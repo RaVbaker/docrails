@@ -1,8 +1,8 @@
-== Routes ==
+== Ścieżki (Routes) ==
 
-In a standard 'routes.rb' file you use routes like 'map.connect' or 'map.resources'.  You can add your own custom routes from a plugin.  This section will describe how to add a custom method called that can be called with 'map.yaffles'.
+W standardowym pliku 'routes.rb' używamy ścieżek typu 'map.connect' lub 'map.resources'. Plugin umożliwia nam dodanie własnych ścieżek. W tym rozdziale dowiemy się jak dodać metodę, którą będziemy mogli wywoływać przez 'map.yaffles'.
 
-Testing routes from plugins is slightly different from testing routes in a standard rails app.  To begin, add a test like this:
+Testowanie ścieżek w pluginach lekko różni się od testów w standardowych aplikacjach railsowych. Na początek utworzymy test:
 
 *vendor/plugins/yaffle/test/routing_test.rb*
 
@@ -31,7 +31,7 @@ class RoutingTest < Test::Unit::TestCase
 end
 --------------------------------------------------------
 
-Once you see the tests fail by running 'rake', you can make them pass with:
+Po sprawdzeniu, że test kończy się błędem, wprowadzamy następujące poprawki:
 
 *vendor/plugins/yaffle/lib/yaffle.rb*
 
@@ -66,4 +66,4 @@ ActionController::Routing::Routes.draw do |map|
 end
 --------------------------------------------------------
 
-You can also see if your routes work by running `rake routes` from your app directory.
+Możemy też sprawdzić czy nasze ścieżki działają przez uruchomienie `rake routes` z poziomu katalogu aplikacji.
