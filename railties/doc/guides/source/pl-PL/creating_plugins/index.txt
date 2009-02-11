@@ -1,59 +1,58 @@
 Podstawy tworzenia pluginów Railsowych
 ======================================
-
-Plugin w Rails to rozszerzenie lub modyfikacja oryginalnego frameworka. Pluginy umożliwiają:
-
- * programiści mogą dzielić się nowatorskimi pomysłami bez naruszania stabilnego kodu
- * a segmented architecture so that units of code can be fixed or updated on their own release schedule ???
- * miejsce na super-ekstra-cool funkcjonalności, które niekoniecznie są warte umieszczenia w głównym kodzie
-
+ 
+Plugin w Rails to rozszerzenie lub modyfikacja oryginalnego frameworka. Co dają nam pluginy?
+ 
+ * Programiści mogą dzielić się nowatorskimi pomysłami bez naruszania stabilnego kodu
+ * Dzięki segmentacji kodu praca nad poszczególnymi funkcjonalnościami może się toczyć w swoim własnym tempie
+ * Miejsce na super-ekstra-cool funkcjonalności, które niekoniecznie są warte umieszczenia w głównym kodzie...
+ 
 Po przeczytaniu tego przewodnika będziesz potrafił:
-
+ 
  * Stworzyć od podstaw plugin
  * Pisać i uruchamiać testy dla pluginów
  * Umieszczać w swoich pluginach modele, widoki, helpery, a nawet inne pluginy
  * Pisać generatory
  * Pisać własne polecenia modułu Rake w Twoim pluginie
  * Generować dokumentację RDoc w Twoim pluginie
- * Unikać popularnych błędów w 'init.rb'
-
+ * Unikać częstych błędów w 'init.rb'
+ 
 Ten przewodnik opisuje jak stworzyć plugin, który będzie:
-
+ 
  * Rozszerzał klasy wbudowane Ruby, takie jak Hash czy String
  * Dodawał metody do modułu ActiveRecord::Base zgodnie z zasadą pluginów 'acts_as'
  * Dodawał helpera widoku, który może być używany w szablonach erb
  * Dodawał własne polecenie generatora
  * Dodawał własną metodę routingu, która może być użyta w routes.rb
-
-For the purpose of this guide pretend for a moment that you are an avid bird watcher.  Your favorite bird is the Yaffle, and you want to create a plugin that allows other developers to share in the Yaffle goodness.  First, you need to get setup for development.
-
-
+ 
+Aby było nam łatwiej posłużymy się przykładem. Skup się i wyobraź sobie, że pasjonujesz się obserwowaniem ptaków. Twoim ulubionym gatunkiem jest... dzięcioł. Postanawiasz stworzyć plugin, który pozwoli innym developerom doświadczyć wspaniałych chwil z owym dzięciołem. Wczułeś się w rolę? Gotowy? No to zaczynamy od konfiguracji.
+ 
 include::setup.txt[]
-
+ 
 include::tests.txt[]
-
+ 
 include::core_ext.txt[]
-
+ 
 include::acts_as_yaffle.txt[]
-
+ 
 include::models.txt[]
-
+ 
 include::controllers.txt[]
-
+ 
 include::helpers.txt[]
-
+ 
 include::routes.txt[]
-
+ 
 include::generators.txt[]
-
+ 
 include::generator_commands.txt[]
-
+ 
 include::migrations.txt[]
-
+ 
 include::tasks.txt[]
-
+ 
 include::gems.txt[]
-
+ 
 include::rdoc.txt[]
-
+ 
 include::appendix.txt[]
