@@ -1,7 +1,8 @@
 Layouty i Renderowanie w Ruby on Rails
-==============================
+======================================
 
-Ten przewodnik opisuje podstawowe możliwości layoutów w modułach Action Controller i Action View. Po jego przeczytaniu powinieneś umieć:
+Ten przewodnik opisuje podstawowe możliwości layoutów w modułach Action Controller
+i Action View. Po jego przeczytaniu powinieneś umieć:
 
 * Używać różnorodnych metod renderujących wbudowanych w Railsy
 * Tworzyć layouty podzielone na wiele sekcji
@@ -10,9 +11,17 @@ Ten przewodnik opisuje podstawowe możliwości layoutów w modułach Action Cont
 
 == Opis zawartości: Jak wszystko razem współgra
 
-Ten poradnik skupia się na wzajemnym oddziaływaniu pomiędzy Kontrolerem a Widokiem we wzorcu Model-View-Controller (MVC). Jak wiesz, Kontroler jest odpowiedzialny za nadzorowanie całego procesu obsługi zapytań w Railsach, pomimo że zazwyczaj przekazuje on każdy większy kod do Modelu. Natomiast gdy dojdzie do wysłania odpowiedzi użytkownikowi, Kontroler przekazuje to zadanie Widokowi. Tematem tego tutoriala jest właśnie to przekazywanie.
+Ten poradnik skupia się na wzajemnym oddziaływaniu pomiędzy Kontrolerem a Widokiem
+we wzorcu Model-View-Controller (MVC). Jak wiesz, Kontroler jest odpowiedzialny za
+nadzorowanie całego procesu obsługi zapytań w Railsach, pomimo że zazwyczaj przekazuje
+on każdy większy kod do Modelu. Natomiast gdy dojdzie do wysłania odpowiedzi użytkownikowi,
+Kontroler przekazuje to zadanie Widokowi. Tematem tego tutoriala jest właśnie to przekazywanie.
 
-Ogólnie mówiąc to nadzorowanie wymaga zadecydowania, co powinno być przesłane jako odpowiedź, a następnie wywołania odpowiedniej metody w celu jej stworzenia. Jeśli odpowiedź jest rozwiniętym, skomplikowanym widokiem, Railsy wykonują dodatkową pracę by opakować widok w layout i ewentualnie dołączyć częściowe widoki. Te wszystkie możliwości zobaczysz w późniejszej części poradnika.
+Ogólnie mówiąc to nadzorowanie wymaga zadecydowania, co powinno być przesłane jako
+odpowiedź, a następnie wywołania odpowiedniej metody w celu jej stworzenia. Jeśli
+odpowiedź jest rozwiniętym, skomplikowanym widokiem, Railsy wykonują dodatkową pracę
+by opakować widok w layout i ewentualnie dołączyć częściowe widoki. Te wszystkie możliwości
+zobaczysz w późniejszej części poradnika.
 
 == Tworzenie odpowiedzi
 
@@ -26,7 +35,10 @@ Wytłumaczę po kolei każdą z tych metod, ale najpierw kilka słów o najprost
 
 === Domyślne renderowanie: strategia Convention Over Configuration w akcji
 
-Słyszałeś zapewne, że Railsy promują strategię „convention over configuration”. Domyślny rendering jest wspaniałym tego przykładem. Standardowo, kontrolery w Railsach automatycznie renderują widoki z nazwami odpowiadającymi akcjom. Na przykład, jeśli masz poniższy kod w klasie +BooksController+:
+Słyszałeś zapewne, że Railsy promują strategię „convention over configuration”. Domyślny
+rendering jest wspaniałym tego przykładem. Standardowo, kontrolery w Railsach automatycznie
+renderują widoki z nazwami odpowiadającymi akcjom. Na przykład, jeśli masz poniższy
+kod w klasie +BooksController+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -35,15 +47,33 @@ def show
 end
 -------------------------------------------------------
 
-Railsy automatycznie po wykonaniu metody wyrenderuje plik +app/views/books/show.html.erb+. Właściwie, jeśli masz domyślną regułę (route) catch-all w odpowiednim miejscu (+map.connect \':controller/:action/:id'+), Railsy wyrenderują nawet widoki, które nie mają żadnego kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną regułę i nadejdzie żądanie dla +/books/sale_list+, Railsy w odpowiedzi wyrenderują +app/views/books/sale_list.html.erb+.
+Railsy automatycznie po wykonaniu metody wyrenderuje plik +app/views/books/show.html.erb+.
+Właściwie, jeśli masz domyślną regułę (route) catch-all w odpowiednim miejscu (+map.connect
+\':controller/:action/:id'+), Railsy wyrenderują nawet widoki, które nie mają żadnego
+kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną regułę i nadejdzie
+żądanie dla +/books/sale_list+, Railsy w odpowiedzi wyrenderują +app/views/books/sale_list.html.erb+.
 
-NOTE: Właściwe renderowanie jest wykonywane przez podklasę +ActionView::TemplateHandlers+. Ten tutorial nie zagłębia się w ten proces, ale należy pamiętać, że rozszerzenie pliku twojego widoku wpływa na wybór szablonu obsługi. W Railsach 2, standardowymi rozszerzeniami są +.erb+dla ERB (HTML z osadzonym Rubim), +.rjs+dla RJS (JavaScript z Rubim) i +.builder+ dla Buildera (generator XML). Dodatkowo znajdziesz również pliki +.rhtml+ używane dla szablonów ERB i +.rxml+ dla szablonów Buildera, jednak obecnie te rozszerzenia są niezalecane i będą usuniętę w przyszłych wersjach Railsów.
+NOTE: Właściwe renderowanie jest wykonywane przez podklasę +ActionView::TemplateHandlers+.
+Ten tutorial nie zagłębia się w ten proces, ale należy pamiętać, że rozszerzenie pliku
+twojego widoku wpływa na wybór szablonu obsługi. W Railsach 2, standardowymi rozszerzeniami
+są +.erb+ dla ERB (HTML z osadzonym Rubim), +.rjs+ dla RJS (JavaScript z Rubim) i
++.builder+ dla Buildera (generator XML). Dodatkowo znajdziesz również pliki +.rhtml+
+używane dla szablonów ERB i +.rxml+ dla szablonów Buildera, jednak obecnie te rozszerzenia
+są niezalecane i będą usuniętę w przyszłych wersjach Railsów.
 
 === Używanie +render+
 
-W większości przypadków, metoda +ActionController::Base#render+ wykonuje dużą część renderowania twojej aplikacji do użytku przeglądarki. Jest wiele dróg dostosowania zachowania funkcji +render+. Możesz wyrenderować domyślny widok dla szablonu Railsów, lub specyficznego szablonu, lub pliku, lub wewnętrznego kodu lub dla niczego w ogóle. Możesz renderować tekst, JSON lub XML. Możesz również ustalić typ zawartości lub stanu HTTP wyrenderowanej odpowiedzi.
+W większości przypadków, metoda +ActionController::Base#render+ wykonuje dużą część
+renderowania twojej aplikacji do użytku przeglądarki. Jest wiele sposobów dostosowania
+zachowania funkcji +render+. Możesz wyrenderować domyślny widok dla szablonu,
+specyficzny szablon, pliku, fragment tekstu lub nawet nic.
+Możesz renderować tekst, JSON lub XML. Możesz również ustalić typ zawartości lub stan
+HTTP wyrenderowanej odpowiedzi.
 
-TIP: Jeśli chcesz zobaczyć dokładny wynik wywołania +render+ bez potrzeby sprawdzania tego w przeglądarce, możesz wywołać +render_to_string+. Ta metoda ma dokładnie takie same opcje jak +render+, ale zwraca string zamiast wysyłać odpowiedzi bezpośrednio do przeglądarki.
+TIP: Jeśli chcesz zobaczyć dokładny wynik wywołania +render+ bez potrzeby sprawdzania
+tego w przeglądarce, możesz wywołać +render_to_string+. Ta metoda ma dokładnie takie
+same opcje jak +render+, ale zwraca string zamiast wysyłać odpowiedź bezpośrednio
+do przeglądarki.
 
 ==== Renderowanie niczego
 
@@ -54,13 +84,17 @@ Prawdopodobnie najprostszą rzeczą jaką możemy zrobić z +render+ jest wyrend
 render :nothing => true
 -------------------------------------------------------
 
-To wyśle pustą odpowiedź do przeglądarki (jakkolwiek, będzie ona zawierała nagłówki statusu które ustawisz za pomocą opcji :status, omówionej poniżej).
+To wywołanie wyśle pustą odpowiedź do przeglądarki (jakkolwiek, będzie ona zawierała 
+nagłówki statusu które ustawisz za pomocą opcji :status, omówionej poniżej).
 
-TIP: Będziesz prawdopodobnie chciał używać metody +head+, omówionej poniżej, zamiast +render:nothing+. Umożliwia to dodatkową elastyczność i zaznacza, że generujesz tylko i wyłącznie nagłówki HTTP.
+TIP: Będziesz prawdopodobnie chciał używać metody +head+, omówionej poniżej, zamiast
++render:nothing+. Jest ona bardziej elastyczna i wskazuje, że generujesz tylko
+i wyłącznie nagłówki HTTP.
 
 ==== Renderowanie widoku akcji
 
-Jeśli chcesz wyrenderować widok odnoszący się do innej akcji w ramach tego samego szablonu, możesz użyć funkcji +render+ razem z nazwą widoku:
+Jeśli chcesz wyrenderować widok odnoszący się do innej akcji w ramach tego samego
+kontrolera, możesz użyć funkcji +render+ razem z nazwą akcji:
 
 [source, ruby]
 -------------------------------------------------------
@@ -74,9 +108,11 @@ def update
   end
 end
 -------------------------------------------------------
-Jeśli wywołanie +update_attributes+ się nie powiedzie, wywołanie akcji +update+ w kontrolerze wyrenderuje szablon +edit.html.erb+ należący do tego samego kontrolera.
+Jeśli wywołanie +update_attributes+ się nie powiedzie, wywołanie akcji +update+ w
+kontrolerze wyrenderuje szablon +edit.html.erb+ należący do tego samego kontrolera.
 
-Jeśli wolisz, możesz używasz symbolu zamiast stringu, aby określić akcję do wyrenderowania.
+Jeśli wolisz, możesz używasz symbolu zamiast łańcucha znaków, 
+aby określić akcję do wyrenderowania.
 
 [source, ruby]
 -------------------------------------------------------
@@ -91,7 +127,8 @@ def update
 end
 -------------------------------------------------------
 
-Uściślając, możesz użyć +render+ z opcją +:action+ (chociaż nie jest to już konieczne od Railsów 2.3):
+Uściślając, możesz również użyć +render+ z opcją +:action+ (chociaż nie jest to już 
+konieczne od Railsów 2.3):
 
 [source, ruby]
 -------------------------------------------------------
@@ -106,18 +143,28 @@ def update
 end
 -------------------------------------------------------
 
-WARNING: Używanie +render+ z +:action+ jest częstym źródłem nieporozumień dla początkujących programistów. Wybrana akcja jest używana do określenia, który widok należy wyrenderować, ale Railsy nie wykonują żadnego kodu dla tej akcji w kontrolerze. Wszystkie zmienne z których będziesz korzystać w widoku muszą być ustawione w aktualnej akcji przed wywołaniem +render+.
+WARNING: Używanie +render+ z +:action+ jest częstym źródłem nieporozumień dla początkujących
+programistów. Wybrana akcja jest używana do określenia, który widok należy wyrenderować,
+ale Railsy nie wykonują żadnego kodu dla tej akcji w kontrolerze. Wszystkie zmienne
+z których będziesz korzystać w widoku muszą być ustawione w aktualnej akcji przed
+wywołaniem +render+.
 
 ==== Renderowanie szablonu akcji z innego kontrolera
 
-Co zrobić jeśli chcesz wyrenderować szablon z zupełnie innego kontrolera, z tego który zawiera kod akcji? Możesz to zrobić za pomocą +render+, które pobiera całą ścieżkę (relatywną do +app/views/+) kontrolera do wyrenderowania. Dla przykładu, jeśli uruchamiasz kod w +AdminProductsController+, który znajduje się w +app/controllers/admin+, możesz wyrenderować wynik akcji do szablonu +app/views/products+ w ten sposób:
+Co zrobić jeśli chcesz wyrenderować szablon z zupełnie innego kontrolera, niż
+ten który zawiera kod akcji? Możesz to zrobić za pomocą +render+, które pobiera całą ścieżkę
+(relatywną do +app/views/+) kontrolera do wyrenderowania. Dla przykładu, jeśli uruchamiasz
+kod w +AdminProductsController+, który znajduje się w +app/controllers/admin+, możesz
+wyrenderować wynik akcji do szablonu +app/views/products+ w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
 render 'products/show'
 -------------------------------------------------------
 
-Railsy wiedzą, że widok ten należy do innego kontrolera dzięki wbudowanemu slashowi w ciąg znaków.  Jeśli chcesz to dodatkowo zaznaczyć w kodzie, możesz użyć opcji +:template+ (która była wymagana w Railsach 2.2 i wcześniejszych):
+Railsy wiedzą, że widok ten należy do innego kontrolera dzięki wbudowanemu slashowi
+w ciąg znaków.  Jeśli chcesz to dodatkowo zaznaczyć w kodzie, możesz użyć opcji +:template+
+(która była wymagana w Railsach 2.2 i wcześniejszych):
 
 [source, ruby]
 -------------------------------------------------------
@@ -126,38 +173,50 @@ render :template => 'products/show'
 
 ==== Renderowanie dowolnego pliku
 
-Metoda +render+ może również korzystać z widoku, który znajduje się zupełnie poza aplikacją (gdy prawdopodobnie dzielisz widoki między dwoma aplikacjami):
+Metoda +render+ może również korzystać z widoku, który znajduje się zupełnie poza
+aplikacją (gdy prawdopodobnie dzielisz widoki między dwoma aplikacjami):
 
 [source, ruby]
 -------------------------------------------------------
 render "/u/apps/warehouse_app/current/app/views/products/show"
 -------------------------------------------------------
 
-Railsy stwierdzą, że jest to renderowanie pliku dzięki slashowi na początku stringu. Chcąc to dodatkowo zaznaczyć, możesz użyć opcji +:file+ (która była wymagana w Railsach 2.2 i wcześniejszych wersjach):
+Railsy stwierdzą, że jest to renderowanie pliku dzięki slashowi na początku stringu.
+Chcąc to dodatkowo zaznaczyć, możesz użyć opcji +:file+ (która była wymagana w Railsach
+2.2 i wcześniejszych wersjach):
 
 [source, ruby]
 -------------------------------------------------------
 render :file => "/u/apps/warehouse_app/current/app/views/products/show"
 -------------------------------------------------------
 
-Opcja +:file+ pobiera bezwzględną ścieżkę w systemie plików. Oczywiście, musisz mieć odpowiednie prawa do widoku, którego używasz do wyrenderowania zawartości.
+Opcja +:file+ pobiera bezwzględną ścieżkę w systemie plików. Oczywiście, musisz mieć
+odpowiednie prawa odczytu widoku, którego używasz do wyrenderowania zawartości.
 
-NOTE: Domyślnie ten plik jest renderowany bez użycia aktualnego layoutu. Jeśli chcesz by Railsy zastosowały aktualny layout musisz dodać opcję +layout=>true+.
+NOTE: Domyślnie ten plik jest renderowany bez użycia aktualnego layoutu. Jeśli chcesz
+by Railsy zastosowały aktualny layout musisz dodać opcję +:layout => true+.
 
-TIP: Jeśli korzystasz z systemu Microsoft Windows, powinieneś używać opcji +:file+ do renderowania pliku, ponieważ nazwy plików w Windowsie nie mają tego samego formatu jak w Unixie.
+TIP: Jeśli korzystasz z systemu Microsoft Windows, powinieneś używać opcji +:file+
+do renderowania pliku, ponieważ nazwy plików w Windowsie nie mają tego samego formatu
+jak w Uniksie.
 
 ==== Używanie +render+ z +:inline+
 
-Metoda +render+ może obyć się bez jakiegokolwiek widoku, jeśli tylko użyjesz opcji +:inline+ by wspomóc ERB jako części wywołania metody. Jest to całkowicie poprawne:
+Metoda +render+ może obyć się bez jakiegokolwiek widoku, jeśli tylko użyjesz opcji
++:inline+ przekazując ERB kod, który ma wyrenderować. Jest to całkowicie poprawne:
 
 [source, ruby]
 -------------------------------------------------------
 render :inline => "<% products.each do |p| %><p><%= p.name %><p><% end %>"
 -------------------------------------------------------
 
-WARNING: Rzadko jednak istnieje dobry powód by użyć tej opcji. Mieszanie ERB wewnątrz twoich kontrolerów niszczy zorientowanie Railsów na MVC i powoduje, że innym developerom jest trudniej podążać za tokiem twojego myślenia. Zamiast tego lepiej używaj oddzielnych widoków erb.
+WARNING: Rzadko jednak istnieje dobry powód by użyć tej opcji. Mieszanie ERB wewnątrz
+twoich kontrolerów niszczy zorientowanie Railsów na MVC i powoduje, że innym developerom
+jest trudniej podążać za tokiem twojego myślenia. Zamiast tego lepiej używaj oddzielnych
+widoków erb.
 
-Domyślnie, renderowanie inline używa ERB. Możesz zmusić je by użyło zamiast tego Buildera, za pomocą opcji +:type+:
+Domyślnie, renderowanie typu inline używa ERB. Możesz zmusić je by użyło zamiast
+tego np.  Buildera, za pomocą opcji +:type+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -166,7 +225,8 @@ render :inline => "xml.p {'Horrid coding practice!'}", :type => :builder
 
 ==== Używanie +render+ z +:update+
 
-Możesz również renderować uaktualnienia stron oparte o javascript  inline używając opcji +:update+ w +render+:
+Możesz również renderować uaktualnienia stron oparte o javascript  używając
+opcji +:update+ w +render+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -175,35 +235,47 @@ render :update do |page|
 end
 -------------------------------------------------------
 
-WARNING: Umieszczanie javascriptowych uaktualnień w twoim kontrolerze może zdawać się upraszczać małe aktualizacje, ale niszczy orientację MVC Railsów i powoduje, że trudniej jest innym zrozumieć twój kod. Proponuję używać zamiast tego oddzielnych szablonów rjs, nie ważne jak mała nie byłaby dana aktualizacja.
+WARNING: Umieszczanie javascriptowych uaktualnień w twoim kontrolerze może zdawać
+się upraszczać małe aktualizacje, ale niszczy orientację MVC Railsów i powoduje, że
+trudniej jest innym zrozumieć twój kod. Proponuję używać zamiast tego oddzielnych
+szablonów rjs, nie ważne jak mała byłaby dana aktualizacja.
 
 ==== Renderowanie tekstu
 
-Możesz wysyłać zwykły tekst – bez jakichkolwiek znaczników – z powrotem do przeglądarki za pomocą opcji +:text+:
+Możesz wysyłać zwykły tekst – bez jakichkolwiek znaczników – z powrotem do przeglądarki
+za pomocą opcji +:text+:
 
 [source, ruby]
 -------------------------------------------------------
 render :text => "OK"
 -------------------------------------------------------
 
-TIP: Rendering zwykłego tekstu jest najbardziej użyteczny kiedy odpowiadasz na AJAX-owe zapytania, które spodziewają się czegoś więcej niż tylko kodu HTML.
+TIP: Rendering zwykłego tekstu jest najbardziej użyteczny kiedy odpowiadasz na AJAX-owe
+zapytania lub zapytanie serwisu webowego, które spodziewają się czegoś innego  
+niż kod HTML.
 
-NOTE: Domyślnie, jeśli korzystasz z opcji +:text+, plik zostanie wyrenderowany bez użycia aktualnego layoutu. Jeśli chcesz by Railsy umieściły text wewnątrz aktualnego layoutu, musisz skorzystać z opcji +:layout=>true+.
+NOTE: Domyślnie, jeśli korzystasz z opcji +:text+, plik zostanie wyrenderowany bez
+użycia aktualnego layoutu. Jeśli chcesz by Railsy umieściły text wewnątrz aktualnego
+layoutu, musisz skorzystać z opcji +:layout => true+.
 
 ==== Renderowanie JSON
 
-JSON jest formatem danych javascript wykorzystywanym przez wiele bibliotek AJAX. Railsy mają wbudowaną obsługę konwersji obiektów do JSON i renderowania go później z powrotem do przeglądarki:
+JSON jest formatem danych javascript wykorzystywanym przez wiele bibliotek AJAX. Railsy
+mają wbudowaną obsługę konwersji obiektów do JSON i wysyłania ich w tej
+postaci z powrotem do przeglądarki:
 
 [source, ruby]
 -------------------------------------------------------
 render :json => @product
 -------------------------------------------------------
 
-TIP: Nie musisz wywoływać funkcji +to_json+ na obiekcie, który chcesz wyrenderować. Jeśli użyjesz opcji +:json, render+ automatycznie wywoła to +to_json+ za Ciebie.
+TIP: Nie musisz wywoływać funkcji +to_json+ na obiekcie, który chcesz wyrenderować.
+Jeśli użyjesz opcji +:json, render+ automatycznie wywoła to +to_json+ za Ciebie.
 
 ==== Renderowanie XML
 
-Railsy mają także wbudowaną obsługę konwersji obiektów XML i renderowania ich z powrotem do obiektu wywołującego:
+Railsy mają także wbudowaną obsługę konwersji obiektów XML i wysyłania ich 
+w tej postaci z powrotem do obiektu wywołującego:
 
 [source, ruby]
 -------------------------------------------------------
@@ -212,16 +284,17 @@ render :xml => @product
 
 TIP: Nie musisz wywoływać funkcji +to_xml+ na obiekcie, który chcesz wyrenderować. Jeśli użyjesz opcji +:xml+, +render+ automatycznie wywoła +to_xml+ za Ciebie.
 
-==== Renderowanie Vanilla JavaScript
+==== Renderowanie czystego JavaScript
 
-Railsy mogą renderować vanilla JavaScript (jako alternatywę do używania +update+ z plikiem +.rjs+):
+Railsy mogą renderować czysty JavaScript (jako alternatywę do używania +update+ z
+plikiem +.rjs+):
 
 [source, ruby]
 -------------------------------------------------------
 render :js => "alert('Hello Rails');"
 -------------------------------------------------------
 
-Będzie to wysyłać pobrany ciąg do przeglądarki z typem MIME +text/javascript+.
+Spowoduje to wysłanie przekazanego ciągu do przeglądarki z typem MIME +text/javascript+.
 
 ==== Opcje dla +render+
 
@@ -234,7 +307,10 @@ Wywołanie metody +render+ generalnie akceptuje cztery opcje:
 
 ===== Opcja +:content_type+
 
-Domyślnie Railsy dostarczą wynik operacji renderowania z typem zawartości MIME +text/html+ (lub +application/json+ jeśli używasz opcji +:json+ lub +application/xm+l dla opcji +:xml+). Możliwe, że będziesz chciał to zmienić i możesz to zrobić  poprzez ustawienie opcji +:content_type+:
+Domyślnie Railsy dostarczą wynik operacji renderowania z typem zawartości MIME +text/html+
+(+application/json+ jeśli używasz
+opcji +:json+ lub +application/xml+ dla opcji +:xml+). Możliwe, że będziesz chciał
+to zmienić i możesz to zrobić  poprzez ustawienie opcji +:content_type+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -243,9 +319,12 @@ render :file => filename, :content_type => 'application/rss'
 
 ===== Opcja +:layout+
 
-W większości opcji renderowania, renderowana zawartość jest wyświetlana jako część aktualnego layoutu. Poznasz dokładniej layouty i jak z nich korzystać w dalszej części tego przewodnika.
+W większości opcji renderowania, renderowana zawartość jest wyświetlana jako część
+aktualnego layoutu. Poznasz dokładniej layouty i jak z nich korzystać w dalszej części
+tego przewodnika.
 
-Możesz użyć opcji +:layout+ by zakomunikować Railsom, by użyło określonego pliku jako layout dla bieżącej akcji.
+Możesz użyć opcji +:layout+ by zakomunikować Railsom, by użyło określonego pliku jako
+layout dla bieżącej akcji.
 
 [source, ruby]
 -------------------------------------------------------
@@ -261,7 +340,8 @@ render :layout => false
 
 ===== Opcja +:status+
 
-Railsy mogą automatycznie generować odpowiedzi z poprawnym kodem HTML (w większości przypadków +200 OK+). Aby to zmienić możesz użyć opcji +:status+:
+Railsy mogą automatycznie generować odpowiedzi z poprawnym kodem HTML (w większości
+przypadków +200 OK+). Aby to zmienić możesz użyć opcji +:status+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -269,11 +349,13 @@ render :status => 500
 render :status => :forbidden
 -------------------------------------------------------
 
-Railsy rozumią zarówno liczbowe kody stanu jak i odpowiadające im symbole. Listę kodów stanu możesz znaleźć w +actionpack/lib/action_controller/status_codes.rb+. Możesz również zobaczyć tam jak mapowane są symbole na kody stanu.
+Railsy rozumią zarówno liczbowe kody stanu jak i odpowiadające im symbole. Listę kodów
+stanu możesz znaleźć w +actionpack/lib/action_controller/status_codes.rb+. Możesz
+również zobaczyć tam jak mapowane są symbole na kody stanu.
 
 ===== Opcja +:location+
 
-Możesz używać opcji :location by ustawić nagłówek HTTP +Location+:
+Możesz używać opcji +:location+ by ustawić nagłówek HTTP +Location+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -282,11 +364,18 @@ render :xml => photo, :location => photo_url(photo)
 
 ==== Znajdowanie Layoutów
 
-Aby znaleźć bieżący layout, Railsy najpierw szukają pliku w +app/views/layouts+ z taką samą nazwą bazową jak kontroler. Na przykład, renderowanie akcji z klasy +PhotosController+ użyje +/app/views/layouts/photos.html.erb+. Jeśli nie ma specyficznego layoutu dla danego kontrolera Railsy użyją +/app/views/layouts/application.html.erb+. Jeśli nie ma layoutu +.erb+, Railsy użyją layoutu +.builder+ jeśli taki istnieje. Railsy również dostarczają kilku sposobów na bardziej precyzyjne przypisanie konkretnego layoutu do poszczególnych kontrolerów i akcji.
+Aby znaleźć bieżący layout, Railsy najpierw szukają pliku w +app/views/layouts+ z
+taką samą nazwą bazową jak kontroler. Na przykład, renderowanie akcji z klasy +PhotosController+
+użyje +/app/views/layouts/photos.html.erb+. Jeśli nie ma specyficznego layoutu dla
+danego kontrolera Railsy użyją +/app/views/layouts/application.html.erb+. Jeśli nie
+ma layoutu +.erb+, Railsy użyją layoutu +.builder+ jeśli taki istnieje. Railsy również
+dostarczają kilku sposobów na bardziej precyzyjne przypisanie konkretnego layoutu
+do poszczególnych kontrolerów i akcji.
 
 ===== Określenie layoutów na poziomie kontrolera
 
-Możesz nadpisać konwencje automatycznych layoutów w swoim kontrolerze za pomocą deklaracji +layout+. Na przykład:
+Możesz zmienić domyślny sposób wyboru layoutów w swoim kontrolerze za pomocą 
+deklaracji +layout+. Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -296,9 +385,11 @@ class ProductsController < ApplicationController
 end
 -------------------------------------------------------
 
-Z tą deklaracją, wszystkie metody w +ProductsController+ będą korzystać z +app/views/layouts/inventory.html.erb+ dla ich layoutu.
+Z tą deklaracją, wszystkie metody w +ProductsController+ będą korzystać z +app/views/layouts/inventory.html.erb+
+jako swojego layoutu.
 
-Aby przypisać konkretny layout dla całej aplikacji, użyj deklaracji w swojej klasie +ApplicationController+:
+Aby przypisać konkretny layout dla całej aplikacji, użyj deklaracji w 
+klasie +ApplicationController+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -308,11 +399,13 @@ class ApplicationController < ActionController::Base
 end
 -------------------------------------------------------
 
-Z tą deklaracją, wszystkie widoki w całej aplikacji będą korzystać z +app/views/layouts/main.html.erb+ dla ich layoutów.
+Z tą deklaracją, wszystkie widoki w całej aplikacji będą korzystać z 
++app/views/layouts/main.html.erb+ jako swojego layoutu.
 
 ===== Wybór layoutu w czasie wykonania
 
-Możesz użyć symbolu dla odroczenia wyboru layoutu, aż do czasu w którym przetwarzane jest zapytanie:
+Możesz użyć symbolu dla odroczenia wyboru layoutu, aż do czasu w którym przetwarzane
+jest zapytanie:
 
 [source, ruby]
 -------------------------------------------------------
@@ -331,7 +424,8 @@ class ProductsController < ApplicationController
 end
 -------------------------------------------------------
 
-Teraz, jeśli bieżący użytkownik jest użytkownikiem specjalnym, to otrzyma specjalny layout podczas przeglądania produktów. Możesz nawet użyć metody inline do wyboru layoutu:
+Teraz, jeśli bieżący użytkownik jest użytkownikiem specjalnym, to otrzyma specjalny
+layout podczas przeglądania produktów. Możesz nawet użyć metody inline do wyboru layoutu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -343,8 +437,10 @@ end
 
 ===== Warunkowe layouty
 
-Layouty określone w kontrolerze obsługują opcje +:only+ i +:except+, które pobierają albo pojedynczą nazwę metody albo tablicę nazw:
+Layouty określone w kontrolerze obsługują opcje +:only+ i +:except+, które
+akceptują albo pojedynczą nazwę metody albo tablicę nazw:
 
+[source, ruby]
 -------------------------------------------------------
 class ProductsController < ApplicationController
   layout "inventory", :only => :index
@@ -353,11 +449,14 @@ class ProductsController < ApplicationController
 end
 -------------------------------------------------------
 
-Z tymi deklaracjami, layout +inventory+ byłby wykorzystywany tylko do metody +index+, layout +product+ byłby wykorzystywany do wszystkiego oprócz metody +rss+, a metoda +rss+ będzie mieć określony layout poprzez zasady automatycznego layoutu.
+Z tymi deklaracjami, layout +inventory+ byłby wykorzystywany tylko do metody +index+,
+layout +product+ byłby wykorzystywany do wszystkiego oprócz metody +rss+, a metoda
++rss+ będzie mieć layout określony poprzez domyślne zasady wyboru.
 
 ===== Dziedziczenie layoutów
 
-Layouty są dzielone w dół hierarchii zaś bardziej konkretne layouty zawsze zasłaniają te bardziej ogólne. Na przykład:
+Layouty są dzielone w dół hierarchii dziedziczenia zaś bardziej 
+konkretne layouty zawsze zasłaniają te bardziej ogólne. Na przykład:
 
 +application_controller.rb+:
 
@@ -409,15 +508,18 @@ end
 
 W tej aplikacji:
 
-* Domyślnie, widoki będą renderowane z wykorzystaniem layoutu +main+
+* Domyślnie widoki będą renderowane z wykorzystaniem layoutu +main+
 * +PostController#index+ będzie używać layoutu +main+
-* +SpecialPostController#index+ będzie używał layoutu +special+
-* +01dPostsController#show+ nie będzie używał żadnego layoutu
-* +01dPostsController#index+ będzie używał layoutu +old+
+* +SpecialPostController#index+ będzie używać layoutu +special+
+* +01dPostsController#show+ nie będzie używać żadnego layoutu
+* +01dPostsController#index+ będzie używać layoutu +old+
 
 ==== Unikanie błędów podwójnego renderowania
 
-Prędzej czy później, większość programistów Railsów zobaczy komunikat o błędzie „Can only render od redirect once per action”. Chociaż jest to irytujące, jest to stosunkowo łatwe do naprawienia. Zwykle dzieje się to z powodu niezrozumienia podstaw działania metody +render+.
+Prędzej czy później, większość programistów Railsów zobaczy komunikat o błędzie „Can
+only render or redirect once per action”. Chociaż jest to irytujące, jest to stosunkowo
+łatwe do naprawienia. Zwykle dzieje się to z powodu niezrozumienia podstaw działania
+metody +render+.
 
 Na przykład, oto fragment kodu, który powoduje ten błąd:
 
@@ -431,7 +533,13 @@ def show
 end
 -------------------------------------------------------
 
-Jeśli +@book.special?+ ewaluuje do +true+, Railsy rozpoczną proces renderowania by zrzutować zmienną +@book+ w widoku +special_show+. Ale to _nie_ zatrzyma reszty kodu w akcji +show+ przed wykonaniem i jeśli Railsy dojdą do końca akcji zaczną renderować widok +show+ i wyrzuci błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno wywołanie +render+ lub +redirect+ w jednej części kodu. Jedną z rzeczy, które mogą pomóc jest +and return+. Oto poprawiona wersja metody:
+Jeśli +@book.special?+ ewaluuje do +true+, Railsy rozpoczną proces
+renderowania przez
+wrzucenie zmiennej +@book+ do widoku +special_show+. Ale to _nie_ zatrzyma reszty kodu
+w akcji +show+ przed wykonaniem i jeśli Railsy dojdą do końca akcji zaczną renderować
+widok +show+ i wystąpi błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno
+wywołanie +render+ lub +redirect+ w jednej części kodu. Jedną z rzeczy, które mogą
+pomóc jest +and return+. Oto poprawiona wersja metody:
 
 [source, ruby]
 -------------------------------------------------------
@@ -445,14 +553,20 @@ end
 
 === Używanie +redirect_to+
 
-Innym sposobem by obsłużyć wracające odpowiedzi na żądanie HTTP jest użycie +redirect_to+. Jak widziałeś, +render+ informuje Railsy, który widok użyć do konstrukcji odpowiedzi. Metoda +redirect_to+ robi coś zupełnie innego: mówi przeglądarce by wysłać nowe zapytanie o inny adres URL. Na przykład można przekierować z dowolnego miejsca w kodzie do indeksu zdjęć twojej aplikacji za pomocą tego wywołania:
+Innym sposobem obsługi odpowiedzi na żądanie HTTP jest użycie +redirect_to+.
+Jak widziałeś, +render+ informuje Railsy, który widok użyć do konstrukcji odpowiedzi.
+Metoda +redirect_to+ robi coś zupełnie innego: mówi przeglądarce by wysłać nowe zapytanie
+pod inny adres URL. Na przykład można przekierować z dowolnego miejsca w kodzie do indeksu
+zdjęć twojej aplikacji za pomocą tego wywołania:
 
 [source, ruby]
 -------------------------------------------------------
 redirect_to photos_path
 -------------------------------------------------------
 
-Możesz korzystać z +redirect_to+ z wszystkimi argumentami które mogłeś użyć w +link_to+ lub +url_for+. W dodatku, istnieje specjalne przekierowanie, które wysyła użytkownika z powrotem tam skąd przyszedł:
+Możesz korzystać z +redirect_to+ z wszystkimi argumentami które mogłeś użyć w +link_to+
+lub +url_for+. W dodatku, istnieje specjalne przekierowanie, które wysyła użytkownika
+z powrotem tam skąd przyszedł:
 
 -------------------------------------------------------
 redirect_to :back
@@ -460,19 +574,26 @@ redirect_to :back
 
 ==== Uzyskanie innego kodu statusu przekierowania
 
-Railsy wykorzystują kod statusu HTTP 302 (stałe przekierowanie), gdy wywołujesz +redirect_to+. Jeśli chciałbyś użyć innego kodu statusu (prawdopodobnie 301, tymczasowe przekierowanie) możesz to zrobić za pomocą opcji +:status+:
+Railsy wykorzystują kod statusu HTTP 302 (stałe przekierowanie), gdy wywołujesz +redirect_to+.
+Jeśli chciałbyś użyć innego kodu statusu (prawdopodobnie 301, tymczasowe przekierowanie)
+możesz to zrobić za pomocą opcji +:status+:
 
 -------------------------------------------------------
 redirect_to photos_path, :status => 301
 -------------------------------------------------------
 
-Podobnie jak opcja +:status+ dla +render+, +:status+ dla +redirect_to+ akceptuje zarówno numeryczne jak i symboliczne oznaczenia nagłówka.
+Podobnie jak opcja +:status+ dla +render+, +:status+ dla +redirect_to+
+akceptuje zarówno numeryczne jak i symboliczne oznaczenia stanu.
 
 ==== Różnica pomiędzy +render+ a +redirect+
 
-Czasami niedoświadczony developer traktuje +redirect_to+ jako swego rodzaju polecenie +goto+, przenosząc wykonanie programu z jednego miejsca do innego miejsca w kodzie. To _nie_ jest prawidłowe. Twój kod przestaje się wykonywać i czeka na nowe zapytanie przeglądarki. Po prostu mówisz przeglądarce jakie następne zapytanie powinna zrobić poprzez wysłanie kodu HTTP 302.
+Czasami niedoświadczony developer traktuje +redirect_to+ jako swego rodzaju polecenie
++goto+, przenosząc wykonanie programu z jednego miejsca do innego miejsca w kodzie.
+To _nie_ jest prawidłowe. Twój kod przestaje się wykonywać i czeka na nowe zapytanie
+przeglądarki. Po prostu mówisz przeglądarce jakie następne zapytanie powinna zrobić
+poprzez wysłanie kodu HTTP 302.
 
-Przeanalizuj te działania by zobaczyć róznicę:
+Przeanalizuj te działania by zobaczyć różnicę:
 
 [source, ruby]
 -------------------------------------------------------
@@ -488,7 +609,10 @@ def show
 end
 -------------------------------------------------------
 
-Kod w tej formie prawdopodobnie będzie stanowić problem, jeśli zmienna +@book+ jest ustawiona na +nil+. Pamiętaj, +render:action+ nie uruchamia żadnego kodu w docelowej akcji, więc nic nie ustawi zmiennej +@books+ na wartość, której oczekuje widok +index+. Jednym sposobem aby to naprawić jest przekierowanie zamiast renderowania:
+Kod w tej formie prawdopodobnie będzie stanowić problem, jeśli zmienna +@book+ jest
+ustawiona na +nil+. Pamiętaj, +render :action+ nie uruchamia żadnego kodu w docelowej
+akcji, więc nic nie ustawi zmiennej +@books+ na wartość, której oczekuje widok +index+.
+Jednym sposobem aby to naprawić jest przekierowanie zamiast renderowania:
 
 [source, ruby]
 -------------------------------------------------------
@@ -504,11 +628,15 @@ def show
 end
 -------------------------------------------------------
 
-Ten kod spowoduje, że przeglądarka wykona nowe zapytanie o stronę index, kod w metodzie +index+ będzie uruchomiony i wszystko będzie działać tak jak powinno.
+Ten kod spowoduje, że przeglądarka wykona nowe zapytanie o stronę index, kod w metodzie
++index+ będzie uruchomiony i wszystko będzie działać tak jak powinno.
 
 === Używanie +head+ do budowania odpowiedzi tylko z nagłówkami
 
-Metoda head istnieje po to by odesłać do przeglądarki odpowiedzi zawierające tylko nagłówki. Zapewnia to bardziej oczywistą alternatywę +render:nothing+. Metoda +head+ bierze jedną odpowiedź, która jest interpretowana jako hash z nazw nagłówków i wartości. Na przykład możesz zwrócić tylko nagłówek błędu:
+Metoda head istnieje po to by odesłać do przeglądarki odpowiedzi zawierające tylko
+nagłówki. Zapewnia to bardziej oczywistą alternatywę dla +render :nothing+. Metoda +head+
+bierze jedną odpowiedź, która jest interpretowana jako hash z nazw nagłówków i wartości.
+Na przykład możesz zwrócić tylko nagłówek błędu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -524,7 +652,11 @@ head :created, :location => photo_path(@photo)
 
 == Strukturyzacja layoutów
 
-Kiedy Railsy renderują widok jako odpowiedź czynią to poprzez połączenie widoku z bieżącym layoutem (stosując zasady znalezienia aktualnego layoutu, które zostały omówione we wcześniejszej części tutoriala). W layoucie masz dostęp do trzech narzędzi służących do łączenia różnych bitów wyjścia do postaci ogólnej odpowiedzi:
+Kiedy Railsy renderują widok jako odpowiedź czynią to poprzez połączenie widoku z
+bieżącym layoutem (stosując zasady znalezienia aktualnego layoutu,
+które zostały omówione we wcześniejszej części tutoriala). W layoucie masz dostęp
+do trzech narzędzi służących do łączenia różnych bitów wyjścia do postaci ogólnej
+odpowiedzi:
 
 * Asset tags
 * +yield+ i +content_for+
@@ -534,20 +666,27 @@ Zajmiemy się omówieniem każdej z nich po kolei.
 
 === Asset Tags
 
-Asset tags dostarczają metod na generowanie kodu HTML, który łączy widoki z elementami zewnętrznymi jak obrazki, javascript, arkusze stylów i kanały. Istnieją cztery typy tagów włączających:
+Asset tags dostarczają metod na generowanie kodu HTML, który łączy widoki z elementami
+zewnętrznymi jak obrazki, javascript, arkusze stylów i kanały. Istnieją cztery typy
+tagów włączających:
 
 * auto_discovery_link_tag
 * javascript_include_tag
 * stylesheet_link_tag
 * image_tag
 
-Możesz używać tych tagów w layoutach lub innych widokach, choć tagi inne niż +image_tag+ są powszechnie używane w sekcji+<head>+ layoutu.
+Możesz używać tych tagów w layoutach lub innych widokach, choć tagi inne niż +image_tag+
+są powszechnie używane w sekcji+<head>+ layoutu.
 
-WARNING: Asset tags _nie_ weryfikują tego czy dany element zewnętrzny istnieje w określonym miejscu. Po prostu zakładają, że wiesz co robisz i generują link.
+WARNING: Asset tags _nie_ weryfikują tego czy dany element zewnętrzny istnieje w określonym
+miejscu. Po prostu zakładają, że wiesz co robisz i generują link.
 
 ==== Włączanie kanałów za pomocą +auto_discovery_link_tag+
 
-+auto_discovery_link_tag helper+ buduje HTML, który większość przeglądarek i czytników wiadomości może użyć do sprawdzenia czy istnieją kanały RSS lub ATOM. Pobiera to typ połączenia (+:rss+ or +:atom+),  hash opcji, które są przekazywane poprzez url_for i hash opcji dla tagu:
++auto_discovery_link_tag helper+ buduje HTML, który większość przeglądarek i czytników
+wiadomości może użyć do sprawdzenia czy istnieją kanały RSS lub ATOM. Pobiera to typ
+połączenia (+:rss+ or +:atom+),  hash opcji, które są przekazywane poprzez url_for
+i hash opcji dla tagu:
 
 [source, ruby]
 -------------------------------------------------------
