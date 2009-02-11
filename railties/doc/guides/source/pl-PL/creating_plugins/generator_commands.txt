@@ -1,10 +1,10 @@
-== Generator Commands ==
+== Polecenia generatora ==
 
-You may have noticed above that you can used one of the built-in rails migration commands `migration_template`.  If your plugin needs to add and remove lines of text from existing files you will need to write your own generator methods.
+???You may have noticed above that you can used one of the built-in rails migration commands `migration_template`. Jeśli nasz plugin ma dodawać i usuwać linie tekstu z istniejących plików to będziemy musieli napisać własne metody generatora.
 
-This section describes how you you can create your own commands to add and remove a line of text from 'config/routes.rb'.
+Dowiemy się teraz jak stworzyć własne polecenia generatora, które będą dodawać i usuwać linie tekstu do/z pliku 'config/routes.rb'.
 
-To start, add the following test method:
+Na początek, standardowo, zaczniemy od testu:
 
 *vendor/plugins/yaffle/test/route_generator_test.rb*
 
@@ -65,7 +65,7 @@ class RouteGeneratorTest < Test::Unit::TestCase
 end
 -----------------------------------------------------------
 
-Run `rake` to watch the test fail, then make the test pass add the following:
+`Rake` oczywiście zgłosi protest, więc wprowadzamy poprawki:
 
 *vendor/plugins/yaffle/lib/yaffle.rb*
 
@@ -133,12 +133,12 @@ class YaffleRouteGenerator < Rails::Generator::Base
 end
 -----------------------------------------------------------
 
-To see this work, type:
+Wypróbujmy nasz generator w akcji:
 
 -----------------------------------------------------------
 ./script/generate yaffle_route
 ./script/destroy yaffle_route
 -----------------------------------------------------------
 
-.Editor's note:
-NOTE: If you haven't set up the custom route from above, 'script/destroy' will fail and you'll have to remove it manually.
+.Od autora:
+NOTE: Jeśli nie skonfigurowałeś wcześniej własnej ścieżki zgodnie z wcześniejszym opisem, to 'script/destroy' się nie powiedzie i będziesz musiał usunąć ją ręcznie.
