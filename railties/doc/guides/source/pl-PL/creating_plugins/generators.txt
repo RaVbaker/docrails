@@ -1,19 +1,18 @@
-== Generators ==
+== Generatory ==
 
-Many plugins ship with generators.  When you created the plugin above, you specified the --with-generator option, so you already have the generator stubs in 'vendor/plugins/yaffle/generators/yaffle'.
+Wiele pluginów zawiera w sobie generatory. Przypomnijmy sobie, że tworzyliśmy nasz plugin z opcją `\--with-generator`, dzięki czemu mamy już zalążek generatora w 'vendor/plugins/yaffle/generators/yaffle'.
 
-Building generators is a complex topic unto itself and this section will cover one small aspect of generators: generating a simple text file.
+Tworzenie generatorów to temat na osobny przewodnik, dlatego zajmiemy się tylko małym aspektem ich możliwości: generowaniem prostego pliku tekstowego.
 
-=== Testing generators ===
+=== Testowanie generatorów ===
 
-Many rails plugin authors do not test their generators, however testing generators is quite simple.  A typical generator test does the following:
+Wielu programistów nie testuje generatorów w swoich pluginach, a jest to całkiem proste. Typowy test generatora powinien:
+ * Tworzyć tymczasowy katalog główny Railsów, który będzie docelowym na potrzeby testu
+ * Uruchomić generator
+ * Sprawdzić, czy zostały wygenerowane poprawne pliki
+ * Usunąć tymczasowy katalog główny
 
- * Creates a new fake rails root directory that will serve as destination
- * Runs the generator
- * Asserts that the correct files were generated
- * Removes the fake rails root
-
-This section will describe how to create a simple generator that adds a file.  For the generator in this section, the test could look something like this:
+W tej części opiszemy jak stworzyć prosty generator, który dodaje plik. Dla naszego generatora test mógłby wyglądać np. tak:
 
 *vendor/plugins/yaffle/test/definition_generator_test.rb*
 
@@ -53,9 +52,9 @@ class DefinitionGeneratorTest < Test::Unit::TestCase
 end
 ------------------------------------------------------------------
 
-You can run 'rake' from the plugin directory to see this fail.  Unless you are doing more advanced generator commands it typically suffices to just test the Generate script, and trust that rails will handle the Destroy and Update commands for you.
+Próba uruchomienia 'rake' w katalogu pluginu zaowocuje błędem. O ile nie używamy bardziej zaawansowanych poleceń generatora, na ogół wystarczy przetestować skrypt 'Generate' i mieć nadzieję, że Railsy zajmą się poleceniami 'Destroy' i 'Update' za nas.
 
-To make it pass, create the generator:
+Aby test wypadł pozytywnie, utwórzmy generator:
 
 *vendor/plugins/yaffle/generators/yaffle_definition/yaffle_definition_generator.rb*
 
@@ -70,17 +69,17 @@ class YaffleDefinitionGenerator < Rails::Generator::Base
 end
 ------------------------------------------------------------------
 
-=== The USAGE file ===
+=== Plik USAGE ===
 
-If you plan to distribute your plugin, developers will expect at least a minimum of documentation.  You can add simple documentation to the generator by updating the USAGE file.
+Jeśli postanowimy podzielić się naszym pluginem z całym światem, inni programiści będą oczekiwać choćby minimalnej dokumentacji. Możemy ją stworzyć przy użyciu pliku USAGE.
 
-Rails ships with several built-in generators.  You can see all of the generators available to you by typing the following at the command line:
+Railsy zawierają kilka wbudowanych generatorów. Aby zobaczyć ich listę, wykonajmy następujące polecenie:
 
 ------------------------------------------------------------------
 ./script/generate
 ------------------------------------------------------------------
 
-You should see something like this:
+Powinniśmy otrzymać coś w tym stylu:
 
 ------------------------------------------------------------------
 Installed Generators
@@ -88,11 +87,11 @@ Installed Generators
   Builtin: controller, integration_test, mailer, migration, model, observer, plugin, resource, scaffold, session_migration
 ------------------------------------------------------------------
 
-When you run `script/generate yaffle_definition -h` you should see the contents of your 'vendor/plugins/yaffle/generators/yaffle_definition/USAGE'.  
+Po wykonaniu `script/generate yaffle_definition -h` powinniśmy zobaczyć zawartość naszego pliku 'vendor/plugins/yaffle/generators/yaffle_definition/USAGE'.
 
-For this plugin, update the USAGE file could look like this:
+W naszym pluginie, zawartość pliku USAGE mogłaby wyglądać tak:
 
 ------------------------------------------------------------------
-Description:
-    Adds a file with the definition of a Yaffle to the app's main directory
+Opis:
+    Dodaje plik z definicją Dzięcioła do głównego katalogu aplikacji
 ------------------------------------------------------------------
