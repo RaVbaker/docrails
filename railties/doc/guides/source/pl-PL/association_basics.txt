@@ -71,7 +71,7 @@ Aby dowiedzieć się więcej o różnych rodzajach asocjacji, przeczytaj następ
 
 == Typy asocjacji
 
-W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących moduł Active Record. Asocjacje są realizowane poprzez makro-połączenia, a więc dzięki dodaniu stosownej funkcji do modelu poprzez jej zadeklarowanie. Na przykład, deklarując, że jeden model _należy do_ (+belongs_to+) innego, instruujesz Railsy by utrzymywały powiązanie klucza podstawowego z obcym kluczem między instancjami tych dwóch modeli, a dzięki temu otrzymujesz także szereg narzędzi (metod), które możesz wykorzystać w swoim modelu. Rails obsługuje sześć typów asocjacji:
+W Railsach _asocjacja_ to powiązanie ze sobą modeli wykorzystujących moduł Active Record. Asocjacje są realizowane poprzez makro-połączenia, a więc dzięki dodaniu stosownej funkcji do modelu poprzez jej zadeklarowanie. Na przykład, deklarując, że jeden model _należy do_ (+belongs_to+) innego, instruujesz Railsy by utrzymywały powiązanie klucza podstawowego z obcym kluczem między instancjami tych dwóch modeli, a dzięki temu otrzymujesz także szereg narzędzi (metod), które możesz wykorzystać w swoim modelu. Railsy obsługują sześć typów asocjacji:
 
 * +belongs_to+
 * +has_one+
@@ -216,7 +216,7 @@ image:images/habtm.png[diagram asocjacji has_and_belongs_to_many]
  
 Jeśli chcesz ustawić relację typu jeden-do-jeden między dwoma modelami, powinieneś użyć asocjacji +belongs_to+ do jednego i +has_one+ do drugiego. Ale skąd wiedzieć która powinna być w którym modelu?
 
-Rozróżnić to należy sprawdzając, w której tabeli (w którym modelu) ustawiłeś klucz obcy (foreign key) (dla klasy tej tabeli potrzebujesz asocjacji +belongs_to+), ale powinieneś pomyśleć także nad znaczeniem danych. Relacja +has_one+ mówi, że "jednen ze zbioru” należy do ciebie – tzn. że coś wskazuje z powrotem na ciebie. 
+Rozróżnić to należy sprawdzając, w której tabeli (w którym modelu) ustawiłeś klucz obcy (foreign key) (dla klasy tej tabeli potrzebujesz asocjacji +belongs_to+), ale powinieneś pomyśleć także nad znaczeniem danych. Relacja +has_one+ mówi, że "jednen ze zbioru" należy do ciebie – tzn. że coś wskazuje z powrotem na ciebie. 
 Na przykład: Ma większy sens powiedzenie, że dostawca posiada konto, aniżeli konto posiada dostawcę. To sugeruje nam, że poprawne relacje wyglądają tak:
 
 [source, ruby]
@@ -256,11 +256,11 @@ end
 -------------------------------------------------------
 
 NOTE: Użycie t.integer :supplier_id powoduje, że nazwa klucza obcego jest podana wprost, ale jednocześnie samo użycie
-klucza jest niejawne. W obecnej wersji Rails można ukryć ten szczegół implementacyjny używając składni t.references :supplier
+klucza jest niejawne. W obecnej wersji Railsów można ukryć ten szczegół implementacyjny używając składni t.references :supplier
  
 === Wybór pomiędzy +has_many :through+ i +has_and_belongs_to_many+
 
-Rails oferuje dwa sposoby deklaracji relacji tyou wiele-do-wiele między modelami. Łatwiejszym wyjściem jest użycie +has_and_belongs_to_many+, które umożliwia bezpośrednie ustanowienie asocjacji:
+Railsy oferują dwa sposoby deklaracji relacji tyou wiele-do-wiele między modelami. Łatwiejszym wyjściem jest użycie +has_and_belongs_to_many+, które umożliwia bezpośrednie ustanowienie asocjacji:
 
 [source, ruby]
 -------------------------------------------------------
@@ -295,7 +295,7 @@ end
 
 Najłatwiejsza zasada polega na tym, że ustawiasz relację +has_many :through+ jeśli chcesz pracować z pośrednim (wiążącym pozostałe dwa) modelem jako niezależnym bytem. Jeśli jednak nie potrzebujesz niczego z nim robić, łatwiejsze będzie wykorzystanie asocjacji +has_and_belongs_to_many+ (choć musisz pamiętać, że należy stworzyć tabelę łączącą)
 
-Należy używać :has_many :through: jeśli potrzebujesz opcji walidacji, callback-ów lub dodatkowych atrybutów dla wiążącego modelu.
+Należy używać +:has_many :through+ jeśli potrzebujesz opcji walidacji, callback-ów lub dodatkowych atrybutów dla wiążącego modelu.
  
 === Asocjacje polimorficzne
 
@@ -392,7 +392,7 @@ customer.orders.size          # używa kopii zamówień z cache
 customer.orders.empty?        # używa kopii zamówień z cache
 -------------------------------------------------------
 
-Ale co zrobić, gdy potrzeba uaktualnić _cache_, bo dane być może zostały zmienione przez jakąś inną część aplikacji? Po prostu ustaw +true+ dla wywołania asocjacji:
+Ale co zrobić, gdy potrzeba uaktualnić _cache_, bo dane być może zostały zmienione przez inną część aplikacji? Po prostu ustaw +true+ dla wywołania asocjacji:
 
 [source, ruby]
 -------------------------------------------------------
@@ -445,7 +445,7 @@ Jeśli tworzysz asocjację po jakimś czasie od stworzenia modelu bazowego, musi
 
 Jeśli tworzysz asocjację +has_and_belongs_to_many+ potrzebujesz stworzyć wiążącą tabelę. Dopóki nazwa dołączanej tabeli nie jest wyraźnie określona poprzez użycie opcji +:join_table+, moduł Active Record utworzy nazwę używając leksykalnego (alfabetycznego) )porządku tworzenia nazw. Zatem: połączenie między modelem  klienta (customer) a zamówieniem (order) otrzyma domyślną nazwę tabeli "customers_orders" (zamówienia klientów), bo "c" jest w alfabecie przed "o".
 
-WARNING: Pierwszeństwo między nazwami modeli jest "obliczane" przy użyciu operatora „<” (mniejszości) dla stringów (łańcuchów znaków). To znaczy, ze jeśli słowa są różnej długości, ale początkowy łańcuch jest jednakowy – wtedy wyżej w tym porządku jest słowo dłuższe. Na przykład, możnaby oczekiwać, że dla tabeli paper_boxes i papers wygenerowana nazwa wiążącej tabeli będzie brzmiała "papers_paper_boxes", ze względu na długość łańcucha "paper_boxes". Jednak w rzeczywistości wygenerowana zostanie nazwa "paper_boxes_papers".
+WARNING: Pierwszeństwo między nazwami modeli jest "obliczane" przy użyciu operatora "<" (mniejszości) dla stringów (łańcuchów znaków). To znaczy, ze jeśli słowa są różnej długości, ale początkowy łańcuch jest jednakowy – wtedy wyżej w tym porządku jest słowo dłuższe. Na przykład, możnaby oczekiwać, że dla tabeli paper_boxes i papers wygenerowana nazwa wiążącej tabeli będzie brzmiała "papers_paper_boxes", ze względu na długość łańcucha "paper_boxes". Jednak w rzeczywistości wygenerowana zostanie nazwa "paper_boxes_papers".
  
 Niezależnie od nazwy, musisz "ręcznie" wygenerować wiążącą tabelę za pomocą odpowiedniej migracji. Na przykład, rozważ takie asocjacje:
 
@@ -460,7 +460,7 @@ class Part < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Powinny one zostać zaktualizowane za pomocą migracji, która wygeneruje tabelę +assemblies_parts+.Taka tabela powinna być stworzona bez klucza podstawowego:
+Powinny one zostać zaktualizowane za pomocą migracji, która wygeneruje tabelę +assemblies_parts+. Taka tabela powinna być stworzona bez klucza podstawowego:
 
 [source, ruby]
 -------------------------------------------------------
@@ -687,7 +687,7 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Z powyższymi deklaracjami, znalezienie wartości +@customer.orders.size+ (wielkość [ilość] zamówień klientów) wymaga zapytania do bazy wykorzystującego +COUNT(*)+. Aby uniknąć tego połączenia możesz dodać :counter_cache ("licznik cache") do modelu: 
+Z powyższymi deklaracjami, znalezienie wartości +@customer.orders.size+ (wielkość [ilość] zamówień klientów) wymaga zapytania do bazy wykorzystującego +COUNT(*)+. Aby uniknąć tego połączenia możesz dodać :counter_cache ("licznik w cache") do modelu: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -776,11 +776,11 @@ Ustawienie +true+ dla opcji +:polymorphic+ wskazuje, że asocjacja jest polimorf
 
 ===== +:readonly+
 
-jeśli ustawisz +true+ dla opcji +:readonly+, asocjowany obiekt będzie tylko do odczytu, gdy wywoływana jest asocjacja.
+Jeśli ustawisz +true+ dla opcji +:readonly+, asocjowany obiekt będzie tylko do odczytu, gdy wywoływana jest asocjacja.
 
 ===== +:select+
 
-Użyj opcji +:select+ by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Rails pobiera wszystkie kolumny. 
+Użyj opcji +:select+ by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny. 
 
 TIP: Po ustawieniu opcji +:select+ dla asocjacji +belongs_to+, powinieneś też ustawić opcję +:foreign_key+, by mieć pewność, że uzyskasz poprawny wynik zapytania
 
@@ -987,7 +987,7 @@ end
 
 ===== +:order+
 
-opcja +:order+ (_uporządkuj_) ustawia porządek w jakim powiązane obiekty będą "wyciągane" z bazy (w składni SQL użyłbyś klauzuli +ORDER BY+). Ponieważ +has_one+ pobierać będzie tylko jeden wiązany obiekt, opcja ta nie będzie potrzebna.
+Opcja +:order+ (_uporządkuj_) ustawia porządek w jakim powiązane obiekty będą "wyciągane" z bazy (w składni SQL użyłbyś klauzuli +ORDER BY+). Ponieważ +has_one+ pobierać będzie tylko jeden wiązany obiekt, opcja ta nie będzie potrzebna.
 
 ===== +:primary_key+
 
@@ -1136,7 +1136,7 @@ Metoda +_collection_.empty?+ zwraca wartośc +true+, jeśli zbiór nie posiada �
 [source, ruby]
 -------------------------------------------------------
 <% if @customer.orders.empty? %>
-  No Orders Found
+  Nie znaleziono zamówień
 <% end %>
 -------------------------------------------------------
 
@@ -1373,7 +1373,7 @@ Jeśli ustawisz +true+ dla opcji +:readonly+, asocjowany obiekt będzie tylko do
 
 ===== +:select+
 
-Użyj opcji : select by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Rails pobiera wszystkie kolumny.
+Użyj opcji : select by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny.
 
 Jeśli określisz opcję +:select+, musisz być pewien, że zawarłeś w nim kolumnę klucza podstawowego (lub klucza obcego) asocjowanego modelu. Jeśli tego nie zrobisz, możesz spowodować błąd Railsów.
 
@@ -1641,7 +1641,7 @@ class Parts < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-możesz także określać warunki używając hash-a:
+Możesz także określać warunki używając hash-a:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1700,7 +1700,7 @@ Możesz użyć opcji +:include+ do podania drugorzędnych asocjacji, które zost
 
 ===== +:insert_sql+
 
-Zwykle Rails generuje automatycznie odpowiednie zapytanie SQL do stworzenia powiązania między asocjowanymi klasami. Jednak z opcją +:insert_sql+ możesz sam określić kompletne zapytanie SQL do tworzenia klas.
+Zwykle Railsy generują automatycznie odpowiednie zapytanie SQL do stworzenia powiązania między asocjowanymi klasami. Jednak z opcją +:insert_sql+ możesz sam określić kompletne zapytanie SQL do tworzenia klas.
 
 ===== +:join_table+
 
@@ -1719,7 +1719,7 @@ end
 
 ===== +:offset+
 
-TOpcja +:offset+ pozwala zdefiniować _offset_ dla obiektów pobieranych w asocjacji. Na przykład, jeśli ustawisz +:offset => 11+, zostanie pominiętych pierwszych 11 rekordów (por. z klauzulą SQL +LIMIT 0,1+. Offset jest tą pierwszą liczbą – przyp.tłum)
+Opcja +:offset+ pozwala zdefiniować _offset_ dla obiektów pobieranych w asocjacji. Na przykład, jeśli ustawisz +:offset => 11+, zostanie pominiętych pierwszych 11 rekordów (por. z klauzulą SQL +LIMIT 0,1+. Offset jest tą pierwszą liczbą – przyp.tłum)
 
 ===== +:order+
 
@@ -1782,7 +1782,7 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Rails przekazuje do callback-a obiekt, który ma być dodany lub wymazany. 
+Railsy przekazują do callback-a obiekt, który ma być dodany lub wymazany. 
 
 Możesz użyć stosu [_stack_] wywołań, które będą traktowane jak pojedynczy callback, przekazując wywołania do w tablicy:
 
@@ -1805,7 +1805,7 @@ Jeśli callback +before_add+ "wyrzuci" wyjątek, obiekt nie może zostać dodany
 
 === Rozszerzenia asocjacji
 
-Nie jesteś ograniczony do funkcjonalności, którą Rails automatycznie wbudowuje w obiekty proxy. Możesz rozszerzać te obiekty używając anonimowych modułów, dodawanie nowych finderów, kreatorów i innych metod. Na przykład:
+Nie jesteś ograniczony do funkcjonalności, którą Railsy automatycznie wbudowuje w obiekty proxy. Możesz rozszerzać te obiekty używając anonimowych modułów, dodawanie nowych finderów, kreatorów i innych metod. Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
