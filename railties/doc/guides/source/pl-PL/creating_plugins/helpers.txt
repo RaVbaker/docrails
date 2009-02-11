@@ -1,8 +1,8 @@
-== Helpers ==
+== Helpery ==
 
-This section describes how to add a helper named 'WoodpeckersHelper' to your plugin that will behave the same as a helper in your main app.  This is very similar to adding a model and a controller.
+W tym rozdziale dowiemy się jak dodać helpera 'WoodpeckersHelper' do naszego pluginu. Będzie on zachowywał się tak samo jak helper w głównej aplikacji. Proces jest analogiczny do postępowania z modelami i kontrolerami.
 
-You can test your plugin's helper as you would test any other helper:
+Test dla helpera pluginu wygląda tak samo jak dla normalnego helpera:
 
 *vendor/plugins/yaffle/test/woodpeckers_helper_test.rb*
 
@@ -18,7 +18,7 @@ class WoodpeckersHelperTest < Test::Unit::TestCase
 end
 ---------------------------------------------------------------
 
-This is just a simple test to make sure the helper is being loaded correctly.  After watching it fail with `rake`, you can make it pass like so:
+Sprawdza on czy nasz helper został załadowany poprawnie. Oczywiście `rake` zwróci błąd, więc aby wszystko grało edytujemy to i owo:
 
 *vendor/plugins/yaffle/lib/yaffle.rb:*
 
@@ -46,4 +46,4 @@ module WoodpeckersHelper
 end
 ----------------------------------------------
 
-Now your test should be passing, and you should be able to use the Woodpeckers helper in your app.
+Teraz test powinien kończyć się bez błędów, a my możemy używać helpera 'WoodpeckersHelper' w naszej aplikacji.
