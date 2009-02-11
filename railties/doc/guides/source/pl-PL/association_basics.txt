@@ -1173,7 +1173,7 @@ The +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego ty
 
 ===== +_collection_.create(attributes = {})+
 
-The +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego typu. Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, a powiązane obiekty _będą_ zapisane (jeśli pomyślnie przyjdą przez walidację).
+Metoda collection.create zwraca nowy obiekt wiązanego typu. Te obiekty będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, a powiązane obiekty _zostaną_ zapisane (zakładając że przejdą przez wszystkie walidacje)
 
 [source, ruby]
 -------------------------------------------------------
@@ -1405,15 +1405,15 @@ Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji
 
 Jeśli obiekt-rodzic (ten, w którym jest deklaracja +has_many+) nie został zapisany (czyli +new_record?+ zwróci +true+), wtedy dodane obiekty-dzieci również nie zostaną zapisane. Wszyscy niezapisani uczestnicy asocjacji będą automatycznie zapisani, kiedy rodzic zostanie zapisany.
 
-Jeśli chcesz przypisać obiek do asocjacji +has_many+ bez jego zapisywania, użyj metody +_collection_.build+
+Jeśli chcesz przypisać obiekt do asocjacji +has_many+ bez jego zapisywania, użyj metody +_collection_.build+
 
-=== The +has_and_belongs_to_many+ Association
+=== Asocjacja +has_and_belongs_to_many+
 
-The +has_and_belongs_to_many+ association creates a many-to-many relationship with another model. In database terms, this associates two classes via an intermediate join table that includes foreign keys referring to each of the classes.
+Asocjacja +has_and_belongs_to_many+ tworzy relację wiele-do-wiele z innym modelem. W warunkach bazy danych wiąże się się dwie klasy poprzez załączenie pośredniej tabeli, która zawiera klucze obce odnoszące się do każdej z klas.
 
 ==== Methods Added
 
-When you declare a +has_and_belongs_to_many+ association, the declaring class automatically gains 13 methods related to the association:
+Kiedy zadeklarujesz asocjację +has_and_belongs_to_many+, zyskujesz automatycznie 13 metod  powiązanych z tą asocjacją:
 
 * +_collection_(force_reload = false)+
 * +_collection_<<(object, ...)+
@@ -1429,7 +1429,7 @@ When you declare a +has_and_belongs_to_many+ association, the declaring class au
 * +_collection_.build(attributes = {})+
 * +_collection_.create(attributes = {})+
 
-In all of these methods, +_collection_+ is replaced with the symbol passed as the first argument to +has_many+, and +_collection_\_singular+ is replaced with the singularized version of that symbol.. For example, given the declaration:
+We wszystkich wymienionych metodach  +_collection_+ zastępuje się symbolem przekazanym jako pierwszy argument do has_many, a także +_collection_\_singular+ zastępuje się nazwą tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, w takiej deklaracji:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1438,7 +1438,7 @@ class Part < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Each instance of the part model will have these methods:
+Każda instancja modelu _part_ będzie posiadała poniższe metody
 
 [source, ruby]
 -------------------------------------------------------
@@ -1457,16 +1457,16 @@ assemblies.build(attributes = {}, ...)
 assemblies.create(attributes = {})
 -------------------------------------------------------
 
-===== Additional Column Methods
+===== Metody dla dodatkowych kolumn
 
-If the join table for a +has_and_belongs_to_many+ association has additional columns beyond the two foreign keys, these columns will be added as attributes to records retrieved via that association. Records returned with additional attributes will always be read-only, because Rails cannot save changes to those attributes.
+Jeżeli dołączana do asocjacji +has_and_belongs_to_many+ posiada dodatkowe kolumny poza dwoma kluczami obcymi, kolumny te powinny zostać dodane jako atrybuty do rekordów pobieranych za pomocą tej asocjacji. Rekordy zwrócone z dodatkowymi atrybutami będą zawsze tylko do odczytu, ponieważ Railsy nie potrafią zapisywać zmian dla tych atrybutów
 
-WARNING: The use of extra attributes on the join table in a +has_and_belongs_to_many+ association is deprecated. If you require this sort of complex behavior on the table that joins two models in a many-to-many relationship, you should use a +has_many :through+ association instead of +has_and_belongs_to_many+.
-
+WARNING: Użycie dodatkowych atrybutów w dołączanej tabeli w asocjacji +has_and_belongs_to_many+ jest dawną tendencją i nie wspiera się jej. Jeśli potrzebujesz tego rodzaju skomplikowanych zachowań w tabeli łączącej dwa modele w relacji wiele-do-wiele, powinieneś użyć asocjacji +has_many :through+ zamiast +has_and_belongs_to_many+.
 
 ===== +_collection_(force_reload = false)+
 
 The +_collection_+ method returns an array of all of the associated objects. If there are no associated objects, it returns an empty array.
+Metoda +_collection_+ zwraca tablicę [_array_] wszystkich wiązanych obiektów. Jeśli nie istnieją żadne wiązane obiekty, zwraca pustą tablicę.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1475,18 +1475,18 @@ The +_collection_+ method returns an array of all of the associated objects. If 
 
 ===== +_collection_<<(object, ...)+
 
-The +_collection_<<+ method adds one or more objects to the collection by creating records in the join table.
+Metoda +_collection_<<+ dodaje jeden lub więcej obiektów do zbioru poprzez dodanie rekordów w tabeli łączącej (pośredniej).
 
 [source, ruby]
 -------------------------------------------------------
 @part.assemblies << @assembly1
 -------------------------------------------------------
 
-NOTE: This method is aliased as +_collection_.concat+ and +_collection_.push+.
+NOTE: Ta metoda jest aliasowana przez +_collection_.concat+ i +_collection_.push+.
 
 ===== +_collection_.delete(object, ...)+
 
-The +_collection_.delete+ method removes one or more objects from the collection by deleting records in the join table. This does not destroy the objects.
+Metoda +_collection_.delete+ usuwa jeden lub więcej obiektów ze zbioru, poprzez usunięcie rekordów z tabeli łączącej. Ta metoda nie usuwa żadnych innych obiektów poza tymi z tabeli łączącej.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1495,13 +1495,13 @@ The +_collection_.delete+ method removes one or more objects from the collection
 
 ===== +_collection_=objects+
 
-The +_collection_=+ method makes the collection contain only the supplied objects, by adding and deleting as appropriate.
+Metoda +_collection_=+ usuwa i dodaje odpowiednie obiekty tak, żeby dana kolekcja zawierała tylko podane (wymienione) obiekty.
 
 ===== +_collection\_singular_\_ids+
 
 #   Returns an array of the associated objects' ids
 
-The +_collection\_singular_\_ids+ method returns an array of the ids of the objects in the collection.
++_collection\_singular_\_ids+ zwraca tablicę identyfikatorów (_ids_) obiektów w zbiorze
 
 [source, ruby]
 -------------------------------------------------------
@@ -1510,26 +1510,26 @@ The +_collection\_singular_\_ids+ method returns an array of the ids of the obje
 
 ===== +_collection\_singular_\_ids=ids+
 
-The +_collection\_singular_\_ids=+ method makes the collection contain only the objects identified by the supplied primary key values, by adding and deleting as appropriate.
-
+Metoda +__collection\_singular_\_ids=+ sprawia, że w zbiorze znajdują się tylko te obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.
+ 
 ===== +_collection_.clear+
 
-The +_collection_.clear+ method removes every object from the collection by deleting the rows from the joining tableassociation. This does not destroy the associated objects.
+Metoda +_collection_.clear+ usuwa wszystkie elementy zbioru poprzez usunięcie wierszy z dołączanej tabeli. Nie niszczy to żadnych wiązanych obiektów. 
 
 ===== +_collection_.empty?+
 
-The +_collection_.empty?+ method returns +true+ if the collection does not contain any associated objects.
+Metoda +_collection_.empty?+ zwraca wartośc +true+, jeśli zbiór nie posiada żadnych związanych obiektów.
 
 [source, ruby]
 -------------------------------------------------------
 <% if @part.assemblies.empty? %>
-  This part is not used in any assemblies
+  Ta część nie została użyta w żadnym zbiorze
 <% end %>
 -------------------------------------------------------
 
 ===== +_collection_.size+
 
-The +_collection_.size+ method returns the number of objects in the collection.
+Metoda +_collection_.size+ zwraca liczbę obiektów w zbiorze.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1538,8 +1538,8 @@ The +_collection_.size+ method returns the number of objects in the collection.
 
 ===== +_collection_.find(...)+
 
-The +_collection_.find+ method finds objects within the collection. It uses the same syntax and options as +ActiveRecord::Base.find+. It also adds the additional condition that the object must be in the collection.
-
+Metoda +_collection_.find+ służy do wyszukiwania obiektów w zbiorze. Korzysta ona z tej samej składni i tych samych opcji, co ActiveRecord::Base.find. To także daje nam warunek konieczności istnienia obiektu w zbiorze
+ 
 [source, ruby]
 -------------------------------------------------------
 @new_assemblies = @part.assemblies.find(:all, :conditions => ["created_at > ?", 2.days.ago])
@@ -1547,11 +1547,11 @@ The +_collection_.find+ method finds objects within the collection. It uses the 
 
 ===== +_collection_.exist?(...)+
 
-The +_collection_.exist?+ method checks whether an object meeting the supplied conditions exists in the collection. It uses the same syntax and options as +ActiveRecord::Base.exists?+.
+Metoda collection.exist? sprawdza, czy obiekt spełniający podane warunki istnieje w danym zbiorze. Metoda ta używa takiej samej składni i takich samych opcji jak +ActiveRecord::Base.exists?+.
 
 ===== +_collection_.build(attributes = {})+
 
-The +_collection_.build+ method returns a new object of the associated type. This object will be instantiated from the passed attributes, and the link through the join table will be created, but the associated object will _not_ yet be saved.
+Metoda +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego typu. Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, ale powiązane obiekty _nie_ będą zapisane.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1560,16 +1560,16 @@ The +_collection_.build+ method returns a new object of the associated type. Thi
 
 ===== +_collection_.create(attributes = {})+
 
-The +_collection_.create+ method returns a new object of the associated type. This objects will be instantiated from the passed attributes, the link through the join table will be created, and the associated object _will_ be saved (assuming that it passes any validations).
+Metoda collection.create zwraca nowy obiekt wiązanego typu. Ten obiekt będzie konstruowany z ustawionych atrybutów. Powiązanie z pośrednią tabelą będzie stworzone, a wiązany obiekt _zostanie_ zapisany (jeśli przejdzie pomyślnie przez walidację).
 
 [source, ruby]
 -------------------------------------------------------
 @assembly = @part.assemblies.create({:assembly_name => "Transmission housing"})
 -------------------------------------------------------
 
-==== Options for has_and_belongs_to_many
+==== Opcje dla +has_and_belongs_to_many+
 
-In many situations, you can use the default behavior for +has_and_belongs_to_many+ without any customization. But you can alter that behavior in a number of ways. This section cover the options that you can pass when you create a +has_and_belongs_to_many+ association. For example, an association with several options might look like this:
+W wielu sytuacjach możesz użyć asocjacji +has_and_belongs_to_many+ bez potrzeby jej dostosowywania. Ale możesz też zmieniać domyślne ustawienia na kilka sposobów. Ten rozdział przedstawi ci opcje, których możesz używać, kiedy zadeklarujesz asocjację +has_and_belongs_to_many+. Na przykład asocjacja z kilkoma opcjami może wyglądać tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1578,7 +1578,7 @@ class Parts < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-The +has_and_belongs_to_many+ association supports these options:
+Asocjacja +has_and_belongs_to_many+ wspiera takie opcje: 
 
 // * +:accessible+
 * +:association_foreign_key+
@@ -1607,9 +1607,9 @@ The +has_and_belongs_to_many+ association supports these options:
 //
 ===== +:association_foreign_key+
 
-By convention, Rails guesses that the column in the join table used to hold the foreign key pointing to the other model is the name of that model with the suffix +_id+ added. The +:association_foreign_key+ option lets you set the name of the foreign key directly:
+Zgodnie z konwencją Railsy "domyślają się", że kolumna w tabeli łączącej, używana do przechowywania klucza obcego wskazującego na inny model to nazwa tego modelu z przyrostkiem +_id+. Opcja +:association_foreign_key+ pozwala Ci ustawić nazwę obcego klucza bezpośrednio.
 
-TIP: The +:foreign_key+ and +:association_foreign_key+ options are useful when setting up a many-to-many self-join. For example:
+TIP: Opcje +:foreign_key+ oraz +:association_foreign_key+ są przydatne gdy ustawiasz samodniesienie się tabeli (odwołanie rekurencyjne) dla typu relacji wiele-do wiele. Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1621,7 +1621,7 @@ end
 
 ===== +:class_name+
 
-If the name of the other model cannot be derived from the association name, you can use the +:class_name+ option to supply the model name. For example, if a part has many assemblies, but the actual name of the model containing assemblies is +Gadget+, you'd set things up this way:
+Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji +:class-name+, by dostarczyć nazwę modelu. Na przykład jeśli _part_ (część) ma wiele _assemblies_ (zadań), ale aktualna nazwa zawierająca _assemblies_ to "Gadget", możesz to ustawić w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1632,7 +1632,7 @@ end
 
 ===== +:conditions+
 
-The +:conditions+ option lets you specify the conditions that the associated object must meet (in the syntax used by a SQL +WHERE+ clause).
+Opcja +:conditions+ pozwala określić warunki, jakie wiązany obiekt musi spełniać (W składni SQL użyłbyś klauzuli WHERE).
 
 [source, ruby]
 -------------------------------------------------------
@@ -1641,7 +1641,7 @@ class Parts < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-You can also set conditions via a hash:
+możesz także określać warunki używając hash-a:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1650,29 +1650,30 @@ class Parts < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-If you use a hash-style +:conditions+ option, then record creation via this association will be automatically scoped using the hash. In this case, using +@parts.assemblies.create+ or +@parts.assemblies.build+ will create orders where the factory column has the value "Seattle".
+Jeżeli użyjesz opcji +:conditions+ (w notacji z hashem), tworzenie rekordów przez tą asocjację zostanie zautomatyzowane według zawartości hasha. W tym przypadku, używając +@parts.assemblies.create+ lub +@parts.assemblies.build+, tworzy się zamówienia tam, gdzie kolumna factory ma wartość "Seattle".
 
 ===== +:counter_sql+
 
-Normally Rails automatically generates the proper SQL to count the association members. With the +:counter_sql+ option, you can specify a complete SQL statement to count them yourself. 
+Zwykle Railsy automatycznie tworzą odpowiednie zapytanie SQL do liczenia uczestników asocjacji. Z opcją +:counter_sql+ możesz zdefiniować własne zapytanie sql do policzenia ich.
 
-NOTE: If you specify +:finder_sql+ but not +:counter_sql+, then the counter SQL will be generated by substituting +SELECT COUNT(*) FROM+ for the +SELECT ... FROM+ clause of your +:finder_sql+ statement.
+NOTE: Jeśli określisz +:finder_sql+, ale nie stworzysz +:counter_sql+, wtedy funkcja licząca sql +SELECT COUNT(*) FROM+ zostanie zastąpiona klauzulą +SELECT ... FROM+, wykorzystującą deklaracje z +:finder_sql+.
+ 
 
 ===== +:delete_sql+
 
-Normally Rails automatically generates the proper SQL to remove links between the associated classes. With the +:delete_sql+ option, you can specify a complete SQL statement to delete them yourself.
+Zwykle Railsy automatycznie generują właściwe zapytanie SQL w celu usunięcia związków pomiędzy związanymi klasami. Dzięki opcji delete_sql możesz zdefiniować własne zapytanie SQL by usunąć je samodzielnie.
 
 ===== +:extend+
 
-The +:extend+ option specifies a named module to extend the association proxy. Association extensions are discussed in detail later in this guide.
+Opcja +:extend+ sprawia, że nazwany moduł rozszerza proxy asocjacji. Rozszerzenia asocjacji są opisane dalej w tym podręczniku.
 
 ===== +:finder_sql+
 
-Normally Rails automatically generates the proper SQL to fetch the association members. With the +:finder_sql+ option, you can specify a complete SQL statement to fetch them yourself. If fetching objects requires complex multi-table SQL, this may be necessary.
+Zwykle Railsy automatycznie tworzą odpowiednie zapytanie SQL do pobrania _uczestników_ asocjacji. Z opcją +:finder_sql+ możesz zdefiniować takie zapytanie samodzielnie. Jeśli pobieranie obiektów wymaga wielu skomplikowanych operacji na wielu tabelach, może to być konieczne.
 
 ===== +:foreign_key+
 
-By convention, Rails guesses that the column in the join table used to hold the foreign key pointing to this model is the name of this model with the suffix +_id+ added. The +:foreign_key+ option lets you set the name of the foreign key directly:
+Zgodnie z konwencją, Railsy "domyślają się", że kolumna używana do przechowywania klucza obcego w innym modelu to nazwa pierwszego modelu z przyrostkiem +_id+. Opcja +:foreign_key+ umożliwia ustawienie nazwy klucza obcego bezpośrednio:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1684,8 +1685,8 @@ end
 
 ===== +:group+
 
-The +:group+ option supplies an attribute name to group the result set by, using a +GROUP BY+ clause in the finder SQL.
-
+Opcja +:group+ dostarcza nazwę atrybutu według której wyniki mają być pogrupowane, W SQL użyłbyś klauzuli +GROUP BY+.
+ 
 [source, ruby]
 -------------------------------------------------------
 class Parts < ActiveRecord::Base
@@ -1695,19 +1696,19 @@ end
 
 ===== +:include+
 
-You can use the :include option to specify second-order associations that should be eager-loaded when this association is used. 
+Możesz użyć opcji +:include+ do podania drugorzędnych asocjacji, które zostaną załadowane wtedy, gdy zostanie użyta dana asocjacja.
 
 ===== +:insert_sql+
 
-Normally Rails automatically generates the proper SQL to create links between the associated classes. With the +:insert_sql+ option, you can specify a complete SQL statement to insert them yourself.
+Zwykle Rails generuje automatycznie odpowiednie zapytanie SQL do stworzenia powiązania między asocjowanymi klasami. Jednak z opcją +:insert_sql+ możesz sam określić kompletne zapytanie SQL do tworzenia klas.
 
 ===== +:join_table+
 
-If the default name of the join table, based on lexical ordering, is not what you want, you can use the +:join_table+ option to override the default.
+Jeśli domyślna nazwa tabeli łączącej utworzona w oparciu o porządek alfabetyczny nie jest tym, czego oczekujesz, możesz uzyć opcji +:join_table+ by nadpisać domyślne ustawienia
 
 ===== +:limit+
 
-The +:limit+ option lets you restrict the total number of objects that will be fetched through an association.
+Opcja +:limit+  pozwala ograniczyć liczbę obiektów, które będą pobierane dzięki asocjacji.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1718,11 +1719,11 @@ end
 
 ===== +:offset+
 
-The +:offset+ option lets you specify the starting offset for fetching objects via an association. For example, if you set +:offset => 11+, it will skip the first 11 records.
+TOpcja +:offset+ pozwala zdefiniować _offset_ dla obiektów pobieranych w asocjacji. Na przykład, jeśli ustawisz +:offset => 11+, zostanie pominiętych pierwszych 11 rekordów (por. z klauzulą SQL +LIMIT 0,1+. Offset jest tą pierwszą liczbą – przyp.tłum)
 
 ===== +:order+
 
-The +:order+ option dictates the order in which associated objects will be received (in the syntax used by a SQL +ORDER BY+ clause).
+Opcja +:order+ ustawia porządek w jakim powiązane obiekty będą "wyciągane" (w składni SQL użyłbyś klauzuli +ORDER BY+).
 
 [source, ruby]
 -------------------------------------------------------
@@ -1733,42 +1734,42 @@ end
 
 ===== +:readonly+
 
-If you set the +:readonly+ option to +true+, then the associated objects will be read-only when retrieved via the association.
+Jeśli ustawisz +true+ dla opcji +:readonly+, asocjowane obiekty będą tylko do odczytu, gdy wywoływana jest asocjacja.
 
 ===== +:select+
 
-The +:select+ option lets you override the SQL +SELECT+ clause that is used to retrieve data about the associated objects. By default, Rails retrieves all columns.
+Użyj opcji : select by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny
 
 ===== +:uniq+
 
-Specify the +:uniq => true+ option to remove duplicates from the collection.
-
+Ustaw opcję +:uniq => true+ aby usunąć ze zbiorów duplikaty.
+ 
 ===== +:validate+
 
-If you set the +:validate+ option to +false+, then associated objects will not be validated whenever you save this object. By default, this is +true+: associated objects will be validated when this object is saved.
+Kiedy ustawisz na +false+ opcję +:validate+, wiązane obiekty nie będą nidy walidowane, kiedy będziesz zapisywać obiekt. Domyślne ustawienie to +true+: wiązane obiekty są walidowane kiedy je zapisujesz.
 
-==== When are Objects Saved?
+==== Kiedy obiekty są zapisywane?
 
-When you assign an object to a +has_and_belongs_to_many+ association, that object is automatically saved (in order to update the join table). If you assign multiple objects in one statement, then they are all saved.
+Kiedy przypisujesz obiekt do asocjacji +has_and_belongs_to_many+, obiekt jest automatycznie zapisywany (żeby zaktualizować tabelę wiążącą). Jeśli wiążesz wiele obiektów w jednym zapytanie, wszystkie zostaną zapisane.
 
-If any of these saves fails due to validation errors, then the assignment statement returns +false+ and the assignment itself is cancelled.
+Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz przypisania zwróci +false+, a samo przypisanie będzie anulowane.
 
-If the parent object (the one declaring the +has_and_belongs_to_many+ association) is unsaved (that is, +new_record?+ returns +true+) then the child objects are not saved when they are added. All unsaved members of the association will automatically be saved when the parent is saved.
+Jeśli obiekt-rodzic (ten, w którym jest deklaracja +has_and_belongs_to_many+) nie został zapisany (czyli +new_record?+ zwróci +true+), wtedy dodane obiekty-dzieci również nie zostaną zapisane. Wszyscy niezapisani uczestnicy asocjacji będą automatycznie zapisani, kiedy rodzic zostanie zapisany.
 
-If you want to assign an object to a +has_and_belongs_to_many+ association without saving the object, use the +_collection_.build+ method.
+Jeśli chcesz przypisać obiekt do asocjacji +has_many+ bez jego zapisywania, użyj metody +_collection_.build+.
+ 
+=== Callback asocjacji
 
-=== Association Callbacks
+Funkcje z callback-iem "zaczepiają się" o cykl życia obiektów Active Record, pozwalając na pracę z tymi obiektami w różnych momentach. Na przykład, możesz użyć callback-a +:before_save+ i sprawić, by coś się stało tuż przed tym, kiedy obiekt zostanie zapisany.
 
-Normal callbacks hook into the lifecycle of Active Record objects, allowing you to work with those objects at various points. For example, you can use a +:before_save+ callback to cause something to happen just before an object is saved.
-
-Association callbacks are similar to normal callbacks, but they are triggered by events in the lifecycle of a collection. There are four available association callbacks:
+Callback-i w asocjacjach podobne są do zwykłych callback-ów, z tym, że (te pierwsze - przyp.tłum) uruchamiane są przez zdarzenia w cyklu życia zbioru. W asocjacjach dostępne są cztery callback-i:
 
 * +before_add+
 * +after_add+
 * +before_remove+
 * +after_remove+
 
-You define association callbacks by adding options to the association declaration. For example:
+Callback asocjacji definiuje się dodając opcje do deklaracji asocjacji. Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1781,9 +1782,9 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Rails passes the object being added or removed to the callback.
+Rails przekazuje do callback-a obiekt, który ma być dodany lub wymazany. 
 
-You can stack callbacks on a single event by passing them as an array:
+Możesz użyć stosu [_stack_] wywołań, które będą traktowane jak pojedynczy callback, przekazując wywołania do w tablicy:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1800,11 +1801,11 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-If a +before_add+ callback throws an exception, the object does not get added to the collection. Similarly, if a +before_remove+ callback throws an exception, the object does not get removed from the collection.
+Jeśli callback +before_add+ "wyrzuci" wyjątek, obiekt nie może zostać dodany do zbioru. Podobnie jeśli +before_remove+ "wyrzuci" wyjątek, nie można obiektu usunąć ze zbioru.
 
-=== Association Extensions
+=== Rozszerzenia asocjacji
 
-You're not limited to the functionality that Rails automatically builds into association proxy objects. You can also extend these objects through anonymous modules, adding new finders, creators, or other methods. For example:
+Nie jesteś ograniczony do funkcjonalności, którą Rails automatycznie wbudowuje w obiekty proxy. Możesz rozszerzać te obiekty używając anonimowych modułów, dodawanie nowych finderów, kreatorów i innych metod. Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1817,7 +1818,7 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-If you have an extension that should be shared by many associations, you can use a named extension module. For example:
+Jeśli posiadasz rozszerzenia, które powinny zostać udostępnione dla wielu asocjacji, możesz użyć modułu o nazwie _extension_ (rozszerzenie). Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1836,7 +1837,7 @@ class Supplier < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-To include more than one extension module in a single association, specify an array of names:
+By załączyć więcej niż jeden moduł rozszerzeń w jednej asocjacji, użyj tablicy nazw:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1845,16 +1846,18 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Extensions can refer to the internals of the association proxy using these three accessors:
+Rozszerzenia mogą odnosić się do wnętrz asocjacji proxy, dzięki użyciu tych trzech dodatków [_accessors_]:
 
-* +proxy_owner+ returns the object that the association is a part of.
-* +proxy_reflection+ returns the reflection object that describes the association.
-* +proxy_target+ returns the associated object for +belongs_to+ or +has_one+, or the collection of associated objects for +has_many+ or +has_and_belongs_to_many+.
+* +proxy_owner+ zwraca obiekt, którego asocjacja jest częścią.
+* +proxy_reflection+ zwraca ‘odbicie’ obiektu opisywanego przez asocjację.
+* +proxy_target+ zwraca powiązany element dla +belongs_to+ lub +has_one+ lub zbiór wiązanych obiektów dla +has_many+ lub +has_and_belongs_to_many+.
 
 == Changelog ==
 
 http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/11[Lighthouse ticket]
 
+* February 11, 2009, Initial version of polish translation.
 * September 28, 2008: Corrected +has_many :through+ diagram, added polymorphic diagram, some reorganization by link:../authors.html#mgunderloy[Mike Gunderloy] . First release version.
 * September 22, 2008: Added diagrams, misc. cleanup by link:../authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
 * September 14, 2008: initial version by link:../authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
+
