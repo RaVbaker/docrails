@@ -1,12 +1,12 @@
-== Tests ==
+== Testy ==
 
-In this guide you will learn how to test your plugin against multiple different database adapters using Active Record.  To setup your plugin to allow for easy testing you'll need to add 3 files:
+W tym przewodniku nauczymy się jak testować nasz plugin pod kątem kilku różnych adapterów baz danych przy użyciu modułu Active Record. Aby łatwo testować nasz plugin musimy dodać 3 pliki:
 
- * A 'database.yml' file with all of your connection strings
- * A 'schema.rb' file with your table definitions
- * A test helper method that sets up the database
+ * 'database.yml', w którym znajdzie się wszystko, co jest związane z połączeniem z bazą
+ * 'schema.rb' z definicjami tabel
+ * helpera, który będzie tworzył bazę danych
 
-=== Test Setup ===
+=== Konfiguracja testowa ===
 
 *vendor/plugins/yaffle/test/database.yml:*
 
@@ -34,7 +34,7 @@ mysql:
   :database: yaffle_plugin_test
 ----------------------------------------------
 
-For this guide you'll need 2 tables/models, Hickwalls and Wickwalls, so add the following:
+Będziemy potrzebowali 2 tabeli/modeli. Jako że po polsku dzięcioł to po prostu dzięcioł, a my musimy jakoś rozróżnić tworzone modele, będziemy się posiłkować językiem Szekspira, w którym tę ptaszynę można nazwać na co najmniej 10 sposobów. W naszym przykładzie będą to: Hickwalls i Wickwalls. Modyfikujemy plik:
 
 *vendor/plugins/yaffle/test/schema.rb:*
 
@@ -73,7 +73,7 @@ def load_schema
 
   db_adapter = ENV['DB']
 
-  # no db passed, try one of these fine config-free DBs before bombing.
+  # jeśli baza danych nie jest zdefiniowana, to spróbujemy użyć sqlite lub sqlite3, zamiast od razu sypać błędami
   db_adapter ||=
     begin
       require 'rubygems'
@@ -97,11 +97,11 @@ def load_schema
 end
 ----------------------------------------------
 
-Now whenever you write a test that requires the database, you can call 'load_schema'.
+Od tej pory, za każdym razem kiedy będziemy pisać test, który wymaga połączenia z bazą danych, możemy wywoływać 'load_schema'.
 
-=== Run the plugin tests ===
+=== Testujemy plugin ===
 
-Once you have these files in place, you can write your first test to ensure that your plugin-testing setup is correct.  By default rails generates a file in 'vendor/plugins/yaffle/test/yaffle_test.rb' with a sample test.  Replace the contents of that file with:
+Kiedy wszystkie pliki są gotowe możemy przystąpić do pisania naszego pierwszego testu, który sprawdzi, czy nasza konfiguracja jest poprawna. Domyślnie railsy generują plik 'vendor/plugins/yaffle/test/yaffle_test.rb' z przykładowym testem. Zmodyfikujemy zawartość tego pliku:
 
 *vendor/plugins/yaffle/test/yaffle_test.rb:*
 
@@ -126,14 +126,14 @@ class YaffleTest < Test::Unit::TestCase
 end
 ----------------------------------------------
 
-To run this, go to the plugin directory and run `rake`:
+Aby go uruchomić, przechodzimy do katalogu pluginów i uruchamiamy `rake`:
 
 ----------------------------------------------
 cd vendor/plugins/yaffle
 rake
 ----------------------------------------------
 
-You should see output like:
+Powinniśmy zobaczyć coś takiego:
 
 ----------------------------------------------
 /opt/local/bin/ruby -Ilib:lib "/opt/local/lib/ruby/gems/1.8/gems/rake-0.8.3/lib/rake/rake_test_loader.rb" "test/yaffle_test.rb" 
@@ -153,7 +153,7 @@ Finished in 0.002236 seconds.
 1 test, 1 assertion, 0 failures, 0 errors
 ----------------------------------------------
 
-By default the setup above runs your tests with sqlite or sqlite3.  To run tests with one of the other connection strings specified in database.yml, pass the DB environment variable to rake:
+Powyższa konfiguracja domyślnie przeprowadza testy przy użyciu sqlite lub sqlite3. Aby przeprowadzić testy dla innego adaptera bazy danych określonego w 'database.yml' musimy przekazać odpowiedni argument przy wywołaniu rake:
 
 ----------------------------------------------
 rake DB=sqlite
@@ -162,4 +162,4 @@ rake DB=mysql
 rake DB=postgresql
 ----------------------------------------------
 
-Now you are ready to test-drive your plugin!
+Świetnie, jesteśmy gotowi przetestować nasz plugin!
