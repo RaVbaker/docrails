@@ -8,15 +8,15 @@ Ten przewodnik jest wprowadzeniem do Ruby on Rails. Po jego przeczytaniu będzie
 * Podstawami modelu MVC (Model, View, Controller) oraz architektury RESTful
 * Szybkim generowaniem podstawowych elementów aplikacji
 
-== This Guide Assumes
+== Co obejmuje przewodnik?
 
-This guide is designed for beginners who want to get started with a Rails application from scratch. It does not assume that you have any prior experience with Rails. However, to get the most out of it, you need to have some prerequisites installed:
+Ten przewodnik jest przeznaczony dla początkujących, którzy chcą rozpocząć tworzenie aplikacji opartych na Railsach. Nie zakładamy, że masz wcześniejsze doświadczenia z Railsami. Niemniej jednak, do jak najlepszego wykorzystania tego przewodnika, konieczne jest:
 
-* The link:http://www.ruby-lang.org/en/downloads/[Ruby] language
-* The link:http://rubyforge.org/frs/?group_id=126[RubyGems] packaging system
-* A working installation of link:http://www.sqlite.org/[SQLite] (preferred), link:http://www.mysql.com/[MySQL], or link:http://www.postgresql.org/[PostgreSQL]
+* link:http://www.ruby-lang.org/en/downloads/ [Ruby] - podstawowa wiedza z zakresu języka Ruby
+* link:http://rubyforge.org/frs/?group_id=126[RubyGems] - narzędzie do dystrybuowania i instalowania paczek zawierających moduły i rozszerzenia języka Ruby
+* Zarządzanie bazą danych link:http://www.sqlite.org/[SQLite] (preferowane), link:http://www.mysql.com/[MySQL] lub link:http://www.postgresql.org/[PostgreSQL]
 
-It is highly recommended that you *familiarize yourself with Ruby before diving into Rails*. You will find it much easier to follow what's going on with a Rails application if you understand basic Ruby syntax. Rails isn't going to magically revolutionize the way you write web applications if you have no experience with the language it uses. There are some good free resources on the net for learning Ruby, including:
+Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygody z Railsami. Znacznie łatwiej jest śledzić, co się dzieje w Railsach, rozumiejąc podstawowy składni Ruby. Rails nie będzie w stanie w sposób magiczny zrewolucjonizować sztuki pisania aplikacji internetowych, jeżeli nie masz doświadczenia w używaniu języka. W Internecie istnieje kilka dobrych darmowych źródeł pomocnych w nauce języka Ruby, w tym:
 
 * link:http://www.humblelittlerubybook.com/[Mr. Neigborlyâs Humble Little Ruby Book]
 * link:http://www.rubycentral.com/book/[Programming Ruby]
