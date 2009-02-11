@@ -379,7 +379,7 @@ W tym rozdziale znajdziesz kilka rzeczy, które powinieneś wiedzieć, by skutec
 * Kontrolowanie cachingu
 * Unikanie kolizji w nazwach 
 * Aktualizacje schematów 
-* Kontrolowanie zakresu asocjacji
+* Kontrolowanie zakresu widoczności asocjacji
  
 === Kontrolowanie cachingu
 
@@ -478,9 +478,9 @@ class CreateAssemblyPartJoinTable < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-=== Kontrolowanie zakresu asocjacji
+=== Kontrolowanie zakresu widoczności asocjacji
  
-Domyślnie asocjacje "szukają" obiektów tylko w ramach bieżącego zakresu modułów. To może być ważne, gdy deklarujesz modele wykorzystujące ActiveRecord wewnątrz modułu, na przykład:
+Domyślnie asocjacje "szukają" obiektów tylko w ramach bieżącego zakresu widoczności modułów. To może być ważne, gdy deklarujesz modele wykorzystujące ActiveRecord wewnątrz modułu, na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -497,7 +497,7 @@ module MyApplication
 end
 -------------------------------------------------------
 
-Ten kod będzie działał dobrze, bo zarówno klasa dostawcy, jak i klasa konta są zdefiniowane w ramach tego samego zakresu (zakresu modelu). Ale już poniższy przykład nie będzie działać, bo dostawca i konto są zdefiniowane w różnych zakresach:
+Powyższy kod będzie działał dobrze, bo zarówno klasa dostawcy, jak i klasa konta są zdefiniowane w ramach tego samego zakresu (zakresu widoczności modelu). Ale już poniższy przykład nie będzie działać, bo dostawca i konto są zdefiniowane w różnych zakresach widoczności:
 
 [source, ruby]
 -------------------------------------------------------
@@ -541,7 +541,7 @@ Niniejszy rozdział ukaże ci szczegóły każdego typu asocjacji, w tym informa
 
 === Asocjacja belongs_to
  
-Asocjacja +belongs_to+ tworzy relację typu jeden-do-jeden z innym modelem. W warunkach bazy danych, oznacza to że dana klasa zawiera klucz obcy. Jeśli inna klasa zawiera klucz obcy, powinieneś raczej użyć asocjacji +has_one+
+Asocjacja +belongs_to+ tworzy relację typu jeden-do-jeden z innym modelem. W języku baz danych, oznacza to że dana klasa zawiera klucz obcy. Jeśli inna klasa zawiera klucz obcy, powinieneś raczej użyć asocjacji +has_one+
 
 ==== Metody dodane dzięki +belongs_to+
 
@@ -586,7 +586,7 @@ Jeśli wiązany obiekt został już pobrany z bazy danych, zwrócona będzie jeg
  
 ===== +_association_=(associate)+
 
-metoda +_association_=+ przydziela wiązanemy obiekt do naszego obiektu. Od środka wygląda to tak, że wydobywa ona z wiązanego obiektu klucz podstawowy i ustawia naszemu obiektowi klucz obcy na tę samą wartość.
+Metoda +_association_=+ przydziela wiązanemy obiekt do naszego obiektu. Od środka wygląda to tak, że wydobywa ona z wiązanego obiektu klucz podstawowy i ustawia naszemu obiektowi klucz obcy na tę samą wartość.
 
 [source, ruby]
 -------------------------------------------------------
@@ -606,7 +606,7 @@ end
 
 ===== +build___association__(attributes = {})+
 
-Metoda +build__\_association__+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów,  będzie ustawiony odnośnik do obcego klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany. 
+Metoda +build__association_+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów,  będzie ustawiony odnośnik do obcego klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany. 
 
 [source, ruby]
 -------------------------------------------------------
@@ -615,7 +615,7 @@ Metoda +build__\_association__+ zwraca nowy obiekt wiązanego typu. Ten obiekt z
 
 ===== +create___association__(attributes = {})+
 
-Metoda +create__\_association__+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do obcego klucza tego obiektu. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
+Metoda +create__association_+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do obcego klucza tego obiektu. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
 
 [source, ruby]
 -------------------------------------------------------
@@ -768,7 +768,7 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-NOTE:Nie ma potrzeby stosowanie +:include+ do bezpośrednich asocjacji, to znaczy: jeśli masz zdefiniowaną w modelu relację zamówień należących do  (_belongs to_) klientów, wtedy "klient" jest przygotowany do wczytania zawsze, kiedy tylko jest potrzebny.
+NOTE: Nie ma potrzeby stosowania +:include+ do bezpośrednich asocjacji, to znaczy: jeśli masz zdefiniowaną w modelu relację zamówień należących do  (_belongs to_) klientów, wtedy "klient" jest przygotowany do wczytania zawsze, kiedy tylko jest potrzebny.
 
 ===== +:polymorphic+
 
@@ -794,7 +794,7 @@ Przypisywanie obiektu do asocjacji +belongs_to+ nie zapisuje go automatycznie. N
 
 === Asocjacja +has_one+
 
-Asocjacja has_one tworzy relację typu jeden-do-jeden pomiędzy modelami. W warunkach bazy danych oznacza to, że inna klasa zawiera klucz obcy. Jeżeli to rozpatrywana aktualnie klasa zawiera klucz obcy, należy użyć asocjacji +belongs_to+ zamiast +has_one+.
+Asocjacja has_one tworzy relację typu jeden-do-jeden pomiędzy modelami. W języku baz danych oznacza to, że inna klasa zawiera klucz obcy. Jeżeli to rozpatrywana aktualnie klasa zawiera klucz obcy, należy użyć asocjacji +belongs_to+ zamiast +has_one+.
 
 ==== Metody dodane dzięki +has_one+
 
@@ -859,7 +859,7 @@ end
 
 ===== +build___association__(attributes = {})+
 
-Metoda +build__\_association__+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów, będzie ustawiony odnośnik do jego obcego klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany.
+Metoda +build__association_+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów, będzie ustawiony odnośnik do jego obcego klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany.
  
 [source, ruby]
 -------------------------------------------------------
@@ -868,7 +868,7 @@ Metoda +build__\_association__+ zwraca nowy obiekt wiązanego typu. Ten obiekt z
 
 ===== +create___association__(attributes = {})+
 
-Metoda +create__\_association__+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do jego obcego klucza. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
+Metoda +create___association_+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do jego obcego klucza. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
 
 [source, ruby]
 -------------------------------------------------------
@@ -910,7 +910,7 @@ Asocjacja +has_one+ wspiera następujące opcje
 //
 ===== +:as+
 
-Użycie opcji +:as+  wskazuje, że mamy do czynienia z asocjacją polimorficzną. Polimorficzne asocjacje zostały omówione szczegółowo w dalszej części podręcznika.
+Użycie opcji +:as+  wskazuje, że mamy do czynienia z asocjacją polimorficzną. Polimorficzne asocjacje zostały omówione szczegółowo ww wcześniejszej części podręcznika.
 
 ===== +:class_name+
 
@@ -1019,17 +1019,17 @@ Kiedy ustawisz na +true+ opcję +:validate+, wiązane obiekty będą walidowane 
 
 ==== Kiedy obiekty są zapisywane?
 
-Kiedy przypisujesz obiekt do asocjacji +has_one+,jest on zapisywany automatycznie (by zaktualizować jego klucz obcy). Nie zapisuje się także wiązanego obiektu. Ponadto każdy obiekt, który został zmieniony jest również automatycznie zapisywany, ponieważ jego klucz obcy także się zmienił.
+Kiedy przypisujesz obiekt do asocjacji +has_one+, jest on zapisywany automatycznie (by zaktualizować jego klucz obcy). Ponadto każdy obiekt, który został zmieniony jest również automatycznie zapisywany, ponieważ jego klucz obcy także się zmienił.
 
 Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz przypisania zwróci +false+, a samo przypisanie jest anulowane.
 
-Jeśli obiekt-rodzic (ten, w którym zadeklarowałeś asocjację has_one) nie został zapisany (to jest, gdy new_record? zwraca wartość +true+), wtedy obiekt-dziecko nie jest zapisywany.
+Jeśli obiekt-rodzic (ten, w którym zadeklarowałeś asocjację +has_one+) nie został zapisany (to jest, gdy +new_record?+ zwraca wartość +true+), wtedy obiekt-dziecko nie jest zapisywany.
 
 Jeśli chcesz przypisać obiekt do asocjacji has_one bez zapisywania obiektu, użyj metody +association.build+.
 
 === The has_many Association
 
-Asocjacja +has_many+ tworzy relację typu jeden-do-wiele z innym modelem. W warunkach bazy danych oznacza to, że inna klasa zawiera klucz obcy, który odnosi się do instancji rozpatrywanej klasy.
+Asocjacja +has_many+ tworzy relację typu jeden-do-wiele z innym modelem. W języku baz danych oznacza to, że inna klasa zawiera klucz obcy, który odnosi się do instancji rozpatrywanej klasy.
 
 ==== Dodane metody
 
@@ -1079,7 +1079,7 @@ orders.create(attributes = {})
 
 ===== +_collection_(force_reload = false)+
 
-Metoda collecrtion zwraca tablicę [_array_] wszystkich wiązanych obiektów. Jeśli nie istnieją żadne wiązane obiekty, zwraca pustą tablicę.
+Metoda +_collection_+ zwraca tablicę [_array_] wszystkich wiązanych obiektów. Jeśli nie istnieją żadne wiązane obiekty, zwraca pustą tablicę.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1088,7 +1088,7 @@ Metoda collecrtion zwraca tablicę [_array_] wszystkich wiązanych obiektów. Je
 
 ===== +_collection_<<(object, ...)+
 
-metoda +_collection_<<+ dodaje jeden lub więcej obiektów do zbioru poprzez ustawienie ich kluczy obcych na wartość klucza podstawowego wywoływanego modelu
+Metoda +_collection_<<+ dodaje jeden lub więcej obiektów do zbioru poprzez ustawienie ich kluczy obcych na wartość klucza podstawowego wywoływanego modelu
 
 [source, ruby]
 -------------------------------------------------------
@@ -1097,7 +1097,7 @@ metoda +_collection_<<+ dodaje jeden lub więcej obiektów do zbioru poprzez ust
 
 ===== +_collection_.delete(object, ...)+
 
-metoda +_collection_.delete+ usuwa jeden lub więcej obiektów ze zbioru, poprzez ustawienie ich kluczy obcych na +NULL+.
+Metoda +_collection_.delete+ usuwa jeden lub więcej obiektów ze zbioru, poprzez ustawienie ich kluczy obcych na +NULL+.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1120,8 +1120,6 @@ Metoda +_collection\_singular_\_ids+ zwraca tablicę identyfikatorów (_ids_) ob
 -------------------------------------------------------
 
 ===== +__collection\_singular_\_ids=ids+
-
-The +__collection\_singular_\_ids=+ method makes the collection contain only the objects identified by the supplied primary key values, by adding and deleting as appropriate.
 
 Metoda +__collection\_singular_\_ids=+ sprawia, że w zbiorze znajdują się tylko te obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.
 
@@ -1164,7 +1162,7 @@ Metoda +_collection_.exist?+ sprawdza, czy obiekt spełniający podane warunki i
 
 ===== +_collection_.build(attributes = {}, ...)+
 
-The +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego typu. Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, ale powiązane obiekty _nie_ będą zapisane.
+Metoda +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego typu. Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, ale powiązane obiekty _nie_ będą zapisane.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1173,7 +1171,7 @@ The +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego ty
 
 ===== +_collection_.create(attributes = {})+
 
-Metoda collection.create zwraca nowy obiekt wiązanego typu. Te obiekty będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, a powiązane obiekty _zostaną_ zapisane (zakładając że przejdą przez wszystkie walidacje)
+Metoda +_collection_.create+ zwraca nowy obiekt wiązanego typu. Te obiekty będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, a powiązane obiekty _zostaną_ zapisane (zakładając że przejdą przez wszystkie walidacje)
 
 [source, ruby]
 -------------------------------------------------------
@@ -1255,7 +1253,6 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-If you use a hash-style +:conditions+ option, then record creation via this association will be automatically scoped using the hash. In this case, using +@customer.confirmed_orders.create+ or +@customer.confirmed_orders.build+ will create orders where the confirmed column has the value +true+.
 Jeżeli użyjesz opcji +:conditions+ (w notacji z hashem), tworzenie rekordów przez tą asocjację zostanie zautomatyzowane według zawartości hasha. W tym przypadku, używając +@customer.confirmed_orders.create+ albo +@customer.confirmed_orders.build+, tworzy się zamówienia tam, gdzie kolumna confirmed ma wartość +true+.
 
 ===== +:counter_sql+
@@ -1293,7 +1290,6 @@ TIP: W żadnym z wypadków Railsy nie będą same tworzyły dla ciebie kolumn kl
 
 ===== +:group+
 
-The +:group+ option supplies an attribute name to group the result set by, using a +GROUP BY+ clause in the finder SQL.
 Opcja +:group+ dostarcza nazwę atrybutu według której wyniki mają być pogrupowane, W SQL użyłbyś klauzuli +GROUP BY+.
 
 [source, ruby]
@@ -1409,7 +1405,7 @@ Jeśli chcesz przypisać obiekt do asocjacji +has_many+ bez jego zapisywania, u�
 
 === Asocjacja +has_and_belongs_to_many+
 
-Asocjacja +has_and_belongs_to_many+ tworzy relację wiele-do-wiele z innym modelem. W warunkach bazy danych wiąże się się dwie klasy poprzez załączenie pośredniej tabeli, która zawiera klucze obce odnoszące się do każdej z klas.
+Asocjacja +has_and_belongs_to_many+ tworzy relację wiele-do-wiele z innym modelem. W języku baz danych wiąże się się dwie klasy poprzez załączenie pośredniej tabeli, która zawiera klucze obce odnoszące się do każdej z klas.
 
 ==== Methods Added
 
@@ -1465,7 +1461,6 @@ WARNING: Użycie dodatkowych atrybutów w dołączanej tabeli w asocjacji +has_a
 
 ===== +_collection_(force_reload = false)+
 
-The +_collection_+ method returns an array of all of the associated objects. If there are no associated objects, it returns an empty array.
 Metoda +_collection_+ zwraca tablicę [_array_] wszystkich wiązanych obiektów. Jeśli nie istnieją żadne wiązane obiekty, zwraca pustą tablicę.
 
 [source, ruby]
@@ -1499,7 +1494,7 @@ Metoda +_collection_=+ usuwa i dodaje odpowiednie obiekty tak, żeby dana kolekc
 
 ===== +_collection\_singular_\_ids+
 
-#   Returns an array of the associated objects' ids
+#  Zwraca tablicę zawierającą identyfikatory wiązanych obiektów.
 
 +_collection\_singular_\_ids+ zwraca tablicę identyfikatorów (_ids_) obiektów w zbiorze
 
