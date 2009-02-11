@@ -1,6 +1,6 @@
 == Polecenia generatora ==
 
-???You may have noticed above that you can used one of the built-in rails migration commands `migration_template`. Jeśli nasz plugin ma dodawać i usuwać linie tekstu z istniejących plików to będziemy musieli napisać własne metody generatora.
+Poniżej zauważysz, że możemy użyć jednego z wbudowanych w Railsy poleceń migracji `migration_template`. Jeśli nasz plugin ma dodawać i usuwać linie tekstu z istniejących plików to będziemy musieli napisać własne metody generatora.
 
 Dowiemy się teraz jak stworzyć własne polecenia generatora, które będą dodawać i usuwać linie tekstu do/z pliku 'config/routes.rb'.
 
