@@ -1,17 +1,17 @@
-== RDoc Documentation ==
+== Dokumentacja RDoc ==
 
-Once your plugin is stable and you are ready to deploy do everyone else a favor and document it!  Luckily, writing documentation for your plugin is easy.
+Kiedy nasz plugin jest już stabilny (czyt. częściej działa niż nie działa) i jesteśmy gotowi podzielić się nim z całym światem, wyświadczmy ludzkości przysługę i napiszmy dokumentację. Nie jest to ani trudne, ani męczące.
 
-The first step is to update the README file with detailed information about how to use your plugin.  A few key things to include are:
+Pierwszym krokiem jest aktualizacja pliku README o szczegółowe informacje o tym, jak w ogóle używać naszego plugina. Kilka obowiązkowych punktów:
 
- * Your name
- * How to install
- * How to add the functionality to the app (several examples of common use cases)
- * Warning, gotchas or tips that might help save users time
+ * Autor (pamiętajmy - uznanie, sława i chwała)
+ * Sposób instalacji
+ * Jak dodać funkcjonalności do aplikacji (kilka typowych przypadków użycia)
+ * Ostrzeżenia, wskazówki i generalnie wszystko, co może ułatwić użytkownikowi życie
+ 
+Kiedy nasz plik README jest już gotowy, warto dodać komentarze rdoc do wszystkich metod, których będą używać inni programiści. Zwyczajowo dodaje się komentarz '#:nodoc:' do tych części kodu, które nie są częścią publicznego API.
 
-Once your README is solid, go through and add rdoc comments to all of the methods that developers will use.  It's also customary to add '#:nodoc:' comments to those parts of the code that are not part of the public api.
-
-Once your comments are good to go, navigate to your plugin directory and run:
+Kiedy komentarze są gotowe, przejdź do katalogu pluginu i wykonaj polecenie:
 
 ---------------------------------------------------------
 rake rdoc
