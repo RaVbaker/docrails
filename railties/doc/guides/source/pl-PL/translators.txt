@@ -2,10 +2,10 @@ Osoby, które tłumaczyły przewodniki na język polski
 ===================================================
 
 * Getting Started with Rails MW
-* Rails Database Migrations + Rails Routing from the Outside In MT
-* Active Record Associations LW
+* Rails Database Migrations + Rails Routing from the Outside In *Mateusz Targosz*
+* Active Record Associations *Lidia Wilczyńska*
 * Layouts and Rendering in Rails JZ
-* Basics of Action Controller + Debugging Rails Applications MS
+* Basics of Action Controller + Debugging Rails Applications *Monika Szałas*
 * Securing Rails Applications *Krzysztof Dąbrowski*
-* The Basics of Creating Rails Plugins PŚ lub TT
-* Koordynacja *Aleksander Pohl*
+* The Basics of Creating Rails Plugins *Piotr Śpiałek*
+* Redaktor *Aleksander Pohl*
