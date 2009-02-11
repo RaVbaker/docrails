@@ -1,10 +1,10 @@
-== Migrations ==
+== Migracje ==
 
-If your plugin requires changes to the app's database you will likely want to somehow add migrations.  Rails does not include any built-in support for calling migrations from plugins, but you can still make it easy for developers to call migrations from plugins.
+Jeśli nasz plugin wymaga zmian w bazie danych aplikacji to prawdopodobnie będziemy chcieli użyć migracji. Railsy nie mają wbudowanego wsparcia dla wywoływania migracji z pluginów, ale możemy ułatwić sobie i innym użytkownikom plugina ten proces.
 
-If you have a very simple needs, like creating a table that will always have the same name and columns, then you can use a more simple solution, like creating a custom rake task or method.  If your migration needs user input to supply table names or other options, you probably want to opt for generating a migration.
+Jeśli nasze wymagania są bardzo proste, np. tworzenie tabeli, która zawsze będzie miała taką samą nazwę i kolumny, możemy użyć jeszcze prostszego rozwiązania - stworzyć własne zadanie modułu `rake` lub metodę. Jeśli potrzebujemy czegoś więcej (np. użytkownik ma podać nazwę tabeli lub inne opcje) to lepszym rozwiązaniem będzie użycie migracji.
 
-Let's say you have the following migration in your plugin:
+Powiedzmy, że w naszym pluginie mamy taką migrację:
 
 *vendor/plugins/yaffle/lib/db/migrate/20081116181115_create_birdhouses.rb:*
 
@@ -24,9 +24,9 @@ class CreateBirdhouses < ActiveRecord::Migration
 end
 ----------------------------------------------
 
-Here are a few possibilities for how to allow developers to use your plugin migrations:
+Oto kilka sposobów na to, jak umożliwić deweloperom korzystanie z migracji naszego pluginu:
 
-=== Create a custom rake task ===
+=== Tworzenie własnego zadania modułu rake ===
 
 *vendor/plugins/yaffle/tasks/yaffle_tasks.rake:*
 
@@ -44,7 +44,7 @@ namespace :db do
 end
 ----------------------------------------------
 
-=== Call migrations directly ===
+=== Bezpośrednie wywołanie migracji ===
 
 *vendor/plugins/yaffle/lib/yaffle.rb:*
 
@@ -70,17 +70,17 @@ class CreateBirdhouses < ActiveRecord::Migration
 end
 ----------------------------------------------
 
-.Editor's note:
-NOTE: several plugin frameworks such as Desert and Engines provide more advanced plugin functionality.
+.Od autora:
+NOTE: Niektóre frameworki, takie jak Desert czy Engines, umożliwiają użycie bardziej zaawansowanych funkcjonalności pluginów.
 
-=== Generate migrations ===
+=== Generowanie migracji ===
 
-Generating migrations has several advantages over other methods.  Namely, you can allow other developers to more easily customize the migration.  The flow looks like this:
+Generowanie migracji ma pewną przewagę nad innymi metodami, a mianowicie pozwala innym programistom na łatwiejszą customizację migracji. Proces wygląda następująco:
 
- * call your script/generate script and pass in whatever options they need
- * examine the generated migration, adding/removing columns or other options as necessary
+ * Wywołanie skryptu script/generate i podanie potrzebnych opcji
+ * Analiza wygenerowanych migracji, dodawanie/usuwanie kolumn i inne potrzebne opcje
 
-This example will demonstrate how to use one of the built-in generator methods named 'migration_template' to create a migration file.  Extending the rails migration generator requires a somewhat intimate knowledge of the migration generator internals, so it's best to write a test first:
+Ten przykład pokaże nam jak użyć jednej z wbudowanych metod generatora, 'migration_template', w celu stworzenia pliku migracji. Rozszerzenie railsowego generatora migracji wymaga pewnej wiedzy na temat jego wewnętrznej organizacji, więc najlepiej będzie na początku stworzyć test:
 
 *vendor/plugins/yaffle/test/yaffle_migration_generator_test.rb*
 
@@ -129,10 +129,10 @@ class MigrationGeneratorTest < Test::Unit::TestCase
 end
 ------------------------------------------------------------------
 
-.Editor's note:
-NOTE: the migration generator checks to see if a migation already exists, and it's hard-coded to check the 'db/migrate' directory.  As a result, if your test tries to generate a migration that already exists in the app, it will fail.  The easy workaround is to make sure that the name you generate in your test is very unlikely to actually appear in the app.
+.Od autora:
+NOTE: Generator migracji najpierw sprawdza, czy migracja już istnieje w katalogu 'db/migrate'. W związku z tym, jeśli nasz test będzie generował migrację, która już istnieje, zostanie zwrócony błąd. Najprostszym rozwiązaniem jest nadanie generowanej migracji jakiejś nieprawdopodobnej nazwy, która na pewno nie pojawi się w aplikacji.
 
-After running the test with 'rake' you can make it pass with:
+Jak zwykle, po próbie uruchomienia 'rake' zaprotestuje błędem. Aby błędu nie było, poprawiamy nasz generator:
 
 *vendor/plugins/yaffle/generators/yaffle_migration/yaffle_migration_generator.rb*
 
@@ -165,17 +165,17 @@ class YaffleMigrationGenerator < Rails::Generator::NamedBase
 end
 ------------------------------------------------------------------
 
-The generator creates a new file in 'db/migrate' with a timestamp and an 'add_column' statement.  It reuses the built in rails `migration_template` method, and reuses the built-in rails migration template.
+Generator tworzy nowy plik w 'db/migrate' razem ze stemplem czasowym i deklaracją 'add_column'. Używa wbudowanej w Railsy metody `migration_template` oraz wbudowanego schematu migracji.
 
-It's courteous to check to see if table names are being pluralized whenever you create a generator that needs to be aware of table names.  This way people using your generator won't have to manually change the generated files if they've turned pluralization off.
+Bardzo miłym zwyczajem przy tworzeniu generatora jest sprawdzanie czy nazwy tabeli są pluralizowane (są w liczbie mnogiej). Dzięki temu użytkownicy naszego generatora nie będą musieli ręcznie zmieniać wygenerowanych plików jeśli nie używają pluralizacji.
 
-To run the generator, type the following at the command line:
+Aby uruchomić generator, wywołaj następujące polecenie:
 
 ------------------------------------------------------------------
 ./script/generate yaffle_migration bird
 ------------------------------------------------------------------
 
-and you will see a new file:
+W efekcie zostanie utworzony nowy plik:
 
 *db/migrate/20080529225649_add_yaffle_fields_to_birds.rb*
 
@@ -191,4 +191,3 @@ class AddYaffleFieldsToBirds < ActiveRecord::Migration
   end
 end
 ------------------------------------------------------------------
-
