@@ -1,8 +1,8 @@
-== Add an 'acts_as' method to Active Record ==
+== Dodawanie metody 'acts_as' do modułu Active Record ==
 
-A common pattern in plugins is to add a method called 'acts_as_something' to models.  In this case, you want to write a method called 'acts_as_yaffle' that adds a 'squawk' method to your models.
+Przy tworzeniu pluginów często będziemy dodawać do modeli metodę 'acts_as_something'. W naszym przykładzie napiszemy metodę 'acts_as_yaffle', która sprawi, że nasze modele będą zachowywać się tak jak nasz ulubiony dzięcioł - czyli będą potrafiły skrzeczeć dzięki metodzie 'squawk'.
 
-To begin, set up your files so that you have:
+Na początek troszkę konfiguracji:
 
 *vendor/plugins/yaffle/test/acts_as_yaffle_test.rb*
 
@@ -26,13 +26,13 @@ require 'yaffle/acts_as_yaffle'
 [source, ruby]
 ------------------------------------------------------
 module Yaffle
-  # your code will go here
+  # tutaj będzie nasz kod
 end
 ------------------------------------------------------
 
-Note that after requiring 'acts_as_yaffle' you also have to include it into ActiveRecord::Base so that your plugin methods will be available to the rails models.
+Zauważmy, że po dołączeniu 'acts_as_yaffle' musimy go włączyć również do ActiveRecord::Base, aby metody naszego pluginu były dostępne w modelach Railsów.
 
-One of the most common plugin patterns for 'acts_as_yaffle' plugins is to structure your file like so:
+Najpopularniejszym schematem pluginów typu 'acts_as_yaffle' jest użycie następującej struktury pliku:
 
 *vendor/plugins/yaffle/lib/yaffle/acts_as_yaffle.rb*
 
@@ -44,25 +44,25 @@ module Yaffle
   end
 
   module ClassMethods
-    # any method placed here will apply to classes, like Hickwall
+    # każda zdefiniowana tutaj metoda będzie się odnosiła do klas, np. Hickwall
     def acts_as_something
       send :include, InstanceMethods
     end
   end
 
   module InstanceMethods
-    # any method placed here will apply to instaces, like @hickwall
+    # każda zdefiniowana tutaj metoda będzie się odnosiła do instancji, np. @hickwall
   end
 end
 ------------------------------------------------------
 
-With structure you can easily separate the methods that will be used for the class (like `Hickwall.some_method`) and the instance (like `@hickwell.some_method`).
+Przy takiej strukturze możemy łatwo oddzielić metody klasowe (np. `Hickwall.jakas_metoda`) od instancyjnych (np. `@hickwall.jakas_metoda`).
 
-=== Add a class method ===
+=== Dodawanie metody klasowej ===
 
-This plugin will expect that you've added a method to your model named 'last_squawk'.  However, the plugin users might have already defined a method on their model named 'last_squawk' that they use for something else.  This plugin will allow the name to be changed by adding a class method called 'yaffle_text_field'.
+Nasz plugin oczekuje, że stworzyliśmy w naszym modelu metodę 'last_squawk'. Może się jednak zdarzyć, że przyszły użytkownik pluginu też jest wielbicielem ptactwa leśnego i zdefiniował sobie własną metodę 'last_squawk', która robi coś innego. Dlatego nasz plugin będzie pozwalał na zmianę jej nazwy przy użyciu metody klasowej, którą nazwiemy 'yaffle_text_field'.
 
-To start out, write a failing test that shows the behavior you'd like:
+Na początek napiszemy test, który będzie symulował taką (niepożądaną) sytuację:
 
 *vendor/plugins/yaffle/test/acts_as_yaffle_test.rb*
 
@@ -91,7 +91,7 @@ class ActsAsYaffleTest < Test::Unit::TestCase
 end
 ------------------------------------------------------
 
-To make these tests pass, you could modify your `acts_as_yaffle` file like so:
+Aby test wypadł poprawnie musimy zmodyfikować nasz plik `acts_as_yaffle.rb` w taki sposób:
 
 *vendor/plugins/yaffle/lib/yaffle/acts_as_yaffle.rb*
 
@@ -113,11 +113,11 @@ end
 ActiveRecord::Base.send :include, Yaffle
 ------------------------------------------------------
 
-=== Add an instance method ===
+=== Dodawanie metody instancyjnej ===
 
-This plugin will add a method named 'squawk' to any Active Record objects that call 'acts_as_yaffle'.  The 'squawk' method will simply set the value of one of the fields in the database.
+Nasz plugin będzie dodawał metodę 'squawk' do wszystkich obiektów modułu Active Record, które będą wywoływać 'acts_as_yaffle'. Metoda 'squawk' będzie po prostu ustawiać wartość jakiegoś pola w bazie danych.
 
-To start out, write a failing test that shows the behavior you'd like:
+Na początek znowu stworzymy test, które będzie symulował błędy:
 
 *vendor/plugins/yaffle/test/acts_as_yaffle_test.rb*
 
@@ -158,7 +158,7 @@ class ActsAsYaffleTest < Test::Unit::TestCase
 end
 ------------------------------------------------------
 
-Run this test to make sure the last two tests fail, then update 'acts_as_yaffle.rb' to look like this:
+Po uruchomieniu dwa ostatnie testy powinny skończyć się błędnie. Aby to naprawić, zmodyfikujmy `acts_as_yaffle.rb`:
 
 *vendor/plugins/yaffle/lib/yaffle/acts_as_yaffle.rb*
 
@@ -187,5 +187,5 @@ end
 ActiveRecord::Base.send :include, Yaffle
 ------------------------------------------------------
 
-.Editor's note:
-NOTE: The use of `write_attribute` to write to the field in model is just one example of how a plugin can interact with the model, and will not always be the right method to use.  For example, you could also use `send("#{self.class.yaffle_text_field}=", string.to_squawk)`.
+.Od autora:
+NOTE: Użycie metody `write_attribute` w celu zapisania wartości do pola w modelu jest tylko jednym ze sposobów, w jakie plugin może współpracować z modelem i nie zawsze będzie właściwym rozwiązaniem. Równie dobrze można użyć np. `send("#{self.class.yaffle_text_field}=", string.to_squawk)`.
