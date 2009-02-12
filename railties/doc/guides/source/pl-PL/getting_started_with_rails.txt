@@ -175,14 +175,14 @@ Railsy utworzy folder o nazwie "blog" w Twoim roboczym katalogu. Otwórz ten fol
 |+app/+		|Folder zawiera kontrolery, modele i widoki dla danej aplikacji. Na tym folderze będziemy koncentrować się w dalszej części tego przewodnika.
 |+config/+		|Folder zawierający pliki konfiguracyjne dla aplikacji, odpowiadające za sposoby uruchamiania, bazę danych, ścieżki dostępu etc.
 |+db/+			|Pokazuje aktualny schemat bazy danych, jak również migracje (migration) baz danych. 
-|+doc/+		|In-depth documentation for your application.
+|+doc/+		|Pełna dokumentacja Twojej aplikacji.
 |+lib/+		|Dodatkowe moduły dla Twojej aplikacji, których nie uwzględniono w tym przewodniku
 |+log/+		|Archiwum plików
 |+public/+		|Jedyny całkowicie dostępny publicznie folder. Są to wszelkie zdjęcia, arkusze stylów (CSS),  To właśnie zdjęcia, JavaScript, arkuszy stylów (CSS), JavaScript i inne statyczne pliki wyjściowe
 |+script/+		|Skrypty dostarczone przez Rails w celu wykonywania powtarzających się zadań, takich jak analiza porównawcza, instalowanie wtyczek (plugin) i uruchamianiu konsoli lub serwera WWW
-|+test/+		|Unit tests, fixtures, and other test apparatus. Są one opisane w: link:../testing_rails_applications.html[Testowanie aplikacji Rails]
+|+test/+		|Testy jednostkowe, tak zwane "fixtures" oraz inne narzędzia służące do przeprowadzania testów.  Są one opisane w: link:../testing_rails_applications.html[Testowanie aplikacji Rails]
 |+tmp/+		|Pliki tymczasowe
-|+vendor/+		|A place for third-party code. W standardowej aplikacji środowiska Rails, zawiera Ruby Gems, kod źródłowy Rubiego (jeśli zastosujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
+|+vendor/+		|Miejsce na kod którego sami nie napisaliśmy, ale chcemy wykorzystać (tak zwani "trzeci dostawcy"). W standardowej aplikacji środowiska Rails, zawiera Ruby Gems, kod źródłowy Rubiego (jeśli zastosujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
 |==========================================================================================================
 
 === Konfiguracja bazy danych
@@ -266,9 +266,9 @@ Jednym z tradycyjnych sposobów uczenia się nowego języka jest pobieżne przeg
 $ script/generate controller home index
 -------------------------------------------------------
 
-TIP: If you're on Windows, or your Ruby is set up in some non-standard fashion, you may need to explicitly pass Rails +script+ commands to Ruby: +ruby script/generate controller home index+.
+TIP: Jeżeli używasz Windows, lub gdy twój Ruby jest skonfigurowany w niestandardowy sposób, możliwe że będziesz potrzebował przekazać komendy +script+ Railsów bezpośrednio do Rubyego: +ruby script/generate controller home index+.
 
-Rails stworzy dla Ciebie parę plików, włączając w to +app/views/home/index.html.erb+. To jest szablon, który będzie używany do pokazywania efektów +index+ action (method) w +home+ kontrolerze. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego ta pojedynczą linijkę kodu:
+Rails stworzy dla Ciebie parę plików, włączając w to +app/views/home/index.html.erb+ - czyli szablon, który będzie używany do pokazywania efektów +index+ action (method) w +home+ kontrolerze. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego ta pojedynczą linijkę kodu:
 
 
 [source, html]
@@ -319,46 +319,46 @@ By połączyć Twoją stronę domową, będziesz potrzebować kolejnej linii do 
 map.root :controller => "home"
 -------------------------------------------------------
 
-Ta linia pokazuje jedną mała część próby "convention over configuration"; jeśli nie określisz akcji, Railsy przyjmą akcję +index+.
+Ta linijka ilustruje jeden mały kawałek podejścia zwanego „konwencja ponad konfiguracją” ("convention over configuration"): jeżeli nie podasz żadnej akcji, Rails założy domyślnie akcję +index+.
 
 Po przejściu do strony +http://localhost:3000+ , zobaczysz widok +home/index+ .
 
-NOTE: For more information about routing, refer to link:../routing_outside_in.html[Rails Routing from the Outside In].
+NOTE: Więcej informacji na temat routingu znajdziesz w link:../routing_outside_in.html[Rails Routing from the Outside In].
 
-== Szybki początek z rusztowaniem.
+== Szybki start dzięki rusztowaniu.
 
 Railsowe rusztowanie (_scaffolding_) jest szybkim sposobem na stworzenia znacznej części programu. Jeśli chcesz stworzyć modele, widoki i kontrolery dla nowych zasobów w pojedynczej operacji, to jest to odpowiednim narzędziem dla Ciebie.
 
 == Creating a Resource
 
-In the case of the blog application, you can start by generating a scaffolded Post resource: this will represent a single blog posting. To do this, enter this command in your terminal:
+W przypadku programów takich jak blog, możesz zacząć od stworzenia obiektu typu Post („Post resource”), który odpowiada za pojedynczy post blogu, w oparciu o rusztowania. By to zrobić, wprowadź następującą komendę do terminalu:
 
 [source, shell]
 -------------------------------------------------------
 $ script/generate scaffold Post name:string title:string content:text
 -------------------------------------------------------
 
-NOTE: While scaffolding will get you up and running quickly, the "one size fits all" code that it generates is unlikely to be a perfect fit for your application. In most cases, you'll need to customize the generated code. Many experienced Rails developers avoid scaffolding entirely, preferring to write all or most of their source code from scratch.
+NOTE: Chociaż rusztowanie pozwoli Ci szybko rozpocząć pisanie programu, ten uniwersalny, działający wszędzie kod raczej nie będzie idealnie pasować do Twojej aplikacji. W większości przypadków będziesz musiał samodzielnie dokonać w nim zmian. Wielu doświadczonych programistów Rails unika używania rusztowań na rzecz pisania większości kodu źródłowego od podstaw, bez używania gotowych wzorców.
 
-The scaffold generator will build 13 files in your application, along with some folders, and edit one more. Here's a quick overview of what it creates:
+Generator rusztowania zbuduje w Twoim programie 14 plików, wspólnie z paroma folderami, i jeden dodatkowo edytuje. Oto krótki przegląd tego co tworzy:
 
 [options="header"]
 |==========================================================================================================
 |File                                          |Purpose
-|app/models/post.rb                            |The Post model
-|db/migrate/20081013124235_create_posts.rb     |Migration to create the posts table in your database (your name will include a different timestamp)
-|app/views/posts/index.html.erb                |A view to display an index of all posts 
-|app/views/posts/show.html.erb                 |A view to display a single post
-|app/views/posts/new.html.erb                  |A view to create a new post
-|app/views/posts/edit.html.erb                 |A view to edit an existing post
-|app/views/layouts/posts.html.erb              |A view to control the overall look and feel of the other posts views
-|public/stylesheets/scaffold.css               |Cascading style sheet to make the scaffolded views look better
-|app/controllers/posts_controller.rb           |The Posts controller
-|test/functional/posts_controller_test.rb      |Functional testing harness for the posts controller
-|app/helpers/posts_helper.rb                   |Helper functions to be used from the posts views
-|config/routes.rb                              |Edited to include routing information for posts
-|test/fixtures/posts.yml                       |Dummy posts for use in testing
-|test/unit/post_test.rb                        |Unit testing harness for the posts model
+|app/models/post.rb                            |Model Postu
+|db/migrate/20081013124235_create_posts.rb     |Migracja do tworzenia tabel postów w Twojej bazie danych (nazwa którą wpiszesz będzie zawierać rózne znaczniki czasowe)
+|app/views/posts/index.html.erb                |Widok dla indeksu wszystkich postów 
+|app/views/posts/show.html.erb                 |Widok dla pojedynczego postu
+|app/views/posts/new.html.erb                  |Widok dla tworzenia nowego postu
+|app/views/posts/edit.html.erb                 |Widok dla edycji postu
+|app/views/layouts/posts.html.erb              |Widok określający całościowy wygląd i działanie innych widoków dla postów.
+|public/stylesheets/scaffold.css               |Poprawianie wyglądu przy użyciu szablonu stylów CSS
+|app/controllers/posts_controller.rb           |Kontroler postów
+|test/functional/posts_controller_test.rb      |Testy funkcjonalności dla kontrolerów postów
+|app/helpers/posts_helper.rb                   |Helpery (helper functions) używane przy widokach postów
+|config/routes.rb                              |Plik zawierający informacje routingowe dla postów
+|test/fixtures/posts.yml                       |Posty testowe
+|test/unit/post_test.rb                        |Testy funkcjonalności dla modeli postów
 |==========================================================================================================
 
 === Running a Migration
