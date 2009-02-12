@@ -652,11 +652,11 @@ head :created, :location => photo_path(@photo)
 
 == Strukturyzacja layoutów
 
-Kiedy Railsy renderują widok jako odpowiedź czynią to poprzez połączenie widoku z
-bieżącym layoutem (stosując zasady znalezienia aktualnego layoutu,
+Kiedy Railsy renderują widok, łączą go z
+bieżącym layoutem (stosując zasady wyboru layoutu,
 które zostały omówione we wcześniejszej części tutoriala). W layoucie masz dostęp
-do trzech narzędzi służących do łączenia różnych bitów wyjścia do postaci ogólnej
-odpowiedzi:
+do trzech narzędzi służących do łączenia różnych elementów do postaci
+wynikowej:
 
 * Asset tags
 * +yield+ i +content_for+
@@ -676,17 +676,17 @@ tagów włączających:
 * image_tag
 
 Możesz używać tych tagów w layoutach lub innych widokach, choć tagi inne niż +image_tag+
-są powszechnie używane w sekcji+<head>+ layoutu.
+są powszechnie używane w sekcji +<head>+ layoutu.
 
-WARNING: Asset tags _nie_ weryfikują tego czy dany element zewnętrzny istnieje w określonym
-miejscu. Po prostu zakładają, że wiesz co robisz i generują link.
+WARNING: Asset tags _nie_ weryfikują tego czy dany element zewnętrzny istnieje w 
+określonym miejscu. Po prostu zakładają, że wiesz co robisz i generują link.
 
 ==== Włączanie kanałów za pomocą +auto_discovery_link_tag+
 
 +auto_discovery_link_tag helper+ buduje HTML, który większość przeglądarek i czytników
-wiadomości może użyć do sprawdzenia czy istnieją kanały RSS lub ATOM. Pobiera to typ
-połączenia (+:rss+ or +:atom+),  hash opcji, które są przekazywane poprzez url_for
-i hash opcji dla tagu:
+wiadomości może użyć do sprawdzenia czy istnieją kanały RSS lub ATOM.
+Wywołanie to akceptuje typ połączenia (+:rss+ or +:atom+),  
+hash opcji, które są przekazywane do +url_for+ i hash opcji dla tagu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -697,11 +697,14 @@ Istnieją trzy opcje dostępne dla  +auto_discovery_link_tag+:
 
 * +:rel+ określa wartość +rel+ w połączeniu (domyślnie ustawione na "alternate")
 * +:type+ określa dokładny typ MIME. Railsy automatycznie wygenerują odpowiedni typ MIME
-* +:title+ określa tytuł połączenia
+* +:title+ określa tytuł kanału
 
 ==== Włączanie plików JavaScript za pomocą +javascript_include_tag+
 
-Narzędzie +javascript_include_tag+ zwraca tag HTML +<script>+ dla każdego dostarczonego źródła. Railsy szukają tych plików domyślnie w +public/javascripts+, ale jeśli wolisz można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład aby włączyć +public/javascripts/main.js+:
+Helper +javascript_include_tag+ zwraca tag HTML +<script>+ dla każdego dostarczonego
+źródła. Railsy szukają tych plików domyślnie w +public/javascripts+, ale jeśli wolisz
+można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład
+aby włączyć +public/javascripts/main.js+:
 	
 [source, ruby]
 -------------------------------------------------------
@@ -736,28 +739,33 @@ Opcja +defaults+ wczytuje biblioteki Prototype i Scriptaculous:
 <%= javascript_include_tag :defaults %>
 -------------------------------------------------------
 
-Opcja +all+ wczytuje każdy plik javascript w +public/javascripts+, zaczynając od bibliotek Prototype i Scriptaculous:
+Opcja +all+ wczytuje każdy plik javascript w +public/javascripts+, zaczynając od bibliotek
+Prototype i Scriptaculous:
 
 [source, ruby]
 -------------------------------------------------------
 <%= javascript_include_tag :all %>
 -------------------------------------------------------
 
-Możesz dołączyć opcję +:recursive+ by ładować również pliki w podfolderach +public/javascripts+:
+Możesz dołączyć opcję +:recursive+ by ładować również pliki w podfolderach 
++public/javascripts+:
 
 [source, ruby]
 -------------------------------------------------------
 <%= javascript_include_tag :all, :recursive => true %>
 -------------------------------------------------------
 
-Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność poprzez połączenie wielu plików w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz +:cache => true+ wewnątrz +javascript_include_tag+:
+Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność poprzez połączenie
+wielu plików w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
++:cache => true+ wewnątrz +javascript_include_tag+:
 
 [source, ruby]
 -------------------------------------------------------
 <%= javascript_include_tag "main", "columns", :cache => true %>
 -------------------------------------------------------
 
-Domyślnie połączony plik będzie dostarczony jako +javascripts/all.js+. Możesz zamiast tego wybrać lokalizację dla załączanego pliku:
+Domyślnie połączony plik będzie dostarczony jako +javascripts/all.js+. Możesz zamiast
+tego wybrać lokalizację dla załączanego pliku:
 
 [source, ruby]
 -------------------------------------------------------
@@ -768,7 +776,10 @@ Możesz również używać dynamicznych ścieżek takich jak +"cache/#{current_s
 	
 ==== Włączanie plików CSS za pomocą +stylesheet_link_tag+
 
-Narzędzie +stylesheet_link_tag+ zwraca tag HTML +<link>+ dla każdego dostarczonego źródła. Railsy szukają tych plików domyślnie w +public/stylesheets+, ale jeśli wolisz, można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład aby włączyć +public/stylesheets/main.cs+:
+Helper +stylesheet_link_tag+ zwraca tag HTML +<link>+ dla każdego dostarczonego
+źródła. Railsy szukają tych plików domyślnie w +public/stylesheets+, ale jeśli wolisz,
+można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład
+aby włączyć +public/stylesheets/main.cs+:
 	
 [source, ruby]
 -------------------------------------------------------
@@ -796,7 +807,9 @@ By włączyć +http://example.com/main.cs+:
 <%= stylesheet_link_tag "http://example.com/main.cs" %>
 -------------------------------------------------------
 
-Domyślnie +stylesheet_link_tag+ tworzy połączenia z +media="screen" rel="stylesheet" type="text/css"+. Możesz nadpisać dowolne z nich poprzez użycie odpowiedniej opcji (:media, :rel, or :type):
+Domyślnie +stylesheet_link_tag+ tworzy połączenia z +media="screen" rel="stylesheet"
+type="text/css"+. Możesz nadpisać dowolne z nich poprzez użycie odpowiedniej opcji
+(:media, :rel, lub :type):
 
 [source, ruby]
 -------------------------------------------------------
@@ -810,32 +823,39 @@ Opcja +all+ załącza każdy plik CSS w +public/stylesheets+:
 <%= stylesheet_link_tag :all %>
 -------------------------------------------------------
 
-Możesz wykorzystać opcję +:recursive+ by załączyć wszystkie pliki w podfolderach +public/stylesheets+:
+Możesz wykorzystać opcję +:recursive+ by załączyć wszystkie pliki w podfolderach
++public/stylesheets+:
 
 [source, ruby]
 -------------------------------------------------------
 <%= stylesheet_link_tag :all, :recursive => true %>
 -------------------------------------------------------
 
-Jeśli wczytujesz wiele plików CSS, możesz polepszyć efektywność poprzez połączenie wielu plików w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz +:cache => true+ wewnątrz +stylesheet_link_tag+:
+Jeśli wczytujesz wiele plików CSS, możesz polepszyć efektywność poprzez połączenie
+wielu plików w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
++:cache => true+ wewnątrz +stylesheet_link_tag+:
 
 [source, ruby]
 -------------------------------------------------------
 <%= stylesheet_link_tag "main", "columns", :cache => true %>
 -------------------------------------------------------
 
-Domyślnie połączony plik będzie dostarczony jako +stylesheets/all.css+. Możesz zamiast tego wybrać lokalizację dla załączanego pliku:	
+Domyślnie połączony plik będzie dostarczony jako +stylesheets/all.css+. Możesz zamiast
+tego wybrać lokalizację dla załączanego pliku:	
 
 [source, ruby]
 -------------------------------------------------------
 <%= stylesheet_link_tag "main", "columns", :cache => 'cache/main/display' %>
 -------------------------------------------------------
 
-Możesz również użyć dynamicznych ścieżek takich jak: +"cache/#{current_site}/main/display"+.
+Możesz również użyć dynamicznych ścieżek takich jak: 
++"cache/#{current_site}/main/display"+.
 	
 ==== Załączanie obrazków za pomocą +image_tag+
 
-Narzędzie +image_tag+ zwraca tag HTML +<image>+ dla każdego dostarczonego źródła. Railsy szukają tych plików domyślnie w +public/images+. Jeśli nie podasz rozszerzenia domyślnie przyjmowane jest .png:
+Helper +image_tag+ zwraca tag HTML +<image>+ dla każdego dostarczonego źródła.
+Railsy szukają tych plików domyślnie w +public/images+. Jeśli nie podasz rozszerzenia
+domyślnie przyjmowane jest .png:
 
 [source, ruby]
 -------------------------------------------------------
@@ -858,13 +878,18 @@ Możesz podać hash dodatkowych opcji HTML:
 
 Istnieją również trzy specjalne opcje, które można używać z +image_tag+:
 
-* +:alt+ określa alternatywny tekst dla obrazka (który domyślnie jest nazwą pliku, napisaną wielkimi literami bez rozszerzenia)
-* +:size+ ustawia zarówno szerokość jak i wysokość, w formacie "{width}x{height}" (for example, "150x125")
-* +:mouseover+ ustawia alternatywny obrazek, który ma być użyty w przypadku, gdy wywołane jest zdarzenie onmouseover.
+* +:alt+ określa alternatywny tekst dla obrazka (który domyślnie jest nazwą pliku,
+  napisaną wielkimi literami bez rozszerzenia)
+* +:size+ ustawia zarówno szerokość jak i wysokość, w formacie "{width}x{height}"
+  (for example, "150x125")
+* +:mouseover+ ustawia alternatywny obrazek, który ma być użyty w przypadku, gdy wywołane
+  jest zdarzenie onmouseover.
 
 === Zrozumienie +yield+
 
-W ramach kontekstu layoutu, +yield+ identyfikuje sekcję do której powinna być wstawiona zawartość widoku. Najprostszym sposobem użycia jest posiadanie jednego +yield+, w które powinna być wstawiana cała zawartość obecnie renderowanego widoku.
+W ramach kontekstu layoutu, +yield+ identyfikuje sekcję do której powinna być wstawiona
+zawartość widoku. Najprostszym sposobem użycia jest posiadanie jednego +yield+, w
+którym powinna być wstawiana cała zawartość obecnie renderowanego widoku.
 
 [source, html]
 -------------------------------------------------------
@@ -891,11 +916,14 @@ Można również tworzyć layout z wieloma miejscami wstawiania kodu.
 </html>
 -------------------------------------------------------
 
-Główna część widoku będzie zawsze renderowana do nienazwanego +yield+. Aby wyrenderować zawartość w nazwany +yield+, należy użyć metody +content_for+.
+Główna część widoku będzie zawsze renderowana do +yield+ bez argumentu. Aby wyrenderować
+zawartość w nazwanym +yield+, należy użyć metody +content_for+.
 
 === Używanie +content_for+
 
-Metoda ta pozwala wstawić treść do bloku +yield+ w twoim layoucie. Używa się +content_for+ tylko po to by wstawić zawartość w nazwane yieldy. Dla przykładu, ten widok będzie współpracował z powyższym layoutem:
+Metoda ta pozwala wstawić treść do bloku +yield+ w twoim layoucie. Używa się +content_for+
+tylko po to by wstawić zawartość w nazwane yieldy. Dla przykładu, ten widok będzie
+współpracował z powyższym layoutem:
 
 [source, html]
 -------------------------------------------------------
@@ -906,7 +934,7 @@ Metoda ta pozwala wstawić treść do bloku +yield+ w twoim layoucie. Używa si�
 <p>Hello, Rails!</p>
 -------------------------------------------------------
 
-Wynik renderowania tej strony w ten layout powinien być taki:
+Wynik renderowania tej strony z tym layoutem powinien być taki:
 
 [source, html]
 -------------------------------------------------------
@@ -920,22 +948,33 @@ Wynik renderowania tej strony w ten layout powinien być taki:
 </html>
 -------------------------------------------------------
 
-Metoda +content_for+ jest bardzo przydatna kiedy twój layout posiada odrębne regiony, takie jak paski boczne i stopki, które powinny mieć wstawiane własne bloki zawartości. Jest to także przydatne do wstawiania tagów które wczytują specyficzny dla danej strony plik javascript lub css w nagłówek layoutu.
+Metoda +content_for+ jest bardzo przydatna kiedy twój layout posiada odrębne regiony,
+takie jak paski boczne i stopki, które powinny mieć wstawiane własne bloki zawartości.
+Jest to także przydatne do wstawiania tagów które wczytują specyficzny dla danej strony
+plik javascript lub css w nagłówek layoutu.
 
 === Używanie podszablonów
 
-Częściowe szablony (ang. partials templates) – zazwyczaj nazywane po prostu podszablonami (ang. partials) - są kolejnym narzędziem służącym do dzielenia procesu renderowania na mniejsze kawałki. Za pomocą podszablonów, możesz przenieść kod renderujący odpowiedniej części odpowiedzi do jego własnego pliku.
+Częściowe szablony (ang. partial templates) – zazwyczaj nazywane po prostu podszablonami
+lub ,,parszalami'' - są kolejnym narzędziem służącym do dzielenia procesu renderowania
+na mniejsze kawałki. Za pomocą podszablonów, możesz przenieść kod renderujący odpowiedniej
+części odpowiedzi do jego własnego pliku.
 
 ==== Nazywanie podszablonów
 
-By wyrenderować podszablon jako część widoku, musisz użyć metody render wewnątrz tego widoku i dołączyć opcję +:partial+:
+By wyrenderować podszablon jako część widoku, musisz użyć metody render wewnątrz tego
+widoku i dołączyć opcję +:partial+:
 
 [source, ruby]
 -------------------------------------------------------
 <%= render :partial => "menu" %>
 -------------------------------------------------------
 
-To wyrenderuje plik nazwany +_menu.html.erb+ w tym momencie wewnątrz aktualnie renderowanego widoku. Zauważ początkowy znak podkreślenia: podszablony są nazywane w ten sposób by odróżnić je od zwyczajnych widoków, nawet jeśli odnosi się do nich bez podkreślenia. To działa nawet jeśli włączasz podszablon z zupełnie innego folderu:
+To wyrenderuje plik nazwany +_menu.html.erb+ w tym momencie wewnątrz aktualnie 
+renderowanego widoku. Zauważ początkowy znak podkreślenia: 
+podszablony są nazywane w ten sposób
+by odróżnić je od zwyczajnych widoków, nawet jeśli odnosi się do nich bez podkreślenia.
+To działa nawet jeśli włączasz podszablon z zupełnie innego folderu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -946,7 +985,10 @@ Ten kod włączy podszablon z +app/views/shared/_menu.html.erb+.
 
 ==== Korzystanie z podszablonów do uproszczenia widoków
 
-Jednym ze sposobów wykorzystania z podszablonów jest traktowanie ich jako odpowiednik procedur: jako sposób aby przenieść detale na zewnątrz widoku, tak by łatwiej zrozumieć co się dzieje wewnątrz. Na przykład, możesz mieć widok, który wygląda w ten sposób:
+Jednym ze sposobów wykorzystania podszablonów jest traktowanie ich jako
+odpowiedników procedur: jako sposób aby przenieść 
+detale na zewnątrz widoku, tak by łatwiej zrozumieć
+co się dzieje wewnątrz. Na przykład, możesz mieć widok, który wygląda w ten sposób:
 
 [source, html]
 -------------------------------------------------------
@@ -960,24 +1002,34 @@ Jednym ze sposobów wykorzystania z podszablonów jest traktowanie ich jako odpo
 <%= render :partial => "shared/footer" %>
 -------------------------------------------------------
 
-Tutaj, podszablony +_ad_banner.html.erb+ i +_footer.html.erb+  mogą zawierać zawartość, która jest dzielona międz wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć szczegółów tych sekcji, kiedy koncentrujesz się na konkretnej stronie.
+Tutaj, podszablony +_ad_banner.html.erb+ i +_footer.html.erb+  mogą zawierać zawartość,
+która jest dzielona międz wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć
+szczegóły tych sekcji, kiedy koncentrujesz się na konkretnej stronie.
 
-TIP: W przypadku treści, które są dzielone pomiędzy wszystkie strony twojej aplikacji możesz użyć podszablonów bezpośrednio z layoutów.
+TIP: W przypadku treści, które są dzielone pomiędzy wszystkie strony twojej aplikacji
+możesz użyć podszablonów bezpośrednio z layoutów.
 
-==== Partial Layouts
+==== Layouty podszablonów
 
-Podszablon może użyć swojego własnego pliku layoutu, tak samo jak może to robić widok. Na przykład możesz odwołać się do niego w ten sposób:
+Podszablon może użyć swojego własnego pliku layoutu, tak samo jak może to robić widok.
+Na przykład możesz odwołać się do niego w ten sposób:
 
 [source, html]
 -------------------------------------------------------
 <%= render :partial => "link_area", :layout => "graybar" %>
 -------------------------------------------------------
 
-Będzie to szukać podszablonu nazwanego +_link_area.html.erb+ i wyrenderuje go używając +_graybar.html.erb+. Zauważ, że layouty dla podszablonów podlegają tym samym zasadom nazewnictwa co zwykłe podszablony i są umiejscowione w tym samym folderze, w którym znajdują się im odpowiadające podszablony (nie w głównym folderze +layouts+).
+Będzie to szukać podszablonu nazwanego +_link_area.html.erb+ i wyrenderuje go używając
++_graybar.html.erb+. Zauważ, że layouty dla podszablonów podlegają tym samym zasadom
+nazewnictwa co zwykłe podszablony i są umiejscowione w tym samym folderze, w którym
+znajdują się im odpowiadające podszablony (nie w głównym folderze +layouts+).
 
 ==== Przekazywanie lokalnych zmiennych
 
-Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich nawet bardziej potężne i elastyczne narzędzie. Na przykład możesz użyć tej techniki do zredukowania powtarzania pomiędzy stronami new i edit, wciąż jednak utrzymując w nich nieco odmienną treść:
+Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich nawet bardziej
+potężne i elastyczne narzędzie. Na przykład możesz użyć tej techniki do zredukowania
+powtarzania pomiędzy stronami new i edit, wciąż jednak utrzymując w nich nieco odmienną
+treść:
 
 +new.html.erb+:
 
@@ -1012,31 +1064,41 @@ Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich n
 <% end %>
 -------------------------------------------------------
 
-Jakkolwiek ten sam podszablon będzie renderowany w obu widokach, etykieta na przycisku wysyłającym jest kontrolowana przez lokalną zmienną przekazywaną do podszablonów.
+Jakkolwiek ten sam podszablon będzie renderowany w obu widokach, etykieta na przycisku
+wysyłającym jest kontrolowana przez lokalną zmienną przekazywaną do podszablonów.
 
-Każdy podszablon ma także lokalną zmienną z taką samą nazwą jak on sam (minus podkreślenie). Możesz przekazać obiekt do tej lokalnej zmiennej za pomocą opcji +:object+.
+Każdy podszablon ma także lokalną zmienną z taką samą nazwą jak on sam (minus podkreślenie).
+Możesz przekazać obiekt do tej lokalnej zmiennej za pomocą opcji +:object+.
 
 [source, html]
 -------------------------------------------------------
 <%= render :partial => "customer", :object => @new_customer %>
 -------------------------------------------------------
 
-Wewnątrz podszablonu +customer+, zmienna +@customer+ będzie odwoływać się do +@new_customer+ od rodzica.
+Wewnątrz podszablonu +customer+, zmienna +customer+ będzie odwoływać się do +@new_customer+
+przekazanej od rodzica.
 
-WARNING: W poprzednich wersjach Railsów, domyślna zmienna lokalna szukała instancji zmiennej o takiej samej nazwie jak podszablon w rodzicu. Takie zachowanie jest niezalecane w Railsach 2.2 i będzie usunięte w przyszłych wersjach.
+WARNING: W poprzednich wersjach Railsów, domyślna zmienna lokalna szukała 
+w szablonie nadrzędnym zmiennej instancyjnej o takiej samej nazwie jak podszablon. 
+Takie zachowanie jest niezalecane w Railsach 2.2 i będzie usunięte 
+w przyszłych wersjach.
 
-Jeśli masz instancje modelu do wyrenderowania w podszablonie możesz użyć skróconego zapisu:
+Jeśli masz instancje modelu do wyrenderowania w podszablonie, możesz użyć skróconego
+zapisu:
 
 [source, html]
 -------------------------------------------------------
 <%= render :partial => @customer %>
 -------------------------------------------------------
 
-Zakładając, że zmienna +@customer+ zawiera instancje modelu +Customer+, użyty zostanie +_customer.html.erb+ do renderowania.
+Zakładając, że zmienna +@customer+ zawiera instancje modelu +Customer+,  do renderowania 
+użyty zostanie +_customer.html.erb+.
 
 ==== Renderowanie kolekcji
 
-Podszablony są bardzo przydatne w renderowaniu kolekcji . Kiedy przekazujesz kolekcje do podszablonu poprzez opcję +:collection+, podszablon będzie wstawiony do każdego elementu kolekcji.
+Podszablony są bardzo przydatne w renderowaniu kolekcji . Kiedy przekazujesz kolekcje do
+podszablonu poprzez opcję +:collection+, podszablon będzie wstawiony do każdego elementu
+kolekcji.
 
 +index.html.erb+:
 
@@ -1053,27 +1115,40 @@ Podszablony są bardzo przydatne w renderowaniu kolekcji . Kiedy przekazujesz ko
 <p>Product Name: <%= product.name %></p>
 -------------------------------------------------------
 
-Kiedy podszablon jest renderowany z mnogą kolekcją, to każda indywidualna instancja podszablonu ma dostęp do renderowanego elementu kolekcji poprzez zmienną nazwaną po tym podszablonie. W tym przypadku podszablonem jest +_product+, i wewnątrz niego możesz odwołać się do +product+ by uzyskać aktualnie renderowaną instancję. Aby użyć wybranej nazwy zmiennej wewnątrz podszablonu, użyj opcji +:as+ podczas jego wywołania:
+Kiedy podszablon jest renderowany z kolekcją, to każda indywidualna instancja
+podszablonu ma dostęp do renderowanego elementu kolekcji poprzez zmienną
+nazwaną tak jak podszablon. W tym przypadku podszablonem 
+jest +_product+, i wewnątrz niego możesz odwołać się do zmiennej +product+ by
+uzyskać aktualnie renderowaną instancję. Aby użyć innej
+nazwy zmiennej wewnątrz podszablonu, użyj opcji +:as+ podczas jego wywołania:
 
 [source, html]
 -------------------------------------------------------
 <%= render :partial => "product", :collection => @products, :as => :item %>
 -------------------------------------------------------
 
-Dzięki tej zmianie można uzyskać dostęp do instancji kolekcji +@product+ jako lokalną zmienną +item+ wewnątrz podszablonu.
+Dzięki tej zmianie  wewnątrz podszablonu można uzyskać dostęp 
+do instancji kolekcji +@product+ przez lokalną zmienną +item+.
 
-TIP:  Railsy tworzą również zmienną licznikową dostępną wewnątrz podszablonu wywołanego przez kolekcję, nazwaną po elemencie kolekcji z dodanym sufiksem +_counter+. Na przykład, jeśli renderujesz +@products+ wewnątrz podszablonu możesz odwołać się do +product_counter+ by dowiedzieć się ile razy podszablon został wyrenderowany.
+TIP:  Railsy tworzą również zmienną licznikową dostępną wewnątrz podszablonu wywołanego
+przez kolekcję, nazwaną tak jak element kolekcji z dodanym sufiksem +_counter+. Na
+przykład, jeśli renderujesz +@products+ wewnątrz podszablonu możesz odwołać się do
++product_counter+ by dowiedzieć się ile razy podszablon został wyrenderowany.
 
-Możesz również określić drugi podszablon do wyrenderowania pomiędzy instancjami głównego podszablonu poprzez użycie opcji +:spacer_template+:
+Możesz również określić drugi podszablon do wyrenderowania pomiędzy instancjami głównego
+podszablonu poprzez użycie opcji +:spacer_template+:
 
 [source, html]
 -------------------------------------------------------
 <%= render :partial => "product", :collection => @products, :spacer_template => "product_ruler" %>
 -------------------------------------------------------
 
-Railsy wyrenderują podszablon +_product_ruler+ (bez danych przekazywanych do niego) pomiędzy każdą parą podszablonów +_product+.
+Railsy wyrenderują podszablon +_product_ruler+ (bez danych przekazywanych do niego)
+pomiędzy każdą parą podszablonów +_product+.
 
-Jest również dostępna skrócona wersja zapisu dla renderowania kolekcji. Na przykład, jeśli +@products+ jest kolekcją produktów to możesz wyrenderować tą kolekcję w ten sposób:
+Jest również dostępna skrócona wersja zapisu dla renderowania kolekcji. Na
+przykład, jeśli +@products+ jest kolekcją produktów to możesz 
+wyrenderować ją w ten sposób:
 
 +index.html.erb+:
 
@@ -1090,7 +1165,9 @@ Jest również dostępna skrócona wersja zapisu dla renderowania kolekcji. Na p
 <p>Product Name: <%= product.name %></p>
 -------------------------------------------------------
 
-Railsy określają nazwę podszablonu do użycia poprzez patrzenie na nazwę modelu w kolekcji. W istocie, można również stworzyć różnorodną kolekcję i renderować ją w ten sposób, a Railsy wybierają właściwy podszablon dla każdego członka kolekcji.
+Railsy określają nazwę podszablonu do użycia poprzez patrzenie na nazwę modelu w
+kolekcji. W istocie, można również stworzyć różnorodną kolekcję i renderować ją w ten
+sposób, a Railsy wybierają właściwy podszablon dla każdego członka kolekcji.
 
 +index.html.erb+:
 
@@ -1114,11 +1191,16 @@ Railsy określają nazwę podszablonu do użycia poprzez patrzenie na nazwę mod
 <p>Name: <%= employee.name %></p>
 -------------------------------------------------------
 
-W tym przypadku, Railsy użyją podszablonu customer lub employee jako odpowiednie dla każdego elementu kolekcji.
+W tym przypadku, Railsy użyją podszablonu customer lub employee jako odpowiednie dla
+każdego elementu kolekcji.
 
 === Korzystanie z zagnieżdżonych layoutów
 
-Może się okazać, że twoja aplikacja wymaga layoutu zupełnie różniącego się od zwyczajnego layoutu twojej aplikacji by obsłużyć to jednym kontrolerem. Zamiast powtarzać główny layout i tylko odpowiednio go edytować można tego dokonać za pomocą zagnieżdżonych layoutów (niekiedy nazywanych sub-szablonami (ang. sub-templates)). Oto przykład:
+Może się okazać, że twoja aplikacja w jednym kontrolerze wymaga layoutu zupełnie
+różniącego się od zwyczajnego layoutu twojej aplikacji.
+Zamiast kopiować główny layout i tylko odpowiednio go edytować można tego dokonać za
+pomocą zagnieżdżonych layoutów.
+Oto przykład:
 
 Załóżmy, że masz następujący layout ApplicationController:
 
@@ -1153,15 +1235,20 @@ Na stronach generowanych przez NewsController, chciałbyś ukryć górne menu i 
 <% content_for :main %>
   <div id="right_menu">Right menu items here</div>
   <%= yield %>
-  <% end -%>
+<% end -%>
 <% render :file => 'layouts/application' %>
 -------------------------------------------------------
 
-NOTE: W wersjach Railsów przed Railsami 2.3, powinieneś użyć +render \'layouts/applications\'+ zamiast +render :file => \'layouts/applications\'+
+NOTE: W wersjach Railsów wcześniejszych niż 2.3, powinieneś użyć +render
+\'layouts/applications\'+ zamiast +render :file => \'layouts/applications'+
 
 To wszystko. Widok News będzie używał nowego layoutu, ukrywającego górne menu i dodającego prawe menu wewnątrz div "content".
 
-Istnieje kilka sposobów otrzymania podobnych wyników za pomocą różnych schematów wykorzystania sub-szablonów wykorzystujących tą technikę. Należy pamiętać, że nie ma limitu poziomu zagnieżdżenia. Można wykorzystać metodę +ActionView::render+ poprzez +render \'layouts/news\'+ by ulokować nowy layout w layoucie News.
+Istnieje kilka sposobów otrzymania podobnych wyników za pomocą różnych schematów
+wykorzystania zagnieżdżonych layoutów wykorzystujących tą technikę. 
+Należy pamiętać, że nie ma
+limitu poziomu zagnieżdżenia. Można wykorzystać metodę +ActionView::render+ poprzez
++render \'layouts/news'+ by ulokować nowy layout w layoucie News.
 
 == Changelog ==
 
