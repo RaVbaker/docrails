@@ -1,10 +1,10 @@
-== Creating A Migration ==
+== Tworzenie migracji ==
 
-=== Creating a model ===
+=== Tworzenie modelu ===
 
-The model and scaffold generators will create migrations appropriate for adding a new model. This migration will already contain instructions for creating the relevant table. If you tell Rails what columns you want then statements for adding those will also be created. For example, running
+Generatory modelu i szkieletu utworzą migrację odpowiednią dla tworzonego modelu. Migracja taka zawiera od razu instrukcje potrzebne do utworzenia powiązanej z danym modelem tablicy. Jeśli powiesz Railsom jakie kolumny powinny znaleźć się w tej tabeli, do migracji zostaną dodane odpowiednie formuły. Przykładowo, wykonanie polecenia 
 
-`ruby script/generate model Product name:string description:text` will create a migration that looks like this
+`ruby script/generate model Product name:string description:text` spowoduje stworzenie następującej migracji:
 
 [source, ruby]
 -----------------------
@@ -24,15 +24,15 @@ class CreateProducts < ActiveRecord::Migration
 end
 -----------------------
 
-You can append as many column name/type pairs as you want. By default `t.timestamps` (which creates the `updated_at` and `created_at` columns that
-are automatically populated by Active Record) will be added for you.
+Możesz dołączyć tyle par kolumna/typ ile potrzebujesz. Domyślnie zostaną dodane znaczniki czasu `t.timestamps` (które powodują automatyczne utworzenie przez moduł Active Record kolumn `updated_at` i `created_at`).
 
-=== Creating a standalone migration ===
-If you are creating migrations for other purposes (for example to add a column to an existing table) then you can use the migration generator:
+=== Tworzenie samodzielnej migracji ===
+
+Jeśli tworzysz migracje dla innych celów (np. aby dodać kolumnę do istniejącej już tabeli), możesz skorzystać z generatora migracji:
 
 `ruby script/generate migration AddPartNumberToProducts`
 
-This will create an empty but appropriately named migration:
+Ta komenda utworzy pustą, lecz odpowiednio nazwaną i skonstruowaną migrację:
 
 [source, ruby]
 -----------------------
@@ -45,12 +45,11 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 -----------------------
 
-If the migration name is of the form AddXXXToYYY or RemoveXXXFromY and is followed by a list of column names and types then a migration containing
-the appropriate add and remove column statements will be created.
+Jeśli nazwa migracji podana w poleceniu generatora migracje jest formatu AddXXXToYYY lub RemoveXXXFromYYY i po niej wymieniona jest lista kolumn i ich typów, to w wyniku utworzona zostanie migracja z odpowiednimi poleceniami dodania/usunięcia kolumny, przykładowo:
 
 `ruby script/generate migration AddPartNumberToProducts part_number:string`
 
-will generate
+wygeneruje migrację:
 
 [source, ruby]
 -----------------------
@@ -65,11 +64,11 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 -----------------------
 
-Similarly,
+Analogicznie, komenda
 
 `ruby script/generate migration RemovePartNumberFromProducts part_number:string`
 
-generates
+generuje
 
 [source, ruby]
 -----------------------
@@ -84,11 +83,11 @@ class RemovePartNumberFromProducts < ActiveRecord::Migration
 end
 -----------------------
 
-You are not limited to one magically generated column, for example
+Przy tworzeniu migracji nie musisz ograniczać się do jednej kolumny, na przykład:
 
 `ruby script/generate migration AddDetailsToProducts part_number:string price:decimal`
 
-generates
+wygeneruje migrację:
 
 [source, ruby]
 -----------------------
@@ -105,5 +104,4 @@ class AddDetailsToProducts < ActiveRecord::Migration
 end
 -----------------------
 
-As always, what has been generated for you is just a starting point. You can add or remove from it as you see fit.
-
+Jak zwykle, wygenerowana migracja jest dopiero punktem startowym Twojej pracy. Możesz ją dalej modyfikować, dodając lub usuwając elementy.

@@ -182,7 +182,7 @@ Railsy utworzy folder o nazwie "blog" w Twoim roboczym katalogu. Otwórz ten fol
 |+script/+		|Skrypty dostarczone przez Rails w celu wykonywania powtarzających się zadań, takich jak analiza porównawcza, instalowanie wtyczek (plugin) i uruchamianiu konsoli lub serwera WWW
 |+test/+		|Testy jednostkowe, tak zwane "fixtures" oraz inne narzędzia służące do przeprowadzania testów.  Są one opisane w: link:../testing_rails_applications.html[Testowanie aplikacji Rails]
 |+tmp/+		|Pliki tymczasowe
-|+vendor/+		|Miejsce na kod którego sami nie napisaliśmy, ale chcemy wykorzystać (tak zwani "trzeci dostawcy"). W standardowej aplikacji środowiska Rails, zawiera Ruby Gems, kod źródłowy Rubiego (jeśli zastosujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
+|+vendor/+		|Miejsce na kod, którego sami nie napisaliśmy, ale chcemy wykorzystać (tak zwani "trzeci dostawcy"). W standardowej aplikacji środowiska Rails, zawiera Ruby Gems, kod źródłowy Rubiego (jeśli zastosujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
 |==========================================================================================================
 
 === Konfiguracja bazy danych
@@ -677,9 +677,9 @@ Rails wyświetla go używając +show.html.erb+:
 <%= link_to 'Back', posts_path %>
 -------------------------------------------------------
 
-=== Editing Posts
+=== Edytowanie postów
 
-Like creating a new post, editing a post is a two-part process. The first step is a request to +edit_post_path(@post)+ with a particular post. This calls the +edit+ action in the controller:
+Edytowanie postu, podobnie jak tworzenie nowego odbywa się dwustopniowo. Pierwszym krokiem jest polecenie +edit_post_path(@post)+ odnoszące się do konkretnego postu. To wywołuje nam akcję +edit+ w kontrolerze.:
 
 [source, ruby]
 -------------------------------------------------------
@@ -688,7 +688,7 @@ def edit
 end
 -------------------------------------------------------
 
-After finding the requested post, Rails uses the +edit.html.erb+ view to display it:
+Po znalezieniu zażądanego postu, Rails, by nam go pokazać, używa +edit.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -717,8 +717,7 @@ After finding the requested post, Rails uses the +edit.html.erb+ view to display
 <%= link_to 'Show', @post %> |
 <%= link_to 'Back', posts_path %>
 -------------------------------------------------------
-
-Submitting the form created by this view will invoke the +update+ action within the controller:
+Składając stworzoną przez ten widok formę odwołujemy się do akcji +update+ wewnątrz kontrolera:
 
 [source, ruby]
 -------------------------------------------------------
@@ -738,13 +737,13 @@ def update
 end
 -------------------------------------------------------
 
-In the +update+ action, Rails first uses the +:id+ parameter passed back from the edit view to locate the database record that's being edited. The +update_attributes+ call then takes the rest of the parameters from the request and applies them to this record. If all goes well, the user is redirected to the post's +show+ view. If there are any problems, it's back to +edit+ to correct them.
+W akcji +update+ Raily używają na początku parametru +:id+, przechodząc z widoku edycji do rekordu zlokalizowanego w edytowanej bazie. +Update_attributes+ wywołuje, a następnie wykorzystuje pozostałe parametry, które zażądaliśmy i dołącza je do tego rekordu. Jeśli wszystko pójdzie dobrze, to użytkownik jest przekierowywany do widoku +show+ postu. Gdy jednak wystąpią jakieś problemy, Railsy zwracają go do +edit+, aby umożliwić mu poprawienie błędów.
 
-NOTE: Sharp-eyed readers will have noticed that the +form_for+ declaration is identical for the +new+ and +edit+ views. Rails generates different code for the two forms because it's smart enough to notice that in the one case it's being passed a new record that has never been saved, and in the other case an existing record that has already been saved to the database. In a production Rails application, you would ordinarily eliminate this duplication by moving identical code to a _partial template_, which you could then include in both parent templates. But the scaffold generator tries not to make too many assumptions, and generates code thatâs easy to modify if you want different forms for +create+ and +edit+.
+NOTE: Uważni czytelnicy zauważa zapewne, że deklaracja +form_for+ jest identyczna dla widoków +new+ i +edit+. Rails generuje inny kod dla każdego z formularzy, ponieważ jest wystarczająco mądry, żeby zauważyć, ze w jednym przypadku otrzymuje nowy rekord, który jeszcze nie był zapisany, natomiast w drugim istniejący rekord, który już został zapisany w bazie danych. W produkcyjnej aplikacji Rails normalnie wyeliminowałbyś tę duplikację poprzez przeniesienie powtarzającego się kodu do podszablonu (_partial template_), który następnie byłby włączany w oba nadrzędne szablony. Jednakże generator rusztowań próbuje nie robić zbyt wielu założeń i tworzy kod, który łatwo modyfikować, jeżeli chcesz mieć różne formularze do akcji +create+ i +edit+.
 
-=== Destroying a Post
+=== Kasowanie Postu
 
-Finally, clicking one of the +destroy+ links sends the associated id to the +destroy+ action:
+Ostatecznie, klikając na jednym z linków kategorii +destroy+ wysyłane jest powiązane id do akcji +destroy+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -759,15 +758,15 @@ def destroy
 end
 -------------------------------------------------------
 
-The +destroy+ method of an Active Record model instance removes the corresponding record from the database. After that's done, there isn't any record to display, so Rails redirects the user's browser to the index view for the model.
+Metoda +destroy+ modelu Active Record natychmiast usuwa odpowiadający mu rekord z bazy danych. Gdy to zostanie zrobione, nie ma już żadnego rekordu do wyświetlenia, dlatego Railsy przekierowują przeglądarkę użytkownika prosto do widoku index tego modelu.
 
-== DRYing up the Code
+== Wykorzystanie zasady DRY
 
-At this point, itâs worth looking at some of the tools that Rails provides to eliminate duplication in your code. In particular, you can use _partials_ to clean up duplication in views and _filters_ to help with duplication in controllers.
+W tym miejscu warto byś przyjrzał się paru narzędziom, które Raily oferują do usuwania duplikatów w Twoim kodzie. Szczególnie zwrócimy uwagę na te, które możesz czasami używać do ich eliminacji z widoków oraz na filtrach (_filters_), które są pomocne przy takich operacjach.
 
-=== Using Partials to Eliminate View Duplication
+=== Używanie podszablonów do eliminacji widocznych duplikatów.
 
-As you saw earlier, the scaffold-generated views for the +new+ and +edit+ actions are largely identical. You can pull the shared code out into a +partial+ template. This requires editing the new and edit views, and adding a new template. The new +_form.html.erb+ template should be saved in the same +app/views/posts+ folder as the files from which it is being extracted:
+Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i +edit+ jest bardzo podobny. YMożesz przenieść dzielony kod prosto do podszablonu +partial+. Wymaga to edytowania widoków +new+ i +edit+ oraz dodania nowego szablonu. Nowy +_form.html.erb+ szablon powinien być zapisany w tym samym folderze +app/views/posts+ co plik, z którego został on wyprowadzony. Zauważ, że nazwa tego pliku zaczyna się od podkreślenia ' _ '(underscore) - jest to przyjęte przez Rails nazewnictwo dla podszablonów 
 
 +new.html.erb+:
 
@@ -817,13 +816,13 @@ As you saw earlier, the scaffold-generated views for the +new+ and +edit+ action
 <% end %>
 -------------------------------------------------------
 
-Now, when Rails renders the +new+ or +edit+ view, it will insert the +_form+ partial at the indicated point. Note the naming convention for partials: if you refer to a partial named +form+ inside of a view, the corresponding file is +_form.html.erb+, with a leading underscore.
+Teraz, gdy Railsy generują widok +new+ lub +edit+, umieszczą go w szablonie +_form+ we wskazanym punkcie. Zwróć uwagę na nazewnictwo dla szablonów: jeśli odnosisz się do jego formy o nazwie +form+ wewnątrz widoku, odpowiadający mu plik to +_form.html.erb+, z podkreśleniem ' _ ' na początku.
 
-For more information on partials, refer to the link:../layouts_and_rendering.html[Layouts and Rending in Rails] guide.
+FWięcej informacji na temat szablonów uzyskasz w przewodniku link:../layouts_and_rendering.html[Layouts and Rending in Rails].
 
-=== Using Filters to Eliminate Controller Duplication
+=== Używanie filtrów do eliminacji powtórzeń w kontrolerze
 
-At this point, if you look at the controller for posts, youâll see some duplication:
+W tym miejscu, jeśli popatrzysz na kontroler pod kątem postów, zobaczysz parę duplikatów:
 
 [source, ruby]
 -------------------------------------------------------
@@ -850,7 +849,7 @@ class PostsController < ApplicationController
 end
 -------------------------------------------------------
 
-Four instances of the exact same line of code doesnât seem very DRY. Rails provides _filters_ as a way to address this sort of repeated code. In this case, you can DRY things up by using a +before_filter+:
+Cztery wystąpienia tej samej linii kodu są niezgodne z zasadą DRY. Railsy zapewniają filtry (_filters_) jako sposób na tego typu powtarzający się kod. W tym przypadku możesz poprawić pewne części używając +before_filter+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -879,30 +878,31 @@ class PostsController < ApplicationController
 end
 -------------------------------------------------------
 
-Rails runs _before filters_ before any action in the controller. You can use the +:only+ clause to limit a before filter to only certain actions, or an +:except+ clause to specifically skip a before filter for certain actions. Rails also allows you to define _after filters_ that run after processing an action, as well as _around filters_ that surround the processing of actions. Filters can also be defined in external classes to make it easy to share them between controllers.
+Railsy uruchamiają _before filters_  przed każdą akcją w kontrolerze. Możesz użyć polecenia +:only+ do nałożenia ograniczenia przed filtrem, lub polecenia +:except+ , by dokonać szczególnego pominięcia akcji tylko dla niektórych z nich. Railsy pozwalają Ci także definiować _after filters_ , które uruchamiają się po przetworzeniu akcji, analogicznie jak otaczają ją _around filters_ w trakcie jej przetwarzania. Do tego filtry mogą być także definiowane jako zewnętrzne klasy, by ułatwić przenoszenie ich pomiędzy kontrolerami.
 
-For more information on filters, see the link:actioncontroller_basics.html[Action Controller Basics] guide.
+Więcej informacji o filtrach znajdziesz w przewodniku:link:actioncontroller_basics.html[Action Controller Basics].
 
-== Adding a Second Model
+== Dodawanie drugiego modelu
 
-Now that you've seen what's in a model built with scaffolding, it's time to add a second model to the application. The second model will handle comments on blog posts.
+Skoro widziałeś już jak buduje się model przy użyciu rusztowania, nadszedł czas by dodać do tego programu drugi model. Na nim opierać się będą komentarze w postach na blogu.
 
-=== Generating a Model 
+=== Tworzenie modelu 
 
-Models in Rails use a singular name, and their corresponding database tables use a plural name. For the model to hold comments, the convention is to use the name Comment. Even if you don't want to use the entire apparatus set up by scaffolding, most Rails developers still use generators to make things like models and controllers. To create the new model, run this command in your terminal:
+Modele w Rails używają nazw w liczbie pojedynczej, a do komunikowania się z bazą danych nazw w liczbie mnogiej. Przyjęło się, że dla modelu, w którym znajdują się komentarze używamy nazwy danego komentarza. Nawet jeśli nie chcesz używać całej aparatury opartej na rusztowaniach, pamiętaj, że większość programistów piszących w Railsach dalej używa generatorów, by stworzyć takie rzeczy jak modele czy kontrolery. Aby stworzyć nowy model, wprowadź do terminalu następującą komendę: 
 
 [source, shell]
 -------------------------------------------------------
 $ script/generate model Comment commenter:string body:text post:references
 -------------------------------------------------------
 
-This command will generate four files:
+Wygeneruje ona 4 pliki:
 
 * +app/models/comment.rb+ - The model
 * +db/migrate/20081013214407_create_comments.rb - The migration
 * +test/unit/comment_test.rb+ and +test/fixtures/comments.yml+ - The test harness.
 
-First, take a look at +comment.rb+:
+Przyjrzyjmy się:
+ +comment.rb+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -911,9 +911,9 @@ class Comment < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-This is very similar to the +post.rb+ model that you saw earlier. The difference is the line +belongs_to :post+, which sets up an Active Record _association_. You'll learn a little about associations in the next section of this guide.
+To model bardzo podobny do +post.rb+ , który widziałeś już wcześniej. Różnica znajduję się w lini  +belongs_to :post+ , która uruchamia Active Record _association_. Nauczysz się więcej na temat powiązań w następnej części niniejszego poradnika.
 
-In addition to the model, Rails has also made a migration to create the corresponding database table:
+Dodatkowo do tego modelu Railsów tworzą migrację (migration), by stworzyć zgodną tabele bazy danych:
 
 [source, ruby]
 -------------------------------------------------------
@@ -934,23 +934,23 @@ class CreateComments < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-The +t.references+ line sets up a foreign key column for the association between the two models. Go ahead and run the migration:
+Linijka +t.references+ tworzy zewnętrzny klucz kolumn dla połączeń pomiędzy dwoma modelami. Możesz spróbować uruchomić migracje:
 
 [source, shell]
 -------------------------------------------------------
 $ rake db:migrate
 -------------------------------------------------------
 
-Rails is smart enough to only execute the migrations that have not already been run against this particular database.
+Railsy są na tyle sprytne, że wykonują tylko te migracje, które nie są sprzeczne z działającą bazą danych.
 
-=== Associating Models
+=== Łączenie modeli
 
-Active Record associations let you easily declare the relationship between two models. In the case of comments and posts, you could write out the relationships this way:
+Asocjacja Active Record pozwala Ci łatwo zdefiniować związek (asocjacje) pomiędzy dwoma modelami. W przypadku komentarzy oraz postów możesz go zapisać w ten sposób:
 
-* Each comment belongs to one post
-* One post can have many comments
+* Każdy komentarz należy do jednego postu
+* Jeden post może mieć wiele komentarzy
 
-In fact, this is very close to the syntax that Rails uses to declare this association. You've already seen the line of code inside the Comment model that makes each comment belong to a Post:
+Tak naprawdę jest to bardzo podobne do składni jaką Railsy używają do deklarowania tych połączeń (asocjacji). Widziałeś już linie kodu umieszczoną w modelu komentarza, która przypisuje każdy komentarz do postu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -959,7 +959,7 @@ class Comment < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-You'll need to edit the +post.rb+ file to add the other side of the association:
+Żeby dodać drugą stronę asocjacji konieczna jest edycja pliku +post.rb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -970,13 +970,13 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-These two declarations enable a good bit of automatic behavior. For example, if you have an instance variable +@post+ containing a post, you can retrieve all the comments belonging to that post as the array +@post.comments+.
+Dzięki tym dwóm deklaracjom w znaczny sposób automatyzujemy sposób zachowania się naszego programu. Praktycznie wygląda to tak: jeśli masz przykładową zmienną +@post+ zawierającą post, możesz otrzymać wszystkie komentarze, które do niego należą, używając tablicy +@post.comments+.
 
-TIP: For more information on Active Record associations, see the link:../association_basics.html[Active Record Associations] guide.
+TIP: Po więcej informacji na temat asocjacji Active Record zajrzyj do przewodnika: link:../association_basics.html[Active Record Associations].
 
-=== Adding a Route
+=== Dodawanie Ścieżek
 
-_Routes_ are entries in the +config/routes.rb+ file that tell Rails how to match incoming HTTP requests to controller actions. Open up that file and find the existing line referring to +posts+. Then edit it as follows:
+Ścieżki (_Routes_) to wpisy do pliku +config/routes.rb+ , które informują Railsy, jak interpretować nadchodzące żądania http, w celu wykonania danych akcji. Otwieranie określonego pliku oraz szukanie istniejącej linii odwołuje się do +posts+ (znajduję się on w prawym górnym rogu pliku). Edytujemy go następująco:
 
 [source, ruby]
 -------------------------------------------------------
@@ -985,20 +985,20 @@ map.resources :posts do |post|
 end
 -------------------------------------------------------
 
-This creates +comments+ as a _nested resource_ within +posts+. This is another part of capturing the hierarchical relationship that exists between posts and comments.
+Tworzy to +comments+ jako sposób zagnieżdżenia (_nested resource_) wewnątrz +posts+. Jest to kolejna część przechwytywania hierarchicznych zależności pomiędzy istniejącymi postami i komentarzami.
 
-TIP: For more information on routing, see the link:../routing_outside_in.html[Rails Routing from the Outside In] guide.
+TIP: Po więcej informacji na temat tworzenia ścieżek sięgnij do poradnika: link:../routing_outside_in.html[Rails Routing from the Outside In].
 
-=== Generating a Controller
+=== Tworzenie Kontrolera
 
-With the model in hand, you can turn your attention to creating a matching controller. Again, there's a generator for this:
+Mając już przygotowany  model, czas zacząć tworzyć pasujący do niego kontroler. I znów posłużymy się generatorem:
 
 [source, shell]
 -------------------------------------------------------
 $ script/generate controller Comments index show new edit
 -------------------------------------------------------
 
-This creates seven files:
+Tworzy to siedem plików:
 
 * +app/controllers/comments_controller.rb+ - The controller
 * +app/helpers/comments_helper.rb+ - A view helper file
@@ -1008,7 +1008,7 @@ This creates seven files:
 * +app/views/comments/edit.html.erb+ - The view for the edit action
 * +test/functional/comments_controller_test.rb+ - The functional tests for the controller
 
-The controller will be generated with empty methods for each action that you specified in the call to +script/generate controller+:
+Kontroler zostanie wygenerowany z pustymi metodami oraz widokami dla każdej akcji, którą wywołasz poleceniem: +script/generate controller+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1028,7 +1028,7 @@ class CommentsController < ApplicationController
 end
 -------------------------------------------------------
 
-You'll need to flesh this out with code to actually process requests appropriately in each method. Here's a version that (for simplicity's sake) only responds to requests that require HTML:
+Należy to rozwinąć za pomocą kodu do aktualnego procesu żądania stosownie do każdej metody. By to rozjaśnić, poniżej znajduje się uproszczony przykład, który odpowiada jedynie na żądania wymagane przez HTML:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1076,22 +1076,23 @@ class CommentsController < ApplicationController
 end
 -------------------------------------------------------
 
-You'll see a bit more complexity here than you did in the controller for posts. That's a side-effect of the nesting that you've set up; each request for a comment has to keep track of the post to which the comment is attached.
+Jak widzisz, jest to trochę bardziej skomplikowane niż wcześniejsze operacje w kontrolerze dla postów. Jest to uboczny efekt zagnieżdżania które tworzyłeś; każde żądanie komentarza musi pamiętać , z którym postem ten komentarz jest związany (do którego posta jest dołączony). 
 
-In addition, the code takes advantage of some of the methods available for an association. For example, in the +new+ method, it calls
+Dodatkowo, kod posiada przewagę w niektórych rodzajach metod do asocjacji. Przykładowo - w metodzie +new+ wywołuję się to tak:
 
 [source, ruby]
 -------------------------------------------------------
 @comment = @post.comments.build
 -------------------------------------------------------
 
-This creates a new +Comment+ object _and_ sets up the +post_id+ field to have the +id+ from the specified +Post+ object in a single operation.
+Tworzy to nowy obiekt: +Comment+ i ustanawia pole: +post_id+ , które przyjmuje formę +id+ zależną od obiektu +Post+ w pojedynczej operacji.
 
-=== Building Views
 
-Because you skipped scaffolding, you'll need to build views for comments "by hand." Invoking +script/generate controller+ will give you skeleton views, but they'll be devoid of actual content. Here's a first pass at fleshing out the comment views.
+=== Budowanie Widoków
 
-The +index.html.erb+ view:
+Ponieważ opuściłeś rusztowanie, konieczne będzie ręczne zbudowanie widoków dla komentarzy. Przywoływanie +script/generate controller+ da ci szkielet widoków, które jednak będą pozbawione aktualnej zawartości. Oto pierwszy krok do uszczegółowienia widoków komentarza.
+
+Widok +index.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1120,7 +1121,7 @@ The +index.html.erb+ view:
 <%= link_to 'Back to Post', @post %>
 -------------------------------------------------------
 
-The +new.html.erb+ view:
+Widok +new.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1145,7 +1146,7 @@ The +new.html.erb+ view:
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-The +show.html.erb+ view:
+Widok +show.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1165,7 +1166,7 @@ The +show.html.erb+ view:
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-The +edit.html.erb+ view:
+Widok +edit.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1191,11 +1192,11 @@ The +edit.html.erb+ view:
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Again, the added complexity here (compared to the views you saw for managing comments) comes from the necessity of juggling a post and its comments at the same time.
+Obecna, coraz większa komplikacja (w porównaniu do widoków dla zarządzania postami, które do tej pory widziałeś) ponownie pochodzi z konieczności żonglowania postami i ich komentarzami w tym samym czasie.
 
-=== Hooking Comments to Posts
+=== Przyłączanie komentarzy do postów
 
-As a final step, I'll modify the +show.html.erb+ view for a post to show the comments on that post, and to allow managing those comments:
+Jako następny krok, zmodyfikuje widok: +show.html.erb+ , by pokazać komentarze do tego postu oraz umożliwić zarządzanie nimi: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -1232,23 +1233,25 @@ As a final step, I'll modify the +show.html.erb+ view for a post to show the com
 <%= link_to 'Manage Comments', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Note that each post has its own individual comments collection, accessible as +@post.comments+. That's a consequence of the declarative associations in the models. Path helpers such as +post_comments_path+ come from the nested route declaration in +config/routes.rb+.
+Zapamiętaj, że każdy post ma swój osobny zbiór komentarzy, dostępny przez +@post.comments+. Wynika to z zadeklarowanych asocjacji w modelach. Ścieżka pomocnicza, taka jak +post_comments_path+ pochodzi od zagnieżdżonej ścieżki deklaracji w +config/routes.rb+ .
 
-== What's Next?
+== Co dalej?
 
-Now that you've seen your first Rails application, you should feel free to update it and experiment on your own. But you don't have to do everything without help. As you need assistance getting up and running with Rails, feel free to consult these support resources:
+Teraz, gdy masz przed sobą swój pierwszy Railsowy program, możesz go uatrakcyjniać, według własnych potrzeb. Ale nie musisz do wszystkiego dochodzić samodzielnie. Jeśli potrzebujesz wsparcia przy tworzeniu i uruchamianiu aplikacji Rails, możesz swobodnie korzystać z tych zasobów:
 
 * The link:http://guides.rubyonrails.org/[Ruby On Rails guides]
 * The link:http://groups.google.com/group/rubyonrails-talk[Ruby on Rails mailing list]
 * The #rubyonrails channel on irc.freenode.net
 * The link:http://wiki.rubyonrails.org/rails[Rails wiki]
 
-Rails also comes with built-in help that you can generate using the rake command-line utility:
+Railsy mają równiez wbudowaną pomoc, która możesz wywołać przy użyciu komendy rake w linii komend:
 
-* Running +rake doc:guides+ will put a full copy of the Rails Guides in the +/doc/guides+ folder of your application. Open +/doc/guides/index.html+ in your web browser to explore the Guides.
-* Running +rake doc:rails+ will put a full copy of the API documentation for Rails in the +/doc/api+ folder of your application. Open +/doc/api/index.html+ in your web browser to explore the API documentation.
+* Uruchomienie +rake doc:guides+ umieści kopię Rails Guides (przewodnik Rails) w folderze +/doc/guides+ Twojego programu. Znajdujący się tam plik +/doc/guides/index.html+ możesz przeglądać używając Twojej przeglądarki.
 
-== Changelog ==
+* Uruchomienie +rake doc:rails+ umieści kopię dokumentacji API dla Rails w folderze +/doc/api+ Twojej aplikacji. Znajdujący się tam plik +/doc/api/index.html+ możesz przeglądać używając Twojej przeglądarki.
+
+
+== Zmiany ==
 
 http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/2[Lighthouse ticket]
 
