@@ -882,26 +882,27 @@ Railsy uruchamiają _before filters_  przed każdą akcją w kontrolerze. Możes
 
 Więcej informacji o filtrach znajdziesz w przewodniku:link:actioncontroller_basics.html[Action Controller Basics].
 
-== Adding a Second Model
+== Dodawanie drugiego modelu
 
-Now that you've seen what's in a model built with scaffolding, it's time to add a second model to the application. The second model will handle comments on blog posts.
+Skoro widziałeś już jak buduje się model przy użyciu rusztowania, nadszedł czas by dodać do tego programu drugi model. Na nim opierać się będą komentarze w postach na blogu.
 
-=== Generating a Model 
+=== Tworzenie modelu 
 
-Models in Rails use a singular name, and their corresponding database tables use a plural name. For the model to hold comments, the convention is to use the name Comment. Even if you don't want to use the entire apparatus set up by scaffolding, most Rails developers still use generators to make things like models and controllers. To create the new model, run this command in your terminal:
+Modele w Rails używają nazw w liczbie pojedynczej, a do komunikowania się z bazą danych nazw w liczbie mnogiej. Przyjęło się, że dla modelu, w którym znajdują się komentarze używamy nazwy danego komentarza. Nawet jeśli nie chcesz używać całej aparatury opartej na rusztowaniach, pamiętaj, że większość programistów piszących w Railsach dalej używa generatorów, by stworzyć takie rzeczy jak modele czy kontrolery. Aby stworzyć nowy model, wprowadź do terminalu następującą komendę: 
 
 [source, shell]
 -------------------------------------------------------
 $ script/generate model Comment commenter:string body:text post:references
 -------------------------------------------------------
 
-This command will generate four files:
+Wygeneruje ona 4 pliki:
 
 * +app/models/comment.rb+ - The model
 * +db/migrate/20081013214407_create_comments.rb - The migration
 * +test/unit/comment_test.rb+ and +test/fixtures/comments.yml+ - The test harness.
 
-First, take a look at +comment.rb+:
+Przyjrzyjmy się:
+ +comment.rb+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -910,9 +911,9 @@ class Comment < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-This is very similar to the +post.rb+ model that you saw earlier. The difference is the line +belongs_to :post+, which sets up an Active Record _association_. You'll learn a little about associations in the next section of this guide.
+To model bardzo podobny do +post.rb+ , który widziałeś już wcześniej. Różnica znajduję się w lini  +belongs_to :post+ , która uruchamia Active Record _association_. Nauczysz się więcej na temat powiązań w następnej części niniejszego poradnika.
 
-In addition to the model, Rails has also made a migration to create the corresponding database table:
+Dodatkowo do tego modelu Railsów tworzą migrację (migration), by stworzyć zgodną tabele bazy danych:
 
 [source, ruby]
 -------------------------------------------------------
@@ -933,23 +934,23 @@ class CreateComments < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-The +t.references+ line sets up a foreign key column for the association between the two models. Go ahead and run the migration:
+Linijka +t.references+ tworzy zewnętrzny klucz kolumn dla połączeń pomiędzy dwoma modelami. Możesz spróbować uruchomić migracje:
 
 [source, shell]
 -------------------------------------------------------
 $ rake db:migrate
 -------------------------------------------------------
 
-Rails is smart enough to only execute the migrations that have not already been run against this particular database.
+Railsy są na tyle sprytne, że wykonują tylko te migracje, które nie są sprzeczne z działającą bazą danych.
 
-=== Associating Models
+=== Łączenie modeli
 
-Active Record associations let you easily declare the relationship between two models. In the case of comments and posts, you could write out the relationships this way:
+Asocjacja Active Record pozwala Ci łatwo zdefiniować związek (asocjacje) pomiędzy dwoma modelami. W przypadku komentarzy oraz postów możesz go zapisać w ten sposób:
 
-* Each comment belongs to one post
-* One post can have many comments
+* Każdy komentarz należy do jednego postu
+* Jeden post może mieć wiele komentarzy
 
-In fact, this is very close to the syntax that Rails uses to declare this association. You've already seen the line of code inside the Comment model that makes each comment belong to a Post:
+Tak naprawdę jest to bardzo podobne do składni jaką Railsy używają do deklarowania tych połączeń (asocjacji). Widziałeś już linie kodu umieszczoną w modelu komentarza, która przypisuje każdy komentarz do postu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -958,7 +959,7 @@ class Comment < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-You'll need to edit the +post.rb+ file to add the other side of the association:
+Żeby dodać drugą stronę asocjacji konieczna jest edycja pliku +post.rb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -969,11 +970,11 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-These two declarations enable a good bit of automatic behavior. For example, if you have an instance variable +@post+ containing a post, you can retrieve all the comments belonging to that post as the array +@post.comments+.
+Dzięki tym dwóm deklaracjom w znaczny sposób automatyzujemy sposób zachowania się naszego programu. Praktycznie wygląda to tak: jeśli masz przykładową zmienną +@post+ zawierającą post, możesz otrzymać wszystkie komentarze, które do niego należą, używając tablicy +@post.comments+.
 
-TIP: For more information on Active Record associations, see the link:../association_basics.html[Active Record Associations] guide.
+TIP: Po więcej informacji na temat asocjacji Active Record zajrzyj do przewodnika: link:../association_basics.html[Active Record Associations].
 
-=== Adding a Route
+=== Dodawanie Ścieżek
 
 _Routes_ are entries in the +config/routes.rb+ file that tell Rails how to match incoming HTTP requests to controller actions. Open up that file and find the existing line referring to +posts+. Then edit it as follows:
 
