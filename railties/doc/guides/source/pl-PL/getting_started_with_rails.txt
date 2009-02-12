@@ -361,11 +361,11 @@ Generator rusztowania zbuduje w Twoim programie 14 plików, wspólnie z paroma f
 |test/unit/post_test.rb                        |Testy funkcjonalności dla modeli postów
 |==========================================================================================================
 
-=== Running a Migration
+=== Uruchamianie Migracji
 
-One of the products of the +script/generate scaffold+ command is a _database migration_. Migrations are Ruby classes that are designed to make it simple to create and modify database tables. Rails uses rake commands to run migrations, and it's possible to undo a migration after it's been applied to your database. Migration filenames include a timestamp to ensure that they're processed in the order that they were created.
+Jednym z produktów komendy: +script/generate scaffold+ jest _database migration_. Migracje są jedną z klas Ruby które upraszczają tworzenie i modyfikowanie baz danych tabel. Railsy używają komendy „rake” by uruchamiać migracje, ale możliwe jest jej wycofanie po tym jak została dodana do Twojej bazy danych. Nazwy pilków migracji uwzględniają znaczniki czasowe by zapewnić ich przetwarzanie w porządku w jakim zostały stworzone.
 
-If you look in the +db/migrate/20081013124235_create_posts.rb+ file (remember, yours will have a slightly different name), here's what you'll find:
+Oto co znajdziesz, gdy zajrzysz do pliku +db/migrate/20090113124235_create_posts.rb+ (jego nazwa u Ciebie może się trochę różnić):
 
 [source, ruby]
 -------------------------------------------------------
@@ -386,9 +386,9 @@ class CreatePosts < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-If you were to translate that into words, it says something like: when this migration is run, create a table named +posts+ with two string columns (+name+ and +title+) and a text column (+content+), and generate timestamp fields to track record creation and updating. You can learn the detailed syntax for migrations in the link:../migrations.html[Rails Database Migrations] guide.
+Gdybyś chciał zawrzeć ten kod w słowach, brzmiałby on mniej więcej tak: gdy migracja jest uruchomiona, tworzy tabele o nazwie +posts+ z dwoma szeregami kolumn (+name+ i +title+) i tekst kolumny (+content+), a wraz z nią pola znaczników czasu by śledzić jej tworzenie oraz aktualizowanie. Więcej szczegółów na temat sposobu pisania migracji znajdziesz w przewodniku link:../migrations.html[Rails Database Migrations].
 
-At this point, you can use a rake command to run the migration:
+Teraz możesz użyć komendy „rake” by uruchomić migracje:
 
 [source, shell]
 -------------------------------------------------------
@@ -396,11 +396,11 @@ $ rake db:create
 $ rake db:migrate
 -------------------------------------------------------
 
-NOTE: Because you're working in the development environment by default, this command will apply to the database defined in the +development+ section of your +config/database.yml+ file.
+NOTE: Ponieważ domyślnie pracujesz w środowisku rozwojowym, ta komenda wykona się na bazie danych zdefiniowanej w sekcji +development+ pliku: +config/database.yml+.
 
-=== Adding a Link
+=== Dodawanie hiperłącza.
 
-To hook the posts up to the home page you've already created, you can add a link to the home page. Open +/app/views/home/index.html.erb+ and modify it as follows:
+By połączyć posty ze stroną domową, którą już stworzyłeś, możesz dodać do niej hiperłącze. Otwórz +/app/views/home/index.html.erb+ i dopisz do niego:
 
 [source, ruby]
 -------------------------------------------------------
@@ -409,23 +409,23 @@ To hook the posts up to the home page you've already created, you can add a link
 <%= link_to "My Blog", posts_path %>
 -------------------------------------------------------
 
-The +link_to+ method is one of Rails' built-in view helpers. It creates a hyperlink based on text to display and where to go - in this case, to the path for posts.
+Metoda +link_to+ jest jednym z helperów pomagających kreować widoki w Railsach. Tworzy ona hiperłącze z tekstem do wyświetlenia oraz informacją, gdzie prowadzi – w tym wypadku ze ścieżką do postu.
 
-=== Working with Posts in the Browser
+=== Praca z postami w przeglądarce
 
-Now you're ready to start working with posts. To do that, navigate to +http://localhost:3000+ and then click the "My Blog" link:
+Teraz jesteś już gotowy do pracy z postami. Na początek przejdź do: +http://localhost:3000+ i kliknij w link „Mój blog”.
 
 image:images/posts_index.png[Posts Index screenshot]
 
-This is the result of Rails rendering the +index+ view of your posts. There aren't currently any posts in the database, but if you click the +New Post+ link you can create one. After that, you'll find that you can edit posts, look at their details, or destroy them. All of the logic and HTML to handle this was built by the single +script/generate scaffold+ command.
+Jest to rezultat renderingu indeksu widoku Twoich postów. Aktualnie nie ma żadnych wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link „nowa wiadomość”.  Możesz również przeglądać i edytować posty, a nawet je wykasować. Cały układ logiczny i HTML obsługuje pojedyncze polecenie +script/generał scaffold+.
 
-TIP: In development mode (which is what you're working in by default), Rails reloads your application with every browser request, so there's no need to stop and restart the web server.
+TIP: W  środowisku rozwojowym (na nim domyślnie pracujesz) z każdym żądaniem przeglądarki Railsy wgrywają od nowa program, dzięki czemu nie jest konieczne wyłączanie serwera WWW.
 
-Congratulations, you're riding the rails! Now it's time to see how it all works.
+Gratulację! Wykonałeś swoją pierwszą aplikację w Railsach! Nadszedł czas, aby przyjrzeć się efektom pracy.
 
-=== The Model
+=== Model
 
-The model file, +app/models/post.rb+ is about as simple as it can get:
+Plik modelu +app/models/post.rb+ jest tak samo prosty w obsłudze jak jego tworzenie:
 
 [source, ruby]
 -------------------------------------------------------
@@ -433,11 +433,11 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-There isn't much to this file - but note that the +Post+ class inherits from +ActiveRecord::Base+. Active Record supplies a great deal of functionality to your Rails models for free, including basic database CRUD (Create, Read, Update, Destroy) operations, data validation, as well as sophisticated search support and the ability to relate multiple models to one another.
+Możliwości zmian tego pliku nie jest dużo – nie wolno jednak zapomnieć, że klasa +Post+ dziedziczy z +ActiveRecord:: Base+. Active Rekord za darmo dostarcza wielu funkcji dla Twoich Railsów, włączając w to podstawową baze danych operacji CRUD (Tworzenie, Czytanie, Aktualizowanie, Niszczenie) czy uwierzytelnianie danych – podobnie jak wsparcie  zaawansowanego wyszukiwania i zdolność do wiązania wielu różnych modeli jeden z drugim.
 
-=== Adding Some Validation
+=== Sprawdzanie poprawności danych
 
-Rails includes methods to help you validate the data that you send to models. Open the +app/models/post.rb+ file and edit it:
+Railsy są wyposażone w metodę, która pomoże Ci sprawdzić poprawność danych wysyłanych do modeli. Wprowadź poniższe zmiany do pliku: +app/models/post.rb+
 
 [source, ruby]
 -------------------------------------------------------
@@ -447,18 +447,18 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-These changes will ensure that all posts have a name and a title, and that the title is at least five characters long. Rails can validate a variety of conditions in a model, including the presence or uniqueness of columns, their format, and the existence of associated objects.
+Dzięki nim mamy pewność, że każdy post będzie mieć nazwę oraz tytuł, a ten ostatni nie będzie miał mniej niż 5 znaków. Railsy mogą sprawdzać różne warunki w modelu, włączając w to obecność lub unikalność kolumn, ich format, i istnienie związanych z nimi obiektów.
 
-=== Using the Console
+=== Używanie konsoli
 
-To see your validations in action, you can use the console. The console is a command-line tool that lets you execute Ruby code in the context of your application:
+By zobaczyć, jak sprawdzanie poprawności danych działa w praktyce, użyjemy konsoli. Konsola, w postaci linii komend, jest narzędziem które umożliwia Ci wykonywanie kodów Ruby’ego w ramach działania Twojej aplikacji:
 
 [source, shell]
 -------------------------------------------------------
 $ script/console
 -------------------------------------------------------
 
-After the console loads, you can use it to work with your application's models:
+Możesz jej użyć do pracy z modelami Twojego programu::
 
 [source, shell]
 -------------------------------------------------------
@@ -474,13 +474,13 @@ title: nil, content: "A new post", created_at: nil, updated_at: nil>,
 "is too short (minimum is 5 characters)"]}>
 -------------------------------------------------------
 
-This code shows creating a new +Post+ instance, attempting to save it and getting +false+ for a return value (indicating that the save failed), and inspecting the +errors+ of the post.
+Powyższy kod przedstawia informację jaką otrzymasz, gdy chcesz stworzyć nowy, ale błędny +Post+. Mechanizm jest następujący: przy próbie zapisania pojawia się wartość zwrotna +false+ (oznaczającą, że zapisanie się nie powiodło), a kod wyszczególnia nam wszystkie znalezione błędy +errors+.
 
-TIP: Unlike the development web server, the console does not automatically load your code afresh for each line. If you make changes, type +reload!+ at the console prompt to load them.
+TIP: W przeciwieństwie do serwerów WWW, konsola nie wprowadza automatycznie Twojego kodu na nowo z każdą linią. By dokonać zmian w Twoim modelu za pomocą konsoli, musisz użyć komendy +reload!+
 
-=== Listing All Posts
+=== Listowanie postów
 
-The easiest place to start looking at functionality is with the code that lists all posts. Open the file +app/controllers/posts_controller.rb + and look at the +index+ action:
+Najłatwiejszym sposobem na zapoznanie się z możliwościami programu jest kod, który listuje wszystkie posty. Otwórz plik: +app/controllers/posts_controller.rb + i przyjrzy się akcji +index+
 
 [source, ruby]
 -------------------------------------------------------
@@ -494,11 +494,11 @@ def index
 end
 -------------------------------------------------------
 
-This code sets the +@posts+ instance variable to an array of all posts in the database. +Post.find(:all)+ or +Post.all+ calls the +Post+ model to return all of the posts that are currently in the database, with no limiting conditions.
+Powyższy kod przypisuje przykładowa zmienną +@posts+ do tablicy wszystkich postów w bazie danych. +Post.find(:all)+ lub +Post.all+ tworzy zawołanie dla modelu Post który bezwarunkowo zwraca wszystkie posty z bazy danych.
 
-TIP: For more information on finding records with Active Record, see link:../finders.html[Active Record Finders].
+TIP: Więcej informacji na temat znajdowania rekordów za pomocą Active Record znajdziesz w link:../finders.html[Active Record Finders]
 
-The +respond_to+ block handles both HTML and XML calls to this action. If you browse to +http://localhost:3000/posts.xml+, you'll see all of the posts in XML format. The HTML format looks for a view in +app/views/posts/+ with a name that corresponds to the action name. Rails makes all of the instance variables from the action available to the view. Here's +app/view/posts/index.html.erb+:
+Blok +respond_to+ obsługuje obydwa zawołania dla tej akcji - zarówno HTML jak i XML. Jeśli przejdziesz do +http://localhost:3000/posts.xml+ to zobaczysz wszystkie posty w formacie XML. Natomiast format HTML znajduję się w widoku +app/views/posts+ nazwanym tak samo jak odpowiadająca mu akcja. Rails same przenoszą wszystkie przykładowe zmienne z dostępnych akcji do widoku. Oto +app/view/posts/index.html.erb+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -528,17 +528,17 @@ The +respond_to+ block handles both HTML and XML calls to this action. If you br
 <%= link_to 'New post', new_post_path %>
 -------------------------------------------------------
 
-This view iterates over the contents of the +@posts+ array to display content and links. A few things to note in the view:
+Widok wyświetla treść tablicy +@posts+, by pokazać zawartość oraz linki. Przyjrzymy się uważnie paru jego aspektom:
 
-* +h+ is a Rails helper method to sanitize displayed data, preventing cross-site scripting attacks
-* +link_to+ builds a hyperlink to a particular destination
-* +edit_post_path+ is a helper that Rails provides as part of RESTful routing. Youâll see a variety of these helpers for the different actions that the controller includes.
+* +h+ to helper metody który ujednolica wyświetlane danych, zapobiegający atakom „cross-site scripting”
+* +link_to+ buduje hiperłącze dla określonej lokalizacji
+* +edit_post_path+ jest helperem, który Rails udostępniają w ramach routingu RESTful. Zobaczysz jeszcze sporo różnych rodzajów takich helperów dla wielu, znajdujących się w kontrolerze, akcji.
 
-TIP: For more details on the rendering process, see link:../layouts_and_rendering.html[Layouts and Rendering in Rails].
+TIP: Więcej szczegółów na temat procesu renderingu znajdziesz w link:../layouts_and_rendering.html[Layouts and Rendering in Rails].
 
-=== Customizing the Layout
+=== Personalizacja Layoutu
 
-The view is only part of the story of how HTML is displayed in your web browser. Rails also has the concept of +layouts+, which are containers for views. When Rails renders a view to the browser, it does so by putting the view's HTML into a layout's HTML. The +script/generate scaffold+ command automatically created a default layout, +app/views/layouts/posts.html.erb+, for the posts. Open this layout in your editor and modify the +body+ tag:
+Widok stanowi tylko część całego procesu przedstawiania przez HTML Twojej strony www. Rails posiada też różne gotowe layouty +layouts+, w których trzymane są widoki. Renderowanie widoku dla przeglądarki odbywa się poprzez umieszczanie widoku HTML wewnątrz layoutu HTML. Komenda +script/generate scaffold+ automatycznie tworzy dla postu domyślny layout: +app/views/layouts/posts.html.erb+. Używając edytora zmodyfikuj go w następujący sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -561,11 +561,11 @@ The view is only part of the story of how HTML is displayed in your web browser.
 </html>
 -------------------------------------------------------
 
-Now when you refresh the +/posts+ page, you'll see a gray background to the page. This same gray background will be used throughout all the views for posts.
+Gdy teraz odświeżysz stronę +/posts+ zobaczysz szare tło. Taki sam będzie używany dla wszystkich widoków postów.
 
-=== Creating New Posts
+=== Tworzenie nowego postu.
 
-Creating a new post involves two actions. The first is the +new+ action, which instantiates an empty +Post+ object:
+Nowy post tworzy się za pomocą dwóch akcji. Pierwszą jest +new+ która tworzy nowy, pusty obiekt +Post+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -579,7 +579,7 @@ def new
 end
 -------------------------------------------------------
 
-The +new.html.erb+ view displays this empty Post to the user:
+Widok +new.html.erb+ wyświetli dla użytkownika pusty Post:
 
 [source, ruby]
 -------------------------------------------------------
@@ -608,11 +608,11 @@ The +new.html.erb+ view displays this empty Post to the user:
 <%= link_to 'Back', posts_path %>
 -------------------------------------------------------
 
-The +form_for+ block is used to create an HTML form. Within this block, you have access to methods to build various controls on the form. For example, +f.text_field :name+ tells Rails to create a text input on the form, and to hook it up to the +name+ attribute of the instance being displayed. You can only use these methods with attributes of the model that the form is based on (in this case +name+, +title+, and +content+). Rails uses +form_for+ in preference to having your write raw HTML because the code is more succinct, and because it explicitly ties the form to a particular model instance.
+Blok +form_for+ jest używany do tworzenia formy HTML. Wewnątrz niego masz dostęp do metod, które umożliwiają zbudowanie różnorodnych sposobów kontroli form. Przykładowo: +f.text_field :name+ prosi Railsy by stworzyły w danej formie pole do wprowadzania tekstu i połączyły go z nazwą przykładowo wyświetlanego atrybutu. Możesz użyć tej metody tylko z takimi atrybutami modelu, które są podstawą formy (w tym wypadku +name+, +title+, i +content+). Rails preferencyjnie uzywa +form_for+ do stworzenia surowego kodu HTML. Dzięki temu jest on bardziej zwięzły i wyraźnie widać związek formy z konkretnym modelem.
 
-TIP: If you need to create an HTML form that displays arbitrary fields, not tied to a model, you should use the +form_tag+ method, which provides shortcuts for building forms that are not necessarily tied to a model instance.
+TIP: Jeśli potrzebujesz stworzyć formę HTML, która pokazuje dowolne pole, nie pasujące do modelu, powinieneś użyć metody +form_tag+, umożliwiające szybkie zbudowanie form, których nie trzeba łączyć z konkretnym modelem.
 
-When the user clicks the +Create+ button on this form, the browser will send information back to the +create+ method of the controller (Rails knows to call the +create+ method because the form is sent with an HTTP POST request; that's one of the conventions that I mentioned earlier):
+Gdy użytkownik kliknie na przycisk +create+, przeglądarka wyśle informacje zwrotną do metody kontrolera +create+ (Rails wiedzą, że mają posłuzyć się metodą +create+ ponieważ forma jest wysyłana za pomocą żądania HTTP POST – jest to jedna z tych umownych rzeczy o których wspomniałem wcześniej):
 
 [source, ruby]
 -------------------------------------------------------
@@ -632,13 +632,13 @@ def create
 end
 -------------------------------------------------------
 
-The +create+ action instantiates a new Post object from the data supplied by the user on the form, which Rails makes available in the +params+ hash. After saving the new post, it uses +flash[:notice]+ to create an informational message for the user, and redirects to the show action for the post. If there's any problem, the +create+ action just shows the +new+ view a second time, with any error messages.
+Akcja +create+ tworzy nowy obiekt Post z danych przekazanymi przez użytkownika w formie, który Rails udostępni w +params+. Po zapisaniu nowego postu, używa on +flash[:notice]+ do stworzenia wiadomości informacyjnej dla użytkownika oraz przekierowuje do wyświetlanej akcji. Jeśli napotka jakiś problem, akcja +create+ pokaże po raz drugi tylko widok new , ale wraz z wiadomością o błędzie.
 
-Rails provides the +flash+ hash (usually just called the Flash) so that messages can be carried over to another action, providing the user with useful information on the status of their request.  In the case of +create+, the user never actually sees any page rendered during the Post creation process, because it immediately redirects to the new Post as soon Rails saves the record. The Flash carries over a message to the next action, so that when the user is redirected back to the +show+ action, they are presented with a message saying "Post was successfully created."
+Rails zapewniają hash: +flash+ (zwyczajowo nazywany po prostu Flashem), stąd ta wiadomość może być przenoszona do innej akcji, dostarczaną użytkownikowi wraz z przydatnymi informacjami na temat statusu żądania. W przypadku +create+ użytkownik nigdy nie widzi strony renderowanej podczas procesu tworzenia postu, ponieważ jest przekierowywany do nowego postu dopiero po zapisaniu rekordu. Flash przenosi informacje do następnej akcji, zatem gdy użytkownik jest przekierowywany spowrotem do akcji +show+, ukazuje mu się informacja „Post został stworzony”.
 
-=== Showing an Individual Post
+=== Prezentacja pojedynczego postu
 
-When you click the +show+ link for a post on the index page, it will bring you to a URL like +http://localhost:3000/posts/1+. Rails interprets this as a call to the +show+ action for the resource, and passes in +1+ as the +:id+ parameter. Here's the +show+ action:
+Gdy klikniesz w link +show+ dla postu na stronie głównej, przeniesie Cie ona do adresu +http://localhost:3000/posts/1+ (lub podobnego). Railsy traktują to jako prośbę o zasoby skierowaną do akcji +show+ i przechodzącą w +1+ z parametrem +:id+. Akcja +show+ wygląda tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -652,7 +652,8 @@ def show
 end
 -------------------------------------------------------
 
-The +show+ action uses +Post.find+ to search for a single record in the database by its id value. After finding the record, Rails displays it by using +show.html.erb+:
+Akcja +show+ używa +Post.find+ by znaleźć w bazie danych pojedynczy rekord z jej wartością id.
+Rails wyświetla go używając +show.html.erb+:
 
 [source, ruby]
 -------------------------------------------------------
