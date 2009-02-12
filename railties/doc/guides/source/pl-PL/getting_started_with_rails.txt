@@ -976,7 +976,7 @@ TIP: Po więcej informacji na temat asocjacji Active Record zajrzyj do przewodni
 
 === Dodawanie Ścieżek
 
-_Routes_ are entries in the +config/routes.rb+ file that tell Rails how to match incoming HTTP requests to controller actions. Open up that file and find the existing line referring to +posts+. Then edit it as follows:
+Ścieżki (_Routes_) to wpisy do pliku +config/routes.rb+ , które informują Railsy, jak interpretować nadchodzące żądania http, w celu wykonania danych akcji. Otwieranie określonego pliku oraz szukanie istniejącej linii odwołuje się do +posts+ (znajduję się on w prawym górnym rogu pliku). Edytujemy go następująco:
 
 [source, ruby]
 -------------------------------------------------------
@@ -985,20 +985,20 @@ map.resources :posts do |post|
 end
 -------------------------------------------------------
 
-This creates +comments+ as a _nested resource_ within +posts+. This is another part of capturing the hierarchical relationship that exists between posts and comments.
+Tworzy to +comments+ jako sposób zagnieżdżenia (_nested resource_) wewnątrz +posts+. Jest to kolejna część przechwytywania hierarchicznych zależności pomiędzy istniejącymi postami i komentarzami.
 
-TIP: For more information on routing, see the link:../routing_outside_in.html[Rails Routing from the Outside In] guide.
+TIP: Po więcej informacji na temat tworzenia ścieżek sięgnij do poradnika: link:../routing_outside_in.html[Rails Routing from the Outside In].
 
-=== Generating a Controller
+=== Tworzenie Kontrolera
 
-With the model in hand, you can turn your attention to creating a matching controller. Again, there's a generator for this:
+Mając już przygotowany  model, czas zacząć tworzyć pasujący do niego kontroler. I znów posłużymy się generatorem:
 
 [source, shell]
 -------------------------------------------------------
 $ script/generate controller Comments index show new edit
 -------------------------------------------------------
 
-This creates seven files:
+Tworzy to siedem plików:
 
 * +app/controllers/comments_controller.rb+ - The controller
 * +app/helpers/comments_helper.rb+ - A view helper file
@@ -1008,7 +1008,7 @@ This creates seven files:
 * +app/views/comments/edit.html.erb+ - The view for the edit action
 * +test/functional/comments_controller_test.rb+ - The functional tests for the controller
 
-The controller will be generated with empty methods for each action that you specified in the call to +script/generate controller+:
+Kontroler zostanie wygenerowany z pustymi metodami oraz widokami dla każdej akcji, którą wywołasz poleceniem: +script/generate controller+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1028,7 +1028,7 @@ class CommentsController < ApplicationController
 end
 -------------------------------------------------------
 
-You'll need to flesh this out with code to actually process requests appropriately in each method. Here's a version that (for simplicity's sake) only responds to requests that require HTML:
+Należy to rozwinąć za pomocą kodu do aktualnego procesu żądania stosownie do każdej metody. By to rozjaśnić, poniżej znajduje się uproszczony przykład, który odpowiada jedynie na żądania wymagane przez HTML:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1076,22 +1076,23 @@ class CommentsController < ApplicationController
 end
 -------------------------------------------------------
 
-You'll see a bit more complexity here than you did in the controller for posts. That's a side-effect of the nesting that you've set up; each request for a comment has to keep track of the post to which the comment is attached.
+Jak widzisz, jest to trochę bardziej skomplikowane niż wcześniejsze operacje w kontrolerze dla postów. Jest to uboczny efekt zagnieżdżania które tworzyłeś; każde żądanie komentarza musi pamiętać , z którym postem ten komentarz jest związany (do którego posta jest dołączony). 
 
-In addition, the code takes advantage of some of the methods available for an association. For example, in the +new+ method, it calls
+Dodatkowo, kod posiada przewagę w niektórych rodzajach metod do asocjacji. Przykładowo - w metodzie +new+ wywołuję się to tak:
 
 [source, ruby]
 -------------------------------------------------------
 @comment = @post.comments.build
 -------------------------------------------------------
 
-This creates a new +Comment+ object _and_ sets up the +post_id+ field to have the +id+ from the specified +Post+ object in a single operation.
+Tworzy to nowy obiekt: +Comment+ i ustanawia pole: +post_id+ , które przyjmuje formę +id+ zależną od obiektu +Post+ w pojedynczej operacji.
 
-=== Building Views
 
-Because you skipped scaffolding, you'll need to build views for comments "by hand." Invoking +script/generate controller+ will give you skeleton views, but they'll be devoid of actual content. Here's a first pass at fleshing out the comment views.
+=== Budowanie Widoków
 
-The +index.html.erb+ view:
+Ponieważ opuściłeś rusztowanie, konieczne będzie ręczne zbudowanie widoków dla komentarzy. Przywoływanie +script/generate controller+ da ci szkielet widoków, które jednak będą pozbawione aktualnej zawartości. Oto pierwszy krok do uszczegółowienia widoków komentarza.
+
+Widok +index.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1120,7 +1121,7 @@ The +index.html.erb+ view:
 <%= link_to 'Back to Post', @post %>
 -------------------------------------------------------
 
-The +new.html.erb+ view:
+Widok +new.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1145,7 +1146,7 @@ The +new.html.erb+ view:
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-The +show.html.erb+ view:
+Widok +show.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1165,7 +1166,7 @@ The +show.html.erb+ view:
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-The +edit.html.erb+ view:
+Widok +edit.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -1191,11 +1192,11 @@ The +edit.html.erb+ view:
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Again, the added complexity here (compared to the views you saw for managing comments) comes from the necessity of juggling a post and its comments at the same time.
+Obecna, coraz większa komplikacja (w porównaniu do widoków dla zarządzania postami, które do tej pory widziałeś) ponownie pochodzi z konieczności żonglowania postami i ich komentarzami w tym samym czasie.
 
-=== Hooking Comments to Posts
+=== Przyłączanie komentarzy do postów
 
-As a final step, I'll modify the +show.html.erb+ view for a post to show the comments on that post, and to allow managing those comments:
+Jako następny krok, zmodyfikuje widok: +show.html.erb+ , by pokazać komentarze do tego postu oraz umożliwić zarządzanie nimi: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -1232,23 +1233,25 @@ As a final step, I'll modify the +show.html.erb+ view for a post to show the com
 <%= link_to 'Manage Comments', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Note that each post has its own individual comments collection, accessible as +@post.comments+. That's a consequence of the declarative associations in the models. Path helpers such as +post_comments_path+ come from the nested route declaration in +config/routes.rb+.
+Zapamiętaj, że każdy post ma swój osobny zbiór komentarzy, dostępny przez +@post.comments+. Wynika to z zadeklarowanych asocjacji w modelach. Ścieżka pomocnicza, taka jak +post_comments_path+ pochodzi od zagnieżdżonej ścieżki deklaracji w +config/routes.rb+ .
 
-== What's Next?
+== Co dalej?
 
-Now that you've seen your first Rails application, you should feel free to update it and experiment on your own. But you don't have to do everything without help. As you need assistance getting up and running with Rails, feel free to consult these support resources:
+Teraz, gdy masz przed sobą swój pierwszy Railsowy program, możesz go uatrakcyjniać, według własnych potrzeb. Ale nie musisz do wszystkiego dochodzić samodzielnie. Jeśli potrzebujesz wsparcia przy tworzeniu i uruchamianiu aplikacji Rails, możesz swobodnie korzystać z tych zasobów:
 
 * The link:http://guides.rubyonrails.org/[Ruby On Rails guides]
 * The link:http://groups.google.com/group/rubyonrails-talk[Ruby on Rails mailing list]
 * The #rubyonrails channel on irc.freenode.net
 * The link:http://wiki.rubyonrails.org/rails[Rails wiki]
 
-Rails also comes with built-in help that you can generate using the rake command-line utility:
+Railsy mają równiez wbudowaną pomoc, która możesz wywołać przy użyciu komendy rake w linii komend:
 
-* Running +rake doc:guides+ will put a full copy of the Rails Guides in the +/doc/guides+ folder of your application. Open +/doc/guides/index.html+ in your web browser to explore the Guides.
-* Running +rake doc:rails+ will put a full copy of the API documentation for Rails in the +/doc/api+ folder of your application. Open +/doc/api/index.html+ in your web browser to explore the API documentation.
+* Uruchomienie +rake doc:guides+ umieści kopię Rails Guides (przewodnik Rails) w folderze +/doc/guides+ Twojego programu. Znajdujący się tam plik +/doc/guides/index.html+ możesz przeglądać używając Twojej przeglądarki.
 
-== Changelog ==
+* Uruchomienie +rake doc:rails+ umieści kopię dokumentacji API dla Rails w folderze +/doc/api+ Twojej aplikacji. Znajdujący się tam plik +/doc/api/index.html+ możesz przeglądać używając Twojej przeglądarki.
+
+
+== Zmiany ==
 
 http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/2[Lighthouse ticket]
 
