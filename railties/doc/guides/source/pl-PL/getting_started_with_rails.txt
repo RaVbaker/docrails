@@ -255,10 +255,11 @@ Teraz, gdy masz już skonfigurowaną bazę danych, czas by Rails stworzył dla c
 -------------------------------------------------------
 $ rake db:create
 -------------------------------------------------------
+NOTE: "Rake" jest poleceniem startującym ogólnego zastosowania, które Rails używa do wielu rzeczy. By zobaczyć dostępne dla niego komendy uruchom "rake -T". :
 
-== Hello, Rails!
+== Witaj Rails!
 
-One of the traditional places to start with a new language is by getting some text up on screen quickly. To do that in Rails, you need to create at minimum a controller and a view. Fortunately, you can do that in a single command. Enter this command in your terminal:
+Jednym z tradycyjnych sposobów uczenia się nowego języka jest pobieżne przeglądnięcie jego tekstu. By tak zrobić w Railsach, konieczne jest stworzenie przynajmniej kontrolera oraz widoku.. Na szczęście możesz to zrobić używając pojedynczej komendy, wpisując ją do terminala:
 
 [source, shell]
 -------------------------------------------------------
@@ -267,40 +268,41 @@ $ script/generate controller home index
 
 TIP: If you're on Windows, or your Ruby is set up in some non-standard fashion, you may need to explicitly pass Rails +script+ commands to Ruby: +ruby script/generate controller home index+.
 
-Rails will create several files for you, including +app/views/home/index.html.erb+. This is the template that will be used to display the results of the +index+ action (method) in the +home+ controller. Open this file in your text editor and edit it to contain a single line of code:
+Rails stworzy dla Ciebie parę plików, włączając w to +app/views/home/index.html.erb+. To jest szablon, który będzie używany do pokazywania efektów +index+ action (method) w +home+ kontrolerze. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego ta pojedynczą linijkę kodu:
+
 
 [source, html]
 -------------------------------------------------------
 <h1>Hello, Rails!</h1>
 -------------------------------------------------------
 
-=== Starting up the Web Server
+=== Uruchamianie serwera WWW.
 
-You actually have a functional Rails application already - after running only two commands! To see it, you need to start a web server on your development machine. You can do this by running another command:
+W chwili obecnej, za pomocą jedynie dwóch komend, masz gotowy i działający Railsowy program! Uruchamiając przeglądarkę na swoim komputerze programisty, za pomocą kolejnej komendy startowej: $ script/Server, będziesz mógł go zobaczyć.
 
 [source, shell]
 -------------------------------------------------------
 $ script/server
 -------------------------------------------------------
 
-This will fire up the lightweight Webrick web server by default. To see your application in action, open a browser window and navigate to +http://localhost:3000+. You should see Rails' default information page:
+Domyślnie spowoduje to odpalenie instancji serwera aplikacyjnego Mongrel. By zobaczyć jak działa Twój program, otwórz okno przeglądarki i przejdź do +http://localhost:3000+. Powinieneś zobaczyć Railsową, domyślną stronę informacyjną:
 
 image:images/rails_welcome.png[Welcome Aboard screenshot]
 
-TIP: To stop the web server, hit Ctrl+C in the terminal window where it's running. In development mode, Rails does not generally require you to stop the server; changes you make in files will be automatically picked up by the server.
+TIP: By zatrzymać serwer WWW naciśnij Ctrl+C w oknie terminalu podczas jego działania. Generalnie, Raily w "trybie tworzenia" (development mode) nie wymaga zatrzymywania serwera by wprowadzić Twoje zmiany w plikach - zostaną one automatycznie wprowadzone na serwer.
 
-The "Welcome Aboard" page is the smoke test for a new Rails application: it makes sure that you have your software configured correctly enough to serve a page. To view the page you just created, navigate to +http://localhost:3000/home/index+.
+Ekran powitalny jest pierwszą próbą dla nowego programu napisanego w Raily - upewnia nas, że oprogramowanie którym dysponujemy jest poprawnie skonfigurowana do działania strony. By ją zobaczyć, przejdź do +http://localhost:3000/home/index+.
 
-=== Setting the Application Home Page
+=== Konfiguracja Strony Domowej Programu.
 
-You'd probably like to replace the "Welcome Aboard" page with your own application's home page. The first step to doing this is to delete the default page from your application:
+Prawdopodobnie chcesz zamienić domyślną stronę startową z tą Twojego programu. Pierwszym krokiem jest wykasowanie strony domyślnej z Twojego programu:
 
 [source, shell]
 -------------------------------------------------------
 $ rm public/index.html
 -------------------------------------------------------
 
-Now, you have to tell Rails where your actual home page is located. Open the file +config/routes.rb+ in your editor. This is your application's, _routing file_, which holds entries in a special DSL (domain-specific language) that tells Rails how to connect incoming requests to controllers and actions. At the bottom of the file you'll see the _default routes_:
+Powinieneś teraz wskazać Railsowi gdzie Twoja strona domowa jest zlokalizowana. Otwórz plik +config/routes.rb+ w swoim edytorze -  jest on plikiem routingowy (_routing file_) Twojego programu. Zawiera wpisy w specjalnym DSL (specyficzny język domeny) które pokazują Railsowi w jaki sposób połączyć żądania kontrolerów oraz akcji. Na dole tego pliku znajdują się domyślne ścieżki (_default routes_):
 
 [source, ruby]
 -------------------------------------------------------
@@ -308,24 +310,24 @@ map.connect ':controller/:action/:id'
 map.connect ':controller/:action/:id.:format'
 -------------------------------------------------------
 
-The default routes handle simple requests such as +/home/index+: Rails translates that into a call to the +index+ action in the +home+ controller. As another example, +/posts/edit/1+ would run the +edit+ action in the +posts+ controller with an +id+ of 1.
+Domyślne ścieżki przenoszą proste żądania, takie jak +/home/index+: Railsy tłumaczą je w postaci prośby do akcji +index+ w +home+ kontrolerze. Kolejny przykład, +/posts/edit/1+ uruchomi akcję +edit+ w +posts+ kontrollera z +id+ 1.
 
-To hook up your home page, you need to add another line to the routing file, above the default routes:
+By połączyć Twoją stronę domową, będziesz potrzebować kolejnej linii do pliku routingu, powyżej domyślnej ścieżki: 
 
 [source, ruby]
 -------------------------------------------------------
 map.root :controller => "home"
 -------------------------------------------------------
 
-This line illustrates one tiny bit of the "convention over configuration" approach: if you don't specify an action, Rails assumes the +index+ action.
+Ta linia pokazuje jedną mała część próby "convention over configuration"; jeśli nie określisz akcji, Railsy przyjmą akcję +index+.
 
-Now if you navigate to +http://localhost:3000+ in your browser, you'll see the +home/index+ view.
+Po przejściu do strony +http://localhost:3000+ , zobaczysz widok +home/index+ .
 
 NOTE: For more information about routing, refer to link:../routing_outside_in.html[Rails Routing from the Outside In].
 
-== Getting Up and Running Quickly With Scaffolding
+== Szybki początek z rusztowaniem.
 
-Rails _scaffolding_ is a quick way to generate some of the major pieces of an application. If you want to create the models, views, and controllers for a new resource in a single operation, scaffolding is the tool for the job. 
+Railsowe rusztowanie (_scaffolding_) jest szybkim sposobem na stworzenia znacznej części programu. Jeśli chcesz stworzyć modele, widoki i kontrolery dla nowych zasobów w pojedynczej operacji, to jest to odpowiednim narzędziem dla Ciebie.
 
 == Creating a Resource
 
