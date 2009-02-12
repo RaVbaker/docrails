@@ -1,16 +1,16 @@
-Migrations
+Migracje
 ==========
 
-Migrations are a convenient way for you to alter your database in a structured and organised manner. You could edit fragments of SQL by hand but you would then be responsible for telling other developers that they need to go and run it. You'd also have to keep track of which changes need to be run against the production machines next time you deploy. Active Record tracks which migrations have already been run so all you have to do is update your source and run `rake db:migrate`. Active Record will work out which migrations should be run. It will also update your db/schema.rb file to match the structure of your database. 
+Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś potem samemu zatroszczyć się o to, by poinformować inny projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia 'rake db:migrate'. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
 
-Migrations also allow you to describe these transformations using Ruby. The great thing about this is that (like most of Active Record's functionality) it is database independent: you don't need to worry about the precise syntax of CREATE TABLE any more that you worry about variations on SELECT * (you can drop down to raw SQL for database specific features). For example you could use SQLite3 in development, but MySQL in production.
+Migracje pozwalają na opisanie zmian bazy danych w Rubym. Dzięki temu, podobnie jak większość funkcji modułu Active Record, nie zależą one od używanej przez Ciebie wersji bazy danych. Nie musisz więc martwić się o dokładną składnię komendy CREATE TABLE ani zastanawiać się nad różnymi wariacjami polecenia SELECT *. Możesz na przykład użyć SQLite3 podczas tworzenia, a MySQL w gotowym, udostępnionym serwisie.
 
-You'll learn all about migrations including:
+W poniższym przewodniku dowiesz się wszystkiego o migracjach. W szczególności, tekst opisuje:
 
-* The generators you can use to create them
-* The methods Active Record provides to manipulate your database
-* The Rake tasks that manipulate them
-* How they relate to `schema.rb`
+* generatory używane przy tworzeniu migracji
+* metody modułu Active Record służące do modyfikacji bazy danych
+* zadania Rade działające na migracjach
+* powiązania między migracjami a plikiem schema.rb
 
 include::anatomy_of_a_migration.txt[]
 include::creating_a_migration.txt[]
