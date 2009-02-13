@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Migrations</title>
+  <title>Migracje</title>
   <!--[if lt IE 8]>
   <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js" type="text/javascript"></script>
   <![endif]-->
@@ -31,34 +31,22 @@
       <h2>Chapters</h2>
       <ol>
           <li>
-          <a href="#_anatomy_of_a_migration">Anatomy Of A Migration</a>
+          <a href="#_anatomia_migracji">Anatomia migracji</a>
             <ul>
             
-              <li><a href="#_migrations_are_classes">Migrations are classes</a></li>
+              <li><a href="#_migracje_s_klasami">Migracje są klasami</a></li>
             
-              <li><a href="#_what_8217_s_in_a_name">What&#8217;s in a name</a></li>
+              <li><a href="#_co_kryje_si_w_nazwie">Co kryje się w nazwie</a></li>
             
-              <li><a href="#_changing_migrations">Changing migrations</a></li>
+              <li><a href="#_zmiany_w_migracjach">Zmiany w migracjach</a></li>
             
-            </ul>
-          </li>
-          <li>
-          <a href="#_creating_a_migration">Creating A Migration</a>
-            <ul>
+              <li><a href="#_tworzenie_modelu">Tworzenie modelu</a></li>
             
-              <li><a href="#_creating_a_model">Creating a model</a></li>
+              <li><a href="#_tworzenie_samodzielnej_migracji">Tworzenie samodzielnej migracji</a></li>
             
-              <li><a href="#_creating_a_standalone_migration">Creating a standalone migration</a></li>
+              <li><a href="#_tworzenie_tabeli">Tworzenie tabeli</a></li>
             
-            </ul>
-          </li>
-          <li>
-          <a href="#_writing_a_migration">Writing a Migration</a>
-            <ul>
-            
-              <li><a href="#_creating_a_table">Creating a table</a></li>
-            
-              <li><a href="#_changing_tables">Changing tables</a></li>
+              <li><a href="#_zmienianie_tabel">Zmienianie tabel</a></li>
             
               <li><a href="#_special_helpers">Special helpers</a></li>
             
@@ -108,39 +96,39 @@
     </div>
     
     <div id="content">
-        <h1>Migrations</h1>
+        <h1>Migracje</h1>
       <div id="preamble">
 <div class="sectionbody">
-<div class="paragraph"><p>Migrations are a convenient way for you to alter your database in a structured and organised manner. You could edit fragments of SQL by hand but you would then be responsible for telling other developers that they need to go and run it. You&#8217;d also have to keep track of which changes need to be run against the production machines next time you deploy. Active Record tracks which migrations have already been run so all you have to do is update your source and run <tt>rake db:migrate</tt>. Active Record will work out which migrations should be run. It will also update your db/schema.rb file to match the structure of your database.</p></div>
-<div class="paragraph"><p>Migrations also allow you to describe these transformations using Ruby. The great thing about this is that (like most of Active Record&#8217;s functionality) it is database independent: you don&#8217;t need to worry about the precise syntax of CREATE TABLE any more that you worry about variations on SELECT * (you can drop down to raw SQL for database specific features). For example you could use SQLite3 in development, but MySQL in production.</p></div>
-<div class="paragraph"><p>You&#8217;ll learn all about migrations including:</p></div>
+<div class="paragraph"><p>Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś potem samemu zatroszczyć się o to, by poinformować inny projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia <em>rake db:migrate</em>. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.</p></div>
+<div class="paragraph"><p>Migracje pozwalają na opisanie zmian bazy danych w Rubym. Dzięki temu, podobnie jak większość funkcji modułu Active Record, nie zależą one od używanej przez Ciebie wersji bazy danych. Nie musisz więc martwić się o dokładną składnię komendy CREATE TABLE ani zastanawiać się nad różnymi wariacjami polecenia SELECT *. Możesz na przykład użyć SQLite3 podczas tworzenia, a MySQL w gotowym, udostępnionym serwisie.</p></div>
+<div class="paragraph"><p>W poniższym przewodniku dowiesz się wszystkiego o migracjach. W szczególności, tekst opisuje:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-The generators you can use to create them
+generatory używane przy tworzeniu migracji
 </p>
 </li>
 <li>
 <p>
-The methods Active Record provides to manipulate your database
+metody modułu Active Record służące do modyfikacji bazy danych
 </p>
 </li>
 <li>
 <p>
-The Rake tasks that manipulate them
+zadania Rade działające na migracjach
 </p>
 </li>
 <li>
 <p>
-How they relate to <tt>schema.rb</tt>
+powiązania między migracjami a plikiem schema.rb
 </p>
 </li>
 </ul></div>
 </div>
 </div>
-<h2 id="_anatomy_of_a_migration">1. Anatomy Of A Migration</h2>
+<h2 id="_anatomia_migracji">1. Anatomia migracji</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Before I dive into the details of a migration, here are a few examples of the sorts of things you can do:</p></div>
+<div class="paragraph"><p>Zanim zagłębimy się w detale migracji, przedstawiam kilka przykładów ilustrujących ich możliwości:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -160,8 +148,8 @@ http://www.gnu.org/software/src-highlite -->
     drop_table <span style="color: #990000">:</span>products
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>This migration adds a table called <tt>products</tt> with a string column called <tt>name</tt> and a text column called <tt>description</tt>. A primary key column called <tt>id</tt> will also be added, however since this is the default we do not need to ask for this. The timestamp columns <tt>created_at</tt> and <tt>updated_at</tt> which Active Record populates automatically will also be added. Reversing this migration is as simple as dropping the table.</p></div>
-<div class="paragraph"><p>Migrations are not limited to changing the schema. You can also use them to fix bad data in the database or populate new fields:</p></div>
+<div class="paragraph"><p>Ta migracja tworzy tabelę <tt>products</tt> z kolumną o nazwie <tt>name</tt> typu string oraz kolumną tekstową <tt>description</tt>. Zostanie również utworzona domyślna kolumna ID, bedąca kluczem głównym tabeli, ale ponieważ jest to domyślna kolumna każdej tabeli, nie musimy jej nawet definiować. Kolumny zawierające znaczniki czasu (timestamp) <tt>created_at</tt> i <tt>updated_at</tt> również zostaną automatycznie dodane przez moduł Active Record. Odwrócenie takiej migracji to po prostu usunięcie tabeli.</p></div>
+<div class="paragraph"><p>Możliwości migracji nie ograniczają się do zmiany schematu bazy danych. Przy ich pomocy można także poprawić błędne dane lub uzupełniać nowe pola:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -179,8 +167,7 @@ http://www.gnu.org/software/src-highlite -->
     remove_column <span style="color: #990000">:</span>users<span style="color: #990000">,</span> <span style="color: #990000">:</span>receive_newsletter
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>This migration adds an <tt>receive_newsletter</tt> column to the <tt>users</tt> table. We want it to default to <tt>false</tt> for new users, but existing users are considered
-to have already opted in, so we use the User model to set the flag to <tt>true</tt> for existing users.</p></div>
+<div class="paragraph"><p>Ta migracja dodaje kolumnę <tt>receive_newsletter</tt> do tabeli <tt>users</tt>. Pole to mówi nam o przypisaniu użytkownika na listę odbiorców aktualności. Chcemy, by domyślnie zawierało ono wartość false dla nowych użytkowników, ale użytkownicy juz zarejestrowani są zgłoszeni do otrzymywania aktualności, więc możemy użyć modelu User do ustawienia dla nich flagi reveive_newsletter jako <tt>true</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -189,9 +176,9 @@ to have already opted in, so we use the User model to set the flag to <tt>true</
 <td class="content">Some <a href="#models">caveats</a> apply to using models in your migrations.</td>
 </tr></table>
 </div>
-<h3 id="_migrations_are_classes">1.1. Migrations are classes</h3>
-<div class="paragraph"><p>A migration is a subclass of ActiveRecord::Migration that implements two class methods: <tt>up</tt> (perform the required transformations) and <tt>down</tt> (revert them).</p></div>
-<div class="paragraph"><p>Active Record provides methods that perform common data definition tasks in a database independent way (you&#8217;ll read about them in detail later):</p></div>
+<h3 id="_migracje_s_klasami">1.1. Migracje są klasami</h3>
+<div class="paragraph"><p>Migracja jest podklasą klasy ActiveRecord::Migration, która posiada zaimplementowane dwie metody: <tt>up</tt> (wykonaj żądane transformacje) i <tt>down</tt> (odwróć je).</p></div>
+<div class="paragraph"><p>Moduł Active Record udostępnia metody, służące do typowych operacji na bazach danych w sposób niezależny od typu używanej bazy (ich dokładniejszy opis będzie zamieszczony w dalszej części):</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -239,24 +226,22 @@ to have already opted in, so we use the User model to set the flag to <tt>true</
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>If you need to perform tasks specific to your database (for example create a <a href="#foreign_key">foreign key</a> constraint) then the <tt>execute</tt> function allows you to execute arbitrary SQL. A migration is just a regular Ruby class so you&#8217;re not limited to these functions. For example after adding a column you could
-write code to set the value of that column for existing records (if necessary using your models).</p></div>
-<div class="paragraph"><p>On databases that support transactions with statements that change the schema (such as PostgreSQL), migrations are wrapped in a transaction. If the database does not support this (for example MySQL and SQLite) then when a migration fails the parts of it that succeeded will not be rolled back. You will have to unpick the changes that were made by hand.</p></div>
-<h3 id="_what_8217_s_in_a_name">1.2. What&#8217;s in a name</h3>
-<div class="paragraph"><p>Migrations are stored in files in &#8216;db/migrate`, one for each migration class. The name of the file is of the form <tt>YYYYMMDDHHMMSS_create_products.rb</tt>, that is to say a UTC timestamp identifying the migration followed by an underscore followed by the name of the migration. The migration class&#8217; name must match (the camelcased version of) the latter part of the file name. For example <tt>20080906120000_create_products.rb</tt> should define CreateProducts and <tt>20080906120001_add_details_to_products.rb</tt> should define AddDetailsToProducts. If you do feel the need to change the file name then you MUST update the name of the class inside or Rails will complain about a missing class.</p></div>
-<div class="paragraph"><p>Internally Rails only uses the migration&#8217;s number (the timestamp) to identify them. Prior to Rails 2.1 the migration number started at 1 and was incremented each time a migration was generated. With multiple developers it was easy for these to clash requiring you to rollback migrations and renumber them. With Rails 2.1 this is largely avoided by using the creation time of the migration to identify them. You can revert to the old numbering scheme by setting <tt>config.active_record.timestamped_migrations</tt> to <tt>false</tt> in <tt>environment.rb</tt>.</p></div>
-<div class="paragraph"><p>The combination of timestamps and recording which migrations have been run allows Rails to handle common situations that occur with multiple developers.</p></div>
-<div class="paragraph"><p>For example Alice adds migrations <tt>20080906120000</tt> and <tt>20080906123000</tt> and Bob adds <tt>20080906124500</tt> and runs it. Alice finishes her changes and checks in her migrations and Bob pulls down the latest changes. Rails knows that it has not run Alice&#8217;s two migrations so <tt>rake db:migrate</tt> would run them (even though Bob&#8217;s migration with a later timestamp has been run), and similarly migrating down would not run their down methods.</p></div>
-<div class="paragraph"><p>Of course this is no substitution for communication within the team, for example if Alice&#8217;s migration removed a table that Bob&#8217;s migration assumed the existence of then trouble will still occur.</p></div>
-<h3 id="_changing_migrations">1.3. Changing migrations</h3>
-<div class="paragraph"><p>Occasionally you will make a mistake while writing a migration. If you have already run the migration then you cannot just edit the migration and run the migration again: Rails thinks it has already run the migration and so will do nothing when you run <tt>rake db:migrate</tt>. You must rollback the migration (for example with <tt>rake db:rollback</tt>), edit your migration and then run <tt>rake db:migrate</tt> to run the corrected version.</p></div>
-<div class="paragraph"><p>In general editing existing migrations is not a good idea: you will be creating extra work for yourself and your co-workers and cause major headaches if the existing version of the migration has already been run on production machines. Instead you should write a new migration that performs the changes you require. Editing a freshly generated migration that has not yet been committed to source control (or more generally which has not been propagated beyond your development machine) is relatively harmless. Just use some common sense.</p></div>
-</div>
-<h2 id="_creating_a_migration">2. Creating A Migration</h2>
-<div class="sectionbody">
-<h3 id="_creating_a_model">2.1. Creating a model</h3>
-<div class="paragraph"><p>The model and scaffold generators will create migrations appropriate for adding a new model. This migration will already contain instructions for creating the relevant table. If you tell Rails what columns you want then statements for adding those will also be created. For example, running</p></div>
-<div class="paragraph"><p><tt>ruby script/generate model Product name:string description:text</tt> will create a migration that looks like this</p></div>
+<div class="paragraph"><p>Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych (np. utworzyć <a href="#klucz obcy">klucz obcy</a>), możesz do tego celu wykorzystać funkcję <tt>execute</tt>, która umożliwia Ci wykonanie skryptu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.</p></div>
+<div class="paragraph"><p>W bazach danych obsługujących transakcje zmieniające schemat bazy danych (takich jak PostgreSQL), migracje są realizowane jako transakcje. Jeśli baza danych nie posiada takiej funkcjonalności (np. MySQL i SQLite), w przypadku niepowodzenia migracji etapy już wykonane nie zostaną automatycznie cofnięte. Wymaga to ręcznego usunięcia już wprowadzonych zmian.</p></div>
+<h3 id="_co_kryje_si_w_nazwie">1.2. Co kryje się w nazwie</h3>
+<div class="paragraph"><p>Każda klasa migracji jest przechowywana w oddzielnym pliku w katalogu <tt>db/migrate</tt>. Nazwa pliku jest w formacie <tt>YYYYMMDDHHMMSS_create_products.rb</tt>, zawierającym znacznik czasowy (w czasie UTC) oraz - po podkreślniku - nazwę migracji. Nazwa taka musi się zgadzać z migracją, którą plik zawiera, np:
+<tt>20080906120000_create_products</tt> powinna definiować migrację CreateProducts, a <tt>20080906120001_add_details_to_products - migrację AddDetailsToProducts</tt>. Jeśli z jakichś przyczyn zmienisz nazwę pliku, MUSISZ poprawić także nazwę klasy - w przeciwnym wypadku Railsy będą informowały Cię o braku wymaganej klasy.</p></div>
+<div class="paragraph"><p>Railsy wykorzystują jedynie numer migracji (czyli jej znacznik czasowy) do jej identyfikacji. Wersje wcześniejsze niż 2.1 numerowały migracje liczbami naturalnymi począwszy od 1, przypisując każdej nowej migracji kolejną liczbę. W przypadku pracy w zespołach kolizje oznaczeń były nieuniknione, co wymagało wycofania zmian i przenumerowania wszystkich migracji. Od wersji 2.1 rozwiązano ten problem identyfikując migrację poprzez datę jej utworzenia. Można przywrócić starszy sposób numeracji, ustawiając w pliku <tt>environment.rb</tt> zmienną <tt>config.active_record.timestamped_migrations</tt> na wartość <tt>false</tt>.</p></div>
+<div class="paragraph"><p>Dzięki nowemu sposobowi numeracji oraz monitorowaniu które migracje już zostały wykonane, Railsy rozwiązują wiele częstych problemów powstających przy pracy zespołowej nad jednym projektem.</p></div>
+<div class="paragraph"><p>Przykładowo, Ania tworzy migracje <tt>20080906120000</tt> i <tt>20080906123000</tt>, a Bartek tworzy <tt>20080906124500</tt> i ją wykonuje. Ania kończy wprowadzać zmiany, a Bartek wycofuje swoją migrację. Railsy wiedzą, że migracje Ani nie zostały wykonane, więc <tt>rake db:migrate</tt> wykona je (pomimo tego, że późniejsza migracja stworzona przez Bartka już została wykonana). Analogicznie, polecenie wycofania migracji pominie niewykonane jeszcze migracje Ani.</p></div>
+<div class="paragraph"><p>Oczywiście nie zastąpi to w pełni komunikacji wewnątrz zespołu. Na przykład, jeśli migracja Ani usunęła tabelę wykorzystywaną przez migrację Bartka, problem i tak wystąpi.</p></div>
+<h3 id="_zmiany_w_migracjach">1.3. Zmiany w migracjach</h3>
+<div class="paragraph"><p>Czasem popełnisz błąd podczas tworzenia migracji. Jeśli już ją wykonałeś, nie możesz po prostu wyedytować migracji i wykonać ponownie: Railsy uznają, że została już ona wykonana i kolejne wpisanie komendy <tt>rake db:migrate</tt> nie zaowocuje wprowadzeniem poprawek. Musisz w tym celu wycofać migrację (np. komendą <em>rake db:rollback</em>), poprawić błędy w migracji i ponownie ją wykonać poleceniem <em>rake db:migrate</em>.</p></div>
+<div class="paragraph"><p>Ogólnie rzecz biorąc, edycja istniejących migracji nie jest dobrym pomysłem: dodajesz tym samym pracy sobie i swoim współpracownikom. Może to być przyczyną poważnych kłopotów, jeżeli Twoja migracja została już uruchomiona na docelowym serwerze. Lepszym rozwiązaniem jest stworzenie nowej migracji, która wprowadzi wymagane zmiany. Edycja świeżo utworzonej migracji, która nie została jeszcze przekazana na serwer docelowy jest stosunkowo bezpieczna.
+== Tworzenie migracji ==</p></div>
+<h3 id="_tworzenie_modelu">1.4. Tworzenie modelu</h3>
+<div class="paragraph"><p>Generatory modelu i szkieletu utworzą migrację odpowiednią dla tworzonego modelu. Migracja taka zawiera od razu instrukcje potrzebne do utworzenia powiązanej z danym modelem tablicy. Jeśli powiesz Railsom jakie kolumny powinny znaleźć się w tej tabeli, do migracji zostaną dodane odpowiednie formuły. Przykładowo, wykonanie polecenia</p></div>
+<div class="paragraph"><p><tt>ruby script/generate model Product name:string description:text</tt> spowoduje stworzenie następującej migracji:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -276,12 +261,11 @@ http://www.gnu.org/software/src-highlite -->
     drop_table <span style="color: #990000">:</span>products
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>You can append as many column name/type pairs as you want. By default <tt>t.timestamps</tt> (which creates the <tt>updated_at</tt> and <tt>created_at</tt> columns that
-are automatically populated by Active Record) will be added for you.</p></div>
-<h3 id="_creating_a_standalone_migration">2.2. Creating a standalone migration</h3>
-<div class="paragraph"><p>If you are creating migrations for other purposes (for example to add a column to an existing table) then you can use the migration generator:</p></div>
+<div class="paragraph"><p>Możesz dołączyć tyle par kolumna/typ ile potrzebujesz. Domyślnie zostaną dodane znaczniki czasu <tt>t.timestamps</tt> (które powodują automatyczne utworzenie przez moduł Active Record kolumn <tt>updated_at</tt> i <tt>created_at</tt>).</p></div>
+<h3 id="_tworzenie_samodzielnej_migracji">1.5. Tworzenie samodzielnej migracji</h3>
+<div class="paragraph"><p>Jeśli tworzysz migracje dla innych celów (np. aby dodać kolumnę do istniejącej już tabeli), możesz skorzystać z generatora migracji:</p></div>
 <div class="paragraph"><p><tt>ruby script/generate migration AddPartNumberToProducts</tt></p></div>
-<div class="paragraph"><p>This will create an empty but appropriately named migration:</p></div>
+<div class="paragraph"><p>Ta komenda utworzy pustą, lecz odpowiednio nazwaną i skonstruowaną migrację:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -294,10 +278,9 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> <span style="font-weight: bold"><span style="color: #0000FF">self</span></span><span style="color: #990000">.</span>down
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>If the migration name is of the form AddXXXToYYY or RemoveXXXFromY and is followed by a list of column names and types then a migration containing
-the appropriate add and remove column statements will be created.</p></div>
+<div class="paragraph"><p>Jeśli nazwa migracji podana w poleceniu generatora migracje jest formatu AddXXXToYYY lub RemoveXXXFromYYY i po niej wymieniona jest lista kolumn i ich typów, to w wyniku utworzona zostanie migracja z odpowiednimi poleceniami dodania/usunięcia kolumny, przykładowo:</p></div>
 <div class="paragraph"><p><tt>ruby script/generate migration AddPartNumberToProducts part_number:string</tt></p></div>
-<div class="paragraph"><p>will generate</p></div>
+<div class="paragraph"><p>wygeneruje migrację:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -312,9 +295,9 @@ http://www.gnu.org/software/src-highlite -->
     remove_column <span style="color: #990000">:</span>products<span style="color: #990000">,</span> <span style="color: #990000">:</span>part_number
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Similarly,</p></div>
+<div class="paragraph"><p>Analogicznie, komenda</p></div>
 <div class="paragraph"><p><tt>ruby script/generate migration RemovePartNumberFromProducts part_number:string</tt></p></div>
-<div class="paragraph"><p>generates</p></div>
+<div class="paragraph"><p>generuje</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -329,9 +312,9 @@ http://www.gnu.org/software/src-highlite -->
     add_column <span style="color: #990000">:</span>products<span style="color: #990000">,</span> <span style="color: #990000">:</span>part_number<span style="color: #990000">,</span> <span style="color: #990000">:</span>string
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>You are not limited to one magically generated column, for example</p></div>
+<div class="paragraph"><p>Przy tworzeniu migracji nie musisz ograniczać się do jednej kolumny, na przykład:</p></div>
 <div class="paragraph"><p><tt>ruby script/generate migration AddDetailsToProducts part_number:string price:decimal</tt></p></div>
-<div class="paragraph"><p>generates</p></div>
+<div class="paragraph"><p>wygeneruje migrację:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -348,13 +331,11 @@ http://www.gnu.org/software/src-highlite -->
     remove_column <span style="color: #990000">:</span>products<span style="color: #990000">,</span> <span style="color: #990000">:</span>part_number
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>As always, what has been generated for you is just a starting point. You can add or remove from it as you see fit.</p></div>
-</div>
-<h2 id="_writing_a_migration">3. Writing a Migration</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Once you have created your migration using one of the generators it&#8217;s time to get to work!</p></div>
-<h3 id="_creating_a_table">3.1. Creating a table</h3>
-<div class="paragraph"><p><tt>create_table</tt> will be one of your workhorses. A typical use would be</p></div>
+<div class="paragraph"><p>Jak zwykle, wygenerowana migracja jest dopiero punktem startowym Twojej pracy. Możesz ją dalej modyfikować, dodając lub usuwając elementy.
+== Pisanie migracji ==</p></div>
+<div class="paragraph"><p>Jeśli już utworzyłeś migrację przy pomocy jednego z generatorów, najwyższy czas zabrać się do pracy!</p></div>
+<h3 id="_tworzenie_tabeli">1.6. Tworzenie tabeli</h3>
+<div class="paragraph"><p><tt>create_table</tt> jest jedną z najbardziej podstawowych komend. Jej typowe użycie ilustruje przykład:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -363,8 +344,8 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>create_table <span style="color: #990000">:</span>products <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> <span style="color: #990000">|</span>t<span style="color: #990000">|</span>
   t<span style="color: #990000">.</span>string <span style="color: #990000">:</span>name
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>which creates a <tt>products</tt> table with a column called <tt>name</tt> (and as discussed below, an implicit <tt>id</tt> column).</p></div>
-<div class="paragraph"><p>The object yielded to the block allows you create columns on the table. There are two ways of doing this. The first looks like</p></div>
+<div class="paragraph"><p>Przykład ten generuje tabelę <tt>products</tt> z kolumną o nazwie <tt>name</tt> (i, jak to omówimy w dalszej części, domyślną kolumną <tt>id</tt>).</p></div>
+<div class="paragraph"><p>Obiekt dołączony do bloku pozwala na tworzenie kolumn tabeli. Są na to dwa sposoby. Pierwszy z nich wygląda tak:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -373,7 +354,7 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>create_table <span style="color: #990000">:</span>products <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> <span style="color: #990000">|</span>t<span style="color: #990000">|</span>
   t<span style="color: #990000">.</span>column <span style="color: #990000">:</span>name<span style="color: #990000">,</span> <span style="color: #990000">:</span>string<span style="color: #990000">,</span> <span style="color: #990000">:</span>null <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">false</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>the second form, the so called "sexy" migrations, drops the somewhat redundant column method. Instead, the <tt>string</tt>, <tt>integer</tt> etc. methods create a column of that type. Subsequent parameters are identical.</p></div>
+<div class="paragraph"><p>Drugi sposób, tzw. "sexy" migracje, nie korzysta z nadmiarowej metody <tt>column</tt>. Zamiast niej wykorzystać można metody <tt>string</tt>, <tt>integer</tt> itp., tworzą kolumny odpowiednich typów. Pozostałe parametry są identyczne do parametrów metody <tt>column</tt>.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -382,7 +363,7 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>create_table <span style="color: #990000">:</span>products <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> <span style="color: #990000">|</span>t<span style="color: #990000">|</span>
   t<span style="color: #990000">.</span>string <span style="color: #990000">:</span>name<span style="color: #990000">,</span> <span style="color: #990000">:</span>null <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">false</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>By default <tt>create_table</tt> will create a primary key called <tt>id</tt>. You can change the name of the primary key with the <tt>:primary_key</tt> option (don&#8217;t forget to update the corresponding model) or if you don&#8217;t want a primary key at all (for example for a HABTM join table) you can pass <tt>:id =&gt; false</tt>. If you need to pass database specific options you can place an sql fragment in the <tt>:options</tt> option. For example</p></div>
+<div class="paragraph"><p>Domyślnie <tt>create_table</tt> stworzy klucz główny nazwany <tt>id</tt>. Możesz zmienić jego nazwę korzystając z opcji <tt>:primiary_key</tt> (nie zapomnij poprawić powiązanego z tabelą modelu) lub, jeśli nie chcesz w ogóle klucza głównego (np. dla tabeli HABTM, realizującej relację typu wiele-do-wielu) możesz dodać <tt>id =&gt; false</tt>. Jeśli chcesz dodać opcję specyficzną dla konkretnego typu bazy danych, możesz umieścić fragment kody SQL wewnątrz parametru <tt>:options</tt>. Na przykład:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -391,10 +372,9 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>create_table <span style="color: #990000">:</span>products<span style="color: #990000">,</span> <span style="color: #990000">:</span>options <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"ENGINE=BLACKHOLE"</span> <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> <span style="color: #990000">|</span>t<span style="color: #990000">|</span>
   t<span style="color: #990000">.</span>string <span style="color: #990000">:</span>name<span style="color: #990000">,</span> <span style="color: #990000">:</span>null <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">false</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Will append <tt>ENGINE=BLACKHOLE</tt> to the sql used to create the table (when using MySQL the default is "ENGINE=InnoDB").</p></div>
-<div class="paragraph"><p>The types Active Record supports are <tt>:primary_key</tt>, <tt>:string</tt>, <tt>:text</tt>, <tt>:integer</tt>, <tt>:float</tt>, <tt>:decimal</tt>, <tt>:datetime</tt>, <tt>:timestamp</tt>, <tt>:time</tt>, <tt>:date</tt>, <tt>:binary</tt>, <tt>:boolean</tt>.</p></div>
-<div class="paragraph"><p>These will be mapped onto an appropriate underlying database type, for example with MySQL <tt>:string</tt> is mapped to <tt>VARCHAR(255)</tt>. You can create columns of
-types not supported by Active Record when using the non sexy syntax, for example</p></div>
+<div class="paragraph"><p>Opcja ta doda <tt>ENGINE=BLACKHOLE</tt> do kodu SQL użytego do tworzenia tabeli (dla MySQL domyślny parametr to "ENGINE=InnoDB").</p></div>
+<div class="paragraph"><p>Typy obsługiwane przez moduł Active Record to <tt>:primary_key</tt>, <tt>:string</tt>, <tt>:text</tt>, <tt>:integer</tt>, <tt>:float</tt>, <tt>:decimal</tt>, <tt>:datetime</tt>, <tt>:timestamp</tt>, <tt>:time</tt>, <tt>:date</tt>, <tt>:binary</tt>, <tt>:boolean</tt>.</p></div>
+<div class="paragraph"><p>Zostaną one zrealizowane poprzez odpowiednie dla bazy danych typy danych, np. w MySQL <tt>:string</tt> zostanie przetłumaczony na <tt>VARCHAR(255)</tt>. Możesz tworzyć kolumny innych niż wymienione typów pod warunkiem, że nie używasz "sexy" składni, przykładowo:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -403,9 +383,9 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>create_table <span style="color: #990000">:</span>products <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> <span style="color: #990000">|</span>t<span style="color: #990000">|</span>
   t<span style="color: #990000">.</span>column <span style="color: #990000">:</span>name<span style="color: #990000">,</span> <span style="color: #FF0000">'polygon'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>null <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">false</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>This may however hinder portability to other databases.</p></div>
-<h3 id="_changing_tables">3.2. Changing tables</h3>
-<div class="paragraph"><p><tt>create_table</tt>'s close cousin is <tt>change_table</tt>. Used for changing existing tables, it is used in a similar fashion to <tt>create_table</tt> but the object yielded to the block knows more tricks. For example</p></div>
+<div class="paragraph"><p>Może to jednak uniemożliwić poprawne przeniesienie migracji na inny typ bazy danych.</p></div>
+<h3 id="_zmienianie_tabel">1.7. Zmienianie tabel</h3>
+<div class="paragraph"><p>Bliskim kuzynem <tt>create_table</tt> jest <tt>change_table</tt>. Komenda ta służy do zmiany istniejących już tabel i używana jest w analogiczny sposób jak <tt>create_table</tt>, posiada jednak o wiele większe możliwości. Przykładowo:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -417,7 +397,7 @@ http://www.gnu.org/software/src-highlite -->
   t<span style="color: #990000">.</span>index <span style="color: #990000">:</span>part_number
   t<span style="color: #990000">.</span>rename <span style="color: #990000">:</span>upccode<span style="color: #990000">,</span> <span style="color: #990000">:</span>upc_code
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>removes the <tt>description</tt> column, creates a <tt>part_number</tt> column and adds an index on it. Finally it renames the <tt>upccode</tt> column.   This is the same as doing</p></div>
+<div class="paragraph"><p>Ta komenda usuwa kolumnę <tt>description</tt>, dodaje kolumnę <tt>part_number</tt> i tworzy na niej indeks. Ostatnia metoda powoduje zmianę nazwy kolumny <tt>upccode</tt> na <tt>upc_code</tt>. Ten sam efekt można osiągnąć również następującym sposobem:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -428,8 +408,8 @@ remove_column <span style="color: #990000">:</span>products<span style="color: #
 add_column <span style="color: #990000">:</span>products<span style="color: #990000">,</span> <span style="color: #990000">:</span>part_number<span style="color: #990000">,</span> <span style="color: #990000">:</span>string
 add_index <span style="color: #990000">:</span>products<span style="color: #990000">,</span> <span style="color: #990000">:</span>part_number
 rename_column <span style="color: #990000">:</span>products<span style="color: #990000">,</span> <span style="color: #990000">:</span>upccode<span style="color: #990000">,</span> <span style="color: #990000">:</span>upc_code</tt></pre></div></div>
-<div class="paragraph"><p>You don&#8217;t have to keep repeating the table name and it groups all the statements related to modifying one particular table. The individual transformation names are also shorter, for example <tt>remove_column</tt> becomes just <tt>remove</tt> and <tt>add_index</tt> becomes just <tt>index</tt>.</p></div>
-<h3 id="_special_helpers">3.3. Special helpers</h3>
+<div class="paragraph"><p>Stosując pierwszą składnię nie musisz powtarzać przy każdej komendzie nazwy tabeli - grupujesz wszystkie wykonane na niej operacje w jedną komendę. Dodatkowo nazwy transformacji są krótsze: <tt>remove_column</tt> zastępuje samo <tt>remove</tt> a <tt>add_index</tt> - po prostu <tt>index</tt>.</p></div>
+<h3 id="_special_helpers">1.8. Special helpers</h3>
 <div class="paragraph"><p>Active Record provides some shortcuts for common functionality. It is for example very common to add both the <tt>created_at</tt> and <tt>updated_at</tt> columns and so there is a method that does exactly that:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -478,7 +458,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <div class="paragraph"><p>If the helpers provided by Active Record aren&#8217;t enough you can use the <tt>execute</tt> function to execute arbitrary SQL.</p></div>
 <div class="paragraph"><p>For more details and examples of individual methods check the API documentation, in particular the documentation for <a href="http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html">ActiveRecord::ConnectionAdapters::SchemaStatements</a> (which provides the methods available in the <tt>up</tt> and <tt>down</tt> methods),  <a href="http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html">ActiveRecord::ConnectionAdapters::TableDefinition</a> (which provides the methods available on the object yielded by <tt>create_table</tt>) and <a href="http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/Table.html">ActiveRecord::ConnectionAdapters::Table</a> (which provides the methods available on the object yielded by <tt>change_table</tt>).</p></div>
-<h3 id="_writing_your_down_method">3.4. Writing your down method</h3>
+<h3 id="_writing_your_down_method">1.9. Writing your down method</h3>
 <div class="paragraph"><p>The <tt>down</tt> method of your migration should revert the transformations done by the <tt>up</tt> method. In other words the database should be unchanged if you do an <tt>up</tt> followed by a <tt>down</tt>. For example if you create a table in the up you should drop it in the <tt>down</tt> method. It is wise to do things in precisely the reverse order to in the <tt>up</tt> method. For example</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -509,7 +489,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Sometimes your migration will do something which is just plain irreversible, for example it might destroy some data. In cases like those when you can&#8217;t reverse the migration you can raise IrreversibleMigration from your <tt>down</tt> method. If someone tries to revert your migration an error message will be
 displayed saying that it can&#8217;t be done.</p></div>
 </div>
-<h2 id="_running_migrations">4. Running Migrations</h2>
+<h2 id="_running_migrations">2. Running Migrations</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Rails provides a set of rake tasks to work with migrations which boils down to running certain sets of migrations. The very first migration related rake task you use will probably be <tt>db:migrate</tt>. In its most basic form it just runs the <tt>up</tt> method for all the migrations that have not yet been run. If there are no such migrations it exits.</p></div>
 <div class="paragraph"><p>Note that running the <tt>db:migrate</tt> also invokes the <tt>db:schema:dump</tt> task, which will update your db/schema.rb file to match the structure of your database.</p></div>
@@ -520,7 +500,7 @@ version is the numerical prefix on the migration&#8217;s filename. For example t
 <pre><tt>rake db:migrate VERSION=20080906120000</tt></pre>
 </div></div>
 <div class="paragraph"><p>If this is greater than the current version (i.e. it is migrating upwards) this will run the <tt>up</tt> method on all migrations up to and including 20080906120000, if migrating downwards this will run the <tt>down</tt> method on all the migrations down to, but not including, 20080906120000.</p></div>
-<h3 id="_rolling_back">4.1. Rolling back</h3>
+<h3 id="_rolling_back">2.1. Rolling back</h3>
 <div class="paragraph"><p>A common task is to rollback the last migration, for example if you made a mistake in it and wish to correct it. Rather than tracking down the version number associated with the previous migration you can run</p></div>
 <div class="listingblock">
 <div class="content">
@@ -547,14 +527,14 @@ version is the numerical prefix on the migration&#8217;s filename. For example t
 <td class="content">This is not the same as running all the migrations - see the section on <a href="#schema">schema.rb</a>.</td>
 </tr></table>
 </div>
-<h3 id="_being_specific">4.2. Being Specific</h3>
+<h3 id="_being_specific">2.2. Being Specific</h3>
 <div class="paragraph"><p>If you need to run a specific migration up or down the <tt>db:migrate:up</tt> and <tt>db:migrate:down</tt> tasks will do that. Just specify the appropriate version and the corresponding migration will have its <tt>up</tt> or <tt>down</tt> method invoked, for example</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>rake db:migrate:up VERSION=20080906120000</tt></pre>
 </div></div>
 <div class="paragraph"><p>will run the <tt>up</tt> method from the 20080906120000 migration. These tasks check whether the migration has already run, so for example <tt>db:migrate:up VERSION=20080906120000</tt> will do nothing if Active Record believes that 20080906120000 has already been run.</p></div>
-<h3 id="_being_talkative">4.3. Being talkative</h3>
+<h3 id="_being_talkative">2.3. Being talkative</h3>
 <div class="paragraph"><p>By default migrations tell you exactly what they&#8217;re doing and how long it took.
 A migration creating a table and adding an index might produce output like this</p></div>
 <div class="listingblock">
@@ -625,7 +605,7 @@ http://www.gnu.org/software/src-highlite -->
 </div></div>
 <div class="paragraph"><p>If you just want Active Record to shut up then running <tt>rake db:migrate VERBOSE=false</tt> will suppress any output.</p></div>
 </div>
-<h2 id="models">5. Using Models In Your Migrations</h2>
+<h2 id="models">3. Using Models In Your Migrations</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>When creating or updating data in a migration it is often tempting to use one of your models. After all they exist to provide easy access to the underlying data. This can be done but some caution should be observed.</p></div>
 <div class="paragraph"><p>Consider for example a migration that uses the Product model to update a row in the corresponding table. Alice later updates the Product model, adding a new column and a validation on it. Bob comes back from holiday, updates the source and runs outstanding migrations with <tt>rake db:migrate</tt>, including the one that used the Product model. When the migration runs the source is up to date and so the Product model has the validation added by Alice. The database however is still old and so does not have that column and an error ensues because that validation is on a column that does not yet exist.</p></div>
@@ -648,7 +628,7 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>The migration has its own minimal copy of the Product model and no longer cares about the Product model defined in the application.</p></div>
-<h3 id="_dealing_with_changing_models">5.1. Dealing with changing models</h3>
+<h3 id="_dealing_with_changing_models">3.1. Dealing with changing models</h3>
 <div class="paragraph"><p>For performance reasons information about the columns a model has is cached. For example if you add a column to a table and then try and use the corresponding model to insert a new row it may try and use the old column information. You can force Active Record to re-read the column information with the <tt>reset_column_information</tt> method, for example</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -670,14 +650,14 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 </div>
-<h2 id="_schema_dumping_and_you">6. Schema dumping and you</h2>
+<h2 id="_schema_dumping_and_you">4. Schema dumping and you</h2>
 <div class="sectionbody">
-<h3 id="schema">6.1. What are schema files for?</h3>
+<h3 id="schema">4.1. What are schema files for?</h3>
 <div class="paragraph"><p>Migrations, mighty as they may be, are not the authoritative source for your database schema. That role falls to either <tt>schema.rb</tt> or an SQL file which Active Record generates by examining the database. They are not designed to be edited, they just represent the current state of the database.</p></div>
 <div class="paragraph"><p>There is no need (and it is error prone) to deploy a new instance of an app by replaying the entire migration history. It is much simpler and faster to just load into the database a description of the current schema.</p></div>
 <div class="paragraph"><p>For example, this is how the test database is created: the current development database is dumped (either to <tt>schema.rb</tt> or <tt>development.sql</tt>) and then loaded into the test database.</p></div>
 <div class="paragraph"><p>Schema files are also useful if you want a quick look at what attributes an Active Record object has. This information is not in the model&#8217;s code and is frequently spread across several migrations but is all summed up in the schema file. The <a href="http://agilewebdevelopment.com/plugins/annotate_models">annotate_models</a> plugin, which automatically adds (and updates) comments at the top of each model summarising the schema, may also be of interest.</p></div>
-<h3 id="_types_of_schema_dumps">6.2. Types of schema dumps</h3>
+<h3 id="_types_of_schema_dumps">4.2. Types of schema dumps</h3>
 <div class="paragraph"><p>There are two ways to dump the schema. This is set in <tt>config/environment.rb</tt> by the <tt>config.active_record.schema_format</tt> setting, which may be either <tt>:sql</tt> or <tt>:ruby</tt>.</p></div>
 <div class="paragraph"><p>If <tt>:ruby</tt> is selected then the schema is stored in <tt>db/schema.rb</tt>. If you look at this file you&#8217;ll find that it looks an awful lot like one very big migration:</p></div>
 <div class="listingblock">
@@ -704,16 +684,16 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>There is however a trade-off: <tt>schema.rb</tt> cannot express database specific items such as foreign key constraints, triggers or stored procedures. While in a migration you can execute custom SQL statements, the schema dumper cannot reconstitute those statements from the database. If you are using features like this then you should set the schema format to <tt>:sql</tt>.</p></div>
 <div class="paragraph"><p>Instead of using Active Record&#8217;s schema dumper the database&#8217;s structure will be dumped using a tool specific to that database (via the <tt>db:structure:dump</tt> Rake task) into <tt>db/#{RAILS_ENV}_structure.sql</tt>. For example for PostgreSQL the <tt>pg_dump</tt> utility is used and for MySQL this file will contain the output of SHOW CREATE TABLE for the various tables. Loading this schema is simply a question of executing the SQL statements contained inside.</p></div>
 <div class="paragraph"><p>By definition this will be a perfect copy of the database&#8217;s structure but this will usually prevent loading the schema into a database other than the one used to create it.</p></div>
-<h3 id="_schema_dumps_and_source_control">6.3. Schema dumps and source control</h3>
+<h3 id="_schema_dumps_and_source_control">4.3. Schema dumps and source control</h3>
 <div class="paragraph"><p>Because they are the authoritative source for your database schema, it is strongly recommended that you check them into source control.</p></div>
 </div>
-<h2 id="foreign_key">7. Active Record and Referential Integrity</h2>
+<h2 id="foreign_key">5. Active Record and Referential Integrity</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>The Active Record way is that intelligence belongs in your models, not in the database. As such, features such as triggers or foreign key constraints, which push some of that intelligence back into the database are not heavily used.</p></div>
 <div class="paragraph"><p>Validations such as <tt>validates_uniqueness_of</tt> are one way in which models can enforce data integrity. The <tt>:dependent</tt> option on associations allows models to automatically destroy child objects when the parent is destroyed. Like anything which operates at the application level these cannot guarantee referential integrity and so some people augment them with foreign key constraints.</p></div>
 <div class="paragraph"><p>Although Active Record does not provide any tools for working directly with such features, the <tt>execute</tt> method can be used to execute arbitrary SQL. There are also a number of plugins such as <a href="http://agilewebdevelopment.com/plugins/search?search=redhillonrails">redhillonrails</a> which add foreign key support to Active Record (including support for dumping foreign keys in <tt>schema.rb</tt>).</p></div>
 </div>
-<h2 id="_changelog">8. Changelog</h2>
+<h2 id="_changelog">6. Changelog</h2>
 <div class="sectionbody">
 <div class="paragraph"><p><a href="http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/6">Lighthouse ticket</a></p></div>
 <div class="ulist"><ul>

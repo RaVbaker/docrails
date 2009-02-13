@@ -990,11 +990,29 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Wiele pluginów zawiera w sobie generatory. Przypomnijmy sobie, że tworzyliśmy nasz plugin z opcją <tt>--with-generator</tt>, dzięki czemu mamy już zalążek generatora w <em>vendor/plugins/yaffle/generators/yaffle</em>.</p></div>
 <div class="paragraph"><p>Tworzenie generatorów to temat na osobny przewodnik, dlatego zajmiemy się tylko małym aspektem ich możliwości: generowaniem prostego pliku tekstowego.</p></div>
 <h3 id="_testowanie_generator_w">9.1. Testowanie generatorów</h3>
-<div class="paragraph"><p>Wielu programistów nie testuje generatorów w swoich pluginach, a jest to całkiem proste. Typowy test generatora powinien:
- * Tworzyć tymczasowy katalog główny Railsów, który będzie docelowym na potrzeby testu
- * Uruchomić generator
- * Sprawdzić, czy zostały wygenerowane poprawne pliki
- * Usunąć tymczasowy katalog główny</p></div>
+<div class="paragraph"><p>Wielu programistów nie testuje generatorów w swoich pluginach, a jest to całkiem proste. Typowy test generatora powinien:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Tworzyć tymczasowy katalog główny Railsów, który będzie docelowym na potrzeby testu
+</p>
+</li>
+<li>
+<p>
+Uruchomić generator
+</p>
+</li>
+<li>
+<p>
+Sprawdzić, czy zostały wygenerowane poprawne pliki
+</p>
+</li>
+<li>
+<p>
+Usunąć tymczasowy katalog główny
+</p>
+</li>
+</ul></div>
 <div class="paragraph"><p>W tej części opiszemy jak stworzyć prosty generator, który dodaje plik. Dla naszego generatora test mógłby wyglądać np. tak:</p></div>
 <div class="paragraph"><p><strong>vendor/plugins/yaffle/test/definition_generator_test.rb</strong></p></div>
 <div class="listingblock">
@@ -1294,7 +1312,8 @@ http://www.gnu.org/software/src-highlite -->
 </tr></table>
 </div>
 <h3 id="_generowanie_migracji">11.3. Generowanie migracji</h3>
-<div class="paragraph"><p>Generowanie migracji ma pewną przewagę nad innymi metodami, a mianowicie pozwala innym programistom na łatwiejszą customizację migracji. Proces wygląda następująco:</p></div>
+<div class="paragraph"><p>Generowanie migracji ma pewną przewagę nad innymi metodami, a mianowicie
+pozwala innym programistom na łatwiejsze dostosowanie migracji. Proces wygląda następująco:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -1446,7 +1465,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <h2 id="_plugingems">13. PluginGems</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Przekształcenie naszego plugina w gema jest bardzo prostym zadaniem. Właśnie tym zajmiemy się w tym rozdziale. Nie będziemy natomiast omawiac sposobu dystrybucji tego gema.</p></div>
+<div class="paragraph"><p>Przekształcenie naszego plugina w gema jest bardzo prostym zadaniem. Właśnie tym zajmiemy się w tym rozdziale. Nie będziemy natomiast omawiać sposobu dystrybucji tego gema.</p></div>
 <div class="paragraph"><p>Tradycyjnie pluginy railsowe ładowały plik <em>init.rb</em> pluginu. Faktycznie niektóre pluginy zawierają cały swój kod w tym jednym pliku. Dla kompatybilności z pluginami, <em>init.rb</em> został przeniesiony do <em>rails/init.rb</em>.</p></div>
 <div class="paragraph"><p>Powszechną praktyką jest umieszczanie wszelkich deweloperskich zadań modułu rake (takich jak testy, rdoc i tworzenie paczek gemów) w <em>Rakefile</em>. Zadanie modułu rake, które tworzy gema, może wyglądać np. tak:</p></div>
 <div class="paragraph"><p><strong>vendor/plugins/yaffle/Rakefile:</strong></p></div>
@@ -1489,7 +1508,7 @@ Rake<span style="color: #990000">::</span>GemPackageTask<span style="color: #990
 rake gem
 sudo gem install pkg/yaffle-0.0.1.gem</tt></pre>
 </div></div>
-<div class="paragraph"><p>Aby to przetestować, należy stworzyć nową aplikację i dodać <em>config.gem "yaffle"</em> do <em>environment&#8217;rb</em>, a wszystkie funkcjonalności plugina będą dostępne.</p></div>
+<div class="paragraph"><p>Aby to przetestować, należy stworzyć nową aplikację i dodać <em>config.gem "yaffle"</em> do <em>environment.rb</em>, a wszystkie funkcjonalności plugina będą dostępne.</p></div>
 </div>
 <h2 id="_dokumentacja_rdoc">14. Dokumentacja RDoc</h2>
 <div class="sectionbody">

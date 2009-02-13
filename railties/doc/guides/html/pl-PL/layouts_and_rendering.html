@@ -816,11 +816,11 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <h2 id="_strukturyzacja_layout_w">3. Strukturyzacja layoutów</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Kiedy Railsy renderują widok jako odpowiedź czynią to poprzez połączenie widoku z
-bieżącym layoutem (stosując zasady znalezienia aktualnego layoutu,
+<div class="paragraph"><p>Kiedy Railsy renderują widok, łączą go z
+bieżącym layoutem (stosując zasady wyboru layoutu,
 które zostały omówione we wcześniejszej części tutoriala). W layoucie masz dostęp
-do trzech narzędzi służących do łączenia różnych bitów wyjścia do postaci ogólnej
-odpowiedzi:</p></div>
+do trzech narzędzi służących do łączenia różnych elementów do postaci
+wynikowej:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -866,21 +866,21 @@ image_tag
 </li>
 </ul></div>
 <div class="paragraph"><p>Możesz używać tych tagów w layoutach lub innych widokach, choć tagi inne niż <tt>image_tag</tt>
-są powszechnie używane w sekcji+&lt;head&gt;+ layoutu.</p></div>
+są powszechnie używane w sekcji <tt>&lt;head&gt;</tt> layoutu.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/warning.png" alt="Warning" />
 </td>
-<td class="content">Asset tags <em>nie</em> weryfikują tego czy dany element zewnętrzny istnieje w określonym
-miejscu. Po prostu zakładają, że wiesz co robisz i generują link.</td>
+<td class="content">Asset tags <em>nie</em> weryfikują tego czy dany element zewnętrzny istnieje w
+określonym miejscu. Po prostu zakładają, że wiesz co robisz i generują link.</td>
 </tr></table>
 </div>
 <h4 id="_w_czanie_kana_w_za_pomoc_tt_auto_discovery_link_tag_tt">3.1.1. Włączanie kanałów za pomocą <tt>auto_discovery_link_tag</tt></h4>
 <div class="paragraph"><p><tt>auto_discovery_link_tag helper</tt> buduje HTML, który większość przeglądarek i czytników
-wiadomości może użyć do sprawdzenia czy istnieją kanały RSS lub ATOM. Pobiera to typ
-połączenia (<tt>:rss</tt> or <tt>:atom</tt>),  hash opcji, które są przekazywane poprzez url_for
-i hash opcji dla tagu:</p></div>
+wiadomości może użyć do sprawdzenia czy istnieją kanały RSS lub ATOM.
+Wywołanie to akceptuje typ połączenia (<tt>:rss</tt> or <tt>:atom</tt>),
+hash opcji, które są przekazywane do <tt>url_for</tt> i hash opcji dla tagu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -901,12 +901,15 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 <li>
 <p>
-<tt>:title</tt> określa tytuł połączenia
+<tt>:title</tt> określa tytuł kanału
 </p>
 </li>
 </ul></div>
 <h4 id="_w_czanie_plik_w_javascript_za_pomoc_tt_javascript_include_tag_tt">3.1.2. Włączanie plików JavaScript za pomocą <tt>javascript_include_tag</tt></h4>
-<div class="paragraph"><p>Narzędzie <tt>javascript_include_tag</tt> zwraca tag HTML <tt>&lt;script&gt;</tt> dla każdego dostarczonego źródła. Railsy szukają tych plików domyślnie w <tt>public/javascripts</tt>, ale jeśli wolisz można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład aby włączyć <tt>public/javascripts/main.js</tt>:</p></div>
+<div class="paragraph"><p>Helper <tt>javascript_include_tag</tt> zwraca tag HTML <tt>&lt;script&gt;</tt> dla każdego dostarczonego
+źródła. Railsy szukają tych plików domyślnie w <tt>public/javascripts</tt>, ale jeśli wolisz
+można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład
+aby włączyć <tt>public/javascripts/main.js</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -941,28 +944,33 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= javascript_include_tag :defaults %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Opcja <tt>all</tt> wczytuje każdy plik javascript w <tt>public/javascripts</tt>, zaczynając od bibliotek Prototype i Scriptaculous:</p></div>
+<div class="paragraph"><p>Opcja <tt>all</tt> wczytuje każdy plik javascript w <tt>public/javascripts</tt>, zaczynając od bibliotek
+Prototype i Scriptaculous:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= javascript_include_tag :all %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Możesz dołączyć opcję <tt>:recursive</tt> by ładować również pliki w podfolderach <tt>public/javascripts</tt>:</p></div>
+<div class="paragraph"><p>Możesz dołączyć opcję <tt>:recursive</tt> by ładować również pliki w podfolderach
+<tt>public/javascripts</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= javascript_include_tag :all, :recursive =&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność poprzez połączenie wielu plików w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz <tt>:cache =&gt; true</tt> wewnątrz <tt>javascript_include_tag</tt>:</p></div>
+<div class="paragraph"><p>Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność poprzez połączenie
+wielu plików w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
+<tt>:cache =&gt; true</tt> wewnątrz <tt>javascript_include_tag</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= javascript_include_tag "main", "columns", :cache =&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Domyślnie połączony plik będzie dostarczony jako <tt>javascripts/all.js</tt>. Możesz zamiast tego wybrać lokalizację dla załączanego pliku:</p></div>
+<div class="paragraph"><p>Domyślnie połączony plik będzie dostarczony jako <tt>javascripts/all.js</tt>. Możesz zamiast
+tego wybrać lokalizację dla załączanego pliku:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -971,7 +979,10 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= javascript_include_tag "main", "columns", :cache =&gt;</span> <span style="color: #FF0000">'cache/main/display'</span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
 <div class="paragraph"><p></p></div>
 <h4 id="_w_czanie_plik_w_css_za_pomoc_tt_stylesheet_link_tag_tt">3.1.3. Włączanie plików CSS za pomocą <tt>stylesheet_link_tag</tt></h4>
-<div class="paragraph"><p>Narzędzie <tt>stylesheet_link_tag</tt> zwraca tag HTML <tt>&lt;link&gt;</tt> dla każdego dostarczonego źródła. Railsy szukają tych plików domyślnie w <tt>public/stylesheets</tt>, ale jeśli wolisz, można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład aby włączyć <tt>public/stylesheets/main.cs</tt>:</p></div>
+<div class="paragraph"><p>Helper <tt>stylesheet_link_tag</tt> zwraca tag HTML <tt>&lt;link&gt;</tt> dla każdego dostarczonego
+źródła. Railsy szukają tych plików domyślnie w <tt>public/stylesheets</tt>, ale jeśli wolisz,
+można podać pełną ścieżkę w stosunku do głównego katalogu lub adresu URL. Na przykład
+aby włączyć <tt>public/stylesheets/main.cs</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -999,7 +1010,9 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= stylesheet_link_tag "http://example.com/main.cs" %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Domyślnie <tt>stylesheet_link_tag</tt> tworzy połączenia z <tt>media="screen" rel="stylesheet" type="text/css"</tt>. Możesz nadpisać dowolne z nich poprzez użycie odpowiedniej opcji (:media, :rel, or :type):</p></div>
+<div class="paragraph"><p>Domyślnie <tt>stylesheet_link_tag</tt> tworzy połączenia z <tt>media="screen" rel="stylesheet"
+type="text/css"</tt>. Możesz nadpisać dowolne z nich poprzez użycie odpowiedniej opcji
+(:media, :rel, lub :type):</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1013,30 +1026,36 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= stylesheet_link_tag :all %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Możesz wykorzystać opcję <tt>:recursive</tt> by załączyć wszystkie pliki w podfolderach <tt>public/stylesheets</tt>:</p></div>
+<div class="paragraph"><p>Możesz wykorzystać opcję <tt>:recursive</tt> by załączyć wszystkie pliki w podfolderach
+<tt>public/stylesheets</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= stylesheet_link_tag :all, :recursive =&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Jeśli wczytujesz wiele plików CSS, możesz polepszyć efektywność poprzez połączenie wielu plików w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz <tt>:cache =&gt; true</tt> wewnątrz <tt>stylesheet_link_tag</tt>:</p></div>
+<div class="paragraph"><p>Jeśli wczytujesz wiele plików CSS, możesz polepszyć efektywność poprzez połączenie
+wielu plików w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
+<tt>:cache =&gt; true</tt> wewnątrz <tt>stylesheet_link_tag</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= stylesheet_link_tag "main", "columns", :cache =&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Domyślnie połączony plik będzie dostarczony jako <tt>stylesheets/all.css</tt>. Możesz zamiast tego wybrać lokalizację dla załączanego pliku:</p></div>
+<div class="paragraph"><p>Domyślnie połączony plik będzie dostarczony jako <tt>stylesheets/all.css</tt>. Możesz zamiast
+tego wybrać lokalizację dla załączanego pliku:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= stylesheet_link_tag "main", "columns", :cache =&gt;</span> <span style="color: #FF0000">'cache/main/display'</span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p></p></div>
+<div class="paragraph"><p>Możesz również użyć dynamicznych ścieżek takich jak:</p></div>
 <h4 id="_za_czanie_obrazk_w_za_pomoc_tt_image_tag_tt">3.1.4. Załączanie obrazków za pomocą <tt>image_tag</tt></h4>
-<div class="paragraph"><p>Narzędzie <tt>image_tag</tt> zwraca tag HTML <tt>&lt;image&gt;</tt> dla każdego dostarczonego źródła. Railsy szukają tych plików domyślnie w <tt>public/images</tt>. Jeśli nie podasz rozszerzenia domyślnie przyjmowane jest .png:</p></div>
+<div class="paragraph"><p>Helper <tt>image_tag</tt> zwraca tag HTML <tt>&lt;image&gt;</tt> dla każdego dostarczonego źródła.
+Railsy szukają tych plików domyślnie w <tt>public/images</tt>. Jeśli nie podasz rozszerzenia
+domyślnie przyjmowane jest .png:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1061,21 +1080,26 @@ http://www.gnu.org/software/src-highlite -->
 <div class="ulist"><ul>
 <li>
 <p>
-<tt>:alt</tt> określa alternatywny tekst dla obrazka (który domyślnie jest nazwą pliku, napisaną wielkimi literami bez rozszerzenia)
+<tt>:alt</tt> określa alternatywny tekst dla obrazka (który domyślnie jest nazwą pliku,
+  napisaną wielkimi literami bez rozszerzenia)
 </p>
 </li>
 <li>
 <p>
+  (for example, "150x125")
 </p>
 </li>
 <li>
 <p>
-<tt>:mouseover</tt> ustawia alternatywny obrazek, który ma być użyty w przypadku, gdy wywołane jest zdarzenie onmouseover.
+<tt>:mouseover</tt> ustawia alternatywny obrazek, który ma być użyty w przypadku, gdy wywołane
+  jest zdarzenie onmouseover.
 </p>
 </li>
 </ul></div>
 <h3 id="_zrozumienie_tt_yield_tt">3.2. Zrozumienie <tt>yield</tt></h3>
-<div class="paragraph"><p>W ramach kontekstu layoutu, <tt>yield</tt> identyfikuje sekcję do której powinna być wstawiona zawartość widoku. Najprostszym sposobem użycia jest posiadanie jednego <tt>yield</tt>, w które powinna być wstawiana cała zawartość obecnie renderowanego widoku.</p></div>
+<div class="paragraph"><p>W ramach kontekstu layoutu, <tt>yield</tt> identyfikuje sekcję do której powinna być wstawiona
+zawartość widoku. Najprostszym sposobem użycia jest posiadanie jednego <tt>yield</tt>, w
+którym powinna być wstawiana cała zawartość obecnie renderowanego widoku.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1102,9 +1126,12 @@ http://www.gnu.org/software/src-highlite -->
         &lt;%= yield %&gt;
   <span style="font-weight: bold"><span style="color: #0000FF">&lt;hbody&gt;</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">&lt;/html&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Główna część widoku będzie zawsze renderowana do nienazwanego <tt>yield</tt>. Aby wyrenderować zawartość w nazwany <tt>yield</tt>, należy użyć metody <tt>content_for</tt>.</p></div>
+<div class="paragraph"><p>Główna część widoku będzie zawsze renderowana do <tt>yield</tt> bez argumentu. Aby wyrenderować
+zawartość w nazwanym <tt>yield</tt>, należy użyć metody <tt>content_for</tt>.</p></div>
 <h3 id="_u_ywanie_tt_content_for_tt">3.3. Używanie <tt>content_for</tt></h3>
-<div class="paragraph"><p>Metoda ta pozwala wstawić treść do bloku <tt>yield</tt> w twoim layoucie. Używa się <tt>content_for</tt> tylko po to by wstawić zawartość w nazwane yieldy. Dla przykładu, ten widok będzie współpracował z powyższym layoutem:</p></div>
+<div class="paragraph"><p>Metoda ta pozwala wstawić treść do bloku <tt>yield</tt> w twoim layoucie. Używa się <tt>content_for</tt>
+tylko po to by wstawić zawartość w nazwane yieldy. Dla przykładu, ten widok będzie
+współpracował z powyższym layoutem:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1115,7 +1142,7 @@ http://www.gnu.org/software/src-highlite -->
 &lt;% end %&gt;
 
 <span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>Hello, Rails!<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Wynik renderowania tej strony w ten layout powinien być taki:</p></div>
+<div class="paragraph"><p>Wynik renderowania tej strony z tym layoutem powinien być taki:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1129,18 +1156,29 @@ http://www.gnu.org/software/src-highlite -->
         <span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>Hello, Rails!<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">&lt;hbody&gt;</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">&lt;/html&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Metoda <tt>content_for</tt> jest bardzo przydatna kiedy twój layout posiada odrębne regiony, takie jak paski boczne i stopki, które powinny mieć wstawiane własne bloki zawartości. Jest to także przydatne do wstawiania tagów które wczytują specyficzny dla danej strony plik javascript lub css w nagłówek layoutu.</p></div>
+<div class="paragraph"><p>Metoda <tt>content_for</tt> jest bardzo przydatna kiedy twój layout posiada odrębne regiony,
+takie jak paski boczne i stopki, które powinny mieć wstawiane własne bloki zawartości.
+Jest to także przydatne do wstawiania tagów które wczytują specyficzny dla danej strony
+plik javascript lub css w nagłówek layoutu.</p></div>
 <h3 id="_u_ywanie_podszablon_w">3.4. Używanie podszablonów</h3>
-<div class="paragraph"><p>Częściowe szablony (ang. partials templates) – zazwyczaj nazywane po prostu podszablonami (ang. partials) - są kolejnym narzędziem służącym do dzielenia procesu renderowania na mniejsze kawałki. Za pomocą podszablonów, możesz przenieść kod renderujący odpowiedniej części odpowiedzi do jego własnego pliku.</p></div>
+<div class="paragraph"><p>Częściowe szablony (ang. partial templates) – zazwyczaj nazywane po prostu podszablonami
+lub ,,parszalami'' - są kolejnym narzędziem służącym do dzielenia procesu renderowania
+na mniejsze kawałki. Za pomocą podszablonów, możesz przenieść kod renderujący odpowiedniej
+części odpowiedzi do jego własnego pliku.</p></div>
 <h4 id="_nazywanie_podszablon_w">3.4.1. Nazywanie podszablonów</h4>
-<div class="paragraph"><p>By wyrenderować podszablon jako część widoku, musisz użyć metody render wewnątrz tego widoku i dołączyć opcję <tt>:partial</tt>:</p></div>
+<div class="paragraph"><p>By wyrenderować podszablon jako część widoku, musisz użyć metody render wewnątrz tego
+widoku i dołączyć opcję <tt>:partial</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= render :partial =&gt;</span> <span style="color: #FF0000">"menu"</span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>To wyrenderuje plik nazwany <tt>_menu.html.erb</tt> w tym momencie wewnątrz aktualnie renderowanego widoku. Zauważ początkowy znak podkreślenia: podszablony są nazywane w ten sposób by odróżnić je od zwyczajnych widoków, nawet jeśli odnosi się do nich bez podkreślenia. To działa nawet jeśli włączasz podszablon z zupełnie innego folderu:</p></div>
+<div class="paragraph"><p>To wyrenderuje plik nazwany <tt>_menu.html.erb</tt> w tym momencie wewnątrz aktualnie
+renderowanego widoku. Zauważ początkowy znak podkreślenia:
+podszablony są nazywane w ten sposób
+by odróżnić je od zwyczajnych widoków, nawet jeśli odnosi się do nich bez podkreślenia.
+To działa nawet jeśli włączasz podszablon z zupełnie innego folderu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1149,7 +1187,10 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= render :partial =&gt;</span> <span style="color: #FF0000">"shared/menu"</span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
 <div class="paragraph"><p>Ten kod włączy podszablon z <tt>app/views/shared/_menu.html.erb</tt>.</p></div>
 <h4 id="_korzystanie_z_podszablon_w_do_uproszczenia_widok_w">3.4.2. Korzystanie z podszablonów do uproszczenia widoków</h4>
-<div class="paragraph"><p>Jednym ze sposobów wykorzystania z podszablonów jest traktowanie ich jako odpowiednik procedur: jako sposób aby przenieść detale na zewnątrz widoku, tak by łatwiej zrozumieć co się dzieje wewnątrz. Na przykład, możesz mieć widok, który wygląda w ten sposób:</p></div>
+<div class="paragraph"><p>Jednym ze sposobów wykorzystania podszablonów jest traktowanie ich jako
+odpowiedników procedur: jako sposób aby przenieść
+detale na zewnątrz widoku, tak by łatwiej zrozumieć
+co się dzieje wewnątrz. Na przykład, możesz mieć widok, który wygląda w ten sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1163,26 +1204,36 @@ http://www.gnu.org/software/src-highlite -->
 ...
 
 &lt;%= render :partial =&gt; "shared/footer" %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Tutaj, podszablony <tt>_ad_banner.html.erb</tt> i <tt>_footer.html.erb</tt>  mogą zawierać zawartość, która jest dzielona międz wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć szczegółów tych sekcji, kiedy koncentrujesz się na konkretnej stronie.</p></div>
+<div class="paragraph"><p>Tutaj, podszablony <tt>_ad_banner.html.erb</tt> i <tt>_footer.html.erb</tt>  mogą zawierać zawartość,
+która jest dzielona międz wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć
+szczegóły tych sekcji, kiedy koncentrujesz się na konkretnej stronie.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">W przypadku treści, które są dzielone pomiędzy wszystkie strony twojej aplikacji możesz użyć podszablonów bezpośrednio z layoutów.</td>
+<td class="content">W przypadku treści, które są dzielone pomiędzy wszystkie strony twojej aplikacji
+możesz użyć podszablonów bezpośrednio z layoutów.</td>
 </tr></table>
 </div>
-<h4 id="_partial_layouts">3.4.3. Partial Layouts</h4>
-<div class="paragraph"><p>Podszablon może użyć swojego własnego pliku layoutu, tak samo jak może to robić widok. Na przykład możesz odwołać się do niego w ten sposób:</p></div>
+<h4 id="_layouty_podszablon_w">3.4.3. Layouty podszablonów</h4>
+<div class="paragraph"><p>Podszablon może użyć swojego własnego pliku layoutu, tak samo jak może to robić widok.
+Na przykład możesz odwołać się do niego w ten sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>&lt;%= render :partial =&gt; "link_area", :layout =&gt; "graybar" %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Będzie to szukać podszablonu nazwanego <tt>_link_area.html.erb</tt> i wyrenderuje go używając <tt>_graybar.html.erb</tt>. Zauważ, że layouty dla podszablonów podlegają tym samym zasadom nazewnictwa co zwykłe podszablony i są umiejscowione w tym samym folderze, w którym znajdują się im odpowiadające podszablony (nie w głównym folderze <tt>layouts</tt>).</p></div>
+<div class="paragraph"><p>Będzie to szukać podszablonu nazwanego <tt>_link_area.html.erb</tt> i wyrenderuje go używając
+<tt>_graybar.html.erb</tt>. Zauważ, że layouty dla podszablonów podlegają tym samym zasadom
+nazewnictwa co zwykłe podszablony i są umiejscowione w tym samym folderze, w którym
+znajdują się im odpowiadające podszablony (nie w głównym folderze <tt>layouts</tt>).</p></div>
 <h4 id="_przekazywanie_lokalnych_zmiennych">3.4.4. Przekazywanie lokalnych zmiennych</h4>
-<div class="paragraph"><p>Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich nawet bardziej potężne i elastyczne narzędzie. Na przykład możesz użyć tej techniki do zredukowania powtarzania pomiędzy stronami new i edit, wciąż jednak utrzymując w nich nieco odmienną treść:</p></div>
+<div class="paragraph"><p>Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich nawet bardziej
+potężne i elastyczne narzędzie. Na przykład możesz użyć tej techniki do zredukowania
+powtarzania pomiędzy stronami new i edit, wciąż jednak utrzymując w nich nieco odmienną
+treść:</p></div>
 <div class="paragraph"><p><tt>new.html.erb</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -1216,33 +1267,43 @@ http://www.gnu.org/software/src-highlite -->
     &lt;%= f.submit button_label %&gt;
   <span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span>
 &lt;% end %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Jakkolwiek ten sam podszablon będzie renderowany w obu widokach, etykieta na przycisku wysyłającym jest kontrolowana przez lokalną zmienną przekazywaną do podszablonów.</p></div>
-<div class="paragraph"><p>Każdy podszablon ma także lokalną zmienną z taką samą nazwą jak on sam (minus podkreślenie). Możesz przekazać obiekt do tej lokalnej zmiennej za pomocą opcji <tt>:object</tt>.</p></div>
+<div class="paragraph"><p>Jakkolwiek ten sam podszablon będzie renderowany w obu widokach, etykieta na przycisku
+wysyłającym jest kontrolowana przez lokalną zmienną przekazywaną do podszablonów.</p></div>
+<div class="paragraph"><p>Każdy podszablon ma także lokalną zmienną z taką samą nazwą jak on sam (minus podkreślenie).
+Możesz przekazać obiekt do tej lokalnej zmiennej za pomocą opcji <tt>:object</tt>.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>&lt;%= render :partial =&gt; "customer", :object =&gt; @new_customer %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Wewnątrz podszablonu <tt>customer</tt>, zmienna <tt>@customer</tt> będzie odwoływać się do <tt>@new_customer</tt> od rodzica.</p></div>
+<div class="paragraph"><p>Wewnątrz podszablonu <tt>customer</tt>, zmienna <tt>customer</tt> będzie odwoływać się do <tt>@new_customer</tt>
+przekazanej od rodzica.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/warning.png" alt="Warning" />
 </td>
-<td class="content">W poprzednich wersjach Railsów, domyślna zmienna lokalna szukała instancji zmiennej o takiej samej nazwie jak podszablon w rodzicu. Takie zachowanie jest niezalecane w Railsach 2.2 i będzie usunięte w przyszłych wersjach.</td>
+<td class="content">W poprzednich wersjach Railsów, domyślna zmienna lokalna szukała
+w szablonie nadrzędnym zmiennej instancyjnej o takiej samej nazwie jak podszablon.
+Takie zachowanie jest niezalecane w Railsach 2.2 i będzie usunięte
+w przyszłych wersjach.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Jeśli masz instancje modelu do wyrenderowania w podszablonie możesz użyć skróconego zapisu:</p></div>
+<div class="paragraph"><p>Jeśli masz instancje modelu do wyrenderowania w podszablonie, możesz użyć skróconego
+zapisu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>&lt;%= render :partial =&gt; @customer %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Zakładając, że zmienna <tt>@customer</tt> zawiera instancje modelu <tt>Customer</tt>, użyty zostanie <tt>_customer.html.erb</tt> do renderowania.</p></div>
+<div class="paragraph"><p>Zakładając, że zmienna <tt>@customer</tt> zawiera instancje modelu <tt>Customer</tt>,  do renderowania
+użyty zostanie <tt>_customer.html.erb</tt>.</p></div>
 <h4 id="_renderowanie_kolekcji">3.4.5. Renderowanie kolekcji</h4>
-<div class="paragraph"><p>Podszablony są bardzo przydatne w renderowaniu kolekcji . Kiedy przekazujesz kolekcje do podszablonu poprzez opcję <tt>:collection</tt>, podszablon będzie wstawiony do każdego elementu kolekcji.</p></div>
+<div class="paragraph"><p>Podszablony są bardzo przydatne w renderowaniu kolekcji . Kiedy przekazujesz kolekcje do
+podszablonu poprzez opcję <tt>:collection</tt>, podszablon będzie wstawiony do każdego elementu
+kolekcji.</p></div>
 <div class="paragraph"><p><tt>index.html.erb</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -1258,31 +1319,44 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>Product Name: &lt;%= product.name %&gt;<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Kiedy podszablon jest renderowany z mnogą kolekcją, to każda indywidualna instancja podszablonu ma dostęp do renderowanego elementu kolekcji poprzez zmienną nazwaną po tym podszablonie. W tym przypadku podszablonem jest <tt>_product</tt>, i wewnątrz niego możesz odwołać się do <tt>product</tt> by uzyskać aktualnie renderowaną instancję. Aby użyć wybranej nazwy zmiennej wewnątrz podszablonu, użyj opcji <tt>:as</tt> podczas jego wywołania:</p></div>
+<div class="paragraph"><p>Kiedy podszablon jest renderowany z kolekcją, to każda indywidualna instancja
+podszablonu ma dostęp do renderowanego elementu kolekcji poprzez zmienną
+nazwaną tak jak podszablon. W tym przypadku podszablonem
+jest <tt>_product</tt>, i wewnątrz niego możesz odwołać się do zmiennej <tt>product</tt> by
+uzyskać aktualnie renderowaną instancję. Aby użyć innej
+nazwy zmiennej wewnątrz podszablonu, użyj opcji <tt>:as</tt> podczas jego wywołania:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>&lt;%= render :partial =&gt; "product", :collection =&gt; @products, :as =&gt; :item %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Dzięki tej zmianie można uzyskać dostęp do instancji kolekcji <tt>@product</tt> jako lokalną zmienną <tt>item</tt> wewnątrz podszablonu.</p></div>
+<div class="paragraph"><p>Dzięki tej zmianie  wewnątrz podszablonu można uzyskać dostęp
+do instancji kolekcji <tt>@product</tt> przez lokalną zmienną <tt>item</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">Railsy tworzą również zmienną licznikową dostępną wewnątrz podszablonu wywołanego przez kolekcję, nazwaną po elemencie kolekcji z dodanym sufiksem <tt>_counter</tt>. Na przykład, jeśli renderujesz <tt>@products</tt> wewnątrz podszablonu możesz odwołać się do <tt>product_counter</tt> by dowiedzieć się ile razy podszablon został wyrenderowany.</td>
+<td class="content">Railsy tworzą również zmienną licznikową dostępną wewnątrz podszablonu wywołanego
+przez kolekcję, nazwaną tak jak element kolekcji z dodanym sufiksem <tt>_counter</tt>. Na
+przykład, jeśli renderujesz <tt>@products</tt> wewnątrz podszablonu możesz odwołać się do
+<tt>product_counter</tt> by dowiedzieć się ile razy podszablon został wyrenderowany.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Możesz również określić drugi podszablon do wyrenderowania pomiędzy instancjami głównego podszablonu poprzez użycie opcji <tt>:spacer_template</tt>:</p></div>
+<div class="paragraph"><p>Możesz również określić drugi podszablon do wyrenderowania pomiędzy instancjami głównego
+podszablonu poprzez użycie opcji <tt>:spacer_template</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>&lt;%= render :partial =&gt; "product", :collection =&gt; @products, :spacer_template =&gt; "product_ruler" %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Railsy wyrenderują podszablon <tt>_product_ruler</tt> (bez danych przekazywanych do niego) pomiędzy każdą parą podszablonów <tt>_product</tt>.</p></div>
-<div class="paragraph"><p>Jest również dostępna skrócona wersja zapisu dla renderowania kolekcji. Na przykład, jeśli <tt>@products</tt> jest kolekcją produktów to możesz wyrenderować tą kolekcję w ten sposób:</p></div>
+<div class="paragraph"><p>Railsy wyrenderują podszablon <tt>_product_ruler</tt> (bez danych przekazywanych do niego)
+pomiędzy każdą parą podszablonów <tt>_product</tt>.</p></div>
+<div class="paragraph"><p>Jest również dostępna skrócona wersja zapisu dla renderowania kolekcji. Na
+przykład, jeśli <tt>@products</tt> jest kolekcją produktów to możesz
+wyrenderować ją w ten sposób:</p></div>
 <div class="paragraph"><p><tt>index.html.erb</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -1298,7 +1372,9 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>Product Name: &lt;%= product.name %&gt;<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Railsy określają nazwę podszablonu do użycia poprzez patrzenie na nazwę modelu w kolekcji. W istocie, można również stworzyć różnorodną kolekcję i renderować ją w ten sposób, a Railsy wybierają właściwy podszablon dla każdego członka kolekcji.</p></div>
+<div class="paragraph"><p>Railsy określają nazwę podszablonu do użycia poprzez patrzenie na nazwę modelu w
+kolekcji. W istocie, można również stworzyć różnorodną kolekcję i renderować ją w ten
+sposób, a Railsy wybierają właściwy podszablon dla każdego członka kolekcji.</p></div>
 <div class="paragraph"><p><tt>index.html.erb</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -1321,9 +1397,14 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>Name: &lt;%= employee.name %&gt;<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>W tym przypadku, Railsy użyją podszablonu customer lub employee jako odpowiednie dla każdego elementu kolekcji.</p></div>
+<div class="paragraph"><p>W tym przypadku, Railsy użyją podszablonu customer lub employee jako odpowiednie dla
+każdego elementu kolekcji.</p></div>
 <h3 id="_korzystanie_z_zagnie_d_onych_layout_w">3.5. Korzystanie z zagnieżdżonych layoutów</h3>
-<div class="paragraph"><p>Może się okazać, że twoja aplikacja wymaga layoutu zupełnie różniącego się od zwyczajnego layoutu twojej aplikacji by obsłużyć to jednym kontrolerem. Zamiast powtarzać główny layout i tylko odpowiednio go edytować można tego dokonać za pomocą zagnieżdżonych layoutów (niekiedy nazywanych sub-szablonami (ang. sub-templates)). Oto przykład:</p></div>
+<div class="paragraph"><p>Może się okazać, że twoja aplikacja w jednym kontrolerze wymaga layoutu zupełnie
+różniącego się od zwyczajnego layoutu twojej aplikacji.
+Zamiast kopiować główny layout i tylko odpowiednio go edytować można tego dokonać za
+pomocą zagnieżdżonych layoutów.
+Oto przykład:</p></div>
 <div class="paragraph"><p>Załóżmy, że masz następujący layout ApplicationController:</p></div>
 <div class="paragraph"><p><tt>app/views/layouts/application.erb</tt></p></div>
 <div class="listingblock">
@@ -1357,18 +1438,23 @@ http://www.gnu.org/software/src-highlite -->
 &lt;% content_for :main %&gt;
   <span style="font-weight: bold"><span style="color: #0000FF">&lt;div</span></span> <span style="color: #009900">id</span><span style="color: #990000">=</span><span style="color: #FF0000">"right_menu"</span><span style="font-weight: bold"><span style="color: #0000FF">&gt;</span></span>Right menu items here<span style="font-weight: bold"><span style="color: #0000FF">&lt;/div&gt;</span></span>
   &lt;%= yield %&gt;
-  &lt;% end -%&gt;
+&lt;% end -%&gt;
 &lt;% render :file =&gt; 'layouts/application' %&gt;</tt></pre></div></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">W wersjach Railsów przed Railsami 2.3, powinieneś użyć <tt>render 'layouts/applications'</tt> zamiast <tt>render :file =&gt; 'layouts/applications\'</tt></td>
+<td class="content">W wersjach Railsów wcześniejszych niż 2.3, powinieneś użyć <tt>render
+'layouts/applications'</tt> zamiast <tt>render :file =&gt; 'layouts/applications'</tt></td>
 </tr></table>
 </div>
 <div class="paragraph"><p>To wszystko. Widok News będzie używał nowego layoutu, ukrywającego górne menu i dodającego prawe menu wewnątrz div "content".</p></div>
-<div class="paragraph"><p>Istnieje kilka sposobów otrzymania podobnych wyników za pomocą różnych schematów wykorzystania sub-szablonów wykorzystujących tą technikę. Należy pamiętać, że nie ma limitu poziomu zagnieżdżenia. Można wykorzystać metodę <tt>ActionView::render</tt> poprzez <tt>render 'layouts/news\'</tt> by ulokować nowy layout w layoucie News.</p></div>
+<div class="paragraph"><p>Istnieje kilka sposobów otrzymania podobnych wyników za pomocą różnych schematów
+wykorzystania zagnieżdżonych layoutów wykorzystujących tą technikę.
+Należy pamiętać, że nie ma
+limitu poziomu zagnieżdżenia. Można wykorzystać metodę <tt>ActionView::render</tt> poprzez
+<tt>render 'layouts/news'</tt> by ulokować nowy layout w layoucie News.</p></div>
 </div>
 <h2 id="_changelog">4. Changelog</h2>
 <div class="sectionbody">

@@ -1,7 +1,8 @@
 Przewodnik po asocjacjach modułu Active Record
 ==============================================
 
-Niniejszy przewodnik obejmuje opis asocjacji (_associations_) – elementów modułu Active Record. Za pomocą tego przewodnika będziesz w stanie:
+Niniejszy przewodnik obejmuje opis asocjacji (_associations_) – elementów modułu Active
+Record. Z pomocą tego przewodnika będziesz w stanie:
 
 * Zadeklarować asocjacje w modelach wykorzystujących moduł Active Record
 * Zrozumieć różne typy asocjacji dostępnych w ramach modułu Active Record
@@ -9,8 +10,11 @@ Niniejszy przewodnik obejmuje opis asocjacji (_associations_) – elementów mod
 
 == Dlaczego Asocjacje?
 
-Dlaczego potrzebne są asocjacje(_powiązania_, _połączenia_ - przyp. tłum.) między modelami? Ponieważ sprawiają one, że wspólne operacje (czyli operacje na kilku modelach – przyp.tłum.) stają się mniej skomplikowane i łatwe do implementacji w kodzie.
-Na przykład, pomyśl o prostej aplikacji zawierającej dwa modele – klienta (_customer_) oraz zamówień (_order(s)_). Każdy klient może składać wiele zamówień.
+Dlaczego potrzebne są asocjacje (_powiązania_, _połączenia_ - przyp. tłum.) między
+modelami? Ponieważ sprawiają one, że wspólne operacje (czyli operacje na kilku modelach
+– przyp.tłum.) stają się mniej skomplikowane i łatwe do implementacji w kodzie.
+Na przykład, pomyśl o prostej aplikacji zawierającej dwa modele – klienta (_customer_)
+oraz zamówień (_order(s)_). Każdy klient może składać wiele zamówień.
 Bez zdefiniowania powiązania deklaracja modelu mogłaby wyglądać tak:
 
 [source, ruby]
@@ -98,8 +102,11 @@ image:images/belongs_to.png[diagram asocjacji belongs_to]
 
 === Asocjacja +has_one+
 
-Asocjacja +has_one+ również ustanawia relację typu jeden-do-jeden pomiędzy dwoma modelami, jednak posiada inną semantykę (i jej konsekwencje). Ta asocjacja wskazuje, iż każda instancja jednego modelu posiada jedną instancję drugiego. 
-Na przykład: Każdy dostawca (_supplier_) w twojej aplikacji ma tylko jedno konto – możesz zadeklarować model dostawcy w taki sposób:
+Asocjacja +has_one+ również ustanawia relację typu jeden-do-jeden pomiędzy dwoma
+modelami, jednak posiada inną semantykę (i konsekwencje). Ta asocjacja wskazuje, iż
+każda instancja jednego modelu posiada jedną instancję drugiego. 
+Na przykład: Każdy dostawca (_supplier_) w twojej aplikacji ma tylko jedno konto –
+możesz zadeklarować model dostawcy w taki sposób:
  
 [source, ruby]
 -------------------------------------------------------
@@ -196,8 +203,12 @@ image:images/has_one_through.png[diagram asocjacji has_one :through]
 
 === Asocjacja +has_and_belongs_to_many+
 
-Asocjacja has_and_belongs_to_many tworzy bezpośrednią relację typu wiele-do-wiele z innym modelem bez ingerencji modelu pośredniego (nie ma potrzeby deklarowania go, jednak zauważyć należy, iż jest tworzona automatycznie stosowna tabela wiążąca -przyp.tłum.).
-Na przykład, jeżeli projekt miałby zawierać zbiory (zestawy - _assembly(ies)_)  i części (_part(s)_) oraz każdy zbiór posiadałby wiele części, a każda część mogłaby pojawić się w wielu zbiorach,  modele można zadeklarować w ten sposób:
+Asocjacja has_and_belongs_to_many tworzy bezpośrednią relację typu
+wiele-do-wiele z innym modelem bez ingerencji modelu pośredniego (nie ma
+potrzeby deklarowania go, jednak zauważyć należy, iż jest wykorzystywna stosowna tabela wiążąca - przyp.tłum.).
+Na przykład, jeżeli projekt miałby zawierać zbiory (zestawy - _assembly(ies)_)  i części
+(_part(s)_) oraz każdy zbiór posiadałby wiele części, a każda część mogłaby pojawić się
+w wielu zbiorach,  modele można zadeklarować w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -217,7 +228,7 @@ image:images/habtm.png[diagram asocjacji has_and_belongs_to_many]
 Jeśli chcesz ustawić relację typu jeden-do-jeden między dwoma modelami, powinieneś użyć asocjacji +belongs_to+ do jednego i +has_one+ do drugiego. Ale skąd wiedzieć która powinna być w którym modelu?
 
 Rozróżnić to należy sprawdzając, w której tabeli (w którym modelu) ustawiłeś klucz obcy (foreign key) (dla klasy tej tabeli potrzebujesz asocjacji +belongs_to+), ale powinieneś pomyśleć także nad znaczeniem danych. Relacja +has_one+ mówi, że "jednen ze zbioru" należy do ciebie – tzn. że coś wskazuje z powrotem na ciebie. 
-Na przykład: Ma większy sens powiedzenie, że dostawca posiada konto, aniżeli konto posiada dostawcę. To sugeruje nam, że poprawne relacje wyglądają tak:
+Na przykład: ma większy sens powiedzenie, że dostawca posiada konto, aniżeli konto posiada dostawcę. To sugeruje nam, że poprawne relacje wyglądają tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -377,7 +388,7 @@ Dzięki takiemu ustawieniu możesz "wyciągnąć" +@employee.subordinates+ (podw
 W tym rozdziale znajdziesz kilka rzeczy, które powinieneś wiedzieć, by skutecznie używać modułu Active Record w twoich aplikacjach Rails. 
 
 * Kontrolowanie cachingu
-* Unikanie kolizji w nazwach 
+* Unikanie kolizji nazw 
 * Aktualizacje schematów 
 * Kontrolowanie zakresu widoczności asocjacji
  
@@ -403,11 +414,19 @@ customer.orders(true).empty?  # odrzuca kopię zamówień będącą w cache i "w
 
 === Unikanie kolizji nazw
  
-Nazwy twoich asocjacji nie mgą być dowolne. Ponieważ tworzenie asocjacji automatycznie dodaje do modelu metodę z taką samą nazwą, złym pomysłem jest nazywanie asocjacji tak samo jak metody instancji ActiveRecord::Base. Metoda asocjacji w takim przypadku przesłoni metodę bazy, a to nie jest pożądane. Przykładem złych nazw asocjacji są +attributes+ albo +connection+. 
+Nazwy twoich asocjacji nie mogą być dowolne. Ponieważ tworzenie asocjacji automatycznie
+dodaje do modelu metodę z taką samą nazwą, złym pomysłem jest nazywanie asocjacji tak
+samo jak metody instancji ActiveRecord::Base. Metoda asocjacji w takim przypadku
+przesłoni metodę bazy, a to nie jest pożądane. Przykładem złych nazw asocjacji są
++attributes+ albo +connection+. 
  
 === Aktualizacja schematu
  
-Asocjacje są bardzo przydatne, ale nie są magiczne. Jesteś odpowiedzialny za utrzymanie schematu  bazy danych w dopasowaniu do swoich asocjacji. W praktyce oznacza to dwie rzeczy, w zależności od tego, którego rodzaju asocjacji użyłeś w swoim modelu. Dla asocjacji +belongs_to+ porzebujesz stworzyć klucze obce, a dla +has_and_belongs_to_many+ - stosowną wiążącą tabelę (w bazie).
+Asocjacje są bardzo przydatne, ale nie są magiczne. Jesteś odpowiedzialny za
+utrzymanie schematu  bazy danych w dopasowaniu do swoich asocjacji. W praktyce
+oznacza to dwie rzeczy, w zależności od tego, którego rodzaju asocjacji użyłeś
+w swoim modelu. Dla asocjacji +belongs_to+ porzebujesz stworzyć klucze obce, a
+dla +has_and_belongs_to_many+ - stosowną tabelę wiążącą (w bazie danych).
  
 ==== Tworzenie kluczy obcych dla asocjacji +belongs_to+
 
@@ -420,7 +439,7 @@ class Order < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Taka deklaracja  powinna być uwzgleniona i "wsparta" odpowiednią deklaracją klucza obcego w tabeli zamówień:
+Taka deklaracja  powinna być uwzględniona i "wsparta" odpowiednią deklaracją klucza obcego w tabeli zamówień:
 
 [source, ruby]
 -------------------------------------------------------
@@ -441,11 +460,21 @@ end
 
 Jeśli tworzysz asocjację po jakimś czasie od stworzenia modelu bazowego, musisz pamiętać o stworzeniu migracji +add_column+ (dodaj kolumnę) by zapewnić modelowi odpowiedni klucz obcy.
 
-==== Creating Join Tables for +has_and_belongs_to_many+ Associations
+==== Tworzenie tabeli wiążących dla asocjacji +has_and_belongs_to_many+
 
-Jeśli tworzysz asocjację +has_and_belongs_to_many+ potrzebujesz stworzyć wiążącą tabelę. Dopóki nazwa dołączanej tabeli nie jest wyraźnie określona poprzez użycie opcji +:join_table+, moduł Active Record utworzy nazwę używając leksykalnego (alfabetycznego) )porządku tworzenia nazw. Zatem: połączenie między modelem  klienta (customer) a zamówieniem (order) otrzyma domyślną nazwę tabeli "customers_orders" (zamówienia klientów), bo "c" jest w alfabecie przed "o".
+Jeśli tworzysz asocjację +has_and_belongs_to_many+ potrzebujesz stworzyć wiążącą tabelę.
+Dopóki nazwa dołączanej tabeli nie jest wyraźnie określona poprzez użycie opcji
++:join_table+, moduł Active Record utworzy nazwę używając leksykalnego (alfabetycznego)
+porządku tworzenia nazw. Zatem: połączenie między modelem  klienta (customer) a
+zamówieniem (order) otrzyma domyślną nazwę tabeli "customers_orders" (zamówienia
+klientów), bo "c" jest w alfabecie przed "o".
 
-WARNING: Pierwszeństwo między nazwami modeli jest "obliczane" przy użyciu operatora "<" (mniejszości) dla stringów (łańcuchów znaków). To znaczy, ze jeśli słowa są różnej długości, ale początkowy łańcuch jest jednakowy – wtedy wyżej w tym porządku jest słowo dłuższe. Na przykład, możnaby oczekiwać, że dla tabeli paper_boxes i papers wygenerowana nazwa wiążącej tabeli będzie brzmiała "papers_paper_boxes", ze względu na długość łańcucha "paper_boxes". Jednak w rzeczywistości wygenerowana zostanie nazwa "paper_boxes_papers".
+WARNING: Pierwszeństwo między nazwami modeli jest "obliczane" przy użyciu operatora "<"
+(mniejszości) dla stringów (łańcuchów znaków). To znaczy, ze jeśli słowa są różnej
+długości, ale początkowy łańcuch jest jednakowy – wtedy wyżej w tym porządku jest słowo
+dłuższe. Na przykład, można by oczekiwać, że dla tabeli paper_boxes i papers wygenerowana
+nazwa wiążącej tabeli będzie brzmiała "papers_paper_boxes", ze względu na długość
+łańcucha "paper_boxes". Jednak w rzeczywistości wygenerowana zostanie nazwa "paper_boxes_papers".
  
 Niezależnie od nazwy, musisz "ręcznie" wygenerować wiążącą tabelę za pomocą odpowiedniej migracji. Na przykład, rozważ takie asocjacje:
 
@@ -537,7 +566,7 @@ end
 
 == Szczegółowy spis asocjacji
 
-Niniejszy rozdział ukaże ci szczegóły każdego typu asocjacji, w tym informacje o metodach, które dzięki nim zyskujesz oraz opcji, których możesz uzywać dzięki zadeklarowaniu asocjacji.
+Niniejszy rozdział ukaże ci szczegóły każdego typu asocjacji, w tym informacje o metodach, które dzięki nim zyskujesz oraz opcji, których możesz używać dzięki zadeklarowaniu asocjacji.
 
 === Asocjacja belongs_to
  
@@ -575,18 +604,22 @@ create_customer
 
 ===== +_association_(force_reload = false)+
 
-Metoda +_association_+ zwraca wiązany obiekt, jeśli tylko taki istnieje. Jeśli wiązany obiekt nie został znaleziony, metoda zwraca +nil+.
+Metoda +_association_+ zwraca wiązany obiekt, jeśli tylko taki istnieje. Jeśli wiązany
+obiekt nie został znaleziony, metoda zwraca +nil+.
 
 [source, ruby]
 -------------------------------------------------------
 @customer = @order.customer
 -------------------------------------------------------
 
-Jeśli wiązany obiekt został już pobrany z bazy danych, zwrócona będzie jego wersja przechowywana w _cache_. Aby to zmienić  (i wymusić czytanie z bazy), ustaw +true+ przy argumencie +force_reload+
+Jeśli wiązany obiekt został już pobrany z bazy danych, zwrócona będzie jego wersja
+przechowywana w _cache_. Aby to zmienić  (i wymusić czytanie z bazy), ustaw +true+ przy argumencie +force_reload+
  
 ===== +_association_=(associate)+
 
-Metoda +_association_=+ przydziela wiązanemy obiekt do naszego obiektu. Od środka wygląda to tak, że wydobywa ona z wiązanego obiektu klucz podstawowy i ustawia naszemu obiektowi klucz obcy na tę samą wartość.
+Metoda +_association_=+ przydziela wiązany obiekt do naszego obiektu. Od środka
+wygląda to tak, że wydobywa ona z wiązanego obiektu klucz podstawowy i ustawia naszemu
+obiektowi klucz obcy na tę samą wartość.
 
 [source, ruby]
 -------------------------------------------------------
@@ -606,7 +639,9 @@ end
 
 ===== +build___association__(attributes = {})+
 
-Metoda +build__association_+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów,  będzie ustawiony odnośnik do obcego klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany. 
+Metoda +build____association___+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów,  będzie ustawiony odnośnik do obcego
+klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany. 
 
 [source, ruby]
 -------------------------------------------------------
@@ -615,7 +650,9 @@ Metoda +build__association_+ zwraca nowy obiekt wiązanego typu. Ten obiekt zost
 
 ===== +create___association__(attributes = {})+
 
-Metoda +create__association_+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do obcego klucza tego obiektu. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
+Metoda +create___association__+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do obcego
+klucza tego obiektu. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
 
 [source, ruby]
 -------------------------------------------------------
@@ -653,7 +690,10 @@ Asocjacja +belongs_to+ wspiera następujące opcje
 //
 ===== +:class_name+
 
-Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji +:class-name+, by dostarczyć własną nazwę modelu. Na przykład, jeśli zamówienie należy [_belongs to_] do klienta, ale aktualna nazwa zawierająca klientów to +Patron+, możesz to ustawić w ten sposób:
+Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji
++:class_name+, by dostarczyć własną nazwę modelu. Na przykład, jeśli zamówienie należy
+[_belongs to_] do klienta, ale aktualna nazwa zawierająca klientów to +Patron+, możesz
+to ustawić w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -687,7 +727,10 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Z powyższymi deklaracjami, znalezienie wartości +@customer.orders.size+ (wielkość [ilość] zamówień klientów) wymaga zapytania do bazy wykorzystującego +COUNT(*)+. Aby uniknąć tego połączenia możesz dodać :counter_cache ("licznik w cache") do modelu: 
+Z powyższymi deklaracjami, znalezienie wartości +@customer.orders.size+
+(wielkość [ilość] zamówień klientów) wymaga zapytania do bazy wykorzystującego
++COUNT(*)+. Aby uniknąć tego połączenia możesz dodać :counter_cache ("cache
+dla licznika") do modelu: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -701,7 +744,10 @@ end
  
 Dzięki tej deklaracji Railsy będą pobierały bieżącą wartość cache i zwrócą ją w odpowiedzi na metodę +.size+.
 
-Pomimo, że opcja +:counter_cache+ jest określona dla modelu zawierającego deklarację +belongs_to+, bieżąca kolumna musi być dodana do wiązanego modelu. W powyższym przypadku musisz dodać kolumnę o nazwie+orders_count+ do modelu klienta [+Customer+]. Możesz zamienić domyślną nazwę kolumny, jeśli tylko chcesz:
+Pomimo, że opcja +:counter_cache+ jest określona dla modelu zawierającego deklarację
++belongs_to+, bieżąca kolumna musi być dodana do wiązanego modelu. W powyższym przypadku
+musisz dodać kolumnę o nazwie +orders_count+ do modelu klienta [+Customer+]. Możesz
+zamienić domyślną nazwę kolumny, jeśli tylko chcesz:
 
 [source, ruby]
 -------------------------------------------------------
@@ -717,7 +763,10 @@ Kolumny _licznika_ są dodawane do listy atrybutów tylko-do-odczytu wiązanego 
 
 ===== +:dependent+
 
-Jeśli ustawisz opcję +:dependent+ na :destroy, wtedy usunięcie tego obiektu wywoła metodę destroy na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję +:dependent+ na +:delete+, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu wiązanego _bez_ wywoływania dla niego metody +destroy+.
+Jeśli ustawisz opcję +:dependent+ na +:destroy+, wtedy usunięcie tego obiektu wywoła
+metodę +destroy+ na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję
++:dependent+ na +:delete+, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu
+wiązanego _bez_ wywoływania dla niego metody +destroy+.
 
 WARNING: Nie używaj tej opcji w asocjacji +belongs_to+, która jest połączona z asocjacją +has_many+ w innej klasie. W przeciwnym wypadku w twojej bazie pojawią się rekordy osierocone.
 
@@ -859,7 +908,9 @@ end
 
 ===== +build___association__(attributes = {})+
 
-Metoda +build__association_+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów, będzie ustawiony odnośnik do jego obcego klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany.
+Metoda +build____association___+ zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów, będzie ustawiony odnośnik do jego obcego
+klucza tego obiektu, ale wiązany obiekt _nie zostanie_ zapisany.
  
 [source, ruby]
 -------------------------------------------------------
@@ -868,7 +919,9 @@ Metoda +build__association_+ zwraca nowy obiekt wiązanego typu. Ten obiekt zost
 
 ===== +create___association__(attributes = {})+
 
-Metoda +create___association_+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do jego obcego klucza. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
+Metoda +create___association__+ zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do jego obcego
+klucza. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).
 
 [source, ruby]
 -------------------------------------------------------
@@ -910,11 +963,12 @@ Asocjacja +has_one+ wspiera następujące opcje
 //
 ===== +:as+
 
-Użycie opcji +:as+  wskazuje, że mamy do czynienia z asocjacją polimorficzną. Polimorficzne asocjacje zostały omówione szczegółowo ww wcześniejszej części podręcznika.
+Użycie opcji +:as+  wskazuje, że mamy do czynienia z asocjacją polimorficzną.
+Polimorficzne asocjacje zostały omówione szczegółowo we wcześniejszej części podręcznika.
 
 ===== +:class_name+
 
-Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji +:class-name+, by dostarczyć własną nazwę modelu. Na przykład, jeśli dostawca posiada konto, ale aktualna nazwa zawierająca konta to +Billing+, możesz to ustawić w ten sposób:
+Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji +:class_name+, by dostarczyć własną nazwę modelu. Na przykład, jeśli dostawca posiada konto, ale aktualna nazwa zawierająca konta to +Billing+, możesz to ustawić w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -936,7 +990,12 @@ end
 
 ===== +:dependent+
 
-Jeśli ustawisz opcję +:dependent+ na :destroy, wtedy usunięcie tego obiektu wywoła metodę destroy na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję +:dependent+ na +:delete+, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu wiązanego _bez_ wywoływania dla niego metody +destroy+. Jeśli ustawisz opcję +:dependent+ na +:nullify+, usunięcie tego obiektu sprawi, że klucz obcy w wiązanym obiekcie zostanie zastąpiony przez +NULL+.
+Jeśli ustawisz opcję +:dependent+ na +:destroy+, wtedy usunięcie tego obiektu wywoła
+metodę destroy na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję
++:dependent+ na +:delete+, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu
+wiązanego _bez_ wywoływania dla niego metody +destroy+. Jeśli ustawisz opcję
++:dependent+ na +:nullify+, usunięcie tego obiektu sprawi, że klucz obcy w wiązanym
+obiekcie zostanie zastąpiony przez +NULL+.
 
 ===== +:foreign_key+
 
@@ -997,7 +1056,7 @@ Zgodnie z konwencją Railsy "domyślają się" że kolumna z kluczem podstawowym
 
 Jeśli ustawisz +true+ dla opcji +:readonly+, asocjowany obiekt będzie tylko do odczytu, gdy wywoływana jest asocjacja.
 
-===== +:select
+===== +:select+
 
 Użyj opcji +:select+ by zastąpić klauzuję SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny.
 
@@ -1011,7 +1070,8 @@ Opcja +:source_type+ określa typ źródła asocjacji dla asocjacji +has_one :th
 
 ===== +:through+
 
-Opcja +:through+ (_poprzez_) określa wiążący model, poprzez który wykonywane sż zapytania. Asocjacje +has_one :through+ są omówione w dalszej części przewodnika.
+Opcja +:through+ (_poprzez_) określa wiążący model, poprzez który wykonywane są
+zapytania. Asocjacje +has_one :through+ są omówione w dalszej części przewodnika.
 
 ===== +:validate+
 
@@ -1027,7 +1087,7 @@ Jeśli obiekt-rodzic (ten, w którym zadeklarowałeś asocjację +has_one+) nie 
 
 Jeśli chcesz przypisać obiekt do asocjacji has_one bez zapisywania obiektu, użyj metody +association.build+.
 
-=== The has_many Association
+=== Asocjacja has_many
 
 Asocjacja +has_many+ tworzy relację typu jeden-do-wiele z innym modelem. W języku baz danych oznacza to, że inna klasa zawiera klucz obcy, który odnosi się do instancji rozpatrywanej klasy.
 
@@ -1039,8 +1099,8 @@ Kiedy zadeklarujesz asocjację +has_many+, deklarowana klasa automatycznie zysku
 * +_collection_<<(object, ...)+
 * +_collection_.delete(object, ...)+
 * +_collection_=objects+
-* +_collection\_singular_\_ids+
-* +_collection\_singular_\_ids=ids+
+* +__collection_singular___ids+
+* +__collection_singular___ids=ids+
 * +_collection_.clear+
 * +_collection_.empty?+
 * +_collection_.size+
@@ -1049,7 +1109,9 @@ Kiedy zadeklarujesz asocjację +has_many+, deklarowana klasa automatycznie zysku
 * +_collection_.build(attributes = {}, ...)+
 * +_collection_.create(attributes = {})+
 
-We wszystkich wymienionych metodach +_collection_+ zastępuje się symbolem przekazanym jako pierwszy argument do +has_many+ oraz +_collection\_singular_+ zastępowany jest nazwą tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, biorąc pod uwagę deklarację:
+We wszystkich wymienionych metodach +_collection_+ zastępuje się symbolem przekazanym
+jako pierwszy argument do +has_many+ oraz +__collection_singular__+ zastępowany jest
+nazwą tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, biorąc pod uwagę deklarację:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1110,18 +1172,19 @@ WARNING: Obiekty będą dodatkowo niszczone, jeśli są powiązane przez  +:depe
 
 Metoda +_collection_=+ usuwa i dodaje odpowiednie obiekty tak, żeby dana kolekcja zawierała tylko podane (wymienione) obiekty.
 
-===== +_collection\_singular_\_ids+
+===== +__collection_singular___ids+
 
-Metoda +_collection\_singular_\_ids+ zwraca tablicę identyfikatorów (_ids_) obiektów w zbiorze
+Metoda +__collection_singular___ids+ zwraca tablicę identyfikatorów obiektów w zbiorze.
 
 [source, ruby]
 -------------------------------------------------------
 @order_ids = @customer.order_ids
 -------------------------------------------------------
 
-===== +__collection\_singular_\_ids=ids+
+===== +__collection_singular___ids=ids+
 
-Metoda +__collection\_singular_\_ids=+ sprawia, że w zbiorze znajdują się tylko te obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.
+Metoda +__collection_singular___ids=+ sprawia, że w zbiorze znajdują się tylko te
+obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.
 
 ===== +_collection_.clear+
 
@@ -1162,7 +1225,9 @@ Metoda +_collection_.exist?+ sprawdza, czy obiekt spełniający podane warunki i
 
 ===== +_collection_.build(attributes = {}, ...)+
 
-Metoda +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego typu. Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, ale powiązane obiekty _nie_ będą zapisane.
+Metoda +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego typu.
+Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich
+klucz obcy zostanie stworzone, ale powiązane obiekty _nie będą zapisane_.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1171,7 +1236,10 @@ Metoda +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego
 
 ===== +_collection_.create(attributes = {})+
 
-Metoda +_collection_.create+ zwraca nowy obiekt wiązanego typu. Te obiekty będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, a powiązane obiekty _zostaną_ zapisane (zakładając że przejdą przez wszystkie walidacje)
+Metoda +_collection_.create+ zwraca nowy obiekt wiązanego typu. Te obiekty będą
+konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie
+stworzone, a powiązane obiekty _zostaną zapisane_ (zakładając że przejdą przez wszystkie
+walidacje)
 
 [source, ruby]
 -------------------------------------------------------
@@ -1224,7 +1292,10 @@ Użycie opcji +:as+ wskazuje, że mamy do czynienia z asocjacją polimorficzną.
 
 ===== +:class_name+
 
-Jeśli nazwa wiązanego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji +:class-name+, by dostarczyć własną nazwę modelu. Na przykład jeśli klient ma wiele zamówień, ale aktualna nazwa modelu zawierającego zamówienia to "Transaction", możesz to ustawić w ten sposób:
+Jeśli nazwa wiązanego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć
+opcji +:class_name+, by dostarczyć własną nazwę modelu. Na przykład jeśli klient ma
+wiele zamówień, ale aktualna nazwa modelu zawierającego zamówienia to "Transaction",
+możesz to ustawić w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1253,13 +1324,19 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Jeżeli użyjesz opcji +:conditions+ (w notacji z hashem), tworzenie rekordów przez tą asocjację zostanie zautomatyzowane według zawartości hasha. W tym przypadku, używając +@customer.confirmed_orders.create+ albo +@customer.confirmed_orders.build+, tworzy się zamówienia tam, gdzie kolumna confirmed ma wartość +true+.
+Jeżeli użyjesz opcji +:conditions+ (w notacji z hashem), tworzenie rekordów
+przez tą asocjację zostanie zautomatyzowane według zawartości hasha. W tym
+przypadku, używając +@customer.confirmed_orders.create+ albo
++@customer.confirmed_orders.build+, tworzy się zamówienia tam, gdzie kolumna
++confirmed+ ma wartość +true+.
 
 ===== +:counter_sql+
 
 Zwykle Railsy automatycznie tworzą odpowiednie zapytanie SQL do liczenia uczestników asocjacji. Z opcją +:counter_sql+ możesz zdefiniować własne zapytanie sql do policzenia ich.
 
-NOTE: Jeśli określisz +:finder_sql+l, ale nie stworzysz+:counter_sql+ , wtedy funkcja licząca sql +SELECT COUNT(*) FROM+ zostanie zastąpiona klauzulą +SELECT ... FROM+, wykorzystującą deklaracje z +:finder_sql+.
+NOTE: Jeśli określisz +:finder_sql+, ale nie stworzysz +:counter_sql+ , wtedy funkcja
+licząca sql +SELECT COUNT(*) FROM+ zostanie zastąpiona klauzulą +SELECT ... FROM+,
+wykorzystującą deklaracje z +:finder_sql+.
 
 ===== +:dependent+
 
@@ -1269,7 +1346,8 @@ NOTE: Ta opcja jest ignorowana, jeśli używasz w asocjacji opcji +:through+.
 
 ===== +:extend+
 
-Opcja +:extend+ sprawia, że nazwany moduł rozszerza proxy asocjacji. Rozszerzenia asocjacji są opisane dalej w tym podręczniku.
+Opcja +:extend+ sprawia, że wskazany moduł rozszerza proxy asocjacji. Rozszerzenia
+asocjacji są opisane dalej w tym podręczniku.
 
 ===== +:finder_sql+
 
@@ -1277,7 +1355,7 @@ Zwykle Railsy automatycznie tworzą odpowiednie zapytanie SQL do pobrania _uczes
 
 ===== +:foreign_key+
 
-Zgodnie z konwencją, Railsy "domyślają się", że kolumna używana do przechowywania klucza obcego w innym modelu to nazwa pierwszego modelu z przyrostkiem +_id+. Opcja F+:foreign_key+ umożliwia ustawienie nazwy klucza obcego bezpośrednio:
+Zgodnie z konwencją, Railsy "domyślają się", że kolumna używana do przechowywania klucza obcego w innym modelu to nazwa pierwszego modelu z przyrostkiem +_id+. Opcja +:foreign_key+ umożliwia ustawienie nazwy klucza obcego bezpośrednio:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1290,7 +1368,7 @@ TIP: W żadnym z wypadków Railsy nie będą same tworzyły dla ciebie kolumn kl
 
 ===== +:group+
 
-Opcja +:group+ dostarcza nazwę atrybutu według której wyniki mają być pogrupowane, W SQL użyłbyś klauzuli +GROUP BY+.
+Opcja +:group+ dostarcza nazwę atrybutu według której wyniki mają być pogrupowane. W SQL użyłbyś klauzuli +GROUP BY+.
 
 [source, ruby]
 -------------------------------------------------------
@@ -1361,7 +1439,8 @@ end
 
 ===== +:primary_key+
 
-Zgodnie zkonwencją Railsy "domyślają się" że kolumna z kluczem podstawowym w modelu to "id". Możesz to zmienić i samodzielnie okreslić klucz postawowy dzieki opcji +:primary_key+
+Zgodnie z konwencją Railsy "domyślają się" że kolumna z kluczem podstawowym w modelu to
+"id". Możesz to zmienić i samodzielnie określić klucz podstawowy dzięki opcji +:primary_key+
 
 ===== +:readonly+
 
@@ -1369,13 +1448,16 @@ Jeśli ustawisz +true+ dla opcji +:readonly+, asocjowany obiekt będzie tylko do
 
 ===== +:select+
 
-Użyj opcji : select by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny.
+Użyj opcji +:select+ by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania
+danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny.
 
 Jeśli określisz opcję +:select+, musisz być pewien, że zawarłeś w nim kolumnę klucza podstawowego (lub klucza obcego) asocjowanego modelu. Jeśli tego nie zrobisz, możesz spowodować błąd Railsów.
 
 ===== +:source+
 
-Opcja source określa źródło asocjacji dla asocjacji typu  +has_many :through+. Tylko wtedy potrzebujesz korzystać z tej opcji, kiedy nazwa źródła asocjacji nie może być automatycznie wygenerowana (stworzona) z nazwy asocjacji.
+Opcja +:source+ określa źródło asocjacji dla asocjacji typu  +has_many :through+. Tylko
+wtedy potrzebujesz korzystać z tej opcji, kiedy nazwa źródła asocjacji nie może być
+automatycznie wygenerowana (stworzona) z nazwy asocjacji.
 
 ===== +:source_type+
 
@@ -1391,13 +1473,18 @@ Ustaw opcję  +:uniq => true+ aby usunąć ze zbiorów duplikaty. Ta opcja jest 
 
 ===== +:validate+
 
-Kiedy ustawisz na +false+ opcję +:validate+, wiązane obiekty nie będą nidy walidowane, kiedy będziesz zapisywać obiekt. Domyślne ustawienie to +true+: wiązane obiekty są walidowane kiedy je zapisujesz.
+Kiedy ustawisz na +false+ opcję +:validate+, wiązane obiekty nie będą nigdy walidowane,
+kiedy będziesz zapisywać obiekt. Domyślne ustawienie to +true+: wiązane obiekty są
+walidowane kiedy je zapisujesz.
 
 ==== Kiedy obiekty są zapisywane?
 
-Kiedy przypisujesz obiekt do asocjacji +has_many+ , obiekt jest automatycznie zapisywani (żeby zaktualizować jego klucz obcy). Jeśli wiążesz wiele obiektów wjednym zapytanie, wszystkie zostaną zapisane.
+Kiedy przypisujesz obiekt do asocjacji +has_many+, obiekt jest automatycznie zapisywani
+(żeby zaktualizować jego klucz obcy). Jeśli wiążesz wiele obiektów w jednym
+zapytaniu, wszystkie zostaną zapisane.
 
-Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz przypisania zwróci false, a samo przypisanie jest anulowane.
+Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz
+przypisania zwróci +false+, a samo przypisanie jest anulowane.
 
 Jeśli obiekt-rodzic (ten, w którym jest deklaracja +has_many+) nie został zapisany (czyli +new_record?+ zwróci +true+), wtedy dodane obiekty-dzieci również nie zostaną zapisane. Wszyscy niezapisani uczestnicy asocjacji będą automatycznie zapisani, kiedy rodzic zostanie zapisany.
 
@@ -1407,7 +1494,7 @@ Jeśli chcesz przypisać obiekt do asocjacji +has_many+ bez jego zapisywania, u�
 
 Asocjacja +has_and_belongs_to_many+ tworzy relację wiele-do-wiele z innym modelem. W języku baz danych wiąże się się dwie klasy poprzez załączenie pośredniej tabeli, która zawiera klucze obce odnoszące się do każdej z klas.
 
-==== Methods Added
+==== Dodane metody
 
 Kiedy zadeklarujesz asocjację +has_and_belongs_to_many+, zyskujesz automatycznie 13 metod  powiązanych z tą asocjacją:
 
@@ -1415,8 +1502,8 @@ Kiedy zadeklarujesz asocjację +has_and_belongs_to_many+, zyskujesz automatyczni
 * +_collection_<<(object, ...)+
 * +_collection_.delete(object, ...)+
 * +_collection_=objects+
-* +_collection\_singular_\_ids+
-* +_collection\_singular_\_ids=ids+
+* +__collection_singular___ids+
+* +__collection_singular___ids=ids+
 * +_collection_.clear+
 * +_collection_.empty?+
 * +_collection_.size+
@@ -1425,7 +1512,9 @@ Kiedy zadeklarujesz asocjację +has_and_belongs_to_many+, zyskujesz automatyczni
 * +_collection_.build(attributes = {})+
 * +_collection_.create(attributes = {})+
 
-We wszystkich wymienionych metodach  +_collection_+ zastępuje się symbolem przekazanym jako pierwszy argument do has_many, a także +_collection_\_singular+ zastępuje się nazwą tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, w takiej deklaracji:
+We wszystkich wymienionych metodach  +_collection_+ zastępuje się symbolem przekazanym
+jako pierwszy argument do has_many, a także +__collection_singular__+ zastępuje się nazwą
+tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, w takiej deklaracji:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1455,7 +1544,10 @@ assemblies.create(attributes = {})
 
 ===== Metody dla dodatkowych kolumn
 
-Jeżeli dołączana do asocjacji +has_and_belongs_to_many+ posiada dodatkowe kolumny poza dwoma kluczami obcymi, kolumny te powinny zostać dodane jako atrybuty do rekordów pobieranych za pomocą tej asocjacji. Rekordy zwrócone z dodatkowymi atrybutami będą zawsze tylko do odczytu, ponieważ Railsy nie potrafią zapisywać zmian dla tych atrybutów
+Jeżeli tabela dołączana do asocjacji +has_and_belongs_to_many+ posiada dodatkowe kolumny
+poza dwoma kluczami obcymi, kolumny te powinny zostać dodane jako atrybuty do rekordów
+pobieranych za pomocą tej asocjacji. Rekordy zwrócone z dodatkowymi atrybutami będą
+zawsze tylko do odczytu, ponieważ Railsy nie potrafią zapisywać zmian dla tych atrybutów
 
 WARNING: Użycie dodatkowych atrybutów w dołączanej tabeli w asocjacji +has_and_belongs_to_many+ jest dawną tendencją i nie wspiera się jej. Jeśli potrzebujesz tego rodzaju skomplikowanych zachowań w tabeli łączącej dwa modele w relacji wiele-do-wiele, powinieneś użyć asocjacji +has_many :through+ zamiast +has_and_belongs_to_many+.
 
@@ -1492,20 +1584,19 @@ Metoda +_collection_.delete+ usuwa jeden lub więcej obiektów ze zbioru, poprze
 
 Metoda +_collection_=+ usuwa i dodaje odpowiednie obiekty tak, żeby dana kolekcja zawierała tylko podane (wymienione) obiekty.
 
-===== +_collection\_singular_\_ids+
+===== +__collection_singular___ids+
 
-#  Zwraca tablicę zawierającą identyfikatory wiązanych obiektów.
-
-+_collection\_singular_\_ids+ zwraca tablicę identyfikatorów (_ids_) obiektów w zbiorze
+Metoda +__collection_singular___ids+ zwraca tablicę identyfikatorów obiektów w zbiorze.
 
 [source, ruby]
 -------------------------------------------------------
 @assembly_ids = @part.assembly_ids
 -------------------------------------------------------
 
-===== +_collection\_singular_\_ids=ids+
+===== +__collection_singular___ids=ids+
 
-Metoda +__collection\_singular_\_ids=+ sprawia, że w zbiorze znajdują się tylko te obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.
+Metoda +__collection_singular___ids=+ sprawia, że w zbiorze znajdują się tylko te
+obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.
  
 ===== +_collection_.clear+
 
@@ -1555,7 +1646,9 @@ Metoda +_collection_.build+ zwraca jeden lub więcej nowych obiektów wiązanego
 
 ===== +_collection_.create(attributes = {})+
 
-Metoda collection.create zwraca nowy obiekt wiązanego typu. Ten obiekt będzie konstruowany z ustawionych atrybutów. Powiązanie z pośrednią tabelą będzie stworzone, a wiązany obiekt _zostanie_ zapisany (jeśli przejdzie pomyślnie przez walidację).
+Metoda +_collection_.create+ zwraca nowy obiekt wiązanego typu. Ten obiekt będzie
+konstruowany z ustawionych atrybutów. Powiązanie z pośrednią tabelą będzie stworzone, a
+wiązany obiekt _zostanie_ zapisany (jeśli przejdzie pomyślnie przez walidację).
 
 [source, ruby]
 -------------------------------------------------------
@@ -1616,7 +1709,10 @@ end
 
 ===== +:class_name+
 
-Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji +:class-name+, by dostarczyć nazwę modelu. Na przykład jeśli _part_ (część) ma wiele _assemblies_ (zadań), ale aktualna nazwa zawierająca _assemblies_ to "Gadget", możesz to ustawić w ten sposób:
+Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji
++:class_name+, by dostarczyć nazwę modelu. Na przykład jeśli _part_ (część) ma wiele
+_assemblies_ (zadań), ale aktualna nazwa zawierająca _assemblies_ to "Gadget", możesz to
+ustawić w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1733,7 +1829,8 @@ Jeśli ustawisz +true+ dla opcji +:readonly+, asocjowane obiekty będą tylko do
 
 ===== +:select+
 
-Użyj opcji : select by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny
+Użyj opcji +:select+ by zastąpić klauzulę SQL +SELECT+, która służy do wyszukiwania
+danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny
 
 ===== +:uniq+
 
@@ -1741,7 +1838,8 @@ Ustaw opcję +:uniq => true+ aby usunąć ze zbiorów duplikaty.
  
 ===== +:validate+
 
-Kiedy ustawisz na +false+ opcję +:validate+, wiązane obiekty nie będą nidy walidowane, kiedy będziesz zapisywać obiekt. Domyślne ustawienie to +true+: wiązane obiekty są walidowane kiedy je zapisujesz.
+Kiedy ustawisz na +false+ opcję +:validate+, wiązane obiekty nie będą nigdy walidowane,
+kiedy będziesz zapisywać obiekt. Domyślne ustawienie to +true+: wiązane obiekty są walidowane kiedy je zapisujesz.
 
 ==== Kiedy obiekty są zapisywane?
 
@@ -1753,11 +1851,15 @@ Jeśli obiekt-rodzic (ten, w którym jest deklaracja +has_and_belongs_to_many+) 
 
 Jeśli chcesz przypisać obiekt do asocjacji +has_many+ bez jego zapisywania, użyj metody +_collection_.build+.
  
-=== Callback asocjacji
+=== Callbacki asocjacji
 
-Funkcje z callback-iem "zaczepiają się" o cykl życia obiektów Active Record, pozwalając na pracę z tymi obiektami w różnych momentach. Na przykład, możesz użyć callback-a +:before_save+ i sprawić, by coś się stało tuż przed tym, kiedy obiekt zostanie zapisany.
+Funkcje z callbackiem "zaczepiają się" o cykl życia obiektów Active Record, pozwalając
+na pracę z tymi obiektami w różnych momentach. Na przykład, możesz użyć callbacka
++:before_save+ i sprawić, by coś się stało tuż przed tym, kiedy obiekt zostanie zapisany.
 
-Callback-i w asocjacjach podobne są do zwykłych callback-ów, z tym, że (te pierwsze - przyp.tłum) uruchamiane są przez zdarzenia w cyklu życia zbioru. W asocjacjach dostępne są cztery callback-i:
+Callbacki w asocjacjach podobne są do zwykłych callbacków, z tym, że (te pierwsze -
+przyp.tłum) uruchamiane są przez zdarzenia w cyklu życia zbioru. W asocjacjach dostępne
+są cztery callbacki:
 
 * +before_add+
 * +after_add+
@@ -1777,7 +1879,7 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Railsy przekazują do callback-a obiekt, który ma być dodany lub wymazany. 
+Railsy przekazują do callbacka obiekt, który ma być dodany lub wymazany. 
 
 Możesz użyć stosu [_stack_] wywołań, które będą traktowane jak pojedynczy callback, przekazując wywołania do w tablicy:
 
@@ -1796,11 +1898,14 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Jeśli callback +before_add+ "wyrzuci" wyjątek, obiekt nie może zostać dodany do zbioru. Podobnie jeśli +before_remove+ "wyrzuci" wyjątek, nie można obiektu usunąć ze zbioru.
+Jeśli callback +before_add+ rzuci wyjątek, obiekt nie może zostać dodany do zbioru. 
+Podobnie jeśli +before_remove+ rzuci wyjątek, nie można obiektu usunąć ze zbioru.
 
 === Rozszerzenia asocjacji
 
-Nie jesteś ograniczony do funkcjonalności, którą Railsy automatycznie wbudowuje w obiekty proxy. Możesz rozszerzać te obiekty używając anonimowych modułów, dodawanie nowych finderów, kreatorów i innych metod. Na przykład:
+Nie jesteś ograniczony do funkcjonalności, którą Railsy automatycznie wbudowuje w
+obiekty proxy asocjacji. Możesz rozszerzać te obiekty używając anonimowych modułów, dodawanie
+nowych finderów, kreatorów i innych metod. Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1841,11 +1946,13 @@ class Customer < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Rozszerzenia mogą odnosić się do wnętrz asocjacji proxy, dzięki użyciu tych trzech dodatków [_accessors_]:
+Rozszerzenia mogą pobierać informacji o asocjacji, dzięki użyciu 
+trzech akcesorów:
 
 * +proxy_owner+ zwraca obiekt, którego asocjacja jest częścią.
-* +proxy_reflection+ zwraca ‘odbicie’ obiektu opisywanego przez asocjację.
-* +proxy_target+ zwraca powiązany element dla +belongs_to+ lub +has_one+ lub zbiór wiązanych obiektów dla +has_many+ lub +has_and_belongs_to_many+.
+* +proxy_reflection+ zwraca "odbicie" obiektu opisywanego przez asocjację.
+* +proxy_target+ zwraca powiązany element dla +belongs_to+ lub +has_one+ lub zbiór
+  wiązanych obiektów dla +has_many+ lub +has_and_belongs_to_many+.
 
 == Changelog ==
 

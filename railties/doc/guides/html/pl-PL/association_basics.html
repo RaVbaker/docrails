@@ -81,11 +81,11 @@
             
               <li><a href="#_asocjacja_tt_has_one_tt_2">Asocjacja <tt>has_one</tt></a></li>
             
-              <li><a href="#_the_has_many_association">The has_many Association</a></li>
+              <li><a href="#_asocjacja_has_many">Asocjacja has_many</a></li>
             
               <li><a href="#_asocjacja_tt_has_and_belongs_to_many_tt_2">Asocjacja <tt>has_and_belongs_to_many</tt></a></li>
             
-              <li><a href="#_callback_asocjacji">Callback asocjacji</a></li>
+              <li><a href="#_callbacki_asocjacji">Callbacki asocjacji</a></li>
             
               <li><a href="#_rozszerzenia_asocjacji">Rozszerzenia asocjacji</a></li>
             
@@ -101,7 +101,8 @@
         <h1>Przewodnik po asocjacjach modułu Active Record</h1>
       <div id="preamble">
 <div class="sectionbody">
-<div class="paragraph"><p>Niniejszy przewodnik obejmuje opis asocjacji (<em>associations</em>) – elementów modułu Active Record. Za pomocą tego przewodnika będziesz w stanie:</p></div>
+<div class="paragraph"><p>Niniejszy przewodnik obejmuje opis asocjacji (<em>associations</em>) – elementów modułu Active
+Record. Z pomocą tego przewodnika będziesz w stanie:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -123,8 +124,11 @@ Stosować metody dodane do twoich modeli dzięki stworzeniu asocjacji
 </div>
 <h2 id="_dlaczego_asocjacje">1. Dlaczego Asocjacje?</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Dlaczego potrzebne są asocjacje(<em>powiązania</em>, <em>połączenia</em> - przyp. tłum.) między modelami? Ponieważ sprawiają one, że wspólne operacje (czyli operacje na kilku modelach – przyp.tłum.) stają się mniej skomplikowane i łatwe do implementacji w kodzie.
-Na przykład, pomyśl o prostej aplikacji zawierającej dwa modele – klienta (<em>customer</em>) oraz zamówień (<em>order(s)</em>). Każdy klient może składać wiele zamówień.
+<div class="paragraph"><p>Dlaczego potrzebne są asocjacje (<em>powiązania</em>, <em>połączenia</em> - przyp. tłum.) między
+modelami? Ponieważ sprawiają one, że wspólne operacje (czyli operacje na kilku modelach
+– przyp.tłum.) stają się mniej skomplikowane i łatwe do implementacji w kodzie.
+Na przykład, pomyśl o prostej aplikacji zawierającej dwa modele – klienta (<em>customer</em>)
+oraz zamówień (<em>order(s)</em>). Każdy klient może składać wiele zamówień.
 Bez zdefiniowania powiązania deklaracja modelu mogłaby wyglądać tak:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -234,8 +238,11 @@ http://www.gnu.org/software/src-highlite -->
 <img src="images/belongs_to.png" alt="diagram asocjacji belongs_to" title="diagram asocjacji belongs_to" />
 </span></p></div>
 <h3 id="_asocjacja_tt_has_one_tt">2.2. Asocjacja <tt>has_one</tt></h3>
-<div class="paragraph"><p>Asocjacja <tt>has_one</tt> również ustanawia relację typu jeden-do-jeden pomiędzy dwoma modelami, jednak posiada inną semantykę (i jej konsekwencje). Ta asocjacja wskazuje, iż każda instancja jednego modelu posiada jedną instancję drugiego.
-Na przykład: Każdy dostawca (<em>supplier</em>) w twojej aplikacji ma tylko jedno konto – możesz zadeklarować model dostawcy w taki sposób:</p></div>
+<div class="paragraph"><p>Asocjacja <tt>has_one</tt> również ustanawia relację typu jeden-do-jeden pomiędzy dwoma
+modelami, jednak posiada inną semantykę (i konsekwencje). Ta asocjacja wskazuje, iż
+każda instancja jednego modelu posiada jedną instancję drugiego.
+Na przykład: Każdy dostawca (<em>supplier</em>) w twojej aplikacji ma tylko jedno konto –
+możesz zadeklarować model dostawcy w taki sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -338,8 +345,12 @@ http://www.gnu.org/software/src-highlite -->
 <img src="images/has_one_through.png" alt="diagram asocjacji has_one :through" title="diagram asocjacji has_one :through" />
 </span></p></div>
 <h3 id="_asocjacja_tt_has_and_belongs_to_many_tt">2.6. Asocjacja <tt>has_and_belongs_to_many</tt></h3>
-<div class="paragraph"><p>Asocjacja has_and_belongs_to_many tworzy bezpośrednią relację typu wiele-do-wiele z innym modelem bez ingerencji modelu pośredniego (nie ma potrzeby deklarowania go, jednak zauważyć należy, iż jest tworzona automatycznie stosowna tabela wiążąca -przyp.tłum.).
-Na przykład, jeżeli projekt miałby zawierać zbiory (zestawy - <em>assembly(ies)</em>)  i części (<em>part(s)</em>) oraz każdy zbiór posiadałby wiele części, a każda część mogłaby pojawić się w wielu zbiorach,  modele można zadeklarować w ten sposób:</p></div>
+<div class="paragraph"><p>Asocjacja has_and_belongs_to_many tworzy bezpośrednią relację typu
+wiele-do-wiele z innym modelem bez ingerencji modelu pośredniego (nie ma
+potrzeby deklarowania go, jednak zauważyć należy, iż jest wykorzystywna stosowna tabela wiążąca - przyp.tłum.).
+Na przykład, jeżeli projekt miałby zawierać zbiory (zestawy - <em>assembly(ies)</em>)  i części
+(<em>part(s)</em>) oraz każdy zbiór posiadałby wiele części, a każda część mogłaby pojawić się
+w wielu zbiorach,  modele można zadeklarować w ten sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -358,7 +369,7 @@ http://www.gnu.org/software/src-highlite -->
 <h3 id="_wyb_r_pomi_dzy_tt_belongs_to_tt_i_tt_has_one_tt">2.7. Wybór pomiędzy <tt>belongs_to</tt> i <tt>has_one</tt></h3>
 <div class="paragraph"><p>Jeśli chcesz ustawić relację typu jeden-do-jeden między dwoma modelami, powinieneś użyć asocjacji <tt>belongs_to</tt> do jednego i <tt>has_one</tt> do drugiego. Ale skąd wiedzieć która powinna być w którym modelu?</p></div>
 <div class="paragraph"><p>Rozróżnić to należy sprawdzając, w której tabeli (w którym modelu) ustawiłeś klucz obcy (foreign key) (dla klasy tej tabeli potrzebujesz asocjacji <tt>belongs_to</tt>), ale powinieneś pomyśleć także nad znaczeniem danych. Relacja <tt>has_one</tt> mówi, że "jednen ze zbioru" należy do ciebie – tzn. że coś wskazuje z powrotem na ciebie.
-Na przykład: Ma większy sens powiedzenie, że dostawca posiada konto, aniżeli konto posiada dostawcę. To sugeruje nam, że poprawne relacje wyglądają tak:</p></div>
+Na przykład: ma większy sens powiedzenie, że dostawca posiada konto, aniżeli konto posiada dostawcę. To sugeruje nam, że poprawne relacje wyglądają tak:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -526,7 +537,7 @@ Kontrolowanie cachingu
 </li>
 <li>
 <p>
-Unikanie kolizji w nazwach
+Unikanie kolizji nazw
 </p>
 </li>
 <li>
@@ -560,9 +571,17 @@ http://www.gnu.org/software/src-highlite -->
 customer<span style="color: #990000">.</span>orders<span style="color: #990000">.</span>size          <span style="font-style: italic"><span style="color: #9A1900"># używa kopii zamówień z cache</span></span>
 customer<span style="color: #990000">.</span>orders<span style="color: #990000">(</span><span style="font-weight: bold"><span style="color: #0000FF">true</span></span><span style="color: #990000">).</span>empty?  <span style="font-style: italic"><span style="color: #9A1900"># odrzuca kopię zamówień będącą w cache i "wraca" do bazy danych</span></span></tt></pre></div></div>
 <h3 id="_unikanie_kolizji_nazw">3.2. Unikanie kolizji nazw</h3>
-<div class="paragraph"><p>Nazwy twoich asocjacji nie mgą być dowolne. Ponieważ tworzenie asocjacji automatycznie dodaje do modelu metodę z taką samą nazwą, złym pomysłem jest nazywanie asocjacji tak samo jak metody instancji ActiveRecord::Base. Metoda asocjacji w takim przypadku przesłoni metodę bazy, a to nie jest pożądane. Przykładem złych nazw asocjacji są <tt>attributes</tt> albo <tt>connection</tt>.</p></div>
+<div class="paragraph"><p>Nazwy twoich asocjacji nie mogą być dowolne. Ponieważ tworzenie asocjacji automatycznie
+dodaje do modelu metodę z taką samą nazwą, złym pomysłem jest nazywanie asocjacji tak
+samo jak metody instancji ActiveRecord::Base. Metoda asocjacji w takim przypadku
+przesłoni metodę bazy, a to nie jest pożądane. Przykładem złych nazw asocjacji są
+<tt>attributes</tt> albo <tt>connection</tt>.</p></div>
 <h3 id="_aktualizacja_schematu">3.3. Aktualizacja schematu</h3>
-<div class="paragraph"><p>Asocjacje są bardzo przydatne, ale nie są magiczne. Jesteś odpowiedzialny za utrzymanie schematu  bazy danych w dopasowaniu do swoich asocjacji. W praktyce oznacza to dwie rzeczy, w zależności od tego, którego rodzaju asocjacji użyłeś w swoim modelu. Dla asocjacji <tt>belongs_to</tt> porzebujesz stworzyć klucze obce, a dla <tt>has_and_belongs_to_many</tt> - stosowną wiążącą tabelę (w bazie).</p></div>
+<div class="paragraph"><p>Asocjacje są bardzo przydatne, ale nie są magiczne. Jesteś odpowiedzialny za
+utrzymanie schematu  bazy danych w dopasowaniu do swoich asocjacji. W praktyce
+oznacza to dwie rzeczy, w zależności od tego, którego rodzaju asocjacji użyłeś
+w swoim modelu. Dla asocjacji <tt>belongs_to</tt> porzebujesz stworzyć klucze obce, a
+dla <tt>has_and_belongs_to_many</tt> - stosowną tabelę wiążącą (w bazie danych).</p></div>
 <h4 id="_tworzenie_kluczy_obcych_dla_asocjacji_tt_belongs_to_tt">3.3.1. Tworzenie kluczy obcych dla asocjacji <tt>belongs_to</tt></h4>
 <div class="paragraph"><p>Kiedy deklarujesz asocjację <tt>belongs_to</tt>, powinieneś stworzyć odpowiednie klucze obce. Na przykład, rozważ taki model:</p></div>
 <div class="listingblock">
@@ -573,7 +592,7 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> Order <span style="color: #990000">&lt;</span> ActiveRecord<span style="color: #990000">::</span>Base
   belongs_to <span style="color: #990000">:</span>customer
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Taka deklaracja  powinna być uwzgleniona i "wsparta" odpowiednią deklaracją klucza obcego w tabeli zamówień:</p></div>
+<div class="paragraph"><p>Taka deklaracja  powinna być uwzględniona i "wsparta" odpowiednią deklaracją klucza obcego w tabeli zamówień:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -593,14 +612,24 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Jeśli tworzysz asocjację po jakimś czasie od stworzenia modelu bazowego, musisz pamiętać o stworzeniu migracji <tt>add_column</tt> (dodaj kolumnę) by zapewnić modelowi odpowiedni klucz obcy.</p></div>
-<h4 id="_creating_join_tables_for_tt_has_and_belongs_to_many_tt_associations">3.3.2. Creating Join Tables for <tt>has_and_belongs_to_many</tt> Associations</h4>
-<div class="paragraph"><p>Jeśli tworzysz asocjację <tt>has_and_belongs_to_many</tt> potrzebujesz stworzyć wiążącą tabelę. Dopóki nazwa dołączanej tabeli nie jest wyraźnie określona poprzez użycie opcji <tt>:join_table</tt>, moduł Active Record utworzy nazwę używając leksykalnego (alfabetycznego) )porządku tworzenia nazw. Zatem: połączenie między modelem  klienta (customer) a zamówieniem (order) otrzyma domyślną nazwę tabeli "customers_orders" (zamówienia klientów), bo "c" jest w alfabecie przed "o".</p></div>
+<h4 id="_tworzenie_tabeli_wi_cych_dla_asocjacji_tt_has_and_belongs_to_many_tt">3.3.2. Tworzenie tabeli wiążących dla asocjacji <tt>has_and_belongs_to_many</tt></h4>
+<div class="paragraph"><p>Jeśli tworzysz asocjację <tt>has_and_belongs_to_many</tt> potrzebujesz stworzyć wiążącą tabelę.
+Dopóki nazwa dołączanej tabeli nie jest wyraźnie określona poprzez użycie opcji
+<tt>:join_table</tt>, moduł Active Record utworzy nazwę używając leksykalnego (alfabetycznego)
+porządku tworzenia nazw. Zatem: połączenie między modelem  klienta (customer) a
+zamówieniem (order) otrzyma domyślną nazwę tabeli "customers_orders" (zamówienia
+klientów), bo "c" jest w alfabecie przed "o".</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/warning.png" alt="Warning" />
 </td>
-<td class="content">Pierwszeństwo między nazwami modeli jest "obliczane" przy użyciu operatora "&lt;" (mniejszości) dla stringów (łańcuchów znaków). To znaczy, ze jeśli słowa są różnej długości, ale początkowy łańcuch jest jednakowy – wtedy wyżej w tym porządku jest słowo dłuższe. Na przykład, możnaby oczekiwać, że dla tabeli paper_boxes i papers wygenerowana nazwa wiążącej tabeli będzie brzmiała "papers_paper_boxes", ze względu na długość łańcucha "paper_boxes". Jednak w rzeczywistości wygenerowana zostanie nazwa "paper_boxes_papers".</td>
+<td class="content">Pierwszeństwo między nazwami modeli jest "obliczane" przy użyciu operatora "&lt;"
+(mniejszości) dla stringów (łańcuchów znaków). To znaczy, ze jeśli słowa są różnej
+długości, ale początkowy łańcuch jest jednakowy – wtedy wyżej w tym porządku jest słowo
+dłuższe. Na przykład, można by oczekiwać, że dla tabeli paper_boxes i papers wygenerowana
+nazwa wiążącej tabeli będzie brzmiała "papers_paper_boxes", ze względu na długość
+łańcucha "paper_boxes". Jednak w rzeczywistości wygenerowana zostanie nazwa "paper_boxes_papers".</td>
 </tr></table>
 </div>
 <div class="paragraph"><p>Niezależnie od nazwy, musisz "ręcznie" wygenerować wiążącą tabelę za pomocą odpowiedniej migracji. Na przykład, rozważ takie asocjacje:</p></div>
@@ -693,7 +722,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <h2 id="_szczeg_owy_spis_asocjacji">4. Szczegółowy spis asocjacji</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Niniejszy rozdział ukaże ci szczegóły każdego typu asocjacji, w tym informacje o metodach, które dzięki nim zyskujesz oraz opcji, których możesz uzywać dzięki zadeklarowaniu asocjacji.</p></div>
+<div class="paragraph"><p>Niniejszy rozdział ukaże ci szczegóły każdego typu asocjacji, w tym informacje o metodach, które dzięki nim zyskujesz oraz opcji, których możesz używać dzięki zadeklarowaniu asocjacji.</p></div>
 <h3 id="_asocjacja_belongs_to">4.1. Asocjacja belongs_to</h3>
 <div class="paragraph"><p>Asocjacja <tt>belongs_to</tt> tworzy relację typu jeden-do-jeden z innym modelem. W języku baz danych, oznacza to że dana klasa zawiera klucz obcy. Jeśli inna klasa zawiera klucz obcy, powinieneś raczej użyć asocjacji <tt>has_one</tt></p></div>
 <h4 id="_metody_dodane_dzi_ki_tt_belongs_to_tt">4.1.1. Metody dodane dzięki <tt>belongs_to</tt></h4>
@@ -746,16 +775,20 @@ customer<span style="color: #990000">.</span><span style="font-weight: bold"><sp
 build_customer
 create_customer</tt></pre></div></div>
 <h5 id="_tt_em_association_em_force_reload_false_tt"><tt><em>association</em>(force_reload = false)</tt></h5>
-<div class="paragraph"><p>Metoda <tt><em>association</em></tt> zwraca wiązany obiekt, jeśli tylko taki istnieje. Jeśli wiązany obiekt nie został znaleziony, metoda zwraca <tt>nil</tt>.</p></div>
+<div class="paragraph"><p>Metoda <tt><em>association</em></tt> zwraca wiązany obiekt, jeśli tylko taki istnieje. Jeśli wiązany
+obiekt nie został znaleziony, metoda zwraca <tt>nil</tt>.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@customer</span> <span style="color: #990000">=</span> <span style="color: #009900">@order</span><span style="color: #990000">.</span>customer</tt></pre></div></div>
-<div class="paragraph"><p>Jeśli wiązany obiekt został już pobrany z bazy danych, zwrócona będzie jego wersja przechowywana w <em>cache</em>. Aby to zmienić  (i wymusić czytanie z bazy), ustaw <tt>true</tt> przy argumencie <tt>force_reload</tt></p></div>
+<div class="paragraph"><p>Jeśli wiązany obiekt został już pobrany z bazy danych, zwrócona będzie jego wersja
+przechowywana w <em>cache</em>. Aby to zmienić  (i wymusić czytanie z bazy), ustaw <tt>true</tt> przy argumencie <tt>force_reload</tt></p></div>
 <h5 id="_tt_em_association_em_associate_tt"><tt><em>association</em>=(associate)</tt></h5>
-<div class="paragraph"><p>Metoda <tt><em>association</em>=</tt> przydziela wiązanemy obiekt do naszego obiektu. Od środka wygląda to tak, że wydobywa ona z wiązanego obiektu klucz podstawowy i ustawia naszemu obiektowi klucz obcy na tę samą wartość.</p></div>
+<div class="paragraph"><p>Metoda <tt><em>association</em>=</tt> przydziela wiązany obiekt do naszego obiektu. Od środka
+wygląda to tak, że wydobywa ona z wiązanego obiektu klucz podstawowy i ustawia naszemu
+obiektowi klucz obcy na tę samą wartość.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -773,7 +806,9 @@ http://www.gnu.org/software/src-highlite -->
   <span style="color: #009900">@msg</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"No customer found for this order"</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h5 id="_tt_build_em_association_em_attributes_tt"><tt>build<em>_association</em>(attributes = {})</tt></h5>
-<div class="paragraph"><p>Metoda <tt>build__association_</tt> zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów,  będzie ustawiony odnośnik do obcego klucza tego obiektu, ale wiązany obiekt <em>nie zostanie</em> zapisany.</p></div>
+<div class="paragraph"><p>Metoda <tt>build<em><em>_association</em></em></tt> zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów,  będzie ustawiony odnośnik do obcego
+klucza tego obiektu, ale wiązany obiekt <em>nie zostanie</em> zapisany.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -781,7 +816,9 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@customer</span> <span style="color: #990000">=</span> <span style="color: #009900">@order</span><span style="color: #990000">.</span>build_customer<span style="color: #990000">(</span><span style="color: #FF0000">{</span><span style="color: #990000">:</span>customer_number <span style="color: #990000">=&gt;</span> <span style="color: #993399">123</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>customer_name <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"John Doe"</span><span style="color: #FF0000">}</span><span style="color: #990000">)</span></tt></pre></div></div>
 <h5 id="_tt_create_em_association_em_attributes_tt"><tt>create<em>_association</em>(attributes = {})</tt></h5>
-<div class="paragraph"><p>Metoda <tt>create__association_</tt> zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do obcego klucza tego obiektu. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).</p></div>
+<div class="paragraph"><p>Metoda <tt>create<em>_association</em></tt> zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do obcego
+klucza tego obiektu. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -852,7 +889,10 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 </ul></div>
 <h5 id="_tt_class_name_tt"><tt>:class_name</tt></h5>
-<div class="paragraph"><p>Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji <tt>:class-name</tt>, by dostarczyć własną nazwę modelu. Na przykład, jeśli zamówienie należy [<em>belongs to</em>] do klienta, ale aktualna nazwa zawierająca klientów to <tt>Patron</tt>, możesz to ustawić w ten sposób:</p></div>
+<div class="paragraph"><p>Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji
+<tt>:class_name</tt>, by dostarczyć własną nazwę modelu. Na przykład, jeśli zamówienie należy
+[<em>belongs to</em>] do klienta, ale aktualna nazwa zawierająca klientów to <tt>Patron</tt>, możesz
+to ustawić w ten sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -884,7 +924,10 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">class</span></span> Customer <span style="color: #990000">&lt;</span> ActiveRecord<span style="color: #990000">::</span>Base
   has_many <span style="color: #990000">:</span>orders
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Z powyższymi deklaracjami, znalezienie wartości <tt>@customer.orders.size</tt> (wielkość [ilość] zamówień klientów) wymaga zapytania do bazy wykorzystującego <tt>COUNT(*)</tt>. Aby uniknąć tego połączenia możesz dodać :counter_cache ("licznik w cache") do modelu:</p></div>
+<div class="paragraph"><p>Z powyższymi deklaracjami, znalezienie wartości <tt>@customer.orders.size</tt>
+(wielkość [ilość] zamówień klientów) wymaga zapytania do bazy wykorzystującego
+<tt>COUNT(*)</tt>. Aby uniknąć tego połączenia możesz dodać :counter_cache ("cache
+dla licznika") do modelu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -897,7 +940,10 @@ http://www.gnu.org/software/src-highlite -->
   has_many <span style="color: #990000">:</span>orders
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Dzięki tej deklaracji Railsy będą pobierały bieżącą wartość cache i zwrócą ją w odpowiedzi na metodę <tt>.size</tt>.</p></div>
-<div class="paragraph"><p>Pomimo, że opcja <tt>:counter_cache</tt> jest określona dla modelu zawierającego deklarację <tt>belongs_to</tt>, bieżąca kolumna musi być dodana do wiązanego modelu. W powyższym przypadku musisz dodać kolumnę o nazwie+orders_count+ do modelu klienta [<tt>Customer</tt>]. Możesz zamienić domyślną nazwę kolumny, jeśli tylko chcesz:</p></div>
+<div class="paragraph"><p>Pomimo, że opcja <tt>:counter_cache</tt> jest określona dla modelu zawierającego deklarację
+<tt>belongs_to</tt>, bieżąca kolumna musi być dodana do wiązanego modelu. W powyższym przypadku
+musisz dodać kolumnę o nazwie <tt>orders_count</tt> do modelu klienta [<tt>Customer</tt>]. Możesz
+zamienić domyślną nazwę kolumny, jeśli tylko chcesz:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -911,7 +957,10 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Kolumny <em>licznika</em> są dodawane do listy atrybutów tylko-do-odczytu wiązanego modelu (poprzez <tt>attr_readonly</tt>)</p></div>
 <h5 id="_tt_dependent_tt"><tt>:dependent</tt></h5>
-<div class="paragraph"><p>Jeśli ustawisz opcję <tt>:dependent</tt> na :destroy, wtedy usunięcie tego obiektu wywoła metodę destroy na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję <tt>:dependent</tt> na <tt>:delete</tt>, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu wiązanego <em>bez</em> wywoływania dla niego metody <tt>destroy</tt>.</p></div>
+<div class="paragraph"><p>Jeśli ustawisz opcję <tt>:dependent</tt> na <tt>:destroy</tt>, wtedy usunięcie tego obiektu wywoła
+metodę <tt>destroy</tt> na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję
+<tt>:dependent</tt> na <tt>:delete</tt>, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu
+wiązanego <em>bez</em> wywoływania dla niego metody <tt>destroy</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -1076,7 +1125,9 @@ http://www.gnu.org/software/src-highlite -->
   <span style="color: #009900">@msg</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"No account found for this supplier"</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h5 id="_tt_build_em_association_em_attributes_tt_2"><tt>build<em>_association</em>(attributes = {})</tt></h5>
-<div class="paragraph"><p>Metoda <tt>build__association_</tt> zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów, będzie ustawiony odnośnik do jego obcego klucza tego obiektu, ale wiązany obiekt <em>nie zostanie</em> zapisany.</p></div>
+<div class="paragraph"><p>Metoda <tt>build<em><em>_association</em></em></tt> zwraca nowy obiekt wiązanego typu. Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów, będzie ustawiony odnośnik do jego obcego
+klucza tego obiektu, ale wiązany obiekt <em>nie zostanie</em> zapisany.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1084,7 +1135,9 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@account</span> <span style="color: #990000">=</span> <span style="color: #009900">@supplier</span><span style="color: #990000">.</span>build_account<span style="color: #990000">(</span><span style="color: #FF0000">{</span><span style="color: #990000">:</span>terms <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"Net 30"</span><span style="color: #FF0000">}</span><span style="color: #990000">)</span></tt></pre></div></div>
 <h5 id="_tt_create_em_association_em_attributes_tt_2"><tt>create<em>_association</em>(attributes = {})</tt></h5>
-<div class="paragraph"><p>Metoda <tt>create___association_</tt> zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do jego obcego klucza. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).</p></div>
+<div class="paragraph"><p>Metoda <tt>create<em>_association</em></tt> zwraca nowy obiekt wiązanego typu, Ten obiekt zostanie
+natychmiast utworzony z ustawionych atrybutów i będzie ustawiony odnośnik do jego obcego
+klucza. Ponadto wiązany obiekt zostanie zapisany (zakładając, że przejdzie pomyślnie przez walidację).</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1175,9 +1228,10 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 </ul></div>
 <h5 id="_tt_as_tt"><tt>:as</tt></h5>
-<div class="paragraph"><p>Użycie opcji <tt>:as</tt>  wskazuje, że mamy do czynienia z asocjacją polimorficzną. Polimorficzne asocjacje zostały omówione szczegółowo ww wcześniejszej części podręcznika.</p></div>
+<div class="paragraph"><p>Użycie opcji <tt>:as</tt>  wskazuje, że mamy do czynienia z asocjacją polimorficzną.
+Polimorficzne asocjacje zostały omówione szczegółowo we wcześniejszej części podręcznika.</p></div>
 <h5 id="_tt_class_name_tt_2"><tt>:class_name</tt></h5>
-<div class="paragraph"><p>Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji <tt>:class-name</tt>, by dostarczyć własną nazwę modelu. Na przykład, jeśli dostawca posiada konto, ale aktualna nazwa zawierająca konta to <tt>Billing</tt>, możesz to ustawić w ten sposób:</p></div>
+<div class="paragraph"><p>Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji <tt>:class_name</tt>, by dostarczyć własną nazwę modelu. Na przykład, jeśli dostawca posiada konto, ale aktualna nazwa zawierająca konta to <tt>Billing</tt>, możesz to ustawić w ten sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1197,7 +1251,12 @@ http://www.gnu.org/software/src-highlite -->
   has_one <span style="color: #990000">:</span>account<span style="color: #990000">,</span> <span style="color: #990000">:</span>conditions <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"confirmed = 1"</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h5 id="_tt_dependent_tt_2"><tt>:dependent</tt></h5>
-<div class="paragraph"><p>Jeśli ustawisz opcję <tt>:dependent</tt> na :destroy, wtedy usunięcie tego obiektu wywoła metodę destroy na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję <tt>:dependent</tt> na <tt>:delete</tt>, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu wiązanego <em>bez</em> wywoływania dla niego metody <tt>destroy</tt>. Jeśli ustawisz opcję <tt>:dependent</tt> na <tt>:nullify</tt>, usunięcie tego obiektu sprawi, że klucz obcy w wiązanym obiekcie zostanie zastąpiony przez <tt>NULL</tt>.</p></div>
+<div class="paragraph"><p>Jeśli ustawisz opcję <tt>:dependent</tt> na <tt>:destroy</tt>, wtedy usunięcie tego obiektu wywoła
+metodę destroy na wiązanym obiekcie, by usunąć ten obiekt. Jeżeli ustawisz opcję
+<tt>:dependent</tt> na <tt>:delete</tt>, wtedy usunięcie tego obiektu spowoduje usunięcie obiektu
+wiązanego <em>bez</em> wywoływania dla niego metody <tt>destroy</tt>. Jeśli ustawisz opcję
+<tt>:dependent</tt> na <tt>:nullify</tt>, usunięcie tego obiektu sprawi, że klucz obcy w wiązanym
+obiekcie zostanie zastąpiony przez <tt>NULL</tt>.</p></div>
 <h5 id="_tt_foreign_key_tt_2"><tt>:foreign_key</tt></h5>
 <div class="paragraph"><p>Zgodnie z konwencją, Railsy "domyślają się", że kolumna używana do przechowywania klucza obcego w innym modelu to nazwa pierwszego modelu z przyrostkiem _id. Opcja <tt>:foreign_key</tt> umożliwia ustawienie nazwy klucza obcego bezpośrednio:</p></div>
 <div class="listingblock">
@@ -1255,14 +1314,15 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Zgodnie z konwencją Railsy "domyślają się" że kolumna z kluczem podstawowym w modelu to "id". Możesz to zmienić i samodzielnie określić klucz podstawowy dzięki opcji <tt>:primary_key</tt>.</p></div>
 <h5 id="_tt_readonly_tt_2"><tt>:readonly</tt></h5>
 <div class="paragraph"><p>Jeśli ustawisz <tt>true</tt> dla opcji <tt>:readonly</tt>, asocjowany obiekt będzie tylko do odczytu, gdy wywoływana jest asocjacja.</p></div>
-<h5 id="_select">+:select</h5>
+<h5 id="_tt_select_tt_2"><tt>:select</tt></h5>
 <div class="paragraph"><p>Użyj opcji <tt>:select</tt> by zastąpić klauzuję SQL <tt>SELECT</tt>, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny.</p></div>
 <h5 id="_tt_source_tt"><tt>:source</tt></h5>
 <div class="paragraph"><p>Opcja source określa źródło asocjacji dla asocjacji typu  <tt>has_one :through</tt>.</p></div>
 <h5 id="_tt_source_type_tt"><tt>:source_type</tt></h5>
 <div class="paragraph"><p>Opcja <tt>:source_type</tt> określa typ źródła asocjacji dla asocjacji <tt>has_one :through</tt>; związane jest to z asocjacją polimorficzną.</p></div>
 <h5 id="_tt_through_tt"><tt>:through</tt></h5>
-<div class="paragraph"><p>Opcja <tt>:through</tt> (<em>poprzez</em>) określa wiążący model, poprzez który wykonywane sż zapytania. Asocjacje <tt>has_one :through</tt> są omówione w dalszej części przewodnika.</p></div>
+<div class="paragraph"><p>Opcja <tt>:through</tt> (<em>poprzez</em>) określa wiążący model, poprzez który wykonywane są
+zapytania. Asocjacje <tt>has_one :through</tt> są omówione w dalszej części przewodnika.</p></div>
 <h5 id="_tt_validate_tt_2"><tt>:validate</tt></h5>
 <div class="paragraph"><p>Kiedy ustawisz na <tt>true</tt> opcję <tt>:validate</tt>, wiązane obiekty będą walidowane zawsze, kiedy będziesz je zapisywać. Domyślne ustawienie to <tt>false</tt>: wiązane obiekty nie są walidowane kiedy je zapisujesz.</p></div>
 <h4 id="_kiedy_obiekty_s_zapisywane_2">4.2.3. Kiedy obiekty są zapisywane?</h4>
@@ -1270,7 +1330,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz przypisania zwróci <tt>false</tt>, a samo przypisanie jest anulowane.</p></div>
 <div class="paragraph"><p>Jeśli obiekt-rodzic (ten, w którym zadeklarowałeś asocjację <tt>has_one</tt>) nie został zapisany (to jest, gdy <tt>new_record?</tt> zwraca wartość <tt>true</tt>), wtedy obiekt-dziecko nie jest zapisywany.</p></div>
 <div class="paragraph"><p>Jeśli chcesz przypisać obiekt do asocjacji has_one bez zapisywania obiektu, użyj metody <tt>association.build</tt>.</p></div>
-<h3 id="_the_has_many_association">4.3. The has_many Association</h3>
+<h3 id="_asocjacja_has_many">4.3. Asocjacja has_many</h3>
 <div class="paragraph"><p>Asocjacja <tt>has_many</tt> tworzy relację typu jeden-do-wiele z innym modelem. W języku baz danych oznacza to, że inna klasa zawiera klucz obcy, który odnosi się do instancji rozpatrywanej klasy.</p></div>
 <h4 id="_dodane_metody">4.3.1. Dodane metody</h4>
 <div class="paragraph"><p>Kiedy zadeklarujesz asocjację <tt>has_many</tt>, deklarowana klasa automatycznie zyskuje 13 metod odnoszących się do tej asocjacji:</p></div>
@@ -1297,12 +1357,12 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 <li>
 <p>
-<tt><em>collection\_singular</em>\_ids</tt>
+<tt><em>collection_singular</em>_ids</tt>
 </p>
 </li>
 <li>
 <p>
-<tt><em>collection\_singular</em>\_ids=ids</tt>
+<tt><em>collection_singular</em>_ids=ids</tt>
 </p>
 </li>
 <li>
@@ -1341,7 +1401,9 @@ http://www.gnu.org/software/src-highlite -->
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>We wszystkich wymienionych metodach <tt><em>collection</em></tt> zastępuje się symbolem przekazanym jako pierwszy argument do <tt>has_many</tt> oraz <tt><em>collection\_singular</em></tt> zastępowany jest nazwą tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, biorąc pod uwagę deklarację:</p></div>
+<div class="paragraph"><p>We wszystkich wymienionych metodach <tt><em>collection</em></tt> zastępuje się symbolem przekazanym
+jako pierwszy argument do <tt>has_many</tt> oraz <tt><em>collection_singular</em></tt> zastępowany jest
+nazwą tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, biorąc pod uwagę deklarację:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1403,16 +1465,17 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <h5 id="_tt_em_collection_em_objects_tt"><tt><em>collection</em>=objects</tt></h5>
 <div class="paragraph"><p>Metoda <tt><em>collection</em>=</tt> usuwa i dodaje odpowiednie obiekty tak, żeby dana kolekcja zawierała tylko podane (wymienione) obiekty.</p></div>
-<h5 id="_tt_em_collection_singular_em_ids_tt"><tt><em>collection\_singular</em>\_ids</tt></h5>
-<div class="paragraph"><p>Metoda <tt><em>collection\_singular</em>_ids</tt> zwraca tablicę identyfikatorów (<em>ids</em>) obiektów w zbiorze</p></div>
+<h5 id="_tt_em_collection_singular_em_ids_tt"><tt><em>collection_singular</em>_ids</tt></h5>
+<div class="paragraph"><p>Metoda <tt><em>collection_singular</em>_ids</tt> zwraca tablicę identyfikatorów obiektów w zbiorze.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@order_ids</span> <span style="color: #990000">=</span> <span style="color: #009900">@customer</span><span style="color: #990000">.</span>order_ids</tt></pre></div></div>
-<h5 id="_tt_em_collection_singular_em_ids_ids_tt"><tt><em>_collection\_singular</em>\_ids=ids</tt></h5>
-<div class="paragraph"><p>Metoda <tt><em>_collection\_singular</em>\_ids=</tt> sprawia, że w zbiorze znajdują się tylko te obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.</p></div>
+<h5 id="_tt_em_collection_singular_em_ids_ids_tt"><tt><em>collection_singular</em>_ids=ids</tt></h5>
+<div class="paragraph"><p>Metoda <tt><em>collection_singular</em>_ids=</tt> sprawia, że w zbiorze znajdują się tylko te
+obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.</p></div>
 <h5 id="_tt_em_collection_em_clear_tt"><tt><em>collection</em>.clear</tt></h5>
 <div class="paragraph"><p>Metoda <tt><em>collection</em>.clear</tt> usuwa wszystkie elementy zbioru. Niszczy ona też wiązane obiekty jeśli zostały związane poprzez <tt>:dependent =&gt; :destroy</tt>, usuwa te wiązane poprzez <tt>:dependent =&gt; :delete_all</tt> lub (w przeciwnym przypadku do dwóch wymienionych) ustawia klucze obce obiektów na <tt>NULL</tt>.</p></div>
 <h5 id="_tt_em_collection_em_empty_tt"><tt><em>collection</em>.empty?</tt></h5>
@@ -1444,7 +1507,9 @@ http://www.gnu.org/software/src-highlite -->
 <h5 id="_tt_em_collection_em_exist_tt"><tt><em>collection</em>.exist?(...)</tt></h5>
 <div class="paragraph"><p>Metoda <tt><em>collection</em>.exist?</tt> sprawdza, czy obiekt spełniający podane warunki istnieje w danej kolekcji. Metoda ta używa takiej samej składni i tych samych opcji, co ActiveRecord::Base.exists?.</p></div>
 <h5 id="_tt_em_collection_em_build_attributes_tt"><tt><em>collection</em>.build(attributes = {}, ...)</tt></h5>
-<div class="paragraph"><p>Metoda <tt><em>collection</em>.build</tt> zwraca jeden lub więcej nowych obiektów wiązanego typu. Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, ale powiązane obiekty <em>nie</em> będą zapisane.</p></div>
+<div class="paragraph"><p>Metoda <tt><em>collection</em>.build</tt> zwraca jeden lub więcej nowych obiektów wiązanego typu.
+Obiekty te będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich
+klucz obcy zostanie stworzone, ale powiązane obiekty <em>nie będą zapisane</em>.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1452,7 +1517,10 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@order</span> <span style="color: #990000">=</span> <span style="color: #009900">@customer</span><span style="color: #990000">.</span>orders<span style="color: #990000">.</span>build<span style="color: #990000">(</span><span style="color: #FF0000">{</span><span style="color: #990000">:</span>order_date <span style="color: #990000">=&gt;</span> Time<span style="color: #990000">.</span>now<span style="color: #990000">,</span> <span style="color: #990000">:</span>order_number <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"A12345"</span><span style="color: #FF0000">}</span><span style="color: #990000">)</span></tt></pre></div></div>
 <h5 id="_tt_em_collection_em_create_attributes_tt"><tt><em>collection</em>.create(attributes = {})</tt></h5>
-<div class="paragraph"><p>Metoda <tt><em>collection</em>.create</tt> zwraca nowy obiekt wiązanego typu. Te obiekty będą konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie stworzone, a powiązane obiekty _zostaną_ zapisane (zakładając że przejdą przez wszystkie walidacje)</p></div>
+<div class="paragraph"><p>Metoda <tt><em>collection</em>.create</tt> zwraca nowy obiekt wiązanego typu. Te obiekty będą
+konstruowane na podstawie podanych atrybutów. Połączenie poprzez ich klucz obcy zostanie
+stworzone, a powiązane obiekty <em>zostaną zapisane</em> (zakładając że przejdą przez wszystkie
+walidacje)</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1580,7 +1648,10 @@ http://www.gnu.org/software/src-highlite -->
 <h5 id="_tt_as_tt_2"><tt>:as</tt></h5>
 <div class="paragraph"><p>Użycie opcji <tt>:as</tt> wskazuje, że mamy do czynienia z asocjacją polimorficzną. Polimorficzne asocjacje zostały omówione we wcześniejszej części podręcznika.</p></div>
 <h5 id="_tt_class_name_tt_3"><tt>:class_name</tt></h5>
-<div class="paragraph"><p>Jeśli nazwa wiązanego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji <tt>:class-name</tt>, by dostarczyć własną nazwę modelu. Na przykład jeśli klient ma wiele zamówień, ale aktualna nazwa modelu zawierającego zamówienia to "Transaction", możesz to ustawić w ten sposób:</p></div>
+<div class="paragraph"><p>Jeśli nazwa wiązanego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć
+opcji <tt>:class_name</tt>, by dostarczyć własną nazwę modelu. Na przykład jeśli klient ma
+wiele zamówień, ale aktualna nazwa modelu zawierającego zamówienia to "Transaction",
+możesz to ustawić w ten sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1608,7 +1679,11 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> Customer <span style="color: #990000">&lt;</span> ActiveRecord<span style="color: #990000">::</span>Base
   has_many <span style="color: #990000">:</span>confirmed_orders<span style="color: #990000">,</span> <span style="color: #990000">:</span>class_name <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"Order"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>conditions <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">{</span> <span style="color: #990000">:</span>confirmed <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span> <span style="color: #FF0000">}</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Jeżeli użyjesz opcji <tt>:conditions</tt> (w notacji z hashem), tworzenie rekordów przez tą asocjację zostanie zautomatyzowane według zawartości hasha. W tym przypadku, używając <tt>@customer.confirmed_orders.create</tt> albo <tt>@customer.confirmed_orders.build</tt>, tworzy się zamówienia tam, gdzie kolumna confirmed ma wartość <tt>true</tt>.</p></div>
+<div class="paragraph"><p>Jeżeli użyjesz opcji <tt>:conditions</tt> (w notacji z hashem), tworzenie rekordów
+przez tą asocjację zostanie zautomatyzowane według zawartości hasha. W tym
+przypadku, używając <tt>@customer.confirmed_orders.create</tt> albo
+<tt>@customer.confirmed_orders.build</tt>, tworzy się zamówienia tam, gdzie kolumna
+<tt>confirmed</tt> ma wartość <tt>true</tt>.</p></div>
 <h5 id="_tt_counter_sql_tt"><tt>:counter_sql</tt></h5>
 <div class="paragraph"><p>Zwykle Railsy automatycznie tworzą odpowiednie zapytanie SQL do liczenia uczestników asocjacji. Z opcją <tt>:counter_sql</tt> możesz zdefiniować własne zapytanie sql do policzenia ich.</p></div>
 <div class="admonitionblock">
@@ -1616,7 +1691,9 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Jeśli określisz <tt>:finder_sql+l, ale nie stworzysz</tt>:counter_sql+ , wtedy funkcja licząca sql <tt>SELECT COUNT(*) FROM</tt> zostanie zastąpiona klauzulą <tt>SELECT ... FROM</tt>, wykorzystującą deklaracje z <tt>:finder_sql</tt>.</td>
+<td class="content">Jeśli określisz <tt>:finder_sql</tt>, ale nie stworzysz <tt>:counter_sql</tt> , wtedy funkcja
+licząca sql <tt>SELECT COUNT(*) FROM</tt> zostanie zastąpiona klauzulą <tt>SELECT ... FROM</tt>,
+wykorzystującą deklaracje z <tt>:finder_sql</tt>.</td>
 </tr></table>
 </div>
 <h5 id="_tt_dependent_tt_3"><tt>:dependent</tt></h5>
@@ -1630,11 +1707,12 @@ http://www.gnu.org/software/src-highlite -->
 </tr></table>
 </div>
 <h5 id="_tt_extend_tt"><tt>:extend</tt></h5>
-<div class="paragraph"><p>Opcja <tt>:extend</tt> sprawia, że nazwany moduł rozszerza proxy asocjacji. Rozszerzenia asocjacji są opisane dalej w tym podręczniku.</p></div>
+<div class="paragraph"><p>Opcja <tt>:extend</tt> sprawia, że wskazany moduł rozszerza proxy asocjacji. Rozszerzenia
+asocjacji są opisane dalej w tym podręczniku.</p></div>
 <h5 id="_tt_finder_sql_tt"><tt>:finder_sql</tt></h5>
 <div class="paragraph"><p>Zwykle Railsy automatycznie tworzą odpowiednie zapytanie SQL do pobrania <em>uczestników</em> asocjacji. Z opcją <tt>:finder_sql</tt> możesz zdefiniować takie zapytanie samodzielnie. Jeśli pobieranie obiektów wymaga wielu skomplikowanych operacji na wielu tabelach, może to być konieczne.</p></div>
 <h5 id="_tt_foreign_key_tt_3"><tt>:foreign_key</tt></h5>
-<div class="paragraph"><p>Zgodnie z konwencją, Railsy "domyślają się", że kolumna używana do przechowywania klucza obcego w innym modelu to nazwa pierwszego modelu z przyrostkiem <tt>_id</tt>. Opcja F+:foreign_key+ umożliwia ustawienie nazwy klucza obcego bezpośrednio:</p></div>
+<div class="paragraph"><p>Zgodnie z konwencją, Railsy "domyślają się", że kolumna używana do przechowywania klucza obcego w innym modelu to nazwa pierwszego modelu z przyrostkiem <tt>_id</tt>. Opcja <tt>:foreign_key</tt> umożliwia ustawienie nazwy klucza obcego bezpośrednio:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1652,7 +1730,7 @@ http://www.gnu.org/software/src-highlite -->
 </tr></table>
 </div>
 <h5 id="_tt_group_tt"><tt>:group</tt></h5>
-<div class="paragraph"><p>Opcja <tt>:group</tt> dostarcza nazwę atrybutu według której wyniki mają być pogrupowane, W SQL użyłbyś klauzuli <tt>GROUP BY</tt>.</p></div>
+<div class="paragraph"><p>Opcja <tt>:group</tt> dostarcza nazwę atrybutu według której wyniki mają być pogrupowane. W SQL użyłbyś klauzuli <tt>GROUP BY</tt>.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1717,14 +1795,18 @@ http://www.gnu.org/software/src-highlite -->
   has_many <span style="color: #990000">:</span>orders<span style="color: #990000">,</span> <span style="color: #990000">:</span>order <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"date_confirmed DESC"</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h5 id="_tt_primary_key_tt_2"><tt>:primary_key</tt></h5>
-<div class="paragraph"><p>Zgodnie zkonwencją Railsy "domyślają się" że kolumna z kluczem podstawowym w modelu to "id". Możesz to zmienić i samodzielnie okreslić klucz postawowy dzieki opcji <tt>:primary_key</tt></p></div>
+<div class="paragraph"><p>Zgodnie z konwencją Railsy "domyślają się" że kolumna z kluczem podstawowym w modelu to
+"id". Możesz to zmienić i samodzielnie określić klucz podstawowy dzięki opcji <tt>:primary_key</tt></p></div>
 <h5 id="_tt_readonly_tt_3"><tt>:readonly</tt></h5>
 <div class="paragraph"><p>Jeśli ustawisz <tt>true</tt> dla opcji <tt>:readonly</tt>, asocjowany obiekt będzie tylko do odczytu, gdy wywoływana jest asocjacja.</p></div>
-<h5 id="_tt_select_tt_2"><tt>:select</tt></h5>
-<div class="paragraph"><p>Użyj opcji : select by zastąpić klauzulę SQL <tt>SELECT</tt>, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny.</p></div>
+<h5 id="_tt_select_tt_3"><tt>:select</tt></h5>
+<div class="paragraph"><p>Użyj opcji <tt>:select</tt> by zastąpić klauzulę SQL <tt>SELECT</tt>, która służy do wyszukiwania
+danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny.</p></div>
 <div class="paragraph"><p>Jeśli określisz opcję <tt>:select</tt>, musisz być pewien, że zawarłeś w nim kolumnę klucza podstawowego (lub klucza obcego) asocjowanego modelu. Jeśli tego nie zrobisz, możesz spowodować błąd Railsów.</p></div>
 <h5 id="_tt_source_tt_2"><tt>:source</tt></h5>
-<div class="paragraph"><p>Opcja source określa źródło asocjacji dla asocjacji typu  <tt>has_many :through</tt>. Tylko wtedy potrzebujesz korzystać z tej opcji, kiedy nazwa źródła asocjacji nie może być automatycznie wygenerowana (stworzona) z nazwy asocjacji.</p></div>
+<div class="paragraph"><p>Opcja <tt>:source</tt> określa źródło asocjacji dla asocjacji typu  <tt>has_many :through</tt>. Tylko
+wtedy potrzebujesz korzystać z tej opcji, kiedy nazwa źródła asocjacji nie może być
+automatycznie wygenerowana (stworzona) z nazwy asocjacji.</p></div>
 <h5 id="_tt_source_type_tt_2"><tt>:source_type</tt></h5>
 <div class="paragraph"><p>Opcja <tt>:source_type</tt> określa typ źródła asocjacji dla asocjacji <tt>has_one :through</tt>; związane jest to z asocjacją polimorficzną.</p></div>
 <h5 id="_tt_through_tt_2"><tt>:through</tt></h5>
@@ -1732,15 +1814,20 @@ http://www.gnu.org/software/src-highlite -->
 <h5 id="_tt_uniq_tt"><tt>:uniq</tt></h5>
 <div class="paragraph"><p>Ustaw opcję  <tt>:uniq =&gt; true</tt> aby usunąć ze zbiorów duplikaty. Ta opcja jest najbardziej użyteczna w połączeniu z opcją <tt>:through</tt>.</p></div>
 <h5 id="_tt_validate_tt_3"><tt>:validate</tt></h5>
-<div class="paragraph"><p>Kiedy ustawisz na <tt>false</tt> opcję <tt>:validate</tt>, wiązane obiekty nie będą nidy walidowane, kiedy będziesz zapisywać obiekt. Domyślne ustawienie to <tt>true</tt>: wiązane obiekty są walidowane kiedy je zapisujesz.</p></div>
+<div class="paragraph"><p>Kiedy ustawisz na <tt>false</tt> opcję <tt>:validate</tt>, wiązane obiekty nie będą nigdy walidowane,
+kiedy będziesz zapisywać obiekt. Domyślne ustawienie to <tt>true</tt>: wiązane obiekty są
+walidowane kiedy je zapisujesz.</p></div>
 <h4 id="_kiedy_obiekty_s_zapisywane_3">4.3.3. Kiedy obiekty są zapisywane?</h4>
-<div class="paragraph"><p>Kiedy przypisujesz obiekt do asocjacji <tt>has_many</tt> , obiekt jest automatycznie zapisywani (żeby zaktualizować jego klucz obcy). Jeśli wiążesz wiele obiektów wjednym zapytanie, wszystkie zostaną zapisane.</p></div>
-<div class="paragraph"><p>Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz przypisania zwróci false, a samo przypisanie jest anulowane.</p></div>
+<div class="paragraph"><p>Kiedy przypisujesz obiekt do asocjacji <tt>has_many</tt>, obiekt jest automatycznie zapisywani
+(żeby zaktualizować jego klucz obcy). Jeśli wiążesz wiele obiektów w jednym
+zapytaniu, wszystkie zostaną zapisane.</p></div>
+<div class="paragraph"><p>Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz
+przypisania zwróci <tt>false</tt>, a samo przypisanie jest anulowane.</p></div>
 <div class="paragraph"><p>Jeśli obiekt-rodzic (ten, w którym jest deklaracja <tt>has_many</tt>) nie został zapisany (czyli <tt>new_record?</tt> zwróci <tt>true</tt>), wtedy dodane obiekty-dzieci również nie zostaną zapisane. Wszyscy niezapisani uczestnicy asocjacji będą automatycznie zapisani, kiedy rodzic zostanie zapisany.</p></div>
 <div class="paragraph"><p>Jeśli chcesz przypisać obiekt do asocjacji <tt>has_many</tt> bez jego zapisywania, użyj metody <tt><em>collection</em>.build</tt></p></div>
 <h3 id="_asocjacja_tt_has_and_belongs_to_many_tt_2">4.4. Asocjacja <tt>has_and_belongs_to_many</tt></h3>
 <div class="paragraph"><p>Asocjacja <tt>has_and_belongs_to_many</tt> tworzy relację wiele-do-wiele z innym modelem. W języku baz danych wiąże się się dwie klasy poprzez załączenie pośredniej tabeli, która zawiera klucze obce odnoszące się do każdej z klas.</p></div>
-<h4 id="_methods_added">4.4.1. Methods Added</h4>
+<h4 id="_dodane_metody_2">4.4.1. Dodane metody</h4>
 <div class="paragraph"><p>Kiedy zadeklarujesz asocjację <tt>has_and_belongs_to_many</tt>, zyskujesz automatycznie 13 metod  powiązanych z tą asocjacją:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -1765,12 +1852,12 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 <li>
 <p>
-<tt><em>collection\_singular</em>\_ids</tt>
+<tt><em>collection_singular</em>_ids</tt>
 </p>
 </li>
 <li>
 <p>
-<tt><em>collection\_singular</em>\_ids=ids</tt>
+<tt><em>collection_singular</em>_ids=ids</tt>
 </p>
 </li>
 <li>
@@ -1809,7 +1896,9 @@ http://www.gnu.org/software/src-highlite -->
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>We wszystkich wymienionych metodach  <tt><em>collection</em></tt> zastępuje się symbolem przekazanym jako pierwszy argument do has_many, a także <tt><em>collection</em>\_singular</tt> zastępuje się nazwą tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, w takiej deklaracji:</p></div>
+<div class="paragraph"><p>We wszystkich wymienionych metodach  <tt><em>collection</em></tt> zastępuje się symbolem przekazanym
+jako pierwszy argument do has_many, a także <tt><em>collection_singular</em></tt> zastępuje się nazwą
+tegoż symbolu w liczbie pojedynczej (w języku angielskim). Na przykład, w takiej deklaracji:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1838,7 +1927,10 @@ assemblies<span style="color: #990000">.</span>exist?<span style="color: #990000
 assemblies<span style="color: #990000">.</span>build<span style="color: #990000">(</span>attributes <span style="color: #990000">=</span> <span style="color: #FF0000">{}</span><span style="color: #990000">,</span> <span style="color: #990000">...)</span>
 assemblies<span style="color: #990000">.</span>create<span style="color: #990000">(</span>attributes <span style="color: #990000">=</span> <span style="color: #FF0000">{}</span><span style="color: #990000">)</span></tt></pre></div></div>
 <h5 id="_metody_dla_dodatkowych_kolumn">Metody dla dodatkowych kolumn</h5>
-<div class="paragraph"><p>Jeżeli dołączana do asocjacji <tt>has_and_belongs_to_many</tt> posiada dodatkowe kolumny poza dwoma kluczami obcymi, kolumny te powinny zostać dodane jako atrybuty do rekordów pobieranych za pomocą tej asocjacji. Rekordy zwrócone z dodatkowymi atrybutami będą zawsze tylko do odczytu, ponieważ Railsy nie potrafią zapisywać zmian dla tych atrybutów</p></div>
+<div class="paragraph"><p>Jeżeli tabela dołączana do asocjacji <tt>has_and_belongs_to_many</tt> posiada dodatkowe kolumny
+poza dwoma kluczami obcymi, kolumny te powinny zostać dodane jako atrybuty do rekordów
+pobieranych za pomocą tej asocjacji. Rekordy zwrócone z dodatkowymi atrybutami będą
+zawsze tylko do odczytu, ponieważ Railsy nie potrafią zapisywać zmian dla tych atrybutów</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -1881,17 +1973,17 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@part</span><span style="color: #990000">.</span>assemblies<span style="color: #990000">.</span>delete<span style="color: #990000">(</span><span style="color: #009900">@assembly1</span><span style="color: #990000">)</span></tt></pre></div></div>
 <h5 id="_tt_em_collection_em_objects_tt_2"><tt><em>collection</em>=objects</tt></h5>
 <div class="paragraph"><p>Metoda <tt><em>collection</em>=</tt> usuwa i dodaje odpowiednie obiekty tak, żeby dana kolekcja zawierała tylko podane (wymienione) obiekty.</p></div>
-<h5 id="_tt_em_collection_singular_em_ids_tt_2"><tt><em>collection\_singular</em>\_ids</tt></h5>
-<div class="paragraph"><p>#  Zwraca tablicę zawierającą identyfikatory wiązanych obiektów.</p></div>
-<div class="paragraph"><p><tt><em>collection\_singular</em>_ids</tt> zwraca tablicę identyfikatorów (<em>ids</em>) obiektów w zbiorze</p></div>
+<h5 id="_tt_em_collection_singular_em_ids_tt_2"><tt><em>collection_singular</em>_ids</tt></h5>
+<div class="paragraph"><p>Metoda <tt><em>collection_singular</em>_ids</tt> zwraca tablicę identyfikatorów obiektów w zbiorze.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@assembly_ids</span> <span style="color: #990000">=</span> <span style="color: #009900">@part</span><span style="color: #990000">.</span>assembly_ids</tt></pre></div></div>
-<h5 id="_tt_em_collection_singular_em_ids_ids_tt_2"><tt><em>collection\_singular</em>\_ids=ids</tt></h5>
-<div class="paragraph"><p>Metoda <tt><em>_collection\_singular</em>\_ids=</tt> sprawia, że w zbiorze znajdują się tylko te obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.</p></div>
+<h5 id="_tt_em_collection_singular_em_ids_ids_tt_2"><tt><em>collection_singular</em>_ids=ids</tt></h5>
+<div class="paragraph"><p>Metoda <tt><em>collection_singular</em>_ids=</tt> sprawia, że w zbiorze znajdują się tylko te
+obiekty, których wartość podstawowego klucza równa jest wartościom dostarczonym do metody.</p></div>
 <h5 id="_tt_em_collection_em_clear_tt_2"><tt><em>collection</em>.clear</tt></h5>
 <div class="paragraph"><p>Metoda <tt><em>collection</em>.clear</tt> usuwa wszystkie elementy zbioru poprzez usunięcie wierszy z dołączanej tabeli. Nie niszczy to żadnych wiązanych obiektów.</p></div>
 <h5 id="_tt_em_collection_em_empty_tt_2"><tt><em>collection</em>.empty?</tt></h5>
@@ -1931,7 +2023,9 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@assembly</span> <span style="color: #990000">=</span> <span style="color: #009900">@part</span><span style="color: #990000">.</span>assemblies<span style="color: #990000">.</span>build<span style="color: #990000">(</span><span style="color: #FF0000">{</span><span style="color: #990000">:</span>assembly_name <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"Transmission housing"</span><span style="color: #FF0000">}</span><span style="color: #990000">)</span></tt></pre></div></div>
 <h5 id="_tt_em_collection_em_create_attributes_tt_2"><tt><em>collection</em>.create(attributes = {})</tt></h5>
-<div class="paragraph"><p>Metoda collection.create zwraca nowy obiekt wiązanego typu. Ten obiekt będzie konstruowany z ustawionych atrybutów. Powiązanie z pośrednią tabelą będzie stworzone, a wiązany obiekt <em>zostanie</em> zapisany (jeśli przejdzie pomyślnie przez walidację).</p></div>
+<div class="paragraph"><p>Metoda <tt><em>collection</em>.create</tt> zwraca nowy obiekt wiązanego typu. Ten obiekt będzie
+konstruowany z ustawionych atrybutów. Powiązanie z pośrednią tabelą będzie stworzone, a
+wiązany obiekt <em>zostanie</em> zapisany (jeśli przejdzie pomyślnie przez walidację).</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -2066,7 +2160,10 @@ http://www.gnu.org/software/src-highlite -->
     <span style="color: #990000">:</span>foreign_key <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"this_user_id"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>association_foreign_key <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"other_user_id"</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h5 id="_tt_class_name_tt_4"><tt>:class_name</tt></h5>
-<div class="paragraph"><p>Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji <tt>:class-name</tt>, by dostarczyć nazwę modelu. Na przykład jeśli <em>part</em> (część) ma wiele <em>assemblies</em> (zadań), ale aktualna nazwa zawierająca <em>assemblies</em> to "Gadget", możesz to ustawić w ten sposób:</p></div>
+<div class="paragraph"><p>Jeśli nazwa innego modelu nie może zostać utworzona z nazwy asocjacji, możesz użyć opcji
+<tt>:class_name</tt>, by dostarczyć nazwę modelu. Na przykład jeśli <em>part</em> (część) ma wiele
+<em>assemblies</em> (zadań), ale aktualna nazwa zawierająca <em>assemblies</em> to "Gadget", możesz to
+ustawić w ten sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -2162,20 +2259,26 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h5 id="_tt_readonly_tt_4"><tt>:readonly</tt></h5>
 <div class="paragraph"><p>Jeśli ustawisz <tt>true</tt> dla opcji <tt>:readonly</tt>, asocjowane obiekty będą tylko do odczytu, gdy wywoływana jest asocjacja.</p></div>
-<h5 id="_tt_select_tt_3"><tt>:select</tt></h5>
-<div class="paragraph"><p>Użyj opcji : select by zastąpić klauzulę SQL <tt>SELECT</tt>, która służy do wyszukiwania danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny</p></div>
+<h5 id="_tt_select_tt_4"><tt>:select</tt></h5>
+<div class="paragraph"><p>Użyj opcji <tt>:select</tt> by zastąpić klauzulę SQL <tt>SELECT</tt>, która służy do wyszukiwania
+danych w wiązanym obiekcie. Domyślnie Railsy pobierają wszystkie kolumny</p></div>
 <h5 id="_tt_uniq_tt_2"><tt>:uniq</tt></h5>
 <div class="paragraph"><p>Ustaw opcję <tt>:uniq =&gt; true</tt> aby usunąć ze zbiorów duplikaty.</p></div>
 <h5 id="_tt_validate_tt_4"><tt>:validate</tt></h5>
-<div class="paragraph"><p>Kiedy ustawisz na <tt>false</tt> opcję <tt>:validate</tt>, wiązane obiekty nie będą nidy walidowane, kiedy będziesz zapisywać obiekt. Domyślne ustawienie to <tt>true</tt>: wiązane obiekty są walidowane kiedy je zapisujesz.</p></div>
+<div class="paragraph"><p>Kiedy ustawisz na <tt>false</tt> opcję <tt>:validate</tt>, wiązane obiekty nie będą nigdy walidowane,
+kiedy będziesz zapisywać obiekt. Domyślne ustawienie to <tt>true</tt>: wiązane obiekty są walidowane kiedy je zapisujesz.</p></div>
 <h4 id="_kiedy_obiekty_s_zapisywane_4">4.4.3. Kiedy obiekty są zapisywane?</h4>
 <div class="paragraph"><p>Kiedy przypisujesz obiekt do asocjacji <tt>has_and_belongs_to_many</tt>, obiekt jest automatycznie zapisywany (żeby zaktualizować tabelę wiążącą). Jeśli wiążesz wiele obiektów w jednym zapytanie, wszystkie zostaną zapisane.</p></div>
 <div class="paragraph"><p>Jeśli którykolwiek z tych zapisów nie powiedzie się z winy błędu walidacji, wtedy rozkaz przypisania zwróci <tt>false</tt>, a samo przypisanie będzie anulowane.</p></div>
 <div class="paragraph"><p>Jeśli obiekt-rodzic (ten, w którym jest deklaracja <tt>has_and_belongs_to_many</tt>) nie został zapisany (czyli <tt>new_record?</tt> zwróci <tt>true</tt>), wtedy dodane obiekty-dzieci również nie zostaną zapisane. Wszyscy niezapisani uczestnicy asocjacji będą automatycznie zapisani, kiedy rodzic zostanie zapisany.</p></div>
 <div class="paragraph"><p>Jeśli chcesz przypisać obiekt do asocjacji <tt>has_many</tt> bez jego zapisywania, użyj metody <tt><em>collection</em>.build</tt>.</p></div>
-<h3 id="_callback_asocjacji">4.5. Callback asocjacji</h3>
-<div class="paragraph"><p>Funkcje z callback-iem "zaczepiają się" o cykl życia obiektów Active Record, pozwalając na pracę z tymi obiektami w różnych momentach. Na przykład, możesz użyć callback-a <tt>:before_save</tt> i sprawić, by coś się stało tuż przed tym, kiedy obiekt zostanie zapisany.</p></div>
-<div class="paragraph"><p>Callback-i w asocjacjach podobne są do zwykłych callback-ów, z tym, że (te pierwsze - przyp.tłum) uruchamiane są przez zdarzenia w cyklu życia zbioru. W asocjacjach dostępne są cztery callback-i:</p></div>
+<h3 id="_callbacki_asocjacji">4.5. Callbacki asocjacji</h3>
+<div class="paragraph"><p>Funkcje z callbackiem "zaczepiają się" o cykl życia obiektów Active Record, pozwalając
+na pracę z tymi obiektami w różnych momentach. Na przykład, możesz użyć callbacka
+<tt>:before_save</tt> i sprawić, by coś się stało tuż przed tym, kiedy obiekt zostanie zapisany.</p></div>
+<div class="paragraph"><p>Callbacki w asocjacjach podobne są do zwykłych callbacków, z tym, że (te pierwsze -
+przyp.tłum) uruchamiane są przez zdarzenia w cyklu życia zbioru. W asocjacjach dostępne
+są cztery callbacki:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -2211,7 +2314,7 @@ http://www.gnu.org/software/src-highlite -->
     <span style="color: #990000">...</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Railsy przekazują do callback-a obiekt, który ma być dodany lub wymazany.</p></div>
+<div class="paragraph"><p>Railsy przekazują do callbacka obiekt, który ma być dodany lub wymazany.</p></div>
 <div class="paragraph"><p>Możesz użyć stosu [<em>stack</em>] wywołań, które będą traktowane jak pojedynczy callback, przekazując wywołania do w tablicy:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -2229,9 +2332,12 @@ http://www.gnu.org/software/src-highlite -->
     <span style="color: #990000">...</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Jeśli callback <tt>before_add</tt> "wyrzuci" wyjątek, obiekt nie może zostać dodany do zbioru. Podobnie jeśli <tt>before_remove</tt> "wyrzuci" wyjątek, nie można obiektu usunąć ze zbioru.</p></div>
+<div class="paragraph"><p>Jeśli callback <tt>before_add</tt> rzuci wyjątek, obiekt nie może zostać dodany do zbioru.
+Podobnie jeśli <tt>before_remove</tt> rzuci wyjątek, nie można obiektu usunąć ze zbioru.</p></div>
 <h3 id="_rozszerzenia_asocjacji">4.6. Rozszerzenia asocjacji</h3>
-<div class="paragraph"><p>Nie jesteś ograniczony do funkcjonalności, którą Railsy automatycznie wbudowuje w obiekty proxy. Możesz rozszerzać te obiekty używając anonimowych modułów, dodawanie nowych finderów, kreatorów i innych metod. Na przykład:</p></div>
+<div class="paragraph"><p>Nie jesteś ograniczony do funkcjonalności, którą Railsy automatycznie wbudowuje w
+obiekty proxy asocjacji. Możesz rozszerzać te obiekty używając anonimowych modułów, dodawanie
+nowych finderów, kreatorów i innych metod. Na przykład:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -2272,7 +2378,8 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> Customer <span style="color: #990000">&lt;</span> ActiveRecord<span style="color: #990000">::</span>Base
   has_many <span style="color: #990000">:</span>orders<span style="color: #990000">,</span> <span style="color: #990000">:</span>extend <span style="color: #990000">=&gt;</span> <span style="color: #990000">[</span>FindRecentExtension<span style="color: #990000">,</span> FindActiveExtension<span style="color: #990000">]</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Rozszerzenia mogą odnosić się do wnętrz asocjacji proxy, dzięki użyciu tych trzech dodatków [<em>accessors</em>]:</p></div>
+<div class="paragraph"><p>Rozszerzenia mogą pobierać informacji o asocjacji, dzięki użyciu
+trzech akcesorów:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -2281,12 +2388,13 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 <li>
 <p>
-<tt>proxy_reflection</tt> zwraca ‘odbicie’ obiektu opisywanego przez asocjację.
+<tt>proxy_reflection</tt> zwraca "odbicie" obiektu opisywanego przez asocjację.
 </p>
 </li>
 <li>
 <p>
-<tt>proxy_target</tt> zwraca powiązany element dla <tt>belongs_to</tt> lub <tt>has_one</tt> lub zbiór wiązanych obiektów dla <tt>has_many</tt> lub <tt>has_and_belongs_to_many</tt>.
+<tt>proxy_target</tt> zwraca powiązany element dla <tt>belongs_to</tt> lub <tt>has_one</tt> lub zbiór
+  wiązanych obiektów dla <tt>has_many</tt> lub <tt>has_and_belongs_to_many</tt>.
 </p>
 </li>
 </ul></div>
