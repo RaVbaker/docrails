@@ -1,10 +1,11 @@
-== Writing a Migration ==
+== Pisanie migracji ==
 
-Once you have created your migration using one of the generators it's time to get to work!
 
-=== Creating a table ===
+Jeśli już utworzyłeś migrację przy pomocy jednego z generatorów, najwyższy czas zabrać się do pracy!
 
-`create_table` will be one of your workhorses. A typical use would be
+=== Tworzenie tabeli ===
+
+`create_table` jest jedną z najbardziej podstawowych komend. Jej typowe użycie ilustruje przykład:
 
 [source, ruby]
 ---------------------
@@ -12,9 +13,10 @@ create_table :products do |t|
   t.string :name
 end
 ---------------------
-which creates a `products` table with a column called `name` (and as discussed below, an implicit `id` column).
 
-The object yielded to the block allows you create columns on the table. There are two ways of doing this. The first looks like
+Przykład ten generuje tabelę `products` z kolumną o nazwie `name` (i, jak to omówimy w dalszej części, domyślną kolumną `id`).
+
+Obiekt dołączony do bloku pozwala na tworzenie kolumn tabeli. Są na to dwa sposoby. Pierwszy z nich wygląda tak:
 
 [source, ruby]
 ---------------------
@@ -23,7 +25,7 @@ create_table :products do |t|
 end
 ---------------------
 
-the second form, the so called "sexy" migrations, drops the somewhat redundant column method. Instead, the `string`, `integer` etc. methods create a column of that type. Subsequent parameters are identical.
+Drugi sposób, tzw. "sexy" migracje, nie korzysta z nadmiarowej metody `column`. Zamiast niej wykorzystać można metody `string`, `integer` itp., tworzą kolumny odpowiednich typów. Pozostałe parametry są identyczne do parametrów metody `column`.
 
 [source, ruby]
 ---------------------
@@ -32,7 +34,7 @@ create_table :products do |t|
 end
 ---------------------
 
-By default `create_table` will create a primary key called `id`. You can change the name of the primary key with the `:primary_key` option (don't forget to update the corresponding model) or if you don't want a primary key at all (for example for a HABTM join table) you can pass `:id => false`. If you need to pass database specific options you can place an sql fragment in the `:options` option. For example
+Domyślnie `create_table` stworzy klucz główny nazwany `id`. Możesz zmienić jego nazwę korzystając z opcji `:primiary_key` (nie zapomnij poprawić powiązanego z tabelą modelu) lub, jeśli nie chcesz w ogóle klucza głównego (np. dla tabeli HABTM, realizującej relację typu wiele-do-wielu) możesz dodać `id => false`. Jeśli chcesz dodać opcję specyficzną dla konkretnego typu bazy danych, możesz umieścić fragment kody SQL wewnątrz parametru `:options`. Na przykład:
 
 [source, ruby]
 ---------------------
@@ -40,12 +42,11 @@ create_table :products, :options => "ENGINE=BLACKHOLE" do |t|
   t.string :name, :null => false
 end
 ---------------------
-Will append `ENGINE=BLACKHOLE` to the sql used to create the table (when using MySQL the default is "ENGINE=InnoDB").
+Opcja ta doda `ENGINE=BLACKHOLE` do kodu SQL użytego do tworzenia tabeli (dla MySQL domyślny parametr to "ENGINE=InnoDB").
 
-The types Active Record supports are `:primary_key`, `:string`, `:text`, `:integer`, `:float`, `:decimal`, `:datetime`, `:timestamp`, `:time`, `:date`, `:binary`, `:boolean`.
+Typy obsługiwane przez moduł Active Record to `:primary_key`, `:string`, `:text`, `:integer`, `:float`, `:decimal`, `:datetime`, `:timestamp`, `:time`, `:date`, `:binary`, `:boolean`.
 
-These will be mapped onto an appropriate underlying database type, for example with MySQL `:string` is mapped to `VARCHAR(255)`. You can create columns of 
-types not supported by Active Record when using the non sexy syntax, for example
+Zostaną one zrealizowane poprzez odpowiednie dla bazy danych typy danych, np. w MySQL `:string` zostanie przetłumaczony na `VARCHAR(255)`. Możesz tworzyć kolumny innych niż wymienione typów pod warunkiem, że nie używasz "sexy" składni, przykładowo:
 
 [source, ruby]
 ---------------------
@@ -53,11 +54,12 @@ create_table :products do |t|
   t.column :name, 'polygon', :null => false
 end
 ---------------------
-This may however hinder portability to other databases.
 
-=== Changing tables ===
+Może to jednak uniemożliwić poprawne przeniesienie migracji na inny typ bazy danych.
 
-`create_table`'s close cousin is `change_table`. Used for changing existing tables, it is used in a similar fashion to `create_table` but the object yielded to the block knows more tricks. For example
+=== Zmienianie tabel ===
+
+Bliskim kuzynem `create_table` jest `change_table`. Komenda ta służy do zmiany istniejących już tabel i używana jest w analogiczny sposób jak `create_table`, posiada jednak o wiele większe możliwości. Przykładowo:
 
 [source, ruby]
 ---------------------
@@ -68,7 +70,8 @@ change_table :products do |t|
   t.rename :upccode, :upc_code
 end
 ---------------------
-removes the `description` column, creates a `part_number` column and adds an index on it. Finally it renames the `upccode` column.   This is the same as doing
+
+Ta komenda usuwa kolumnę `description`, dodaje kolumnę `part_number` i tworzy na niej indeks. Ostatnia metoda powoduje zmianę nazwy kolumny `upccode` na `upc_code`. Ten sam efekt można osiągnąć również następującym sposobem:
 
 [source, ruby]
 ---------------------
@@ -79,7 +82,7 @@ add_index :products, :part_number
 rename_column :products, :upccode, :upc_code
 ---------------------
 
-You don't have to keep repeating the table name and it groups all the statements related to modifying one particular table. The individual transformation names are also shorter, for example `remove_column` becomes just `remove` and `add_index` becomes just `index`.
+Stosując pierwszą składnię nie musisz powtarzać przy każdej komendzie nazwy tabeli - grupujesz wszystkie wykonane na niej operacje w jedną komendę. Dodatkowo nazwy transformacji są krótsze: `remove_column` zastępuje samo `remove` a `add_index` - po prostu `index`.
 
 === Special helpers ===
 
