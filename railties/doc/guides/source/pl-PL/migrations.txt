@@ -208,6 +208,9 @@ Jak zwykle, wygenerowana migracja jest dopiero punktem startowym Twojej pracy. M
 == Pisanie migracji ==
 
 
+
+
+
 Jeśli już utworzyłeś migrację przy pomocy jednego z generatorów, najwyższy czas zabrać się do pracy!
 
 === Tworzenie tabeli ===
@@ -223,7 +226,7 @@ end
 
 Przykład ten generuje tabelę `products` z kolumną o nazwie `name` (i, jak to omówimy w dalszej części, domyślną kolumną `id`).
 
-Obiekt dołączony do bloku pozwala na tworzenie kolumn tabeli. Są na to dwa sposoby. Pierwszy z nich wygląda tak:
+Obiekt przekazany (yielded) do bloku pozwala na tworzenie kolumn tabeli. Są na to dwa sposoby. Pierwszy z nich wygląda tak:
 
 [source, ruby]
 ---------------------
@@ -266,7 +269,7 @@ Może to jednak uniemożliwić poprawne przeniesienie migracji na inny typ bazy 
 
 === Zmienianie tabel ===
 
-Bliskim kuzynem `create_table` jest `change_table`. Komenda ta służy do zmiany istniejących już tabel i używana jest w analogiczny sposób jak `create_table`, posiada jednak o wiele większe możliwości. Przykładowo:
+Bliskim kuzynem `create_table` jest `change_table`. Komenda ta służy do zmiany istniejących już tabel i używana jest w analogiczny sposób jak `create_table`, jednak w jej wypadku obiekt przekazany do bloku daje o wiele większe możliwości. Przykładowo:
 
 [source, ruby]
 ---------------------
@@ -291,9 +294,9 @@ rename_column :products, :upccode, :upc_code
 
 Stosując pierwszą składnię nie musisz powtarzać przy każdej komendzie nazwy tabeli - grupujesz wszystkie wykonane na niej operacje w jedną komendę. Dodatkowo nazwy transformacji są krótsze: `remove_column` zastępuje samo `remove` a `add_index` - po prostu `index`.
 
-=== Special helpers ===
+=== Specjalne helpery (helpers) ===
 
-Active Record provides some shortcuts for common functionality. It is for example very common to add both the `created_at` and `updated_at` columns and so there is a method that does exactly that:
+Moduł Active Record zapewnia kilka skrótów do najczęściej używanych opcji. Bardzo częste jest na przykład dodawanie kolumn `created_at` i `updated_at`, więc stworzono specjalną metodę, która to ułatwia:
 
 [source, ruby]
 ---------------------
@@ -301,7 +304,7 @@ create_table :products do |t|
   t.timestamps
 end
 ---------------------
-will create a new products table with those two columns whereas
+Ten zapis spowoduje stworzenie nowej tabeli `products` z oboma wspomnianymi kolumnami, podczas gdy:
 
 [source, ruby]
 ---------------------
@@ -309,9 +312,9 @@ change_table :products do |t|
   t.timestamps
 end
 ---------------------
-adds those columns to an existing table.
+spowoduje dodanie tych kolumn do istniejącej tabeli.
 
-The other helper is called `references` (also available as `belongs_to`). In its simplest form it just adds some readability
+Inny helper nazywa się `references` (można też używać nazwy `belongs_to`). W najprostrzej postaci, poprawia on po prostu czytelność:
 
 [source, ruby]
 ---------------------
@@ -320,7 +323,7 @@ create_table :products do |t|
 end
 ---------------------
 
-will create a `category_id` column of the appropriate type. Note that you pass the model name, not the column name. Active Record adds the `_id` for you. If you have polymorphic belongs_to associations then `references` will add both of the columns required:
+Ten zapis stworzy kolumnę `category_id` odpowiedniego typu. Zwróc uwagę na fakt, że w kodzie podajemy nazwę modelu, a nie kolumny. Moduł Active Record sam dodaje przyrostek `_id`. Jeśli potrzebujesz polimorficznych asocjacji, to `references` doda obie potrzebne kolumny:
 
 [source, ruby]
 ---------------------
@@ -328,17 +331,16 @@ create_table :products do |t|
   t.references :attachment, :polymorphic => {:default => 'Photo'}
 end
 ---------------------
-will add an `attachment_id` column and a string `attachment_type` column with a default value of 'Photo'.
+Ten zapis spowoduje dodanie kolumny `attachment_id` oraz drugiej kolumny `attachment_type` typu string, o domyślnej wartości Photo.
 
 NOTE: The `references` helper does not actually create foreign key constraints for you. You will need to use `execute` for that or a plugin that adds <<foreign_key,foreign key support>>.
 
-If the helpers provided by Active Record aren't enough you can use the `execute` function to execute arbitrary SQL.
+Jeśli helpery udostępniane przez moduł Active Record nie wystarczają do Twoich potrzeb, możesz użyc funkcji `execute` by wywołać kod SQL.
+Aby zapoznać się z detalami i przykładami tworzenia własnych metod polecam dokumentację API, zwłaszcza http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html[ActiveRecord::ConnectionAdapters::SchemaStatements] (opis metod dostępnych w metodach `up` i `down`), http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html[ActiveRecord::ConnectionAdapters::TableDefinition] (metody dostępne na obiekcie przekazanym przy pomocy komendy `create_table`) i http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/Table.html[ActiveRecord::ConnectionAdapters::Table] (metody na obiekcie przekazanym przez `change_table`).
 
-For more details and examples of individual methods check the API documentation, in particular the documentation for http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html[ActiveRecord::ConnectionAdapters::SchemaStatements] (which provides the methods available in the `up` and `down` methods),  http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html[ActiveRecord::ConnectionAdapters::TableDefinition] (which provides the methods available on the object yielded by `create_table`) and http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/Table.html[ActiveRecord::ConnectionAdapters::Table] (which provides the methods available on the object yielded by `change_table`).
+=== Tworzenie metody down ===
 
-=== Writing your down method ===
-
-The `down` method of your migration should revert the transformations done by the `up` method. In other words the database should be unchanged if you do an `up` followed by a `down`. For example if you create a table in the up you should drop it in the `down` method. It is wise to do things in precisely the reverse order to in the `up` method. For example
+Metoda `down` Twojej migracji powinna odwrócić transformacje wywołane przez metodę `up`. Innymi słowy, baza nie powinna ulec zmianie, jeśli wywołamy metodę `up` a po niej metodę 'down`. Na przykład, jeśli w metodzie `up` tworzymy tabelę, to w metodzie `down` powinniśmy ją usunąć. Rozsądnie jest w metodzie 'down' odwoływać wszystkie polecenia w dokładnie odwrotnej kolejności niż zostały one wywołane. Na przykład:
 
 [source, ruby]
 ---------------------
@@ -364,8 +366,7 @@ class ExampleMigration < ActiveRecord::Migration
   end
 end
 ---------------------
-Sometimes your migration will do something which is just plain irreversible, for example it might destroy some data. In cases like those when you can't reverse the migration you can raise IrreversibleMigration from your `down` method. If someone tries to revert your migration an error message will be
-displayed saying that it can't be done.
+Czasem Twoja migracja wykona transformację, która jest nieodwracalna, na przykład usunie jakieś dane. W takim przypadku, możesz wywołać IrreverisbleMigration ze swojej metody `down`. W przypadku próby odwrócenia Twojej migracji wyświetlony zostanie komunikat informujący o braku możliwości cofnięcia migracji.
 
 == Running Migrations ==
 
