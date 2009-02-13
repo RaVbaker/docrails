@@ -207,10 +207,6 @@ Jak zwykle, wygenerowana migracja jest dopiero punktem startowym Twojej pracy. M
 
 == Pisanie migracji ==
 
-
-
-
-
 Jeśli już utworzyłeś migrację przy pomocy jednego z generatorów, najwyższy czas zabrać się do pracy!
 
 === Tworzenie tabeli ===
@@ -368,64 +364,62 @@ end
 ---------------------
 Czasem Twoja migracja wykona transformację, która jest nieodwracalna, na przykład usunie jakieś dane. W takim przypadku, możesz wywołać IrreverisbleMigration ze swojej metody `down`. W przypadku próby odwrócenia Twojej migracji wyświetlony zostanie komunikat informujący o braku możliwości cofnięcia migracji.
 
-== Running Migrations ==
+== Wykonywanie migracji ==
 
-Rails provides a set of rake tasks to work with migrations which boils down to running certain sets of migrations. The very first migration related rake task you use will probably be `db:migrate`. In its most basic form it just runs the `up` method for all the migrations that have not yet been run. If there are no such migrations it exits.
+Railsy zapewniają zestaw zadań Rake służących do działań na migracjach, sprowadzających się do wykonania określonych zestawów migracji. Prawdopodobnie najważniejszym zadaniem rake jest `db:migrate`. W swojej najbardziej podstawowej formie wykonuje ona metodę `up` dla każdej migracji, która nie została jeszcze wywołana. Jeśli nie ma takich migracji, polecenie po prostu kończy swoje działanie.
 
-Note that running the `db:migrate` also invokes the `db:schema:dump` task, which will update your db/schema.rb file to match the structure of your database.
+Warto zauważyć, że wywołanie `db:migrate` powoduje również uruchomienie zadania `db:schema:dump`, które zmienia zawartość pliku `db/schema.rb` tak, by odpowiadał on aktualnej strukturze bazy.
 
-If you specify a target version, Active Record will run the required migrations (up or down) until it has reached the specified version. The
-version is the numerical prefix on the migration's filename. For example to migrate to version 20080906120000 run
+Jeśli sprecyzujesz docelową wersję migracji, moduł Active Record wykona (lub odwoła) migracje wymagane do osiągnięcia żądanej przez Ciebie wersji. Pod pojęciem wersji rozumiemy prefiks nazwy pliku migracji, zawierający stempel czasowy jego utworzenia. Na przykład, aby migrować do wersji 20080906120000, wykonamy polecenie:
 
 ------------------------------------
 rake db:migrate VERSION=20080906120000
 ------------------------------------
 
-If this is greater than the current version (i.e. it is migrating upwards) this will run the `up` method on all migrations up to and including 20080906120000, if migrating downwards this will run the `down` method on all the migrations down to, but not including, 20080906120000.
+Jeśli podana wersja jest późniejsza niż obecna, polecenie spowoduje wywołanie metod `up` kolejnych migracji aż do migracji 20080906120000 włącznie. W przeciwnym wypadku, wszystkie późniejsze niż wskazana migracje zostaną wycofane metodą `down`.
 
-=== Rolling back ===
+=== Powroty ===
 
-A common task is to rollback the last migration, for example if you made a mistake in it and wish to correct it. Rather than tracking down the version number associated with the previous migration you can run
+Częstym zadaniem jest wycofanie ostatniej migracji, na przykład po to, by poprawić znaleziony w niej błąd. Zamiast wpisywać numer poprzedniej wersji, możemy po prostu wycofać ostatnią zmianę poleceniem:
 
 ------------------
 rake db:rollback
 ------------------
 
-This will run the `down` method from the latest migration. If you need to undo several migrations you can provide a `STEP` parameter:
+Wykonana zostanie metoda `down` ostatniej migracji. Jeśli potrzebujesz wycofać więcej migracji, możesz dodać parametr `STEP`:
 
 ------------------
 rake db:rollback STEP=3
 ------------------
 
-will run the `down` method from the last 3 migrations.
+Tym sposobem wykonasz metodę `down` dla trzech ostatnich migracji.
 
-The `db:migrate:redo` task is a shortcut for doing a rollback and then migrating back up again. As with the `db:rollback` task you can use the `STEP` parameter if you need to go more than one version back, for example
+Zadanie `dr:migrate:redo` jest skrótowym zapisem wycofania i ponownego wykonania migracji. Podobnie jak w przypadku `db:rollback`, możesz dodać parametr `STEP` jeśli chcesz powtórzyć więcej niż jedną migrację, np:
 
 ------------------
 rake db:migrate:redo STEP=3
 ------------------
 
-Neither of these Rake tasks do anything you could not do with `db:migrate`, they are simply more convenient since you do not need to explicitly specify the version to migrate to.
+Żadne z powyższych zadań Rake nie wykonuje niczego, czego nie można osiągnąć przy pomocy podstawowego polecenia `db:migrate`. Są to po prostu wygodniejsze sposoby pracy na migracjach, nie wymagają bowiem podawania wprost docelowej wersji migracji.
 
-Lastly, the `db:reset` task will drop the database, recreate it and load the current schema into it.
+Ostatnim poleceniem jest `db:reset`. Służy ono usunięcia całej bazy danych, ponownego jej stworzenia i przywrócenia obecnego schematu.
 
 NOTE: This is not the same as running all the migrations - see the section on <<schema,schema.rb>>.
 
-=== Being Specific ===
+=== Konkretność ===
 
-If you need to run a specific migration up or down the `db:migrate:up` and `db:migrate:down` tasks will do that. Just specify the appropriate version and the corresponding migration will have its `up` or `down` method invoked, for example
+Jeśli chcesz wywołać metodę `up` lub `down` konkretnej migracji, możesz w tym celu użyć komend `db:migrate:up` i `db:migrate:down`. Wystarczy podać dokładną wersję migracji, a jej metoda `up` albo `down` zostanie wykonana. Na przykład
 
 ------------------
 rake db:migrate:up VERSION=20080906120000
 ------------------
 
-will run the `up` method from the 20080906120000 migration. These tasks check whether the migration has already run, so for example `db:migrate:up VERSION=20080906120000` will do nothing if Active Record believes that 20080906120000 has already been run.
+wywoła metodę `up` dla migracji 20080906120000. Zadanie to sprawdza najpierw czy podana migracja została wcześniej wykonana, więc np. komenda 'db:migrate:up VERSION=20080906120000' nie spowoduje żadnych zmian, jeśli moduł Active Record uzna, że ta migracja jest już wywołana.
 
+=== Komunikatywność ===
 
-=== Being talkative ===
+Domyślnie migracja informuje Cię dokładnie o wykonywanej obecnie transformacji oraz o czasie który był potrzebny do wykonania ukończonych zadań. Migracja tworząca tabelę i indeks na niej może wygenerować na przykład taki komunikat:
 
-By default migrations tell you exactly what they're doing and how long it took.
-A migration creating a table and adding an index might produce output like this
 -------------------------
 == 20080906170109 CreateProducts: migrating ===================================
 -- create_table(:products)
@@ -434,13 +428,13 @@ A migration creating a table and adding an index might produce output like this
    -> 0.0026s
 == 20080906170109 CreateProducts: migrated (0.0059s) ==========================
 -------------------------
-Several methods are provided that allow you to control all this:
 
-* `suppress_messages` suppresses any output generated by its block
-* `say` outputs text (the second argument controls whether it is indented or not)
-* `say_with_time` outputs text along with how long it took to run its block. If the block returns an integer it assumes it is the number of rows affected.
+Istnieje kilka metod służących do kontroli komunikatów zwrotnych:
+* `suppress_messages` zawiesza wszystkie komunikaty generowane przez dany blok
+* `say` generuje tekst (drugi parametr służy do określenia czy tekst ma być w nowej linii czy nie)
+* `say_with_time` generuje wskazany tekst oraz czas potrzebny na wykonanie danego bloku. Jeśli blok zwróci liczbę typu integer, metoda traktuje ją jako liczbę wierszy zmodyfikowanych przez ten blok.
 
-For example, this migration
+Na przykład migracja:
 
 [source, ruby]
 ----------------------
@@ -468,7 +462,8 @@ class CreateProducts < ActiveRecord::Migration
 end
 ----------------------
 
-generates the following output
+wygeneruje następujący komunikat:
+
 ----------------------
 == 20080906170109 CreateProducts: migrating ===================================
 -- Created a table
@@ -479,7 +474,7 @@ generates the following output
 == 20080906170109 CreateProducts: migrated (10.0097s) =========================
 ----------------------
 
-If you just want Active Record to shut up then running `rake db:migrate VERBOSE=false` will suppress any output.
+Jeśli chcesz po prostu zupełnie "uciszyć" moduł Active Record, możesz wykorzystać komendę `rake db:migrate VERBOSE=false`.
 
 [[models]]
 == Using Models In Your Migrations ==
