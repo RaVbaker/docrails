@@ -1,0 +1,589 @@
+Migracje
+==========
+
+Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś potem samemu zatroszczyć się o to, by poinformować inny projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia 'rake db:migrate'. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
+
+Migracje pozwalają na opisanie zmian bazy danych w Rubym. Dzięki temu, podobnie jak większość funkcji modułu Active Record, nie zależą one od używanej przez Ciebie wersji bazy danych. Nie musisz więc martwić się o dokładną składnię komendy CREATE TABLE ani zastanawiać się nad różnymi wariacjami polecenia SELECT *. Możesz na przykład użyć SQLite3 podczas tworzenia, a MySQL w gotowym, udostępnionym serwisie.
+
+W poniższym przewodniku dowiesz się wszystkiego o migracjach. W szczególności, tekst opisuje:
+
+* generatory używane przy tworzeniu migracji
+* metody modułu Active Record służące do modyfikacji bazy danych
+* zadania Rade działające na migracjach
+* powiązania między migracjami a plikiem schema.rb
+
+== Anatomia migracji ==
+
+Zanim zagłębimy się w detale migracji, przedstawiam kilka przykładów ilustrujących ich możliwości:
+
+[source, ruby]
+------------------------
+class CreateProducts < ActiveRecord::Migration
+  def self.up
+    create_table :products do |t|
+      t.string :name
+      t.text :description
+
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :products
+  end
+end
+------------------------
+
+Ta migracja tworzy tabelę `products` z kolumną o nazwie `name` typu string oraz kolumną tekstową `description`. Zostanie również utworzona domyślna kolumna ID, bedąca kluczem głównym tabeli, ale ponieważ jest to domyślna kolumna każdej tabeli, nie musimy jej nawet definiować. Kolumny zawierające znaczniki czasu (timestamp) `created_at` i `updated_at` również zostaną automatycznie dodane przez moduł Active Record. Odwrócenie takiej migracji to po prostu usunięcie tabeli.
+
+Możliwości migracji nie ograniczają się do zmiany schematu bazy danych. Przy ich pomocy można także poprawić błędne dane lub uzupełniać nowe pola:
+
+[source, ruby]
+------------------------
+class AddReceiveNewsletterToUsers < ActiveRecord::Migration
+  def self.up
+    change_table :users do |t|
+      t.boolean :receive_newsletter, :default => false
+    end
+    User.update_all ["receive_newsletter = ?", true]
+  end
+
+  def self.down
+    remove_column :users, :receive_newsletter
+  end
+end
+------------------------
+
+Ta migracja dodaje kolumnę `receive_newsletter` do tabeli `users`. Pole to mówi nam o przypisaniu użytkownika na listę odbiorców aktualności. Chcemy, by domyślnie zawierało ono wartość false dla nowych użytkowników, ale użytkownicy juz zarejestrowani są zgłoszeni do otrzymywania aktualności, więc możemy użyć modelu User do ustawienia dla nich flagi reveive_newsletter jako `true`.
+ 
+NOTE: Some <<models,caveats>> apply to using models in your migrations.
+
+=== Migracje są klasami ===
+Migracja jest podklasą klasy ActiveRecord::Migration, która posiada zaimplementowane dwie metody: +up+ (wykonaj żądane transformacje) i +down+ (odwróć je).
+
+Moduł Active Record udostępnia metody, służące do typowych operacji na bazach danych w sposób niezależny od typu używanej bazy (ich dokładniejszy opis będzie zamieszczony w dalszej części):
+
+* `create_table`
+* `change_table`
+* `drop_table`
+* `add_column`
+* `remove_column`
+* `change_column`
+* `rename_column` 
+* `add_index`
+* `remove_index`
+
+
+Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych (np. utworzyć <<klucz obcy,klucz obcy>>), możesz do tego celu wykorzystać funkcję `execute`, która umożliwia Ci wykonanie skryptu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.
+
+W bazach danych obsługujących transakcje zmieniające schemat bazy danych (takich jak PostgreSQL), migracje są realizowane jako transakcje. Jeśli baza danych nie posiada takiej funkcjonalności (np. MySQL i SQLite), w przypadku niepowodzenia migracji etapy już wykonane nie zostaną automatycznie cofnięte. Wymaga to ręcznego usunięcia już wprowadzonych zmian.
+
+=== Co kryje się w nazwie ===
+
+Każda klasa migracji jest przechowywana w oddzielnym pliku w katalogu `db/migrate`. Nazwa pliku jest w formacie `YYYYMMDDHHMMSS_create_products.rb`, zawierającym znacznik czasowy (w czasie UTC) oraz - po podkreślniku - nazwę migracji. Nazwa taka musi się zgadzać z migracją, którą plik zawiera, np:
+`20080906120000_create_products` powinna definiować migrację CreateProducts, a `20080906120001_add_details_to_products - migrację AddDetailsToProducts`. Jeśli z jakichś przyczyn zmienisz nazwę pliku, MUSISZ poprawić także nazwę klasy - w przeciwnym wypadku Railsy będą informowały Cię o braku wymaganej klasy.
+
+Railsy wykorzystują jedynie numer migracji (czyli jej znacznik czasowy) do jej identyfikacji. Wersje wcześniejsze niż 2.1 numerowały migracje liczbami naturalnymi począwszy od 1, przypisując każdej nowej migracji kolejną liczbę. W przypadku pracy w zespołach kolizje oznaczeń były nieuniknione, co wymagało wycofania zmian i przenumerowania wszystkich migracji. Od wersji 2.1 rozwiązano ten problem identyfikując migrację poprzez datę jej utworzenia. Można przywrócić starszy sposób numeracji, ustawiając w pliku `environment.rb` zmienną `config.active_record.timestamped_migrations` na wartość `false`.
+
+Dzięki nowemu sposobowi numeracji oraz monitorowaniu które migracje już zostały wykonane, Railsy rozwiązują wiele częstych problemów powstających przy pracy zespołowej nad jednym projektem.
+
+Przykładowo, Ania tworzy migracje `20080906120000` i `20080906123000`, a Bartek tworzy `20080906124500` i ją wykonuje. Ania kończy wprowadzać zmiany, a Bartek wycofuje swoją migrację. Railsy wiedzą, że migracje Ani nie zostały wykonane, więc `rake db:migrate` wykona je (pomimo tego, że późniejsza migracja stworzona przez Bartka już została wykonana). Analogicznie, polecenie wycofania migracji pominie niewykonane jeszcze migracje Ani.
+
+Oczywiście nie zastąpi to w pełni komunikacji wewnątrz zespołu. Na przykład, jeśli migracja Ani usunęła tabelę wykorzystywaną przez migrację Bartka, problem i tak wystąpi.
+
+=== Zmiany w migracjach ===
+
+Czasem popełnisz błąd podczas tworzenia migracji. Jeśli już ją wykonałeś, nie możesz po prostu wyedytować migracji i wykonać ponownie: Railsy uznają, że została już ona wykonana i kolejne wpisanie komendy `rake db:migrate` nie zaowocuje wprowadzeniem poprawek. Musisz w tym celu wycofać migrację (np. komendą 'rake db:rollback'), poprawić błędy w migracji i ponownie ją wykonać poleceniem 'rake db:migrate'.
+
+Ogólnie rzecz biorąc, edycja istniejących migracji nie jest dobrym pomysłem: dodajesz tym samym pracy sobie i swoim współpracownikom. Może to być przyczyną poważnych kłopotów, jeżeli Twoja migracja została już uruchomiona na docelowym serwerze. Lepszym rozwiązaniem jest stworzenie nowej migracji, która wprowadzi wymagane zmiany. Edycja świeżo utworzonej migracji, która nie została jeszcze przekazana na serwer docelowy jest stosunkowo bezpieczna.
+
+== Tworzenie migracji ==
+
+=== Tworzenie modelu ===
+
+Generatory modelu i szkieletu utworzą migrację odpowiednią dla tworzonego modelu. Migracja taka zawiera od razu instrukcje potrzebne do utworzenia powiązanej z danym modelem tablicy. Jeśli powiesz Railsom jakie kolumny powinny znaleźć się w tej tabeli, do migracji zostaną dodane odpowiednie formuły. Przykładowo, wykonanie polecenia 
+
+`ruby script/generate model Product name:string description:text` spowoduje stworzenie następującej migracji:
+
+[source, ruby]
+-----------------------
+class CreateProducts < ActiveRecord::Migration
+  def self.up
+    create_table :products do |t|
+      t.string :name
+      t.text :description
+
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :products
+  end
+end
+-----------------------
+
+Możesz dołączyć tyle par kolumna/typ ile potrzebujesz. Domyślnie zostaną dodane znaczniki czasu `t.timestamps` (które powodują automatyczne utworzenie przez moduł Active Record kolumn `updated_at` i `created_at`).
+
+=== Tworzenie samodzielnej migracji ===
+
+Jeśli tworzysz migracje dla innych celów (np. aby dodać kolumnę do istniejącej już tabeli), możesz skorzystać z generatora migracji:
+
+`ruby script/generate migration AddPartNumberToProducts`
+
+Ta komenda utworzy pustą, lecz odpowiednio nazwaną i skonstruowaną migrację:
+
+[source, ruby]
+-----------------------
+class AddPartNumberToProducts < ActiveRecord::Migration
+  def self.up
+  end
+
+  def self.down
+  end
+end
+-----------------------
+
+Jeśli nazwa migracji podana w poleceniu generatora migracje jest formatu AddXXXToYYY lub RemoveXXXFromYYY i po niej wymieniona jest lista kolumn i ich typów, to w wyniku utworzona zostanie migracja z odpowiednimi poleceniami dodania/usunięcia kolumny, przykładowo:
+
+`ruby script/generate migration AddPartNumberToProducts part_number:string`
+
+wygeneruje migrację:
+
+[source, ruby]
+-----------------------
+class AddPartNumberToProducts < ActiveRecord::Migration
+  def self.up
+    add_column :products, :part_number, :string
+  end
+
+  def self.down
+    remove_column :products, :part_number
+  end
+end
+-----------------------
+
+Analogicznie, komenda
+
+`ruby script/generate migration RemovePartNumberFromProducts part_number:string`
+
+generuje
+
+[source, ruby]
+-----------------------
+class RemovePartNumberFromProducts < ActiveRecord::Migration
+  def self.up
+    remove_column :products, :part_number
+  end
+
+  def self.down
+    add_column :products, :part_number, :string
+  end
+end
+-----------------------
+
+Przy tworzeniu migracji nie musisz ograniczać się do jednej kolumny, na przykład:
+
+`ruby script/generate migration AddDetailsToProducts part_number:string price:decimal`
+
+wygeneruje migrację:
+
+[source, ruby]
+-----------------------
+class AddDetailsToProducts < ActiveRecord::Migration
+  def self.up
+    add_column :products, :part_number, :string
+    add_column :products, :price, :decimal
+  end
+
+  def self.down
+    remove_column :products, :price
+    remove_column :products, :part_number
+  end
+end
+-----------------------
+
+Jak zwykle, wygenerowana migracja jest dopiero punktem startowym Twojej pracy. Możesz ją dalej modyfikować, dodając lub usuwając elementy.
+
+== Pisanie migracji ==
+
+
+Jeśli już utworzyłeś migrację przy pomocy jednego z generatorów, najwyższy czas zabrać się do pracy!
+
+=== Tworzenie tabeli ===
+
+`create_table` jest jedną z najbardziej podstawowych komend. Jej typowe użycie ilustruje przykład:
+
+[source, ruby]
+---------------------
+create_table :products do |t|
+  t.string :name
+end
+---------------------
+
+Przykład ten generuje tabelę `products` z kolumną o nazwie `name` (i, jak to omówimy w dalszej części, domyślną kolumną `id`).
+
+Obiekt dołączony do bloku pozwala na tworzenie kolumn tabeli. Są na to dwa sposoby. Pierwszy z nich wygląda tak:
+
+[source, ruby]
+---------------------
+create_table :products do |t|
+  t.column :name, :string, :null => false
+end
+---------------------
+
+Drugi sposób, tzw. "sexy" migracje, nie korzysta z nadmiarowej metody `column`. Zamiast niej wykorzystać można metody `string`, `integer` itp., tworzą kolumny odpowiednich typów. Pozostałe parametry są identyczne do parametrów metody `column`.
+
+[source, ruby]
+---------------------
+create_table :products do |t|
+  t.string :name, :null => false
+end
+---------------------
+
+Domyślnie `create_table` stworzy klucz główny nazwany `id`. Możesz zmienić jego nazwę korzystając z opcji `:primiary_key` (nie zapomnij poprawić powiązanego z tabelą modelu) lub, jeśli nie chcesz w ogóle klucza głównego (np. dla tabeli HABTM, realizującej relację typu wiele-do-wielu) możesz dodać `id => false`. Jeśli chcesz dodać opcję specyficzną dla konkretnego typu bazy danych, możesz umieścić fragment kody SQL wewnątrz parametru `:options`. Na przykład:
+
+[source, ruby]
+---------------------
+create_table :products, :options => "ENGINE=BLACKHOLE" do |t|
+  t.string :name, :null => false
+end
+---------------------
+Opcja ta doda `ENGINE=BLACKHOLE` do kodu SQL użytego do tworzenia tabeli (dla MySQL domyślny parametr to "ENGINE=InnoDB").
+
+Typy obsługiwane przez moduł Active Record to `:primary_key`, `:string`, `:text`, `:integer`, `:float`, `:decimal`, `:datetime`, `:timestamp`, `:time`, `:date`, `:binary`, `:boolean`.
+
+Zostaną one zrealizowane poprzez odpowiednie dla bazy danych typy danych, np. w MySQL `:string` zostanie przetłumaczony na `VARCHAR(255)`. Możesz tworzyć kolumny innych niż wymienione typów pod warunkiem, że nie używasz "sexy" składni, przykładowo:
+
+[source, ruby]
+---------------------
+create_table :products do |t|
+  t.column :name, 'polygon', :null => false
+end
+---------------------
+
+Może to jednak uniemożliwić poprawne przeniesienie migracji na inny typ bazy danych.
+
+=== Zmienianie tabel ===
+
+Bliskim kuzynem `create_table` jest `change_table`. Komenda ta służy do zmiany istniejących już tabel i używana jest w analogiczny sposób jak `create_table`, posiada jednak o wiele większe możliwości. Przykładowo:
+
+[source, ruby]
+---------------------
+change_table :products do |t|
+  t.remove :description, :name
+  t.string :part_number
+  t.index :part_number
+  t.rename :upccode, :upc_code
+end
+---------------------
+
+Ta komenda usuwa kolumnę `description`, dodaje kolumnę `part_number` i tworzy na niej indeks. Ostatnia metoda powoduje zmianę nazwy kolumny `upccode` na `upc_code`. Ten sam efekt można osiągnąć również następującym sposobem:
+
+[source, ruby]
+---------------------
+remove_column :products, :description
+remove_column :products, :name
+add_column :products, :part_number, :string
+add_index :products, :part_number
+rename_column :products, :upccode, :upc_code
+---------------------
+
+Stosując pierwszą składnię nie musisz powtarzać przy każdej komendzie nazwy tabeli - grupujesz wszystkie wykonane na niej operacje w jedną komendę. Dodatkowo nazwy transformacji są krótsze: `remove_column` zastępuje samo `remove` a `add_index` - po prostu `index`.
+
+=== Special helpers ===
+
+Active Record provides some shortcuts for common functionality. It is for example very common to add both the `created_at` and `updated_at` columns and so there is a method that does exactly that:
+
+[source, ruby]
+---------------------
+create_table :products do |t|
+  t.timestamps
+end
+---------------------
+will create a new products table with those two columns whereas
+
+[source, ruby]
+---------------------
+change_table :products do |t|
+  t.timestamps
+end
+---------------------
+adds those columns to an existing table.
+
+The other helper is called `references` (also available as `belongs_to`). In its simplest form it just adds some readability
+
+[source, ruby]
+---------------------
+create_table :products do |t|
+  t.references :category
+end
+---------------------
+
+will create a `category_id` column of the appropriate type. Note that you pass the model name, not the column name. Active Record adds the `_id` for you. If you have polymorphic belongs_to associations then `references` will add both of the columns required:
+
+[source, ruby]
+---------------------
+create_table :products do |t|
+  t.references :attachment, :polymorphic => {:default => 'Photo'}
+end
+---------------------
+will add an `attachment_id` column and a string `attachment_type` column with a default value of 'Photo'.
+
+NOTE: The `references` helper does not actually create foreign key constraints for you. You will need to use `execute` for that or a plugin that adds <<foreign_key,foreign key support>>.
+
+If the helpers provided by Active Record aren't enough you can use the `execute` function to execute arbitrary SQL.
+
+For more details and examples of individual methods check the API documentation, in particular the documentation for http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html[ActiveRecord::ConnectionAdapters::SchemaStatements] (which provides the methods available in the `up` and `down` methods),  http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html[ActiveRecord::ConnectionAdapters::TableDefinition] (which provides the methods available on the object yielded by `create_table`) and http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/Table.html[ActiveRecord::ConnectionAdapters::Table] (which provides the methods available on the object yielded by `change_table`).
+
+=== Writing your down method ===
+
+The `down` method of your migration should revert the transformations done by the `up` method. In other words the database should be unchanged if you do an `up` followed by a `down`. For example if you create a table in the up you should drop it in the `down` method. It is wise to do things in precisely the reverse order to in the `up` method. For example
+
+[source, ruby]
+---------------------
+class ExampleMigration < ActiveRecord::Migration
+
+  def self.up
+    create_table :products do |t|
+      t.references :category
+    end
+    #add a foreign key
+    execute "ALTER TABLE products ADD CONSTRAINT fk_products_categories FOREIGN KEY (category_id) REFERENCES categories(id)"
+    
+    add_column :users, :home_page_url, :string
+    
+    rename_column :users, :email, :email_address
+  end
+  
+  def self.down
+    rename_column :users, :email_address, :email
+    remove_column :users, :home_page_url
+    execute "ALTER TABLE products DROP FOREIGN KEY fk_products_categories"
+    drop_table :products
+  end
+end
+---------------------
+Sometimes your migration will do something which is just plain irreversible, for example it might destroy some data. In cases like those when you can't reverse the migration you can raise IrreversibleMigration from your `down` method. If someone tries to revert your migration an error message will be
+displayed saying that it can't be done.
+
+== Running Migrations ==
+
+Rails provides a set of rake tasks to work with migrations which boils down to running certain sets of migrations. The very first migration related rake task you use will probably be `db:migrate`. In its most basic form it just runs the `up` method for all the migrations that have not yet been run. If there are no such migrations it exits.
+
+Note that running the `db:migrate` also invokes the `db:schema:dump` task, which will update your db/schema.rb file to match the structure of your database.
+
+If you specify a target version, Active Record will run the required migrations (up or down) until it has reached the specified version. The
+version is the numerical prefix on the migration's filename. For example to migrate to version 20080906120000 run
+
+------------------------------------
+rake db:migrate VERSION=20080906120000
+------------------------------------
+
+If this is greater than the current version (i.e. it is migrating upwards) this will run the `up` method on all migrations up to and including 20080906120000, if migrating downwards this will run the `down` method on all the migrations down to, but not including, 20080906120000.
+
+=== Rolling back ===
+
+A common task is to rollback the last migration, for example if you made a mistake in it and wish to correct it. Rather than tracking down the version number associated with the previous migration you can run
+
+------------------
+rake db:rollback
+------------------
+
+This will run the `down` method from the latest migration. If you need to undo several migrations you can provide a `STEP` parameter:
+
+------------------
+rake db:rollback STEP=3
+------------------
+
+will run the `down` method from the last 3 migrations.
+
+The `db:migrate:redo` task is a shortcut for doing a rollback and then migrating back up again. As with the `db:rollback` task you can use the `STEP` parameter if you need to go more than one version back, for example
+
+------------------
+rake db:migrate:redo STEP=3
+------------------
+
+Neither of these Rake tasks do anything you could not do with `db:migrate`, they are simply more convenient since you do not need to explicitly specify the version to migrate to.
+
+Lastly, the `db:reset` task will drop the database, recreate it and load the current schema into it.
+
+NOTE: This is not the same as running all the migrations - see the section on <<schema,schema.rb>>.
+
+=== Being Specific ===
+
+If you need to run a specific migration up or down the `db:migrate:up` and `db:migrate:down` tasks will do that. Just specify the appropriate version and the corresponding migration will have its `up` or `down` method invoked, for example
+
+------------------
+rake db:migrate:up VERSION=20080906120000
+------------------
+
+will run the `up` method from the 20080906120000 migration. These tasks check whether the migration has already run, so for example `db:migrate:up VERSION=20080906120000` will do nothing if Active Record believes that 20080906120000 has already been run.
+
+
+=== Being talkative ===
+
+By default migrations tell you exactly what they're doing and how long it took.
+A migration creating a table and adding an index might produce output like this
+-------------------------
+== 20080906170109 CreateProducts: migrating ===================================
+-- create_table(:products)
+   -> 0.0021s
+-- add_index(:products, :name)
+   -> 0.0026s
+== 20080906170109 CreateProducts: migrated (0.0059s) ==========================
+-------------------------
+Several methods are provided that allow you to control all this:
+
+* `suppress_messages` suppresses any output generated by its block
+* `say` outputs text (the second argument controls whether it is indented or not)
+* `say_with_time` outputs text along with how long it took to run its block. If the block returns an integer it assumes it is the number of rows affected.
+
+For example, this migration
+
+[source, ruby]
+----------------------
+class CreateProducts < ActiveRecord::Migration
+  def self.up
+    suppress_messages do
+      create_table :products do |t|
+        t.string :name
+        t.text :description
+        t.timestamps
+      end
+    end
+    say "Created a table"
+    suppress_messages {add_index :products, :name}
+    say "and an index!", true
+    say_with_time 'Waiting for a while' do
+      sleep 10
+      250
+    end
+  end
+
+  def self.down
+    drop_table :products
+  end
+end
+----------------------
+
+generates the following output
+----------------------
+== 20080906170109 CreateProducts: migrating ===================================
+-- Created a table
+   -> and an index!
+-- Waiting for a while
+   -> 10.0001s
+   -> 250 rows
+== 20080906170109 CreateProducts: migrated (10.0097s) =========================
+----------------------
+
+If you just want Active Record to shut up then running `rake db:migrate VERBOSE=false` will suppress any output.
+
+[[models]]
+== Using Models In Your Migrations ==
+When creating or updating data in a migration it is often tempting to use one of your models. After all they exist to provide easy access to the underlying data. This can be done but some caution should be observed. 
+
+Consider for example a migration that uses the Product model to update a row in the corresponding table. Alice later updates the Product model, adding a new column and a validation on it. Bob comes back from holiday, updates the source and runs outstanding migrations with `rake db:migrate`, including the one that used the Product model. When the migration runs the source is up to date and so the Product model has the validation added by Alice. The database however is still old and so does not have that column and an error ensues because that validation is on a column that does not yet exist.
+
+Frequently I just want to update rows in the database without writing out the SQL by hand: I'm not using anything specific to the model. One pattern for this is to define a copy of the model inside the migration itself, for example:
+
+[source, ruby]
+-------------------------
+class AddPartNumberToProducts < ActiveRecord::Migration
+  class Product < ActiveRecord::Base
+  end
+  
+  def self.up
+    ...
+  end
+
+  def self.down
+    ...
+  end
+end
+-------------------------
+The migration has its own minimal copy of the Product model and no longer cares about the Product model defined in the application.
+
+=== Dealing with changing models ===
+
+For performance reasons information about the columns a model has is cached. For example if you add a column to a table and then try and use the corresponding model to insert a new row it may try and use the old column information. You can force Active Record to re-read the column information with the `reset_column_information` method, for example
+
+[source, ruby]
+-------------------------
+class AddPartNumberToProducts < ActiveRecord::Migration
+  class Product < ActiveRecord::Base
+  end
+  
+  def self.up
+    add_column :product, :part_number, :string
+    Product.reset_column_information
+    ...
+  end
+
+  def self.down
+    ...
+  end
+end
+-------------------------
+
+== Schema dumping and you ==
+[[schema]]
+=== What are schema files for? ===
+Migrations, mighty as they may be, are not the authoritative source for your database schema. That role falls to either `schema.rb` or an SQL file which Active Record generates by examining the database. They are not designed to be edited, they just represent the current state of the database.
+
+There is no need (and it is error prone) to deploy a new instance of an app by replaying the entire migration history. It is much simpler and faster to just load into the database a description of the current schema.
+
+For example, this is how the test database is created: the current development database is dumped (either to `schema.rb` or `development.sql`) and then loaded into the test database.
+
+Schema files are also useful if you want a quick look at what attributes an Active Record object has. This information is not in the model's code and is frequently spread across several migrations but is all summed up in the schema file. The http://agilewebdevelopment.com/plugins/annotate_models[annotate_models] plugin, which automatically adds (and updates) comments at the top of each model summarising the schema, may also be of interest.
+
+=== Types of schema dumps === 
+There are two ways to dump the schema. This is set in `config/environment.rb` by the `config.active_record.schema_format` setting, which may be either `:sql` or `:ruby`.
+
+If `:ruby` is selected then the schema is stored in `db/schema.rb`. If you look at this file you'll find that it looks an awful lot like one very big migration:
+
+[source, ruby]
+--------------------------------------
+ActiveRecord::Schema.define(:version => 20080906171750) do
+  create_table "authors", :force => true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "products", :force => true do |t|
+    t.string   "name"
+    t.text     "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "part_number"
+  end
+end
+--------------------------------------
+
+In many ways this is exactly what it is. This file is created by inspecting the database and expressing its structure using `create_table`, `add_index` and so on. Because this is database independent it could be loaded into any database that Active Record supports. This could be very useful if you were to distribute an application that is able to run against multiple databases.
+
+There is however a trade-off: `schema.rb` cannot express database specific items such as foreign key constraints, triggers or stored procedures. While in a migration you can execute custom SQL statements, the schema dumper cannot reconstitute those statements from the database. If you are using features like this then you should set the schema format to `:sql`. 
+
+Instead of using Active Record's schema dumper the database's structure will be dumped using a tool specific to that database (via the `db:structure:dump` Rake task) into `db/#\{RAILS_ENV\}_structure.sql`. For example for PostgreSQL the `pg_dump` utility is used and for MySQL this file will contain the output of SHOW CREATE TABLE for the various tables. Loading this schema is simply a question of executing the SQL statements contained inside.
+
+By definition this will be a perfect copy of the database's structure but this will usually prevent loading the schema into a database other than the one used to create it.
+
+=== Schema dumps and source control ===
+
+Because they are the authoritative source for your database schema, it is strongly recommended that you check them into source control.
+
+[[foreign_key]]
+== Active Record i integralność referencyjna ==
+Active Record way is that intelligence belongs in your models, not in the database. As such, features such as triggers or foreign key constraints, which push some of that intelligence back into the database are not heavily used.
+
+Validations such as `validates_uniqueness_of` are one way in which models can enforce data integrity. The `:dependent` option on associations allows models to automatically destroy child objects when the parent is destroyed. Like anything which operates at the application level these cannot guarantee referential integrity and so some people augment them with foreign key constraints.
+
+Although Active Record does not provide any tools for working directly with such features, the `execute` method can be used to execute arbitrary SQL. There are also a number of plugins such as http://agilewebdevelopment.com/plugins/search?search=redhillonrails[redhillonrails] which add foreign key support to Active Record (including support for dumping foreign keys in `schema.rb`).
+
+== Changelog ==
+
+http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/6[Lighthouse ticket]
+
+* September 14, 2008: initial version by link:../authors.html#fcheung[Frederick Cheung]
