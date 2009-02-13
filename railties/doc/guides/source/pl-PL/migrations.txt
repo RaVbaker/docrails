@@ -1,7 +1,7 @@
 Migracje
 ==========
 
-Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś potem samemu zatroszczyć się o to, by poinformować inny projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia 'rake db:migrate'. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
+Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś potem samemu zatroszczyć się o to, by poinformować inny projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia `rake db:migrate`. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
 
 Migracje pozwalają na opisanie zmian bazy danych w Rubym. Dzięki temu, podobnie jak większość funkcji modułu Active Record, nie zależą one od używanej przez Ciebie wersji bazy danych. Nie musisz więc martwić się o dokładną składnię komendy CREATE TABLE ani zastanawiać się nad różnymi wariacjami polecenia SELECT *. Możesz na przykład użyć SQLite3 podczas tworzenia, a MySQL w gotowym, udostępnionym serwisie.
 
@@ -9,7 +9,7 @@ W poniższym przewodniku dowiesz się wszystkiego o migracjach. W szczególnośc
 
 * generatory używane przy tworzeniu migracji
 * metody modułu Active Record służące do modyfikacji bazy danych
-* zadania Rade działające na migracjach
+* zadania Rake działające na migracjach
 * powiązania między migracjami a plikiem schema.rb
 
 == Anatomia migracji ==
@@ -93,7 +93,7 @@ Oczywiście nie zastąpi to w pełni komunikacji wewnątrz zespołu. Na przykła
 
 === Zmiany w migracjach ===
 
-Czasem popełnisz błąd podczas tworzenia migracji. Jeśli już ją wykonałeś, nie możesz po prostu wyedytować migracji i wykonać ponownie: Railsy uznają, że została już ona wykonana i kolejne wpisanie komendy `rake db:migrate` nie zaowocuje wprowadzeniem poprawek. Musisz w tym celu wycofać migrację (np. komendą 'rake db:rollback'), poprawić błędy w migracji i ponownie ją wykonać poleceniem 'rake db:migrate'.
+Czasem popełnisz błąd podczas tworzenia migracji. Jeśli już ją wykonałeś, nie możesz po prostu wyedytować migracji i wykonać ponownie: Railsy uznają, że została już ona wykonana i kolejne wpisanie komendy `rake db:migrate` nie zaowocuje wprowadzeniem poprawek. Musisz w tym celu wycofać migrację (np. komendą `rake db:rollback`), poprawić błędy w migracji i ponownie ją wykonać poleceniem `rake db:migrate`.
 
 Ogólnie rzecz biorąc, edycja istniejących migracji nie jest dobrym pomysłem: dodajesz tym samym pracy sobie i swoim współpracownikom. Może to być przyczyną poważnych kłopotów, jeżeli Twoja migracja została już uruchomiona na docelowym serwerze. Lepszym rozwiązaniem jest stworzenie nowej migracji, która wprowadzi wymagane zmiany. Edycja świeżo utworzonej migracji, która nie została jeszcze przekazana na serwer docelowy jest stosunkowo bezpieczna.
 
@@ -336,7 +336,7 @@ Aby zapoznać się z detalami i przykładami tworzenia własnych metod polecam d
 
 === Tworzenie metody down ===
 
-Metoda `down` Twojej migracji powinna odwrócić transformacje wywołane przez metodę `up`. Innymi słowy, baza nie powinna ulec zmianie, jeśli wywołamy metodę `up` a po niej metodę 'down`. Na przykład, jeśli w metodzie `up` tworzymy tabelę, to w metodzie `down` powinniśmy ją usunąć. Rozsądnie jest w metodzie 'down' odwoływać wszystkie polecenia w dokładnie odwrotnej kolejności niż zostały one wywołane. Na przykład:
+Metoda `down` Twojej migracji powinna odwrócić transformacje wywołane przez metodę `up`. Innymi słowy, baza nie powinna ulec zmianie, jeśli wywołamy metodę `up` a po niej metodę `down`. Na przykład, jeśli w metodzie `up` tworzymy tabelę, to w metodzie `down` powinniśmy ją usunąć. Rozsądnie jest w metodzie `down` odwoływać wszystkie polecenia w dokładnie odwrotnej kolejności niż zostały one wywołane. Na przykład:
 
 [source, ruby]
 ---------------------
@@ -414,7 +414,7 @@ Jeśli chcesz wywołać metodę `up` lub `down` konkretnej migracji, możesz w t
 rake db:migrate:up VERSION=20080906120000
 ------------------
 
-wywoła metodę `up` dla migracji 20080906120000. Zadanie to sprawdza najpierw czy podana migracja została wcześniej wykonana, więc np. komenda 'db:migrate:up VERSION=20080906120000' nie spowoduje żadnych zmian, jeśli moduł Active Record uzna, że ta migracja jest już wywołana.
+wywoła metodę `up` dla migracji 20080906120000. Zadanie to sprawdza najpierw czy podana migracja została wcześniej wykonana, więc np. komenda `db:migrate:up VERSION=20080906120000` nie spowoduje żadnych zmian, jeśli moduł Active Record uzna, że ta migracja jest już wywołana.
 
 === Komunikatywność ===
 
@@ -478,11 +478,12 @@ Jeśli chcesz po prostu zupełnie "uciszyć" moduł Active Record, możesz wykor
 
 [[models]]
 == Using Models In Your Migrations ==
-When creating or updating data in a migration it is often tempting to use one of your models. After all they exist to provide easy access to the underlying data. This can be done but some caution should be observed. 
 
-Consider for example a migration that uses the Product model to update a row in the corresponding table. Alice later updates the Product model, adding a new column and a validation on it. Bob comes back from holiday, updates the source and runs outstanding migrations with `rake db:migrate`, including the one that used the Product model. When the migration runs the source is up to date and so the Product model has the validation added by Alice. The database however is still old and so does not have that column and an error ensues because that validation is on a column that does not yet exist.
+Podczas tworzenia czy aktualizacji danych zawsze kusi wykorzystanie jednego z modeli. W zasadzie po to przecież tworzymy modele, by ułatwić dostęp do danych. Można to wykonać, zachowując jednak pewien warunek. 
 
-Frequently I just want to update rows in the database without writing out the SQL by hand: I'm not using anything specific to the model. One pattern for this is to define a copy of the model inside the migration itself, for example:
+Wyobraźmy sobie na przykład migrację korzystającą z modelu Product w celu aktualizacji wiersza powiązanej z nim tabeli. Następnie Ania zmienia model Product, dodając nową kolumnę i walidację (validation) dla niej. Gdy Bartek wraca z wakacji, aktualizuje kod źródłowy i wpisując komendę `rake db:migrate` wykonuje wszystkie migracje, włącznie z migracją korzystającą z modelu Product. Ponieważ Bartek zaktualizował kod źródłowy, model Product zawiera nową walidację stworzoną przez Anię, podczas gdy baza nie posiada nowej kolumny. Spowoduje to błąd - walidacja będzie się odnosić do nieistniejącej kolumny.
+
+Często chcę po prostu zaktualizować wiersze danych w bazie bez konieczności ręcznego wpisywania kodu SQL; nie wykorzystuję żadnych specyficznych dla danego modelu cech. Jednym z rozwiązań jest w takim wypadku stworzenie kopii modelu wewnątrz samej migracji, na przykład:
 
 [source, ruby]
 -------------------------
@@ -499,11 +500,11 @@ class AddPartNumberToProducts < ActiveRecord::Migration
   end
 end
 -------------------------
-The migration has its own minimal copy of the Product model and no longer cares about the Product model defined in the application.
+Migracja posiada swoją własną kopię modelu Product i nie odnosi się już do modelu zdefiniowanego w aplikacji.
 
-=== Dealing with changing models ===
+=== Praca na zmieniających się modelach ===
 
-For performance reasons information about the columns a model has is cached. For example if you add a column to a table and then try and use the corresponding model to insert a new row it may try and use the old column information. You can force Active Record to re-read the column information with the `reset_column_information` method, for example
+Dla poprawy wydajności, informacja o kolumnach w modelu jest cachowana (cached). Na przykład, jeśli dodasz kolumnę do tabeli a potem spróbujesz użyć powiązanego modelu w celu dodania nowego rekordu, może on użyć starej informacji o kolumnach. Możesz zmusić moduł Active Record do ponownego odczytania informacji o kolumnach korzystając z metody `reset_column_information`. Na przykład:
 
 [source, ruby]
 -------------------------
