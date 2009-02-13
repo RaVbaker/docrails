@@ -1,6 +1,6 @@
 == Cookies ==
 
-Your application can store small amounts of data on the client - called cookies - that will be persisted across requests and even sessions. Rails provides easy access to cookies via the `cookies` method, which - much like the `session` - works like a hash:
+Twoja aplikacja może przechowywać małe ilości danych po stronie klienta w postaci tzw. cookies. Mogą one trwać poprzez wiele żądań, a nawet sesji. Railsy zapewniają łatwy dostęp do cookies za pomocą metody `cookies`, która podobnie jak metoda `session`, działa jako tablica haszująca:
 
 [source, ruby]
 -----------------------------------------
@@ -31,4 +31,4 @@ class CommentsController < ApplicationController
 end
 -----------------------------------------
 
-Note that while for session values you set the key to `nil`, to delete a cookie value you should use `cookies.delete(:key)`.
+Zwróć uwagę: żeby skasować wartości sesji, musisz przypisać kluczowi wartość `nil`. Natomiast żeby skasować wartość cookie, powinieneś użyć `cookies.delete(:key)`.
