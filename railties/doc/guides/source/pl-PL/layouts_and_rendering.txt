@@ -11,25 +11,24 @@ i Action View. Po jego przeczytaniu powinieneś umieć:
 
 == Opis zawartości: Jak wszystko razem współgra
 
-Ten poradnik skupia się na wzajemnym oddziaływaniu pomiędzy Kontrolerem a Widokiem
-we wzorcu Model-View-Controller (MVC). Jak wiesz, Kontroler jest odpowiedzialny za
-nadzorowanie całego procesu obsługi zapytań w Railsach, pomimo że zazwyczaj przekazuje
-on każdy większy kod do Modelu. Natomiast gdy dojdzie do wysłania odpowiedzi użytkownikowi,
-Kontroler przekazuje to zadanie Widokowi. Tematem tego tutoriala jest właśnie to przekazywanie.
+Ten poradnik opisuje wzajemne relacje pomiędzy Kontrolerem a Widokiem 
+we wzorcu Model-View-Controller (MVC). Jak wiesz, drogi czytelniku, Kontroler jest 
+odpowiedzialny za nadzorowanie całego procesu obsługi zapytań w Railsach,
+pomimo że zazwyczaj przekazuje on każdy większy kod do Modelu. 
+Natomiast, gdy dojdzie do wysłania odpowiedzi użytkownikowi, 
+Kontroler przekazuje to zadanie Widokowi. 
+Tematem tego tutoriala jest właśnie to przekazywanie.
 
-Ogólnie mówiąc to nadzorowanie wymaga zadecydowania, co powinno być przesłane jako
-odpowiedź, a następnie wywołania odpowiedniej metody w celu jej stworzenia. Jeśli
-odpowiedź jest rozwiniętym, skomplikowanym widokiem, Railsy wykonują dodatkową pracę
-by opakować widok w layout i ewentualnie dołączyć częściowe widoki. Te wszystkie możliwości
+Kontroler musi zadecydować co powinno być przesłane jako odpowiedź i wywołać odpowiednią metodę by tą odpowiedź stworzyć. W przypadku gdy jest ona rozwiniętym widokiem jest dodatkowo opakowywana w layout i ewentualnie są do niej dołączane inne fragmenty widoków. Te wszystkie możliwości
 zobaczysz w późniejszej części poradnika.
 
 == Tworzenie odpowiedzi
 
-Z punktu widzenia kontrolera, są trzy drogi, aby stworzyć odpowiedź HTTP:
+Kontroler może stworzyć odpowiedź HTTP dla przeglądarki na trzy sposoby:
 
 * Wywołać +render+ by stworzyć pełną odpowiedź do odesłania przeglądarce
-* Wywołać +redirect_to+ by wysłać kod HTTP informujący o przekierowaniu do przeglądarki
-* Wywołać +head+ by stworzyć odpowiedź zawierającą tylko nagłówki HTTP i odesłać ją do przeglądarki
+* Wywołać +redirect_to+ by wysłać kod HTTP informujący o przekierowaniu
+* Wywołać +head+ by stworzyć odpowiedź zawierającą tylko nagłówki HTTP
 
 Wytłumaczę po kolei każdą z tych metod, ale najpierw kilka słów o najprostszej rzeczy, którą może wykonać kontroler w odpowiedzi na żądanie – nie robić nic :)
 
@@ -48,7 +47,7 @@ end
 -------------------------------------------------------
 
 Railsy automatycznie po wykonaniu metody wyrenderuje plik +app/views/books/show.html.erb+.
-Właściwie, jeśli masz domyślną regułę (route) catch-all w odpowiednim miejscu (+map.connect
+Właściwie, jeśli masz domyślną regułę catch-all w pliku config/routing.rb (+map.connect
 \':controller/:action/:id'+), Railsy wyrenderują nawet widoki, które nie mają żadnego
 kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną regułę i nadejdzie
 żądanie dla +/books/sale_list+, Railsy w odpowiedzi wyrenderują +app/views/books/sale_list.html.erb+.
@@ -63,10 +62,9 @@ są niezalecane i będą usuniętę w przyszłych wersjach Railsów.
 
 === Używanie +render+
 
-W większości przypadków, metoda +ActionController::Base#render+ wykonuje dużą część
-renderowania twojej aplikacji do użytku przeglądarki. Jest wiele sposobów dostosowania
-zachowania funkcji +render+. Możesz wyrenderować domyślny widok dla szablonu,
-specyficzny szablon, pliku, fragment tekstu lub nawet nic.
+W większości przypadków, metoda +ActionController::Base#render+ wykonuje zdecydowaną większość 
+renderowania twojej aplikacji zaś sam proces można dostosować do własnych potrzeb. Możesz wyrenderować domyślny widok dla szablonu,
+specyficzny szablon pliku, fragment tekstu lub nawet (i tu niespodzianka) nic.
 Możesz renderować tekst, JSON lub XML. Możesz również ustalić typ zawartości lub stan
 HTTP wyrenderowanej odpowiedzi.
 
@@ -84,10 +82,10 @@ Prawdopodobnie najprostszą rzeczą jaką możemy zrobić z +render+ jest wyrend
 render :nothing => true
 -------------------------------------------------------
 
-To wywołanie wyśle pustą odpowiedź do przeglądarki (jakkolwiek, będzie ona zawierała 
+To wywołanie wyśle pustą odpowiedź do przeglądarki (chociaż będzie ona zawierała 
 nagłówki statusu które ustawisz za pomocą opcji :status, omówionej poniżej).
 
-TIP: Będziesz prawdopodobnie chciał używać metody +head+, omówionej poniżej, zamiast
+TIP: Prawdopodobnie będziesz chciał używać metody +head+, omówionej poniżej, zamiast
 +render:nothing+. Jest ona bardziej elastyczna i wskazuje, że generujesz tylko
 i wyłącznie nagłówki HTTP.
 
@@ -151,9 +149,10 @@ wywołaniem +render+.
 
 ==== Renderowanie szablonu akcji z innego kontrolera
 
-Co zrobić jeśli chcesz wyrenderować szablon z zupełnie innego kontrolera, niż
-ten który zawiera kod akcji? Możesz to zrobić za pomocą +render+, które pobiera całą ścieżkę
-(relatywną do +app/views/+) kontrolera do wyrenderowania. Dla przykładu, jeśli uruchamiasz
+Jeżeli nie wiesz co zrobić, aby wyrenderować szablon z zupełnie innego kontrolera, niż
+ten który zawiera kod akcji, tu znajdziesz odpowiedź. Możesz tego dokonać za pomocą +render+,
+ które pobiera całą ścieżkę
+(relatywną do +app/views/+) kontrolera do wyrenderowania. Na przykład, jeśli uruchamiasz
 kod w +AdminProductsController+, który znajduje się w +app/controllers/admin+, możesz
 wyrenderować wynik akcji do szablonu +app/views/products+ w ten sposób:
 
@@ -202,8 +201,8 @@ jak w Uniksie.
 
 ==== Używanie +render+ z +:inline+
 
-Metoda +render+ może obyć się bez jakiegokolwiek widoku, jeśli tylko użyjesz opcji
-+:inline+ przekazując ERB kod, który ma wyrenderować. Jest to całkowicie poprawne:
+Metoda +render+ może obejść się bez jakiegokolwiek widoku, jeśli tylko użyjesz opcji
++:inline+ przekazując ERB kod, który ma wyrenderować. Dlatego następujący kod jest całkowicie poprawny:
 
 [source, ruby]
 -------------------------------------------------------
@@ -215,7 +214,7 @@ twoich kontrolerów niszczy zorientowanie Railsów na MVC i powoduje, że innym 
 jest trudniej podążać za tokiem twojego myślenia. Zamiast tego lepiej używaj oddzielnych
 widoków erb.
 
-Domyślnie, renderowanie typu inline używa ERB. Możesz zmusić je by użyło zamiast
+Renderowanie typu inline domyślnie używa ERB. Możesz zmusić je by użyło zamiast
 tego np.  Buildera, za pomocą opcji +:type+:
 
 [source, ruby]
@@ -298,7 +297,7 @@ Spowoduje to wysłanie przekazanego ciągu do przeglądarki z typem MIME +text/j
 
 ==== Opcje dla +render+
 
-Wywołanie metody +render+ generalnie akceptuje cztery opcje:
+Wywołanie metody +render+ akceptuje cztery opcje:
 
 * +:content_type+
 * +:layout+
@@ -310,7 +309,7 @@ Wywołanie metody +render+ generalnie akceptuje cztery opcje:
 Domyślnie Railsy dostarczą wynik operacji renderowania z typem zawartości MIME +text/html+
 (+application/json+ jeśli używasz
 opcji +:json+ lub +application/xml+ dla opcji +:xml+). Możliwe, że będziesz chciał
-to zmienić i możesz to zrobić  poprzez ustawienie opcji +:content_type+:
+to zmienić. Możesz to zrobić  poprzez ustawienie opcji +:content_type+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -319,8 +318,7 @@ render :file => filename, :content_type => 'application/rss'
 
 ===== Opcja +:layout+
 
-W większości opcji renderowania, renderowana zawartość jest wyświetlana jako część
-aktualnego layoutu. Poznasz dokładniej layouty i jak z nich korzystać w dalszej części
+Większość opcji renderowania wyświetla zawartość jako część aktualnego layoutu. Poznasz dokładniej layouty i jak z nich korzystać w dalszej części
 tego przewodnika.
 
 Możesz użyć opcji +:layout+ by zakomunikować Railsom, by użyło określonego pliku jako
@@ -349,7 +347,7 @@ render :status => 500
 render :status => :forbidden
 -------------------------------------------------------
 
-Railsy rozumią zarówno liczbowe kody stanu jak i odpowiadające im symbole. Listę kodów
+Railsy rozumieją zarówno liczbowe kody stanu jak i odpowiadające im symbole. Listę kodów
 stanu możesz znaleźć w +actionpack/lib/action_controller/status_codes.rb+. Możesz
 również zobaczyć tam jak mapowane są symbole na kody stanu.
 
@@ -517,7 +515,7 @@ W tej aplikacji:
 ==== Unikanie błędów podwójnego renderowania
 
 Prędzej czy później, większość programistów Railsów zobaczy komunikat o błędzie „Can
-only render or redirect once per action”. Chociaż jest to irytujące, jest to stosunkowo
+only render or redirect once per action”. Chociaż jest to irytujące, to stosunkowo
 łatwe do naprawienia. Zwykle dzieje się to z powodu niezrozumienia podstaw działania
 metody +render+.
 
@@ -536,8 +534,7 @@ end
 Jeśli +@book.special?+ ewaluuje do +true+, Railsy rozpoczną proces
 renderowania przez
 wrzucenie zmiennej +@book+ do widoku +special_show+. Ale to _nie_ zatrzyma reszty kodu
-w akcji +show+ przed wykonaniem i jeśli Railsy dojdą do końca akcji zaczną renderować
-widok +show+ i wystąpi błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno
+w akcji +show+ przed wykonaniem i jeśli Railsy dojdą do końca akcji to nastąpi próba wyrenderowania widoku +show+ co spowoduje błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno
 wywołanie +render+ lub +redirect+ w jednej części kodu. Jedną z rzeczy, które mogą
 pomóc jest +and return+. Oto poprawiona wersja metody:
 
