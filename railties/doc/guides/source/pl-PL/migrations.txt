@@ -56,7 +56,7 @@ end
 
 Ta migracja dodaje kolumnę `receive_newsletter` do tabeli `users`. Pole to mówi nam o przypisaniu użytkownika na listę odbiorców aktualności. Chcemy, by domyślnie zawierało ono wartość false dla nowych użytkowników, ale użytkownicy juz zarejestrowani są zgłoszeni do otrzymywania aktualności, więc możemy użyć modelu User do ustawienia dla nich flagi reveive_newsletter jako `true`.
  
-NOTE: Some <<models,caveats>> apply to using models in your migrations.
+NOTE: <<models,Ostrzeżenie>> dotyczące używania modeli w migracjach.
 
 === Migracje są klasami ===
 Migracja jest podklasą klasy ActiveRecord::Migration, która posiada zaimplementowane dwie metody: +up+ (wykonaj żądane transformacje) i +down+ (odwróć je).
@@ -329,7 +329,7 @@ end
 ---------------------
 Ten zapis spowoduje dodanie kolumny `attachment_id` oraz drugiej kolumny `attachment_type` typu string, o domyślnej wartości Photo.
 
-NOTE: The `references` helper does not actually create foreign key constraints for you. You will need to use `execute` for that or a plugin that adds <<foreign_key,foreign key support>>.
+NOTE: Helper `references` nie tworzy  <<foreign_key,kluczy obcych>>. Aby je dodać, musisz użyć metody `execute` lub skorzystać z wtyczki poszerzającej funkcjonalność modułu Active Record.
 
 Jeśli helpery udostępniane przez moduł Active Record nie wystarczają do Twoich potrzeb, możesz użyc funkcji `execute` by wywołać kod SQL.
 Aby zapoznać się z detalami i przykładami tworzenia własnych metod polecam dokumentację API, zwłaszcza http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html[ActiveRecord::ConnectionAdapters::SchemaStatements] (opis metod dostępnych w metodach `up` i `down`), http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html[ActiveRecord::ConnectionAdapters::TableDefinition] (metody dostępne na obiekcie przekazanym przy pomocy komendy `create_table`) i http://api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/Table.html[ActiveRecord::ConnectionAdapters::Table] (metody na obiekcie przekazanym przez `change_table`).
