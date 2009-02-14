@@ -74,7 +74,7 @@ Moduł Active Record udostępnia metody, służące do typowych operacji na baza
 * `remove_index`
 
 
-Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych (np. utworzyć <<klucz obcy,klucz obcy>>), możesz do tego celu wykorzystać funkcję `execute`, która umożliwia Ci wykonanie skryptu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.
+Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych (np. utworzyć <<foreign_key,klucz obcy>>), możesz do tego celu wykorzystać funkcję `execute`, która umożliwia Ci wykonanie skryptu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.
 
 W bazach danych obsługujących transakcje zmieniające schemat bazy danych (takich jak PostgreSQL), migracje są realizowane jako transakcje. Jeśli baza danych nie posiada takiej funkcjonalności (np. MySQL i SQLite), w przypadku niepowodzenia migracji etapy już wykonane nie zostaną automatycznie cofnięte. Wymaga to ręcznego usunięcia już wprowadzonych zmian.
 
@@ -477,7 +477,7 @@ wygeneruje następujący komunikat:
 Jeśli chcesz po prostu zupełnie "uciszyć" moduł Active Record, możesz wykorzystać komendę `rake db:migrate VERBOSE=false`.
 
 [[models]]
-== Using Models In Your Migrations ==
+== Użycie modeli w migracjach ==
 
 Podczas tworzenia czy aktualizacji danych zawsze kusi wykorzystanie jednego z modeli. W zasadzie po to przecież tworzymy modele, by ułatwić dostęp do danych. Można to wykonać, zachowując jednak pewien warunek. 
 
@@ -524,21 +524,23 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 -------------------------
 
-== Schema dumping and you ==
+== Zrzuty schematów i Ty ==
 [[schema]]
-=== What are schema files for? ===
-Migrations, mighty as they may be, are not the authoritative source for your database schema. That role falls to either `schema.rb` or an SQL file which Active Record generates by examining the database. They are not designed to be edited, they just represent the current state of the database.
+=== Po co tworzyć pliki schematów? ===
 
-There is no need (and it is error prone) to deploy a new instance of an app by replaying the entire migration history. It is much simpler and faster to just load into the database a description of the current schema.
+Migracje, jakkolwiek potężnym narzędziem by były, nie są wiarygodnym źródłem wiedzy o schemacie bazy. Ta rola należy do pliku `schema.rb` lub pliku SQL, generowanym przez moduł Active Record poprzez odpytywanie bazy danych. Nie zostały one stworzone z myślą o edycji, ich zadanie to po prostu reprezentacja aktualnego schematu bazy.
 
-For example, this is how the test database is created: the current development database is dumped (either to `schema.rb` or `development.sql`) and then loaded into the test database.
+Aby utworzyć nową kopię aplikacji nie musimy powtarzać wszystkich wykonanych migracji. Znacznie szybciej i prościej jest wczytać do bazy opis docelowego schematu.
 
-Schema files are also useful if you want a quick look at what attributes an Active Record object has. This information is not in the model's code and is frequently spread across several migrations but is all summed up in the schema file. The http://agilewebdevelopment.com/plugins/annotate_models[annotate_models] plugin, which automatically adds (and updates) comments at the top of each model summarising the schema, may also be of interest.
+Przykładowo, w celu utworzenia bazy do testów, należy pobrać zrzut aktualnego schematu bazy (do pliku `schema.rb` lub `development.sql`) a następnie wczytać go do bazy testowej.
 
-=== Types of schema dumps === 
-There are two ways to dump the schema. This is set in `config/environment.rb` by the `config.active_record.schema_format` setting, which may be either `:sql` or `:ruby`.
+Pliki ze schematami są także przydatne, by szybko sprawdzić atrybuty obiektu modułu Active Record. Ta informacja nie jest zapisana w kodzie modelu, często wynika z w wielu kolejnych migracji, ale jej podsumowanie jest dostępne w pliku schematu. Warta polecenia jest wtyczka http://agilewebdevelopment.com/plugins/annotate_models[annotate_models], dodająca na górze każdego modelu komentarze podsumowujące jego schemat.
 
-If `:ruby` is selected then the schema is stored in `db/schema.rb`. If you look at this file you'll find that it looks an awful lot like one very big migration:
+=== Typy zrzutów schematu === 
+
+Są dwa sposoby na zapisanie zrzutu schematu bazy. Który z nich zostanie wykorzystany, zależy od zapisu w pliku konfiguracyjnym `config/environment.rb`. Odpowiedzialna za to jest zmienna `config.active_record.schema_format`, przyjmująca wartości `:sql` lub `:ruby`.
+
+Jeśli zmienna ma przypisaną wartość `:ruby`, schemat bazy jest zapisywany w pliku `db/schema.rb`. Jeśli przyjrzeć się temu plikowi, można odnieść wrażenie, że to zapis jednej, wielkiej migracji.
 
 [source, ruby]
 --------------------------------------
@@ -559,25 +561,26 @@ ActiveRecord::Schema.define(:version => 20080906171750) do
 end
 --------------------------------------
 
-In many ways this is exactly what it is. This file is created by inspecting the database and expressing its structure using `create_table`, `add_index` and so on. Because this is database independent it could be loaded into any database that Active Record supports. This could be very useful if you were to distribute an application that is able to run against multiple databases.
+Pod wieloma względami tak właśnie jest. Ten plik jest tworzony poprzez odpytywanie bazy danych i zapisanie jej struktury za pomocą kolejnych poleceń `create_table`, `add_index` itd. Plik taki może zostać wczytany do dowolnej bazy danych, ponieważ polecenia te są niezmienne dla wszystkich obsługiwanych przez moduł Active Record baz. To może być bardzo użyteczne, jeśli chcesz stworzyć aplikację działającą na kilku bazach danych.
 
-There is however a trade-off: `schema.rb` cannot express database specific items such as foreign key constraints, triggers or stored procedures. While in a migration you can execute custom SQL statements, the schema dumper cannot reconstitute those statements from the database. If you are using features like this then you should set the schema format to `:sql`. 
+Wykorzystanie pliku `schema.rb` ma też swoje wady. Nie są w nim zapisywane informacje o funkcjach specyficznych tylko dla danego typu bazy, takich jak klucze opcje, triggery (triggers) czy procedury. O ile możesz ich używać podczas migracji, nie da się ich odtworzyć w zrzucie schematu. Jeśli korzystasz z takich opcji, powinieneś zmienić zawartość zmiennej konfiguracyjnej na `:sql`.
 
-Instead of using Active Record's schema dumper the database's structure will be dumped using a tool specific to that database (via the `db:structure:dump` Rake task) into `db/#\{RAILS_ENV\}_structure.sql`. For example for PostgreSQL the `pg_dump` utility is used and for MySQL this file will contain the output of SHOW CREATE TABLE for the various tables. Loading this schema is simply a question of executing the SQL statements contained inside.
+W takim przypadku, zamiast korzystać z wbudowanego narzędzia modułu Active Record, schmematy zapisywane są przez narzędzia stworzone dla danego typu bazy danych (poprzez polecenie `db:structure:dump`) do pliku `db/#\{RAILS_ENV\}_structure.sql`. Na przykład dla bazy PostgreSQL używane jest narzędzie `pg_dump`, a dla MySQL w pliku zapisywane są wyniki pytań SHOW CREATE TABLE dla kolejnych tabel. Wczytanie tak zapisanego schematu bazy sprowadza się do wykonania kodu SQL zapisanego we wskazanym pliku.
 
-By definition this will be a perfect copy of the database's structure but this will usually prevent loading the schema into a database other than the one used to create it.
+Z założenia taki zrzut schematu umożliwia stworzenie idealnej kopii bazy danych. Niestety zwykle uniemożliwia to przeniesienie schematu na bazę innego typu.
 
-=== Schema dumps and source control ===
+=== Kontrola wersji zrzutów schematów ===
 
-Because they are the authoritative source for your database schema, it is strongly recommended that you check them into source control.
+Ponieważ pliki schematu powinny być wiarygodnym źródłem wiedzy o bazie danych, zalecane jest włączenie ich do systemu kontroli wersji, by umożliwić wgląd w historię zmian bazy.
 
 [[foreign_key]]
 == Active Record i integralność referencyjna ==
-Active Record way is that intelligence belongs in your models, not in the database. As such, features such as triggers or foreign key constraints, which push some of that intelligence back into the database are not heavily used.
 
-Validations such as `validates_uniqueness_of` are one way in which models can enforce data integrity. The `:dependent` option on associations allows models to automatically destroy child objects when the parent is destroyed. Like anything which operates at the application level these cannot guarantee referential integrity and so some people augment them with foreign key constraints.
+Korzystanie z modułu Active Record powoduje przeniesienie części logiki z bazy danych do modeli. W związku z tym narzędzie takie jak triggery czy klucze obce, które tworzą dodatkową logikę wewnątrz bazy danych nie są zbyt często używane.
 
-Although Active Record does not provide any tools for working directly with such features, the `execute` method can be used to execute arbitrary SQL. There are also a number of plugins such as http://agilewebdevelopment.com/plugins/search?search=redhillonrails[redhillonrails] which add foreign key support to Active Record (including support for dumping foreign keys in `schema.rb`).
+Walidacje (validations) takie jak `validates_uniqueness_of` są jednym ze sposobów na wymuszenie integralności danych przez model. Opcja asocjacji `:dependent` pozwala modelowi automatycznie niszczyć obiekty potomne w przypadku usunięcia ich rodzica. Jak wszystkie opcje działające na poziomie aplikacji, wspomniane sposoby nie gwarantują zachowania integralności referencyjnej. Jest przyczyna dla której niektórzy wspierają je dodatkowo kluczami obcymi zawartymi w bazie danych.
+
+Chociaż moduł Active Record nie zapewnia narzędzi do bezpośredniej obsługi kluczy obcych, można w tym celu wykorzystać metodę `execute`. Są także dostępne różne wtyczki, takie jak http://agilewebdevelopment.com/plugins/search?search=redhillonrails[redhillonrails], które poszerzają możliwości modułu Active Record o obsługę kluczy obcych (m.in. umożliwiają zapisywanie ich w schemacie bazy w pliku `schema.rb`).
 
 == Changelog ==
 
