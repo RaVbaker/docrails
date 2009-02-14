@@ -11,7 +11,7 @@ Ten przewodnik opisuje częste problemy związane z bezpieczeństwem w aplikacja
 - Jak zarządzać użytkownikami: logowanie, wylogowanie i metody ataku na wszystkich poziomach.
 - I najbardziej popularne metody ataku typu injection
 
-== Introduction
+== Wstęp
 
 Frameworki powstały by pomagać projektantom w tworzeniu aplikacji internetowych. Niektóre z nich mogą być pomocne także przy ochronie aplikacji przed atakami. W rzeczywistości wszystkie frameworki są tak samo bezpieczne: jeśli stosujesz je prawidłowo będziesz w stanie stworzyć bezpieczne aplikacje używając niemalże każdego z frameworków. W Ruby on Rails można znaleźć kilka helperów rozwiązujących takie problemy jak np. ataki typu injection. Z przyjemnością muszę stwierdzić, że wszystkie Railsowe aplikacje, które audytowałem miały wysoki poziom bezpieczeństwa.
 
@@ -23,133 +23,133 @@ Zagrożenia wobec aplikacji internetowych to między innymi: przejęcie konta u�
 
 W celu rozwoju bezpiecznej aplikacji internetowej musisz aktualizować wszystkie jej poziomy i poznać swoich wrogów. Żeby być na bieżąco z aktualnymi informacjami o bezpieczeństwie dopisz się do odpowiednich list mailingowych, czytaj blogi i postaraj się, żeby aktualizowanie i kontrolowanie bezpieczeństwa Twojej aplikacji weszło Ci w nawyk (sprawdź w rozdziale „Dodatkowe materiały”). Ja robię to ręcznie ponieważ to najlepszy sposób, żeby znaleźć złośliwe problemy związane z bezpieczeństwem.
 
-== Sessions
-
-A good place to start looking at security is with sessions, which can be vulnerable to particular attacks.
-
-=== What are sessions?
-
--- _HTTP is a stateless protocol Sessions make it stateful._
-
-Most applications need to keep track of certain state of a particular user. This could be the contents of a shopping basket or the user id of the currently logged in user. Without the idea of sessions, the user would have to identify, and probably authenticate, on every request.
-Rails will create a new session automatically if a new user accesses the application. It will load an existing session if the user has already used the application.
-
-A session usually consists of a hash of values and a session id, usually a 32-character string, to identify the hash. Every cookie sent to the client's browser includes the session id. And the other way round: the browser will send it to the server on every request from the client. In Rails you can save and retrieve values using the session method:
-
+== Sesje
+ 
+Rozważając kwestię bezpieczeństwa dobrze zwrócić uwagę na sesje, które mogą być szczególnie narażone na ataki.
+ 
+=== Czym są sesje?
+ 
+-- _HTTP jest bezstanowym protokołem. Sesje to zmieniają._
+ 
+Większość aplikacji wymaga śledzenia stanu danego użytkownika. Może to dotyczyć zawartości koszyka zakupów lub ID aktualnie zalogowanego użytkownika. Gdyby nie sesje, użytkownik musiałby identyfikować się i uwierzytelniać przy każdej podejmowanej akcji. 
+Railsy tworzą nową sesję automatycznie, w chwili gdy użytkownik zaczyna korzystać z  nowej aplikacji. W przypadku gdy użytkownik korzystał już z aplikacji, wczytywana jest istniejąca sesja.
+ 
+Sesja zwykle składa się z tablicy asocjacyjnej wartości i identyfikatora sesji. Zwykle jest to 32-znakowy łańcuch do określenia tablicy asocjacyjnej. Każde cookie wysłane do przeglądarki klienta zawiera identyfikator sesji. I odwrotnie: przeglądarka wysyła je do serwera, na każde żądanie klienta. W Railsach można zapisać i pobrać wartości używając metody sesji:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 session[:user_id] = @current_user.id
 User.find(session[:user_id])
 ----------------------------------------------------------------------------
-
-=== Session id
-
+ 
+=== Identyfikator sesji
+ 
 -- _The session id is a 32 byte long MD5 hash value._
 
-A session id consists of the hash value of a random string. The random string is the current time, a random number between 0 and 1, the process id number of the Ruby interpreter (also basically a random number) and a constant string. Currently it is not feasible to brute-force Rails' session ids. To date MD5 is uncompromised, but there have been collisions, so it is theoretically possible to create another input text with the same hash value. But this has had no security impact to date.
+-- _Identyfikator sesji jest 32 bajtową wartością hash MD5._
 
-=== Session hijacking
+Identyfikator sesji składa się z wartości hash losowego ciągu znaków. Losowy ciąg znaków to aktualny czas, losowa liczba między 0 a 1, id procesu interpretera Ruby (również po prostu losowa liczba) i stały ciąg znaków. Obecnie atak typu brute-force na ID sesji w Railsach jest niemożliwy. Do tej pory MD5 był bezkonkurencyjny, jednak znaleziono sposób na generowanie kolizji. Oznacza to, że różne dane wejściowe mogą mieć taką samą wartość hash. Jednak nie ma to żadnego wpływu na bezpieczeństwo daty.
+ 
+=== Przechwytywanie sesji
 
--- _Stealing a user's session id lets an attacker use the web application in the victim's name._
+-- _Kradzież identyfikatora sesji użytkownika pozwala atakującemu umożliwia atakującemu dostęp do danej aplikacji internetowej, tak, jakby korzystał z niej pełnoprawny użytkownik._
 
-Many web applications have an authentication system: a user provides a user name and password, the web application checks them and stores the corresponding user id in the session hash. From now on, the session is valid. On every request the application will load the user, identified by the user id in the session, without the need for new authentication. The session id in the cookie identifies the session.
+Wiele aplikacji internetowych ma następujący system uwierzytelniania: użytkownik wprowadza nazwę użytkownika i hasło, aplikacja sprawdza dane i przechowuje identyfikator sprawdzonego użytkownika w tablicy asocjacyjnej sesji. Od tej chwili sesja jest ważna. Na każde żądanie aplikacja wczyta użytkownika o danym identyfikatorze użytkownika bez potrzeby uwierzytelniania. Identyfikator sesji jest odpowiedzialny za identyfikacje sesji.
 
-Hence, the cookie serves as temporary authentication for the web application. Everyone who seizes a cookie from someone else, may use the web application as this user – with possibly severe consequences. Here are some ways to hijack a session, and their countermeasures:
+Stąd wynika, że cookies są wykorzystwane do tymczasowego uwierzytelniania w aplikacjach internetowych. Każdy kto przejmie czyjeś cookies, może używać aplikacji jako ten użytkownik - co może powodować poważne konsekwencje. Oto kilka sposobów na przejęcie sesji i sposoby obrony przed atakiem:
+ 
+- Wywęszenie cookies w niezabezpieczonej sieci. Bezprzewodowa sieć może posłużyć jako przykład takiej sieci. W nieszyfrowanej sieci bezprzewodowej śledzenie ruchu wszystkich podłączonych klientów jest szczególnie łatwe. Jest to jeden z powodów, dla których powinniśy zrezygnować z pracy w kawiarniach. Dla projektantów aplikacji internetowych oznacza to [,#fffcdb] #konieczność zapewnienia bezpiecznego połączenia przez SSL#.
+ 
+- Większość ludzi nie kasuje cookies po pracy na publicznym sprzęcie. Więc jeśli ostatni użytkownik nie wylogował się z aplikacji internetowej, ktoś inny może się pod niego podszywać. Dlatego ważne jest, aby zapewnić użytkownikowi [,#fffcdb]#widoczny przycisk do wylogowania#.
+ 
+- Wiele ataków typu cross-site scripting (XSS) ma na celu pozyskanie cookies użytkownika. Więcej informacji o atakach typu XSS znajduje się w dalszej części podręcznika.
+ 
+- Atakujący może spreparować ID sesji użytkownika zamiast kradzieży nieznanych cookies. Więcej informacji o atakach typu session fixation znajduje się w dalszej części podręcznika.
+ 
+Głównym celem większości atakujących jest korzyść finansowa. Ceny za skradzione loginy do kont bankowych na czarnym rynku są wyceniane od 10 do 1000 dolarów (w zależności od środków na koncie). Numery kart kredytowych są warte od 0,40 do 20 dolarów. Za konta na stronach z aukcjami online – 1 do 8 dolarów. Hasła do kont mailowych kosztują od 4 do 30 dolarów. Dane pochodzą ze strony: http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf[Symantec Global Internet Security Threat Report]. 
+ 
+=== Wskazówki dotyczące sesji
+ 
+-- _Kilka ogólnych wskazówek dotyczących sesji._
+  
+- Nie przechowuj dużych obiektów w sesji. Zamiast tego powinieneś przechowywać je w bazie danych i zapisywać ich ID w sesji. Rozwiążesz w ten sposób problemy z synchronizacją i nie zapełnisz miejsca w sesji (w zależności od tego jaką pojemność wybrałeś, patrz poniżej).  
 
-- Sniff the cookie in an insecure network. A wireless LAN can be an example of such a network. In an unencrypted wireless LAN it is especially easy to listen to the traffic of all connected clients. This is one more reason not to work from a coffee shop. For the web application builder this means to [,#fffcdb]#provide a secure connection over SSL#.
-
-- Most people don't clear out the cookies after working at a public terminal. So if the last user didn't log out of a web application, you would be able to use it as this user. Provide the user with a [,#fffcdb]#log-out button# in the web application, and [,#fffcdb]#make it prominent#.
-
-- Many cross-site scripting (XSS) exploits aim at obtaining the user's cookie. You'll read more about XSS later.
-
-- Instead of stealing a cookie unknown to the attacker, he fixes a user's session identifier (in the cookie) known to him. Read more about this so-called session fixation later.
-
-The main objective of most attackers is to make money. The underground prices for stolen bank login accounts range from $10-$1000 (depending on the available amount of funds), $0.40-$20 for credit card numbers, $1-$8 for online auction site accounts and $4-$30 for email passwords, according to the http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf[Symantec Global Internet Security Threat Report].
-
-=== Session guidelines
-
--- _Here are some general guidelines on sessions._
-
-- [,#fffcdb]#Do not store large objects in a session#. Instead you should store them in the database and save their id in the session. This will eliminate synchronization headaches and it won't fill up your session storage space (depending on what session storage you chose, see below).
-This will also be a good idea, if you modify the structure of an object and old versions of it are still in some user's cookies. With server-side session storages you can clear out the sessions, but with client-side storages, this is hard to mitigate.
-
-- [,#fffcdb]#Critical data should not be stored in session#. If the user clears his cookies or closes the browser, they will be lost. And with a client-side session storage, the user can read the data.
-
-
+- [,#fffcdb]#Ważne dane nie powinny być przechowywane w sesjach#. Gdy użytkownik wyczyści cookies albo zamknie przeglądarkę nie będzie mógł ich odzyskać. Przechowując dane w sesji po stronie klienta, użytkownik będzie mógł z nich korzystać. 
+ 
 === Session storage
+ 
+-- _Railsy zapewniają kilka mechanizmów przechowywania hashów sesji wartości. Najważniejszymi z nich są ActiveRecordStore i CookieStore._
+ 
+Można wymienić wiele sposobów przechowywania sesji, np. gdy Railsy zapisują hash i id sesji. Większość aplikacji typu Real-live korzysta z ActiveRecordStore (lub jej pochodnych). ActiveRecordStore przechowuje hash i id sesji w tabeli w bazie danych. Hash jest zapisywany i wczytywany na każde żądanie.
 
--- _Rails provides several storage mechanisms for the session hashes. The most important are ActiveRecordStore and CookieStore._
+W Railsach 2 wprowadzono nowy domyślny sposób przechowywania sesji - CookieStore. CookieStore zapisuje hash sesji bezpośrednio w cookie po stronie klienta, skąd wczytywany jest przez serwer. Dzięki temu id sesji staje się zbędne, a aplikacja działa dużo szybciej. Jednak jest to dość kontrowersyjny sposób przechowywania i trzeba wziąć pod uwagę kilka kwestii związanych z bezpieczeństwem tego sposobu:
+  
+- Rozmiar cookies nie może przekraczać 4K. Jest to w porządku, jednak nie powinno się przechowywać w cookies dużej ilości danych, odwołując się do tego co napisałem wcześniej. [,#fffcdb]#Przechowywanie id bazy danych danego użytkownika jest dobrym rozwiązaniem#.
 
-There are a number of session storages, i.e. where Rails saves the session hash and session id. Most real-live applications choose ActiveRecordStore (or one of its derivatives) over file storage due to performance and maintenance reasons. ActiveRecordStore keeps the session id and hash in a database table and saves and retrieves the hash on every request.
-
-Rails 2 introduced a new default session storage, CookieStore. CookieStore saves the session hash directly in a cookie on the client-side. The server retrieves the session hash from the cookie and eliminates the need for a session id. That will greatly increase the speed of the application, but it is a controversial storage option and you have to think about the security implications of it:
-
-- Cookies imply a strict size limit of 4K. This is fine as you should not store large amounts of data in a session anyway, as described before. [,#fffcdb]#Storing the current user's database id in a session is usually ok#.
-
-- The client can see everything you store in a session, because it is stored in clear-text (actually Base64-encoded, so not encrypted). So, of course, [,#fffcdb]#you don't want to store any secrets here#. To prevent session hash tampering, a digest is calculated from the session with a server-side secret and inserted into the end of the cookie.
-
-That means the security of this storage depends on this secret (and of the digest algorithm, which defaults to SHA512, which has not been compromised, yet). So [,#fffcdb]#don't use a trivial secret, i.e. a word from a dictionary, or one which is shorter than 30 characters#. Put the secret in your environment.rb:
-
+- Użytkownik może zobaczyć wszystko co przechowujesz w sesji, ponieważ przechowywane dane są w postaci tekstowej (właściwie są one zakodowane w Base64, ale nie szyfrowane) Więc zapewne [,#fffcdb]#nie chciałbyś przechowywać tu żadnych sekretnych danych#. Żeby zapobiec manipulacji hasha sesji, skrót jest wyliczany na podstawie sesji z tajnym kluczem (secret) po stronie serwera i umieszczany na końcu pliku cookie.
+ 
+Oznacza to, że bezpieczeństwo przechowywania jest zależne od tajnego klucza (I od algorytmu funkcji skrótu, którym domyślnie jest, jak do tej pory niezastąpiony, SHA512). Więc [,#fffcdb]#nie używaj prostych kluczy takich jak słowa ze słownika, lub kluczy poniżej 30 znaków#. Umieść swój tajny klucz w environment.rb:
+ 
 ....................................
 config.action_controller.session = {
   :key         => ‘_app_session’,
   :secret      => ‘0x0dkfj3927dkc7djdh36rkckdfzsg...’
 }
 ....................................
+ 
+Istnieją jednak, pochodne CookieStore które szyfrują hash sesji, więc klient nie może go zobaczyć.
+ 
+=== Ataki typu Replay na sesje CookieStore.
+ 
+-- _Kolejnym sposobem ataku, którego powinieneś się obawiać gdy używasz CookieStore, jest atak typu replay._
 
-There are, however, derivatives of CookieStore which encrypt the session hash, so the client cannot see it.
-
-=== Replay attacks for CookieStore sessions
-
--- _Another sort of attack you have to be aware of when using CookieStore is the replay attack._
-
-It works like this:
-
-- A user receives credits, the amount is stored in a session (which is bad idea, anyway, but we'll do this for demonstration purposes).
-- The user buys something.
-- His new, lower credit will be stored in the session.
-- The dark side of the user forces him to take the cookie from the first step (which he copied) and replace the current cookie in the browser.
-- The user has his credit back.
-
-Including a nonce (a random value) in the session solves replay attacks. A nonce is valid only once, and the server has to keep track of all the valid nonces. It gets even more complicated if you have several application servers (mongrels). Storing nonces in a database table would defeat the entire purpose of CookieStore (avoiding accessing the database).
-
-The best [,#fffcdb]#solution against it is not to store this kind of data in a session, but in the database#. In this case store the credit in the database and the logged_in_user_id in the session.
-
-=== Session fixation
-
--- _Apart from stealing a user's session id, the attacker may fix a session id known to him. This is called session fixation._
-
+Wygląda to tak:
+ 
+- Użytkownik otrzymuje kredyty, kwota jest przechowywana w sesji (co jest złym pomysłem, ale użyłem tego przykładu dla celów demonstracyjnych). 
+- Użytkownik kupuje jakiś przedmiot. 
+- Jego nowy, niższy kredyt będzie przechowywany w sesji. 
+- Ciemna strona mocy użytkownika każe mu wziąć cookie z pierwszego kroku (które wcześniej skopiował) i zastąpić obecne cookie w przeglądarce. 
+- Użytkownik ma swój kredyt z powrotem.
+ 
+Zastosowanie nonce (losowa wartość) w sesji rozwiązuje problem ataku typu replay. Nonce jest ważna tylko raz i serwer musi śledzić wszystkie ważne nonce. To staje się jeszcze bardziej skomplikowane, jeśli twoja aplikacja znajduje się na kilku serwerach (mongrels). Przechowywanie nonce w tabeli bazy danych niszczy całą ideę CookieStore (unikanie łączenia się z bazą danych).
+ 
+Najlepszym [,#fffcdb]#rozwiązaniem jest przechowywanie tego rodzaju danych nie w sesji, lecz w bazie danych#. W tym przypadku kredyt powinien być przechowywany w bazie danych, a id_zalogowanego_użytkownika (logged_in_user_id) w sesji.
+=== Atak typu Session fixation
+ 
+-- _Oprócz kradzieży identyfikatora sesji użytkownika, atakujący może spreparować identyfikator sesji dla użytkownika. Zjawisko to jest określane mianem ataku typu session fixation.
+ 
 image::images/session_fixation.png[Session fixation]
-
-This attack focuses on fixing a user's session id known to the attacker, and forcing the user's browser into using this id. It is therefore not necessary for the attacker to steal the session id afterwards. Here is how this attack works:
-
-. The attacker creates a valid session id: He loads the login page of the web application where he wants to fix the session, and takes the session id in the cookie from the response (see number 1 and 2 in the image).
-
-. He possibly maintains the session. Expiring sessions, for example every 20 minutes, greatly reduces the time-frame for attack. Therefore he accesses the web application from time to time in order to keep the session alive.
-
-. Now the attacker will force the user's browser into using this session id (see number 3 in the image). As you may not change a cookie of another domain (because of the same origin policy), the attacker has to run a JavaScript from the domain of the target web application. Injecting the JavaScript code into the application by XSS accomplishes this attack. Here is an example: +<script> document.cookie="_session_id=16d5b78abb28e3d6206b60f22a03c8d9"; </script>+
-Read more about XSS and injection later on.
-
-. The attacker lures the victim to the infected page with the JavaScript code. By viewing the page, the victim's browser will change the session id to the trap session id.
-
-. As the new trap session is unused, the web application will require the user to authenticate.
-
-. From now on, the victim and the attacker will co-use the web application with the same session: The session became valid and the victim didn't notice the attack.
-
-=== Session fixation – Countermeasures
-
--- _One line of code will protect you from session fixation._
-
-The most effective countermeasure is to [,#fffcdb]#issue a new session identifier# and declare the old one invalid after a successful login. That way, an attacker cannot use the fixed session identifier. This is a good countermeasure against session hijacking, as well. Here is how to create a new session in Rails:
+ 
+Ten atak skupia się na spreparowaniu identyfikatora sesji dla użytkownika, który jest znany atakujący i zmuszeniu użytkownika do korzystania z tego identyfikatora. Zatem atakujący nie musi później kraść identyfikatora sesji. Oto jak działa ten atak:
+ 
+. Atakujący tworzy ważny identyfikator sesji: Ładuje stronę logowania aplikacji internetowej (która ma być obiektem ataku typu session fixation), i pozyskuje identyfikator sesji, wysłany w odpowiedzi z serwera w pliku cookie (patrz nr 1 i 2 na obrazku).
+ 
+. Atakujący prawdopodobnie będzie kontynuował sesję. Wygasanie sesji, na przykład co 20 minut, znacznie skraca czas przewidziany dla ataku. Dlatego atakujący co jakiś czas otwiera aplikację internetową, żeby podtrzymać sesję.
+ 
+. Teraz atakujący może zmusić przeglądarkę użytkownika do korzystania z jego identyfikatora sesji (patrz nr 3 na obrazku). Ponieważ nie można zmienić cookie innej domeny (z powodu zasady tożsamego pochodzenia - same origin policy), atakujący musi uruchomić JavaScript z domeny docelowej aplikacji internetowej. Wdrożenie (Injection) własnego kodu JavaScript do aplikacji będącej obiektem ataku jest możliwe dzięki takim metodom jak XSS. Oto przykład: 
++<script> document.cookie="_session_id=16d5b78abb28e3d6206b60f22a03c8d9"; </script>+
+Więcej informacji o atakach typu XSS i Injection znajduje się w dalszej części podręcznika.
+  
+. Atakujący wabi ofiary do stron zainfekowanych kodem JavaScript. Przeglądając stronę, przeglądarka ofiary zmienia identyfikator sesji na identyfikator sesji-pułapki.
+ 
+. Ponieważ nowa sesja-pułapka nie była do tej pory nieużywana, aplikacja internetowa będzie wymagać uwierzytelnienia użytkownika. 
+ 
+. Od tej pory, ofiara i atakujący będą wspólnie używać aplikacji internetowej, korzystając z tej samej sesji: Sesja stała się ważna, a ofiara nie zauważyła ataku.
+ 
+=== Sposoby obrony przed atakiem typu session fixation
+ 
+-- _Jedna linia kodu może ochronić Cię przed atakiem typu session fixation._
+  
+Najskuteczniejszą ochroną jest [,#fffcdb]#wydanie nowego identyfikatora sesji# i zadeklarowanie starego jako nieważnego po udanym logowaniu. W ten sposób atakujący nie może używać spreparowanych identyfikatorów sesji. Jest to również dobry sposób obrony przeciw przejęciu sesji. Oto jak utworzyć nową sesję w Railsach:
 
 [source, ruby]
 ----------------------------------------------------------------------------
 reset_session
 ----------------------------------------------------------------------------
-
-If you use the popular RestfulAuthentication plugin for user management, add reset_session to the SessionsController#create action. Note that this removes any value from the session, [,#fffcdb]#you have to transfer them to the new session#.
-
-Another countermeasure is to [,#fffcdb]#save user-specific properties in the session#, verify them every time a request comes in, and deny access, if the information does not match. Such properties could be the remote IP address or the user agent (the web browser name), though the latter is less user-specific. When saving the IP address, you have to bear in mind that there are Internet service providers or large organizations that put their users behind proxies. [,#fffcdb]#These might change over the course of a session#, so these users  will not be able to use your application, or only in a limited way.
+ 
+W przypadku korzystania z popularnej wtyczki RestfulAuthentication do zarządzania użytkownikami, należy dodać reset_session do akcji SessionsController#create. Zwróć uwagę, że ta akcja usuwa wszystkie wartości z sesji, [,#fffcdb]# więc musisz przenieść je do nowej sesji#.
+  
+Innym sposobem obrony jest [,#fffcdb]#zapisywanie specyficznych właściwości użytkownika w sesji#, weryfikowanie ich przy każdym żądaniu i odmowa dostępu, jeśli informacje te nie pasują do siebie. Takimi właściwościami mogą być adres IP lub user agent (nazwa przeglądarki internetowej), choć ta ostatnia nie jest aż tak bardzo charakterystyczna dla użytkownika. Podczas zapisywania adresu IP, musisz pamiętać, że istnieją dostawcy usług internetowych oraz duże organizacje, które oferują swoim użytkownikom dostęp do Internetu przez proxy. [,#fffcdb]# Adresy IP tych użytkowników mogą ulegać zmianom w trakcie sesji#, więc nie będą oni mogli korzystać z aplikacji, lub tylko w ograniczonym zakresie.
 
 === Session expiry
 
