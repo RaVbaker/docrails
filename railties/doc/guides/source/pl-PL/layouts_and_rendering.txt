@@ -19,7 +19,7 @@ Natomiast, gdy dojdzie do wysłania odpowiedzi użytkownikowi,
 Kontroler przekazuje to zadanie Widokowi. 
 Tematem tego tutoriala jest właśnie to przekazywanie.
 
-Kontroler musi zadecydować co powinno być przesłane jako odpowiedź i wywołać odpowiednią metodę by tą odpowiedź stworzyć. W przypadku gdy jest ona rozwiniętym widokiem jest dodatkowo opakowywana w layout i ewentualnie są do niej dołączane inne fragmenty widoków. Te wszystkie możliwości
+Kontroler musi zadecydować co powinno być przesłane jako odpowiedź i wywołać odpowiednią metodę by tą odpowiedź stworzyć. W przypadku gdy jest ona rozwiniętym widokiem, dodatkowo jest opakowywana w layout i ewentualnie są do niej dołączane inne fragmenty widoków. Te wszystkie możliwości
 zobaczysz w późniejszej części poradnika.
 
 == Tworzenie odpowiedzi
@@ -585,7 +585,7 @@ akceptuje zarówno numeryczne jak i symboliczne oznaczenia stanu.
 ==== Różnica pomiędzy +render+ a +redirect+
 
 Czasami niedoświadczony developer traktuje +redirect_to+ jako swego rodzaju polecenie
-+goto+, przenosząc wykonanie programu z jednego miejsca do innego miejsca w kodzie.
++goto+, przenosząc wykonanie programu z jednego miejsca do innego w kodzie.
 To _nie_ jest prawidłowe. Twój kod przestaje się wykonywać i czeka na nowe zapytanie
 przeglądarki. Po prostu mówisz przeglądarce jakie następne zapytanie powinna zrobić
 poprzez wysłanie kodu HTTP 302.
@@ -624,9 +624,7 @@ def show
   end
 end
 -------------------------------------------------------
-
-Ten kod spowoduje, że przeglądarka wykona nowe zapytanie o stronę index, kod w metodzie
-+index+ będzie uruchomiony i wszystko będzie działać tak jak powinno.
+Ten kod spowoduje, że przeglądarka wyśle zapytanie o stronę index. Następnie zostanie uruchomiony odpowiedni kod w metodzie index i wszystko zadziała tak jak tego oczekujemy.
 
 === Używanie +head+ do budowania odpowiedzi tylko z nagłówkami
 
@@ -659,12 +657,12 @@ wynikowej:
 * +yield+ i +content_for+
 * Podszablony
 
-Zajmiemy się omówieniem każdej z nich po kolei.
+Omówię każdą z nich po kolei.
 
 === Asset Tags
 
-Asset tags dostarczają metod na generowanie kodu HTML, który łączy widoki z elementami
-zewnętrznymi jak obrazki, javascript, arkusze stylów i kanały. Istnieją cztery typy
+Asset tags dostarczają metody do generowania kodu HTML, który łączy widoki z elementami
+zewnętrznymi takimi jak obrazki, javascript, arkusze stylów i kanały. Istnieją cztery typy
 tagów włączających:
 
 * auto_discovery_link_tag
@@ -752,8 +750,8 @@ Możesz dołączyć opcję +:recursive+ by ładować również pliki w podfolder
 <%= javascript_include_tag :all, :recursive => true %>
 -------------------------------------------------------
 
-Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność poprzez połączenie
-wielu plików w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
+Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność, poprzez połączenie
+ich w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
 +:cache => true+ wewnątrz +javascript_include_tag+:
 
 [source, ruby]
@@ -829,7 +827,7 @@ Możesz wykorzystać opcję +:recursive+ by załączyć wszystkie pliki w podfol
 -------------------------------------------------------
 
 Jeśli wczytujesz wiele plików CSS, możesz polepszyć efektywność poprzez połączenie
-wielu plików w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
+ich w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
 +:cache => true+ wewnątrz +stylesheet_link_tag+:
 
 [source, ruby]
@@ -919,7 +917,7 @@ zawartość w nazwanym +yield+, należy użyć metody +content_for+.
 === Używanie +content_for+
 
 Metoda ta pozwala wstawić treść do bloku +yield+ w twoim layoucie. Używa się +content_for+
-tylko po to by wstawić zawartość w nazwane yieldy. Dla przykładu, ten widok będzie
+tylko po to by wstawić zawartość w nazwane yielda. Dla przykładu, ten widok będzie
 współpracował z powyższym layoutem:
 
 [source, html]
@@ -999,8 +997,8 @@ co się dzieje wewnątrz. Na przykład, możesz mieć widok, który wygląda w t
 <%= render :partial => "shared/footer" %>
 -------------------------------------------------------
 
-Tutaj, podszablony +_ad_banner.html.erb+ i +_footer.html.erb+  mogą zawierać zawartość,
-która jest dzielona międz wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć
+Tutaj, podszablony +_ad_banner.html.erb+ i +_footer.html.erb+  mogą zawierać kod,
+który jest dzielona między wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć
 szczegóły tych sekcji, kiedy koncentrujesz się na konkretnej stronie.
 
 TIP: W przypadku treści, które są dzielone pomiędzy wszystkie strony twojej aplikacji
@@ -1023,7 +1021,7 @@ znajdują się im odpowiadające podszablony (nie w głównym folderze +layouts+
 
 ==== Przekazywanie lokalnych zmiennych
 
-Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich nawet bardziej
+Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich bardziej
 potężne i elastyczne narzędzie. Na przykład możesz użyć tej techniki do zredukowania
 powtarzania pomiędzy stronami new i edit, wciąż jednak utrzymując w nich nieco odmienną
 treść:
@@ -1065,7 +1063,7 @@ Jakkolwiek ten sam podszablon będzie renderowany w obu widokach, etykieta na pr
 wysyłającym jest kontrolowana przez lokalną zmienną przekazywaną do podszablonów.
 
 Każdy podszablon ma także lokalną zmienną z taką samą nazwą jak on sam (minus podkreślenie).
-Możesz przekazać obiekt do tej lokalnej zmiennej za pomocą opcji +:object+.
+Możesz przekazać obiekt do tej zmiennej za pomocą opcji +:object+.
 
 [source, html]
 -------------------------------------------------------
@@ -1093,7 +1091,7 @@ użyty zostanie +_customer.html.erb+.
 
 ==== Renderowanie kolekcji
 
-Podszablony są bardzo przydatne w renderowaniu kolekcji . Kiedy przekazujesz kolekcje do
+Podszablony są bardzo przydatne w renderowaniu kolekcji. Kiedy przekazujesz kolekcje do
 podszablonu poprzez opcję +:collection+, podszablon będzie wstawiony do każdego elementu
 kolekcji.
 
@@ -1114,7 +1112,7 @@ kolekcji.
 
 Kiedy podszablon jest renderowany z kolekcją, to każda indywidualna instancja
 podszablonu ma dostęp do renderowanego elementu kolekcji poprzez zmienną
-nazwaną tak jak podszablon. W tym przypadku podszablonem 
+nazwaną tak jak podszablon. W tym przypadku, podszablonem 
 jest +_product+, i wewnątrz niego możesz odwołać się do zmiennej +product+ by
 uzyskać aktualnie renderowaną instancję. Aby użyć innej
 nazwy zmiennej wewnątrz podszablonu, użyj opcji +:as+ podczas jego wywołania:
@@ -1162,7 +1160,7 @@ wyrenderować ją w ten sposób:
 <p>Product Name: <%= product.name %></p>
 -------------------------------------------------------
 
-Railsy określają nazwę podszablonu do użycia poprzez patrzenie na nazwę modelu w
+Railsy określają nazwę podszablonu do użycia, bazując na nazwie modelu w
 kolekcji. W istocie, można również stworzyć różnorodną kolekcję i renderować ją w ten
 sposób, a Railsy wybierają właściwy podszablon dla każdego członka kolekcji.
 
@@ -1193,10 +1191,7 @@ każdego elementu kolekcji.
 
 === Korzystanie z zagnieżdżonych layoutów
 
-Może się okazać, że twoja aplikacja w jednym kontrolerze wymaga layoutu zupełnie
-różniącego się od zwyczajnego layoutu twojej aplikacji.
-Zamiast kopiować główny layout i tylko odpowiednio go edytować można tego dokonać za
-pomocą zagnieżdżonych layoutów.
+Może się okazać, że twoja aplikacja w jednym kontrolerze wymaga layoutu nieco różniącego się od standardowego layoutu twojej aplikacji. Rozwiązaniem, zamiast edycji kopii głównego layoutu, może być wykorzystanie mechanizmu zagnieżdżonych layoutów.
 Oto przykład:
 
 Załóżmy, że masz następujący layout ApplicationController:
@@ -1239,7 +1234,7 @@ Na stronach generowanych przez NewsController, chciałbyś ukryć górne menu i 
 NOTE: W wersjach Railsów wcześniejszych niż 2.3, powinieneś użyć +render
 \'layouts/applications\'+ zamiast +render :file => \'layouts/applications'+
 
-To wszystko. Widok News będzie używał nowego layoutu, ukrywającego górne menu i dodającego prawe menu wewnątrz div "content".
+I to wszystko. Widok News będzie używał nowego layoutu, ukrywającego górne menu i dodającego prawe menu wewnątrz div "content".
 
 Istnieje kilka sposobów otrzymania podobnych wyników za pomocą różnych schematów
 wykorzystania zagnieżdżonych layoutów wykorzystujących tą technikę. 
