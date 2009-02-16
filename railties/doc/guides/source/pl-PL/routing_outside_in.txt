@@ -103,62 +103,62 @@ map.connect ':controller/:action/:id.:format'
 
 Te drogi routingu są automatycznie generowane podczas tworzenia nowej aplikacji Railsowej. Jeśli cała Twoja aplikacja jest korzysta z routingu RESTful, prawdopodobnie będziesz chciał je usunąć. Zanim jednak to zrobisz, upewnij się, że nie są one nigdy używane!
 
-== RESTful Routing: the Rails Default
+== Routing RESTful: domyślny routing Railsów
 
-RESTful routing is the current standard for routing in Rails, and it's the one that you should prefer for new applications. It can take a little while to understand how RESTful routing works, but it's worth the effort; your code will be easier to read and you'll be working with Rails, rather than fighting against it, when you use this style of routing.
+Routing RESTful jest obecnie standardowy w Railsach i to jego powinieneś preferować tworząc nowe aplikacje. Zrozumienie jak działa routing RESTful może wydawać się trochę trudne, jednak na pewno się opłaca; dzięki niemu Twój kod będzie dużo bardziej czytelny, a Twoja praca w końcu przestanie wyglądać jak walczenie z frameworkiem.
 
-=== What is REST?
+=== Czym jest REST?
 
-The foundation of RESTful routing is generally considered to be Roy Fielding's doctoral thesis, link:http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm[Architectural Styles and the Design of Network-based Software Architectures]. Fortunately, you need not read this entire document to understand how REST works in Rails. REST, an acronym for Representational State Transfer, boils down to two main principles for our purposes:
+Założenia routingu REST pochodzą z pracy doktorskiej Roy'a Fielding'a: link:http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm[Architectural Styles and the Design of Network-based Software Architectures]. Na szczęście nie musisz czytać całego dokumentu, by zrozumieć ideę REST w Railsach. REST jest to skrót od angielskiej nazwy "Representational State Transfer", czyli Reprezentacyjny Transfer Stanu. Sprowadza się on do dwóch głównych założeń:
 
-* Using resource identifiers (which, for the purposes of discussion, you can think of as URLs) to represent resources
-* Transferring representations of the state of that resource between system components. 
+* używanie identyfikatorów zasobów (dla celów tego przewodnika możesz je utożsamiać z URL) do ich reprezentacji
+* transferowanie reprezentacji stanów każdego zasobu pomiędzy elementami systemu.
 
-For example, to a Rails application a request such as this:
+Na przykład, żądanie takie jak:
 
-+DELETE /photos/17+
+`DELETE /photos/17`
 
-would be understood to refer to a photo resource with the ID of 17, and to indicate a desired action - deleting that resource. REST is a natural style for the architecture of web applications, and Rails makes it even more natural by using conventions to shield you from some of the RESTful complexities.
+będzie odczytane przez aplikację Railsową jako odniesienie do zasobu będącego zdjęciem o ID równym 17, a akcją wymaganą przez takie żądanie będzie wskazanego usunięcie zasobu. REST jest naturalnym stylem architektury aplikacji sieciowej, a Rails czyni go jeszcze bardziej przyjaznym dzięki konwencjom upraszczającym jego stosowanie.
   
-=== CRUD, Verbs, and Actions
+=== CRUD, typy żądań i akcje
 
-In Rails, a RESTful route provides a mapping between HTTP verbs, controller actions, and (implicitly) CRUD operations in a database. A single entry in the routing file, such as
+W Railsach, droga routingu RESTful łączy żądanie HTTP, akcję kontrolera i, pośrednio, operację CRUD na bazie danych. Pojedynczy wpis do pliku routingu, taki jak:
 
 [source, ruby]
 -------------------------------------------------------
 map.resources :photos
 -------------------------------------------------------
 
-creates seven different routes in your application:
+tworzy siedem różnych dróg routingu w aplikacji:
 
 [options="header"]
 |==========================================================================================================
-|HTTP verb  |URL             |controller  |action   |used for
-|GET        |/photos         |Photos      |index    |display a list of all photos
-|GET        |/photos/new     |Photos      |new      |return an HTML form for creating a new photo
-|POST       |/photos         |Photos      |create   |create a new photo
-|GET        |/photos/1       |Photos      |show     |display a specific photo
-|GET        |/photos/1/edit  |Photos      |edit     |return an HTML form for editing a photo
-|PUT        |/photos/1       |Photos      |update   |update a specific photo
-|DELETE     |/photos/1       |Photos      |destroy  |delete a specific photo
+|żądanie HTTP |URL             |kontroler |akcja    |cel użycia
+|GET          |/photos         |Photos    |index    |wyświetlenie listy wszystkich zdjęć
+|GET          |/photos/new     |Photos    |new      |zwrócenie formularza HTML do tworzenia zdjęcia
+|POST         |/photos         |Photos    |create   |tworzenie nowego zdjęcia
+|GET          |/photos/1       |Photos    |show     |wyświetlenie konkretnego zdjęcia
+|GET          |/photos/1/edit  |Photos    |edit     |zwrócenie formularza HTML do edycji zdjęcia
+|PUT          |/photos/1       |Photos    |update   |aktualizacja konkretnego zdjęcia
+|DELETE       |/photos/1       |Photos    |destroy  |usunięcie konkretnego zdjęcia
 |==========================================================================================================
 
-For the specific routes (those that reference just a single resource), the identifier for the resource will be available within the corresponding controller action as +params[:id]+.
+Dla dróg routingu odnoszących się do jednego konkretnego zasobu, identyfikator zasobu będzie dostępny dla akcji odpowiedniego kontrolera jako parametr `params[:id]`.
 
-TIP: If you consistently use RESTful routes in your application, you should disable the default routes in +routes.rb+ so that Rails will enforce the mapping between HTTP verbs and routes.
+TIP: Jeśli stale używasz dróg RESTful, powinieneś wyłączyć drogi domyślne w pliku `routes.rb`, aby Railsy wymusiły routowanie oparte na typach żądań.
 
-=== URLs and Paths
+=== Adresy URL i ścieżki dostępu
 
-Creating a RESTful route will also make available a pile of helpers within your application:
+Stworzenie drogi routingu RESTful powoduje także udostępnienie kilku helperów wewnątrz aplikacji:
 
-* +photos_url+ and +photos_path+ map to the path for the index and create actions
-* +new_photo_url+ and +new_photo_path+ map to the path for the new action
-* +edit_photo_url+ and +edit_photo_path+ map to the path for the edit action
-* +photo_url+ and +photo_path+ map to the path for the show, update, and destroy actions
+* `photos_url` i `photos_path` wskazują ścieżki dostępu do akcji `index` i `create`
+* `new_photo_url` i `new_photo_path` wskazują ścieżkę dostępu do akcji `new`
+* `edit_photo_url` i `edit_photo_path` wskazują ścieżkę dostępu do akcji `edit`
+* `photo_url`  i `photo_path` wskazują ścieżki dostępu do akcji `show`, `update` i `destroy`
 
-NOTE: Because routing makes use of the HTTP verb as well as the path in the request to dispatch requests, the seven routes generated by a RESTful routing entry only give rise to four pairs of helpers.
+NOTE: Ponieważ routing opiera się zarówno na typach żądań HTTP jak i na ścieżkach dostępu w nich zawartych, siedem dróg routingu wymaga określenia tylko czterech par helperów.
 
-In each case, the +_url+ helper generates a string containing the entire URL that the application will understand, while the +_path+ helper generates a string containing the relative path from the root of the application. For example:
+W każdym przypadku, helper `_url` generuje łańcuch znaków zawierający pełny adres URL jaki będzie zrozumiały dla aplikacji, a `_path` - łańcuch zawierający ścieżkę dostępu odnoszącą się do katalogu głównego aplikacji. Na przykład:
 
 [source, ruby]
 -------------------------------------------------------
@@ -166,16 +166,16 @@ photos_url  # => "http://www.example.com/photos"
 photos_path # => "/photos"
 -------------------------------------------------------
 
-=== Defining Multiple Resources at the Same Time
+=== Definiowanie kilku zasobów jednocześnie
 
-If you need to create routes for more than one RESTful resource, you can save a bit of typing by defining them all with a single call to +map.resources+:
+Jeśli chcesz utworzyć drogi routingu do więcej niż jednego zasobu RESTful, możesz zaoszczędzić dużo kodu definiując je wewnątrz jednego odwołania do `map.resources`:
 
 [source, ruby]
 -------------------------------------------------------
 map.resources :photos, :books, :videos
 -------------------------------------------------------
 
-This has exactly the same effect as 
+Taki zapis jest równoważny z poniższym:
 
 [source, ruby]
 -------------------------------------------------------
