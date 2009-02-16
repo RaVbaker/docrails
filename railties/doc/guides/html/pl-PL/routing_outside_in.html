@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Rails Routing from the Outside In</title>
+  <title>Routing w Railsach</title>
   <!--[if lt IE 8]>
   <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js" type="text/javascript"></script>
   <![endif]-->
@@ -31,30 +31,30 @@
       <h2>Chapters</h2>
       <ol>
           <li>
-          <a href="#_the_dual_purpose_of_routing">The Dual Purpose of Routing</a>
+          <a href="#_podw_jny_cel_routingu">Podwójny cel routingu</a>
             <ul>
             
-              <li><a href="#_connecting_urls_to_code">Connecting URLs to Code</a></li>
+              <li><a href="#_czenie_adresu_url_z_kodem">Łączenie adresu URL z kodem</a></li>
             
-              <li><a href="#_generating_urls_from_code">Generating URLs from Code</a></li>
+              <li><a href="#_generowanie_adresu_url_z_kodu_r_d_owego">Generowanie adresu URL z kodu źródłowego</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_quick_tour_of_routes_rb">Quick Tour of Routes.rb</a>
+          <a href="#_kr_tki_przegl_d_routes_rb">Krótki przegląd routes.rb</a>
             <ul>
             
-              <li><a href="#_processing_the_file">Processing the File</a></li>
+              <li><a href="#_przetwarzanie_pliku">Przetwarzanie pliku</a></li>
             
-              <li><a href="#_restful_routes">RESTful Routes</a></li>
+              <li><a href="#_drogi_restful">Drogi RESTful</a></li>
             
-              <li><a href="#_named_routes">Named Routes</a></li>
+              <li><a href="#_drogi_nazwane">Drogi nazwane</a></li>
             
-              <li><a href="#_nested_routes">Nested Routes</a></li>
+              <li><a href="#_drogi_zagnie_d_one">Drogi zagnieżdżone</a></li>
             
-              <li><a href="#_regular_routes">Regular Routes</a></li>
+              <li><a href="#_drogi_regularne">Drogi regularne</a></li>
             
-              <li><a href="#_default_routes">Default Routes</a></li>
+              <li><a href="#_drogi_domy_lne">Drogi domyślne</a></li>
             
             </ul>
           </li>
@@ -87,7 +87,7 @@
             </ul>
           </li>
           <li>
-          <a href="#_regular_routes_2">Regular Routes</a>
+          <a href="#_regular_routes">Regular Routes</a>
             <ul>
             
               <li><a href="#_bound_parameters">Bound Parameters</a></li>
@@ -100,7 +100,7 @@
             
               <li><a href="#_defining_defaults">Defining Defaults</a></li>
             
-              <li><a href="#_named_routes_2">Named Routes</a></li>
+              <li><a href="#_named_routes">Named Routes</a></li>
             
               <li><a href="#_route_requirements">Route Requirements</a></li>
             
@@ -152,46 +152,28 @@
     </div>
     
     <div id="content">
-        <h1>Rails Routing from the Outside In</h1>
+        <h1>Routing w Railsach</h1>
       <div id="preamble">
 <div class="sectionbody">
-<div class="paragraph"><p>This guide covers the user-facing features of Rails routing. By referring to this guide, you will be able to:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Understand the purpose of routing
-</p>
-</li>
-<li>
-<p>
-Decipher the code in <tt>routes.rb</tt>
-</p>
-</li>
-<li>
-<p>
-Construct your own routes, using either the classic hash style or the now-preferred RESTful style
-</p>
-</li>
-<li>
-<p>
-Identify how a route will map to a controller and action
-</p>
-</li>
-</ul></div>
+<div class="paragraph"><p>Poniższy tekst to przewodnik po opcjach związanych z routingiem (routing) we frameworku Rails, z którymi spotykają użytkownicy. W oparciu o niego, będziesz mógł:
+* Poznać i zrozimieć sens routingu
+* Rozszyfrować kod pliku <tt>routes.rb</tt>
+* Tworzyć własne drogi routingu (routes) w klasycznym stylu hash lub popularnym obecnie RESTful
+* Rozpoznać jak droga routingu wskazuje do kontrolera i akcji.</p></div>
 </div>
 </div>
-<h2 id="_the_dual_purpose_of_routing">1. The Dual Purpose of Routing</h2>
+<h2 id="_podw_jny_cel_routingu">1. Podwójny cel routingu</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Rails routing is a two-way piece of machinery - rather as if you could turn trees into paper, and then turn paper back into trees. Specifically, it both connects incoming HTTP requests to the code in your application&#8217;s controllers, and helps you generate URLs without having to hard-code them as strings.</p></div>
-<h3 id="_connecting_urls_to_code">1.1. Connecting URLs to Code</h3>
-<div class="paragraph"><p>When your Rails application receives an incoming HTTP request, say</p></div>
+<div class="paragraph"><p>Routing w Railsach jest to dwukierunkowy mechanizm - tak, jakby móc przerobić drzewa na papier, a potem z papieru z powrotem utworzyć drzewa. Dokładnie rzecz biorąc, drogi routingu łączą nadchodzące żądania HTTP z kodem w kontrolerach Twojej aplikacji i pomagają generować adresy URL bez konieczności ręcznego zapisania ich jako łańcuchy znaków.</p></div>
+<h3 id="_czenie_adresu_url_z_kodem">1.1. Łączenie adresu URL z kodem</h3>
+<div class="paragraph"><p>Silnik routingu wewnątrz Railsów jest to fragment kodu, który przekazuje żądanie HTTP do odpowiedniego fragmentu aplikacji. Gdy Twoja aplikacja otrzymuje żądanie, np.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>GET /patients/17</tt></pre>
 </div></div>
-<div class="paragraph"><p>the routing engine within Rails is the piece of code that dispatches the request to the appropriate spot in your application. In this case, the application would most likely end up running the <tt>show</tt> action within the <tt>patients</tt> controller, displaying the details of the patient whose ID is 17.</p></div>
-<h3 id="_generating_urls_from_code">1.2. Generating URLs from Code</h3>
-<div class="paragraph"><p>Routing also works in reverse. If your application contains this code:</p></div>
+<div class="paragraph"><p>najprawdopodobniej wykona akcję <tt>show</tt> dla kontrolera <tt>patients</tt>, wyświetlając informacje o pacjencie posiadającym ID równe 17.</p></div>
+<h3 id="_generowanie_adresu_url_z_kodu_r_d_owego">1.2. Generowanie adresu URL z kodu źródłowego</h3>
+<div class="paragraph"><p>Routing działa także w drugą stronę. Załóżmy, że Twoja aplikacja zawiera kod:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -199,68 +181,68 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@patient</span> <span style="color: #990000">=</span> Patient<span style="color: #990000">.</span>find<span style="color: #990000">(</span><span style="color: #993399">17</span><span style="color: #990000">)</span>
 <span style="color: #FF0000">&lt;%= link_to "Patient Record", patient_path(@patient) %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Then the routing engine is the piece that translates that to a link to a URL such as <tt>http://example.com/patients/17</tt>. By using routing in this way, you can reduce the brittleness of your application as compared to one with hard-coded URLs, and make your code easier to read and understand.</p></div>
+<div class="paragraph"><p>Mechanizm rutingu działa jako element tłumaczący ten kod na adres URL, np <tt>http://example.com/patients/17</tt>. Korzystając z routingu w ten sposób, możesz sprawisz, że Twoja aplikacja będzie bardziej niezawodna i łatwiejsza do zrozumienia niż w wypadku, gdybyś ręcznie wpisywał wszystkie linki URL.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Patient needs to be declared as a resource for this style of translation via a named route to be available.</td>
+<td class="content">Obiekt <tt>Patient</tt> musi być zadeklarowany jako zasób dostępny dla drogi nazwanej, by mógł zostać prawidłowo obsłużony przez ten kod.</td>
 </tr></table>
 </div>
 </div>
-<h2 id="_quick_tour_of_routes_rb">2. Quick Tour of Routes.rb</h2>
+<h2 id="_kr_tki_przegl_d_routes_rb">2. Krótki przegląd routes.rb</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>There are two components to routing in Rails: the routing engine itself, which is supplied as part of Rails, and the file <tt>config/routes.rb</tt>, which contains the actual routes that will be used by your application. Learning exactly what you can put in <tt>routes.rb</tt> is the main topic of this guide, but before we dig in let&#8217;s get a quick overview.</p></div>
-<h3 id="_processing_the_file">2.1. Processing the File</h3>
-<div class="paragraph"><p>In format, <tt>routes.rb</tt> is nothing more than one big block sent to <tt>ActionController::Routing::Routes.draw</tt>. Within this block, you can have comments, but it&#8217;s likely that most of your content will be individual lines of code - each line being a route in your application. You&#8217;ll find five main types of content in this file:</p></div>
+<div class="paragraph"><p>Za routing w Railsach odpowiadają dwa moduły: silnik routingu, który jest integralną częścią frameworku oraz plik <tt>config/routes.rb</tt>, zawierający definicje dróg routingu używanych w aplikacji. Poznanie dokładnej zawartości pliku <tt>routes.rb</tt> jest podstawowym celem tego przewodnika. Zanim jednak zagłębimy się w tym temacie, proponuję krótki przegląd pliku.</p></div>
+<h3 id="_przetwarzanie_pliku">2.1. Przetwarzanie pliku</h3>
+<div class="paragraph"><p>Pod względem formatu, <tt>routes.rb</tt> jest po prostu dużym blokiem wysłanym do <tt>ActionController::Routing::Routes.draw</tt>. Wewnątrz tego bloku możesz umieszczać komentarze, jednak najprawdopodobniej większość jego zawartości to pojedyncze linie kodu - każda z nich odpowiada za drogę routingu w aplikacji. W pliku tym można znaleźć pięć podstawowych typów zawartości:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-RESTful Routes
+drogi RESTful
 </p>
 </li>
 <li>
 <p>
-Named Routes
+drogi nazwane
 </p>
 </li>
 <li>
 <p>
-Nested Routes
+drogi zagnieżdżone
 </p>
 </li>
 <li>
 <p>
-Regular Routes
+drogi regularne
 </p>
 </li>
 <li>
 <p>
-Default Routes
+drogi domyślne
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Each of these types of route is covered in more detail later in this guide.</p></div>
-<div class="paragraph"><p>The <tt>routes.rb</tt> file is processed from top to bottom when a request comes in. The request will be dispatched to the first matching route. If there is no matching route, then Rails returns HTTP status 404 to the caller.</p></div>
-<h3 id="_restful_routes">2.2. RESTful Routes</h3>
-<div class="paragraph"><p>RESTful routes take advantage of the built-in REST orientation of Rails to wrap up a lot of routing information in a single declaration. A RESTful route looks like this:</p></div>
+<div class="paragraph"><p>Każdą z nich omówimy dokładniej w dalszej części tego przewodnika.</p></div>
+<div class="paragraph"><p>W momencie nadejścia żądania, plik `routes.rb jest przetwarzany w kolejności "z góry na dół". W momencie odnalezienia pierwszego pasującego wpisu, żądanie zostaje przekazane przez powiązaną z nim drogę do odpowiedniego kontrolera.W przypadku, gdy w pliku nie będzie żadnej pasującej do żądania drogi routingu, Railsy zwrócą status 404.</p></div>
+<h3 id="_drogi_restful">2.2. Drogi RESTful</h3>
+<div class="paragraph"><p>Drogi RESTful korzystają z wbudowanej w Rails orientacji REST, by umożliwić zapisanie jak najwięcej informacji routingu w jednej deklaracji. Ścieżka RESTful wygląda tak:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>resources <span style="color: #990000">:</span>books</tt></pre></div></div>
-<h3 id="_named_routes">2.3. Named Routes</h3>
-<div class="paragraph"><p>Named routes give you very readable links in your code, as well as handling incoming requests. Here&#8217;s a typical named route:</p></div>
+<h3 id="_drogi_nazwane">2.3. Drogi nazwane</h3>
+<div class="paragraph"><p>Drogi nazwane dają bardzo czytelne linki w kodzie źródłowym. Poniżej przedstawiona została typowa droga nazwana:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>login <span style="color: #FF0000">'/login'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>controller <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'sessions'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>action <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'new'</span></tt></pre></div></div>
-<h3 id="_nested_routes">2.4. Nested Routes</h3>
-<div class="paragraph"><p>Nested routes let you declare that one resource is contained within another resource. You&#8217;ll see later on how this translates to URLs and paths in your code. For example, if your application includes parts, each of which belongs to an assembly, you might have this nested route declaration:</p></div>
+<h3 id="_drogi_zagnie_d_one">2.4. Drogi zagnieżdżone</h3>
+<div class="paragraph"><p>Drogi zagnieżdżone umożliwiają deklarację ścieżki do zasobu zawartego wewnątrz innego zasobu. Później zobaczysz jak taka droga umożliwia tłumaczenie kodu na adresy i ścieżki dostępu. Na przykład, jeśli aplikacja składa się z kilku części, a każda z nich należy do pewnej grupy, możesz stosować zagnieżdżoną drogę routingu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -269,16 +251,16 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>resources <span style="color: #990000">:</span>assemblies <span style="font-weight: bold"><span style="color: #0000FF">do</span></span> <span style="color: #990000">|</span>assemblies<span style="color: #990000">|</span>
   assemblies<span style="color: #990000">.</span>resources <span style="color: #990000">:</span>parts
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<h3 id="_regular_routes">2.5. Regular Routes</h3>
-<div class="paragraph"><p>In many applications, you&#8217;ll also see non-RESTful routing, which explicitly connects the parts of a URL to a particular action. For example,</p></div>
+<h3 id="_drogi_regularne">2.5. Drogi regularne</h3>
+<div class="paragraph"><p>W wielu aplikacjach spotkasz się także z niezgodnym z założeniami REST routingiem, który wskazuje wprost powiązanie fragmentów URL z konkretną akcją. Przykład ścieżki regularnej to:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>connect <span style="color: #FF0000">'parts/:number'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>controller <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'inventory'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>action <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'show'</span></tt></pre></div></div>
-<h3 id="_default_routes">2.6. Default Routes</h3>
-<div class="paragraph"><p>The default routes are a safety net that catch otherwise-unrouted requests. Many Rails applications will contain this pair of default routes:</p></div>
+<h3 id="_drogi_domy_lne">2.6. Drogi domyślne</h3>
+<div class="paragraph"><p>Domyślne drogi routingu są siecią zabezpieczeń, obsługującą żądania które nie pasowały do żadnej innej drogi. Wiele aplikacji Railsowych zawiera taką parę ścieżek domyślnych:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -286,7 +268,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>connect <span style="color: #FF0000">':controller/:action/:id'</span>
 map<span style="color: #990000">.</span>connect <span style="color: #FF0000">':controller/:action/:id.:format'</span></tt></pre></div></div>
-<div class="paragraph"><p>These default routes are automatically generated when you create a new Rails application. If you&#8217;re using RESTful routing for everything in your application, you will probably want to remove them. But be sure you&#8217;re not using the default routes before you remove them!</p></div>
+<div class="paragraph"><p>Te drogi routingu są automatycznie generowane podczas tworzenia nowej aplikacji Railsowej. Jeśli cała Twoja aplikacja jest korzysta z routingu RESTful, prawdopodobnie będziesz chciał je usunąć. Zanim jednak to zrobisz, upewnij się, że nie są one nigdy używane!</p></div>
 </div>
 <h2 id="_restful_routing_the_rails_default">3. RESTful Routing: the Rails Default</h2>
 <div class="sectionbody">
@@ -1256,7 +1238,7 @@ http://www.gnu.org/software/src-highlite -->
 <h4 id="_a_note_of_caution">3.11.4. A Note of Caution</h4>
 <div class="paragraph"><p>If you find yourself adding many extra actions to a RESTful route, it&#8217;s time to stop and ask yourself whether you&#8217;re disguising the presence of another resource that would be better split off on its own. When the <tt>:member</tt> and <tt>:collection</tt> hashes become a dumping-ground, RESTful routes lose the advantage of easy readability that is one of their strongest points.</p></div>
 </div>
-<h2 id="_regular_routes_2">4. Regular Routes</h2>
+<h2 id="_regular_routes">4. Regular Routes</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>In addition to RESTful routing, Rails supports regular routing - a way to map URLs to controllers and actions. With regular routing, you don&#8217;t get the masses of routes automatically generated by RESTful routing. Instead, you must set up each route within your application separately.</p></div>
 <div class="paragraph"><p>While RESTful routing has become the Rails standard, there are still plenty of places where the simpler regular routing works fine. You can even mix the two styles within a single application. In general, you should prefer RESTful routing <em>when possible</em>, because it will make parts of your application easier to write. But there&#8217;s no need to try to shoehorn every last piece of your application into a RESTful framework if that&#8217;s not a good fit.</p></div>
@@ -1313,7 +1295,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>connect <span style="color: #FF0000">'photos/:id'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>controller <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'photos'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>action <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'show'</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>defaults <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">{</span> <span style="color: #990000">:</span>format <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'jpg'</span> <span style="color: #FF0000">}</span></tt></pre></div></div>
 <div class="paragraph"><p>With this route, an incoming URL of <tt>photos/12</tt> would be dispatched to the <tt>show</tt> action within the <tt>Photos</tt> controller, and <tt>params[:format]</tt> will be set to <tt>jpg</tt>.</p></div>
-<h3 id="_named_routes_2">4.6. Named Routes</h3>
+<h3 id="_named_routes">4.6. Named Routes</h3>
 <div class="paragraph"><p>Regular routes need not use the <tt>connect</tt> method. You can use any other name here to create a <em>named route</em>. For example,</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11

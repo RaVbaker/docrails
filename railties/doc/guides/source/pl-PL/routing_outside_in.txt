@@ -1,5 +1,5 @@
 Routing w Railsach
-=================================
+==================
 
 Poniższy tekst to przewodnik po opcjach związanych z routingiem (routing) we frameworku Rails, z którymi spotykają użytkownicy. W oparciu o niego, będziesz mógł:
 * Poznać i zrozimieć sens routingu

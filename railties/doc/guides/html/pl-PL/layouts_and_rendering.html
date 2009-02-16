@@ -101,20 +101,19 @@ Używać zagnieżdżonych szablonów (sub-szablony ang. nested layouts, sub-temp
 </div>
 <h2 id="_opis_zawarto_ci_jak_wszystko_razem_wsp_gra">1. Opis zawartości: Jak wszystko razem współgra</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Ten poradnik skupia się na wzajemnym oddziaływaniu pomiędzy Kontrolerem a Widokiem
-we wzorcu Model-View-Controller (MVC). Jak wiesz, Kontroler jest odpowiedzialny za
-nadzorowanie całego procesu obsługi zapytań w Railsach, pomimo że zazwyczaj przekazuje
-on każdy większy kod do Modelu. Natomiast gdy dojdzie do wysłania odpowiedzi użytkownikowi,
-Kontroler przekazuje to zadanie Widokowi. Tematem tego tutoriala jest właśnie to przekazywanie.</p></div>
-<div class="paragraph"><p>Ogólnie mówiąc to nadzorowanie wymaga zadecydowania, co powinno być przesłane jako
-odpowiedź, a następnie wywołania odpowiedniej metody w celu jej stworzenia. Jeśli
-odpowiedź jest rozwiniętym, skomplikowanym widokiem, Railsy wykonują dodatkową pracę
-by opakować widok w layout i ewentualnie dołączyć częściowe widoki. Te wszystkie możliwości
+<div class="paragraph"><p>Ten poradnik opisuje wzajemne relacje pomiędzy Kontrolerem a Widokiem
+we wzorcu Model-View-Controller (MVC). Jak wiesz, drogi czytelniku, Kontroler jest
+odpowiedzialny za nadzorowanie całego procesu obsługi zapytań w Railsach,
+pomimo że zazwyczaj przekazuje on każdy większy kod do Modelu.
+Natomiast, gdy dojdzie do wysłania odpowiedzi użytkownikowi,
+Kontroler przekazuje to zadanie Widokowi.
+Tematem tego tutoriala jest właśnie to przekazywanie.</p></div>
+<div class="paragraph"><p>Kontroler musi zadecydować co powinno być przesłane jako odpowiedź i wywołać odpowiednią metodę by tą odpowiedź stworzyć. W przypadku gdy jest ona rozwiniętym widokiem, dodatkowo jest opakowywana w layout i ewentualnie są do niej dołączane inne fragmenty widoków. Te wszystkie możliwości
 zobaczysz w późniejszej części poradnika.</p></div>
 </div>
 <h2 id="_tworzenie_odpowiedzi">2. Tworzenie odpowiedzi</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Z punktu widzenia kontrolera, są trzy drogi, aby stworzyć odpowiedź HTTP:</p></div>
+<div class="paragraph"><p>Kontroler może stworzyć odpowiedź HTTP dla przeglądarki na trzy sposoby:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -123,12 +122,12 @@ Wywołać <tt>render</tt> by stworzyć pełną odpowiedź do odesłania przeglą
 </li>
 <li>
 <p>
-Wywołać <tt>redirect_to</tt> by wysłać kod HTTP informujący o przekierowaniu do przeglądarki
+Wywołać <tt>redirect_to</tt> by wysłać kod HTTP informujący o przekierowaniu
 </p>
 </li>
 <li>
 <p>
-Wywołać <tt>head</tt> by stworzyć odpowiedź zawierającą tylko nagłówki HTTP i odesłać ją do przeglądarki
+Wywołać <tt>head</tt> by stworzyć odpowiedź zawierającą tylko nagłówki HTTP
 </p>
 </li>
 </ul></div>
@@ -147,7 +146,7 @@ http://www.gnu.org/software/src-highlite -->
   <span style="color: #009900">@book</span> <span style="color: #990000">=</span> Book<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Railsy automatycznie po wykonaniu metody wyrenderuje plik <tt>app/views/books/show.html.erb</tt>.
-Właściwie, jeśli masz domyślną regułę (route) catch-all w odpowiednim miejscu (<tt>map.connect
+Właściwie, jeśli masz domyślną regułę catch-all w pliku config/routing.rb (<tt>map.connect
 ':controller/:action/:id'</tt>), Railsy wyrenderują nawet widoki, które nie mają żadnego
 kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną regułę i nadejdzie
 żądanie dla <tt>/books/sale_list</tt>, Railsy w odpowiedzi wyrenderują <tt>app/views/books/sale_list.html.erb</tt>.</p></div>
@@ -166,10 +165,9 @@ są niezalecane i będą usuniętę w przyszłych wersjach Railsów.</td>
 </tr></table>
 </div>
 <h3 id="_u_ywanie_tt_render_tt">2.2. Używanie <tt>render</tt></h3>
-<div class="paragraph"><p>W większości przypadków, metoda <tt>ActionController::Base#render</tt> wykonuje dużą część
-renderowania twojej aplikacji do użytku przeglądarki. Jest wiele sposobów dostosowania
-zachowania funkcji <tt>render</tt>. Możesz wyrenderować domyślny widok dla szablonu,
-specyficzny szablon, pliku, fragment tekstu lub nawet nic.
+<div class="paragraph"><p>W większości przypadków, metoda <tt>ActionController::Base#render</tt> wykonuje zdecydowaną większość
+renderowania twojej aplikacji zaś sam proces można dostosować do własnych potrzeb. Możesz wyrenderować domyślny widok dla szablonu,
+specyficzny szablon pliku, fragment tekstu lub nawet (i tu niespodzianka) nic.
 Możesz renderować tekst, JSON lub XML. Możesz również ustalić typ zawartości lub stan
 HTTP wyrenderowanej odpowiedzi.</p></div>
 <div class="admonitionblock">
@@ -191,14 +189,14 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>render <span style="color: #990000">:</span>nothing <span style="color: #990000">=&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span></tt></pre></div></div>
-<div class="paragraph"><p>To wywołanie wyśle pustą odpowiedź do przeglądarki (jakkolwiek, będzie ona zawierała
+<div class="paragraph"><p>To wywołanie wyśle pustą odpowiedź do przeglądarki (chociaż będzie ona zawierała
 nagłówki statusu które ustawisz za pomocą opcji :status, omówionej poniżej).</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">Będziesz prawdopodobnie chciał używać metody <tt>head</tt>, omówionej poniżej, zamiast
+<td class="content">Prawdopodobnie będziesz chciał używać metody <tt>head</tt>, omówionej poniżej, zamiast
 <tt>render:nothing</tt>. Jest ona bardziej elastyczna i wskazuje, że generujesz tylko
 i wyłącznie nagłówki HTTP.</td>
 </tr></table>
@@ -267,9 +265,10 @@ wywołaniem <tt>render</tt>.</td>
 </tr></table>
 </div>
 <h4 id="_renderowanie_szablonu_akcji_z_innego_kontrolera">2.2.3. Renderowanie szablonu akcji z innego kontrolera</h4>
-<div class="paragraph"><p>Co zrobić jeśli chcesz wyrenderować szablon z zupełnie innego kontrolera, niż
-ten który zawiera kod akcji? Możesz to zrobić za pomocą <tt>render</tt>, które pobiera całą ścieżkę
-(relatywną do <tt>app/views/</tt>) kontrolera do wyrenderowania. Dla przykładu, jeśli uruchamiasz
+<div class="paragraph"><p>Jeżeli nie wiesz co zrobić, aby wyrenderować szablon z zupełnie innego kontrolera, niż
+ten który zawiera kod akcji, tu znajdziesz odpowiedź. Możesz tego dokonać za pomocą <tt>render</tt>,
+ które pobiera całą ścieżkę
+(relatywną do <tt>app/views/</tt>) kontrolera do wyrenderowania. Na przykład, jeśli uruchamiasz
 kod w <tt>AdminProductsController</tt>, który znajduje się w <tt>app/controllers/admin</tt>, możesz
 wyrenderować wynik akcji do szablonu <tt>app/views/products</tt> w ten sposób:</p></div>
 <div class="listingblock">
@@ -327,8 +326,8 @@ jak w Uniksie.</td>
 </tr></table>
 </div>
 <h4 id="_u_ywanie_tt_render_tt_z_tt_inline_tt">2.2.5. Używanie <tt>render</tt> z <tt>:inline</tt></h4>
-<div class="paragraph"><p>Metoda <tt>render</tt> może obyć się bez jakiegokolwiek widoku, jeśli tylko użyjesz opcji
-<tt>:inline</tt> przekazując ERB kod, który ma wyrenderować. Jest to całkowicie poprawne:</p></div>
+<div class="paragraph"><p>Metoda <tt>render</tt> może obejść się bez jakiegokolwiek widoku, jeśli tylko użyjesz opcji
+<tt>:inline</tt> przekazując ERB kod, który ma wyrenderować. Dlatego następujący kod jest całkowicie poprawny:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -346,7 +345,7 @@ jest trudniej podążać za tokiem twojego myślenia. Zamiast tego lepiej używa
 widoków erb.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Domyślnie, renderowanie typu inline używa ERB. Możesz zmusić je by użyło zamiast
+<div class="paragraph"><p>Renderowanie typu inline domyślnie używa ERB. Możesz zmusić je by użyło zamiast
 tego np.  Buildera, za pomocą opcji <tt>:type</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -452,7 +451,7 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>render <span style="color: #990000">:</span>js <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"alert('Hello Rails');"</span></tt></pre></div></div>
 <div class="paragraph"><p>Spowoduje to wysłanie przekazanego ciągu do przeglądarki z typem MIME <tt>text/javascript</tt>.</p></div>
 <h4 id="_opcje_dla_tt_render_tt">2.2.11. Opcje dla <tt>render</tt></h4>
-<div class="paragraph"><p>Wywołanie metody <tt>render</tt> generalnie akceptuje cztery opcje:</p></div>
+<div class="paragraph"><p>Wywołanie metody <tt>render</tt> akceptuje cztery opcje:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -479,7 +478,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Domyślnie Railsy dostarczą wynik operacji renderowania z typem zawartości MIME <tt>text/html</tt>
 (<tt>application/json</tt> jeśli używasz
 opcji <tt>:json</tt> lub <tt>application/xml</tt> dla opcji <tt>:xml</tt>). Możliwe, że będziesz chciał
-to zmienić i możesz to zrobić  poprzez ustawienie opcji <tt>:content_type</tt>:</p></div>
+to zmienić. Możesz to zrobić  poprzez ustawienie opcji <tt>:content_type</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -487,8 +486,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>render <span style="color: #990000">:</span>file <span style="color: #990000">=&gt;</span> filename<span style="color: #990000">,</span> <span style="color: #990000">:</span>content_type <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'application/rss'</span></tt></pre></div></div>
 <h5 id="_opcja_tt_layout_tt">Opcja <tt>:layout</tt></h5>
-<div class="paragraph"><p>W większości opcji renderowania, renderowana zawartość jest wyświetlana jako część
-aktualnego layoutu. Poznasz dokładniej layouty i jak z nich korzystać w dalszej części
+<div class="paragraph"><p>Większość opcji renderowania wyświetla zawartość jako część aktualnego layoutu. Poznasz dokładniej layouty i jak z nich korzystać w dalszej części
 tego przewodnika.</p></div>
 <div class="paragraph"><p>Możesz użyć opcji <tt>:layout</tt> by zakomunikować Railsom, by użyło określonego pliku jako
 layout dla bieżącej akcji.</p></div>
@@ -515,7 +513,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>render <span style="color: #990000">:</span>status <span style="color: #990000">=&gt;</span> <span style="color: #993399">500</span>
 render <span style="color: #990000">:</span>status <span style="color: #990000">=&gt;</span> <span style="color: #990000">:</span>forbidden</tt></pre></div></div>
-<div class="paragraph"><p>Railsy rozumią zarówno liczbowe kody stanu jak i odpowiadające im symbole. Listę kodów
+<div class="paragraph"><p>Railsy rozumieją zarówno liczbowe kody stanu jak i odpowiadające im symbole. Listę kodów
 stanu możesz znaleźć w <tt>actionpack/lib/action_controller/status_codes.rb</tt>. Możesz
 również zobaczyć tam jak mapowane są symbole na kody stanu.</p></div>
 <h5 id="_opcja_tt_location_tt">Opcja <tt>:location</tt></h5>
@@ -690,7 +688,7 @@ Domyślnie widoki będą renderowane z wykorzystaniem layoutu <tt>main</tt>
 </ul></div>
 <h4 id="_unikanie_b_d_w_podw_jnego_renderowania">2.2.13. Unikanie błędów podwójnego renderowania</h4>
 <div class="paragraph"><p>Prędzej czy później, większość programistów Railsów zobaczy komunikat o błędzie „Can
-only render or redirect once per action”. Chociaż jest to irytujące, jest to stosunkowo
+only render or redirect once per action”. Chociaż jest to irytujące, to stosunkowo
 łatwe do naprawienia. Zwykle dzieje się to z powodu niezrozumienia podstaw działania
 metody <tt>render</tt>.</p></div>
 <div class="paragraph"><p>Na przykład, oto fragment kodu, który powoduje ten błąd:</p></div>
@@ -708,8 +706,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Jeśli <tt>@book.special?</tt> ewaluuje do <tt>true</tt>, Railsy rozpoczną proces
 renderowania przez
 wrzucenie zmiennej <tt>@book</tt> do widoku <tt>special_show</tt>. Ale to <em>nie</em> zatrzyma reszty kodu
-w akcji <tt>show</tt> przed wykonaniem i jeśli Railsy dojdą do końca akcji zaczną renderować
-widok <tt>show</tt> i wystąpi błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno
+w akcji <tt>show</tt> przed wykonaniem i jeśli Railsy dojdą do końca akcji to nastąpi próba wyrenderowania widoku <tt>show</tt> co spowoduje błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno
 wywołanie <tt>render</tt> lub <tt>redirect</tt> w jednej części kodu. Jedną z rzeczy, które mogą
 pomóc jest <tt>and return</tt>. Oto poprawiona wersja metody:</p></div>
 <div class="listingblock">
@@ -754,7 +751,7 @@ możesz to zrobić za pomocą opcji <tt>:status</tt>:</p></div>
 akceptuje zarówno numeryczne jak i symboliczne oznaczenia stanu.</p></div>
 <h4 id="_r_nica_pomi_dzy_tt_render_tt_a_tt_redirect_tt">2.3.2. Różnica pomiędzy <tt>render</tt> a <tt>redirect</tt></h4>
 <div class="paragraph"><p>Czasami niedoświadczony developer traktuje <tt>redirect_to</tt> jako swego rodzaju polecenie
-<tt>goto</tt>, przenosząc wykonanie programu z jednego miejsca do innego miejsca w kodzie.
+<tt>goto</tt>, przenosząc wykonanie programu z jednego miejsca do innego w kodzie.
 To <em>nie</em> jest prawidłowe. Twój kod przestaje się wykonywać i czeka na nowe zapytanie
 przeglądarki. Po prostu mówisz przeglądarce jakie następne zapytanie powinna zrobić
 poprzez wysłanie kodu HTTP 302.</p></div>
@@ -793,8 +790,7 @@ http://www.gnu.org/software/src-highlite -->
     redirect_to <span style="color: #990000">:</span>action <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"index"</span> <span style="font-weight: bold"><span style="color: #0000FF">and</span></span> <span style="font-weight: bold"><span style="color: #0000FF">return</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Ten kod spowoduje, że przeglądarka wykona nowe zapytanie o stronę index, kod w metodzie
-<tt>index</tt> będzie uruchomiony i wszystko będzie działać tak jak powinno.</p></div>
+<div class="paragraph"><p>Ten kod spowoduje, że przeglądarka wyśle zapytanie o stronę index. Następnie zostanie uruchomiony odpowiedni kod w metodzie index i wszystko zadziała tak jak tego oczekujemy.</p></div>
 <h3 id="_u_ywanie_tt_head_tt_do_budowania_odpowiedzi_tylko_z_nag_wkami">2.4. Używanie <tt>head</tt> do budowania odpowiedzi tylko z nagłówkami</h3>
 <div class="paragraph"><p>Metoda head istnieje po to by odesłać do przeglądarki odpowiedzi zawierające tylko
 nagłówki. Zapewnia to bardziej oczywistą alternatywę dla <tt>render :nothing</tt>. Metoda <tt>head</tt>
@@ -838,10 +834,10 @@ Podszablony
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Zajmiemy się omówieniem każdej z nich po kolei.</p></div>
+<div class="paragraph"><p>Omówię każdą z nich po kolei.</p></div>
 <h3 id="_asset_tags">3.1. Asset Tags</h3>
-<div class="paragraph"><p>Asset tags dostarczają metod na generowanie kodu HTML, który łączy widoki z elementami
-zewnętrznymi jak obrazki, javascript, arkusze stylów i kanały. Istnieją cztery typy
+<div class="paragraph"><p>Asset tags dostarczają metody do generowania kodu HTML, który łączy widoki z elementami
+zewnętrznymi takimi jak obrazki, javascript, arkusze stylów i kanały. Istnieją cztery typy
 tagów włączających:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -960,8 +956,8 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= javascript_include_tag :all, :recursive =&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność poprzez połączenie
-wielu plików w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
+<div class="paragraph"><p>Jeśli ładujesz wiele plików javascript, możesz polepszyć efektywność, poprzez połączenie
+ich w pojedyńczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
 <tt>:cache =&gt; true</tt> wewnątrz <tt>javascript_include_tag</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -1035,7 +1031,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;%= stylesheet_link_tag :all, :recursive =&gt;</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span> <span style="color: #990000">%&gt;</span></tt></pre></div></div>
 <div class="paragraph"><p>Jeśli wczytujesz wiele plików CSS, możesz polepszyć efektywność poprzez połączenie
-wielu plików w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
+ich w pojedynczy plik do ściągnięcia. By zrobić to w czasie wykonania, zaznacz
 <tt>:cache =&gt; true</tt> wewnątrz <tt>stylesheet_link_tag</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -1130,7 +1126,7 @@ http://www.gnu.org/software/src-highlite -->
 zawartość w nazwanym <tt>yield</tt>, należy użyć metody <tt>content_for</tt>.</p></div>
 <h3 id="_u_ywanie_tt_content_for_tt">3.3. Używanie <tt>content_for</tt></h3>
 <div class="paragraph"><p>Metoda ta pozwala wstawić treść do bloku <tt>yield</tt> w twoim layoucie. Używa się <tt>content_for</tt>
-tylko po to by wstawić zawartość w nazwane yieldy. Dla przykładu, ten widok będzie
+tylko po to by wstawić zawartość w nazwane yielda. Dla przykładu, ten widok będzie
 współpracował z powyższym layoutem:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -1204,8 +1200,8 @@ http://www.gnu.org/software/src-highlite -->
 ...
 
 &lt;%= render :partial =&gt; "shared/footer" %&gt;</tt></pre></div></div>
-<div class="paragraph"><p>Tutaj, podszablony <tt>_ad_banner.html.erb</tt> i <tt>_footer.html.erb</tt>  mogą zawierać zawartość,
-która jest dzielona międz wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć
+<div class="paragraph"><p>Tutaj, podszablony <tt>_ad_banner.html.erb</tt> i <tt>_footer.html.erb</tt>  mogą zawierać kod,
+który jest dzielona między wiele stron w twojej aplikacji. Nie ma potrzeby aby widzieć
 szczegóły tych sekcji, kiedy koncentrujesz się na konkretnej stronie.</p></div>
 <div class="admonitionblock">
 <table><tr>
@@ -1230,7 +1226,7 @@ http://www.gnu.org/software/src-highlite -->
 nazewnictwa co zwykłe podszablony i są umiejscowione w tym samym folderze, w którym
 znajdują się im odpowiadające podszablony (nie w głównym folderze <tt>layouts</tt>).</p></div>
 <h4 id="_przekazywanie_lokalnych_zmiennych">3.4.4. Przekazywanie lokalnych zmiennych</h4>
-<div class="paragraph"><p>Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich nawet bardziej
+<div class="paragraph"><p>Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich bardziej
 potężne i elastyczne narzędzie. Na przykład możesz użyć tej techniki do zredukowania
 powtarzania pomiędzy stronami new i edit, wciąż jednak utrzymując w nich nieco odmienną
 treść:</p></div>
@@ -1270,7 +1266,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Jakkolwiek ten sam podszablon będzie renderowany w obu widokach, etykieta na przycisku
 wysyłającym jest kontrolowana przez lokalną zmienną przekazywaną do podszablonów.</p></div>
 <div class="paragraph"><p>Każdy podszablon ma także lokalną zmienną z taką samą nazwą jak on sam (minus podkreślenie).
-Możesz przekazać obiekt do tej lokalnej zmiennej za pomocą opcji <tt>:object</tt>.</p></div>
+Możesz przekazać obiekt do tej zmiennej za pomocą opcji <tt>:object</tt>.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1301,7 +1297,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>Zakładając, że zmienna <tt>@customer</tt> zawiera instancje modelu <tt>Customer</tt>,  do renderowania
 użyty zostanie <tt>_customer.html.erb</tt>.</p></div>
 <h4 id="_renderowanie_kolekcji">3.4.5. Renderowanie kolekcji</h4>
-<div class="paragraph"><p>Podszablony są bardzo przydatne w renderowaniu kolekcji . Kiedy przekazujesz kolekcje do
+<div class="paragraph"><p>Podszablony są bardzo przydatne w renderowaniu kolekcji. Kiedy przekazujesz kolekcje do
 podszablonu poprzez opcję <tt>:collection</tt>, podszablon będzie wstawiony do każdego elementu
 kolekcji.</p></div>
 <div class="paragraph"><p><tt>index.html.erb</tt>:</p></div>
@@ -1321,7 +1317,7 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>Product Name: &lt;%= product.name %&gt;<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Kiedy podszablon jest renderowany z kolekcją, to każda indywidualna instancja
 podszablonu ma dostęp do renderowanego elementu kolekcji poprzez zmienną
-nazwaną tak jak podszablon. W tym przypadku podszablonem
+nazwaną tak jak podszablon. W tym przypadku, podszablonem
 jest <tt>_product</tt>, i wewnątrz niego możesz odwołać się do zmiennej <tt>product</tt> by
 uzyskać aktualnie renderowaną instancję. Aby użyć innej
 nazwy zmiennej wewnątrz podszablonu, użyj opcji <tt>:as</tt> podczas jego wywołania:</p></div>
@@ -1372,7 +1368,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">&lt;p&gt;</span></span>Product Name: &lt;%= product.name %&gt;<span style="font-weight: bold"><span style="color: #0000FF">&lt;/p&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Railsy określają nazwę podszablonu do użycia poprzez patrzenie na nazwę modelu w
+<div class="paragraph"><p>Railsy określają nazwę podszablonu do użycia, bazując na nazwie modelu w
 kolekcji. W istocie, można również stworzyć różnorodną kolekcję i renderować ją w ten
 sposób, a Railsy wybierają właściwy podszablon dla każdego członka kolekcji.</p></div>
 <div class="paragraph"><p><tt>index.html.erb</tt>:</p></div>
@@ -1400,10 +1396,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p>W tym przypadku, Railsy użyją podszablonu customer lub employee jako odpowiednie dla
 każdego elementu kolekcji.</p></div>
 <h3 id="_korzystanie_z_zagnie_d_onych_layout_w">3.5. Korzystanie z zagnieżdżonych layoutów</h3>
-<div class="paragraph"><p>Może się okazać, że twoja aplikacja w jednym kontrolerze wymaga layoutu zupełnie
-różniącego się od zwyczajnego layoutu twojej aplikacji.
-Zamiast kopiować główny layout i tylko odpowiednio go edytować można tego dokonać za
-pomocą zagnieżdżonych layoutów.
+<div class="paragraph"><p>Może się okazać, że twoja aplikacja w jednym kontrolerze wymaga layoutu nieco różniącego się od standardowego layoutu twojej aplikacji. Rozwiązaniem, zamiast edycji kopii głównego layoutu, może być wykorzystanie mechanizmu zagnieżdżonych layoutów.
 Oto przykład:</p></div>
 <div class="paragraph"><p>Załóżmy, że masz następujący layout ApplicationController:</p></div>
 <div class="paragraph"><p><tt>app/views/layouts/application.erb</tt></p></div>
@@ -1449,7 +1442,7 @@ http://www.gnu.org/software/src-highlite -->
 'layouts/applications'</tt> zamiast <tt>render :file =&gt; 'layouts/applications'</tt></td>
 </tr></table>
 </div>
-<div class="paragraph"><p>To wszystko. Widok News będzie używał nowego layoutu, ukrywającego górne menu i dodającego prawe menu wewnątrz div "content".</p></div>
+<div class="paragraph"><p>I to wszystko. Widok News będzie używał nowego layoutu, ukrywającego górne menu i dodającego prawe menu wewnątrz div "content".</p></div>
 <div class="paragraph"><p>Istnieje kilka sposobów otrzymania podobnych wyników za pomocą różnych schematów
 wykorzystania zagnieżdżonych layoutów wykorzystujących tą technikę.
 Należy pamiętać, że nie ma
