@@ -813,18 +813,18 @@ end
 
 Znaczenie tej opcji zmalało z momentem wprowadzenia dróg RESTful.
 
-== Formats and respond_to
+== Formaty i polecenie respond_to
 
-There's one more way in which routing can do different things depending on differences in the incoming HTTP request: by issuing a response that corresponds to what the request specifies that it will accept. In Rails routing, you can control this with the special +:format+ parameter in the route.
+Istnieje jeszcze jeden sposób, by routing dopasowywał odpowiedź aplikacji na podstawie różnic w nadchodzącym żądaniu HTTP: poprzez tworzenie odpowiedzi w zależności od tego jaki format jest akceptowalny dla żądania. W routingu Rails, możesz kontrolować tę opcję korzystając w definicji drogi routingu z parametru `:format`.
 
-For instance, consider the second of the default routes in the boilerplate +routes.rb+ file:
+Załóżmy na przykład, że druga z domyślnych dróg w pliku `routes.rb` ma postać:
 
 [source, ruby]
 -------------------------------------------------------
 map.connect ':controller/:action/:id.:format'
 -------------------------------------------------------
 
-This route matches requests such as +/photo/edit/1.xml+ or +/photo/show/2.rss+. Within the appropriate action code, you can issue different responses depending on the requested format:
+Taka droga routingu będzie obsługiwała żadania takie jak `/photo/edit/1.xml` lub `/photo/show/2.rss`. Wewnątrz właściwego kodu akcji, możemy wymusić różne zachowanie w zależności od żądanego formatu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -834,22 +834,22 @@ respond_to do |format|
 end
 -------------------------------------------------------
 
-=== Specifying the Format with an HTTP Header
+=== Rozróżnianie formatu na podstawie nagłówka żądania HTTP
 
-If there is no +:format+ parameter in the route, Rails will automatically look at the HTTP Accept header to determine the desired format.
+Jeśli parametr `:format` nie występuje w definicji drogi routingu, Railsy automatycznie uznają zawartość nagłówka HTTP Accept za żądany format odpowiedzi.
 
-=== Recognized MIME types
+=== Rozpoznawalne typy MIME
 
-By default, Rails recognizes +html+, +text+, +json+, +csv+, +xml+, +rss+, +atom+, and +yaml+ as acceptable response types. If you need types beyond this, you can register them in your environment:
+Domyślnie Railsy rozpoznają typy `html`, `json`, `csv`, `xml`, `rss`, `atom` i `yaml` jako akceptowalne formaty odpowiedzi. Jeśli potrzebujesz innego typu, możesz go zdefiniować w konfiguracji środowiska:
 
 [source, ruby]
 -------------------------------------------------------
 Mime::Type.register "image/jpg", :jpg
 -------------------------------------------------------
 
-== The Default Routes
+== Drogi domyślne
 
-When you create a new Rails application, +routes.rb+ is initialized with two default routes:
+Podczas tworzenia nowej aplikacji w Railsach, plik `routes.rb` jest uzupełniany dwoma domyślnymi drogami routingu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -857,26 +857,26 @@ map.connect ':controller/:action/:id'
 map.connect ':controller/:action/:id.:format'
 -------------------------------------------------------
 
-These routes provide reasonable defaults for many URLs, if you're not using RESTful routing.
+Te drogi zapewniają rozsądną obsługę dla wielu URL, pod warunkiem że nie używasz routingu RESTful.
 
-NOTE: The default routes will make every action of every controller in your application accessible to GET requests. If you've designed your application to make consistent use of RESTful and named routes, you should comment out the default routes to prevent access to your controllers through the wrong verbs. If you've had the default routes enabled during development, though, you need to be sure that you haven't unwittingly depended on them somewhere in your application - otherwise you may find mysterious failures when you disable them.
+NOTE: Domyślne drogi routingu sprawią, że każda akcja każdego kontrolera Twojej aplikacji będzie osiągalna za pomocą żądania typu GET. Jeśli planujesz korzystać z dróg RESTful i dróg nazwanych, powinieneś "wykomentować" drogi domyślne, by uniemożliwić dostęp do kontrolerów żądaniami niechcianych typów. Jeśli jednak na etapie tworzenia aplikacji domyślne drogi routingu będą aktywne, musisz upewnić się, że nie wykorzystujesz ich gdzieś przypadkowo - w przeciwnym wypadku po ich wyłączeniu możesz liczyć się z dziwnym zachowaniem aplikacji.
 
-== The Empty Route
+== Pusta droga routingu
 
-Don't confuse the default routes with the empty route. The empty route has one specific purpose: to route requests that come in to the root of the web site. For example, if your site is example.com, then requests to +http://example.com+ or +http://example.com/+ will be handled by the empty route.
+Nie należy mylić drogi domyślnej z drogą pustą. Ta ostatnia ma jedno unikalne założenie: służy do obsługi żądań odnoszących się do katalogu głównego strony. Jeśli twoja strona ma adres example.com, to żądania do `http://example.com` lub `http://example.com/` będą obsługiwane przez drogę pustą.
 
-=== Using map.root
+=== Używanie map.root
 
-The preferred way to set up the empty route is with the +map.root+ command:
+Preferowanym sposobem obsługi drogi pustej jest użycie komendy `map.root`:
 
 [source, ruby]
 -------------------------------------------------------
 map.root :controller => "pages", :action => "main"
 -------------------------------------------------------
 
-The use of the +root+ method tells Rails that this route applies to requests for the root of the site.
+Użycie metody `root` zasygnalizuje Railsom, że droga obsługuje żądania dotyczące katalogu głównego strony.
 
-For better readability, you can specify an already-created route in your call to +map.root+:
+Dla poprawy czytelności, możesz zdefiniować w wywołaniu `map.root` stworzoną wcześniej drogę nazwaną:
 
 [source, ruby]
 -------------------------------------------------------
@@ -884,33 +884,33 @@ map.index 'index', :controller => "pages", :action => "main"
 map.root :index
 -------------------------------------------------------
 
-Because of the top-down processing of the file, the named route must be specified _before_ the call to +map.root+.
+Z powodu ustalonej kolejności przetwarzania pliku `routes.rb`, droga nazwana musi zostać określona _przed_ odwołaniem `map.root`.
 
-=== Connecting the Empty String
+=== Łączenie pustego łańcucha znaków
 
-You can also specify an empty route by explicitly connecting the empty string:
+Możesz też określić pustą drogę wprost, poprzez dopasowanie do pustego ciągu znaków:
 
 [source, ruby]
 -------------------------------------------------------
 map.connect '', :controller => "pages", :action => "main"
 -------------------------------------------------------
 
-TIP: If the empty route does not seem to be working in your application, make sure that you have deleted the file +public/index.html+ from your Rails tree.
+TIP: Jeśli masz wrażenie, że pusta droga nie działa w Twojej aplikacji poprawnie, upewnij się, że usunąłeś plik `public/index.html` z drzewa katalogów.
 
-== Inspecting and Testing Routes
+== Inspekcja i testowanie dróg routingu
 
-Routing in your application should not be a "black box" that you never open. Rails offers built-in tools for both inspecting and testing routes.
+Routowanie nie powinną być "czarną skrzynką" aplikacji, do której lepiej nigdy nie zaglądać. Railsy oferują wbudowane narzędzia, służące do inspekcji i testowania dróg.
 
-=== Seeing Existing Routes with rake
+=== Przelądanie istniejących dróg routingu poprzez Rake
 
-If you want a complete list of all of the available routes in your application, run the +rake routes+ command. This will dump all of your routes to the console, in the same order that they appear in +routes.rb+. For each route, you'll see:
+Jeśli potrzebujesz kompletnej listy wszystkich dostępnych w aplikacji dróg routingu, użyj komendy `rake routes`. Zrzuci ona wszystkie drogi na wyjście konsoli, zachowując kolejność z jaką są one wpisane w pliku `routes.rb`. Wśród informacji dotyczących każdej drogi zobaczysz:
 
-* The route name (if any)
-* The HTTP verb used (if the route doesn't respond to all verbs)
-* The URL pattern
-* The routing parameters that will be generated by this URL
+* jej nazwę ścieżki (o ile została podana)
+* typ żądania HTTP (o ile droga nie odpowiada na wszystkie typy żądań)
+* wzorzec URL
+* parametry generowane przez ten URL
 
-For example, here's a small section of the +rake routes+ output for a RESTful route:
+Dla przykładu, oto mały wycinek wyników polecenia `rake routes` dla drogi RESTful:
 
 -------------------------------------------------------------------------------------------------------
           users GET  /users          {:controller=>"users", :action=>"index"}
@@ -919,19 +919,19 @@ formatted_users GET  /users.:format  {:controller=>"users", :action=>"index"}
                 POST /users.:format  {:controller=>"users", :action=>"create"}
 -------------------------------------------------------------------------------------------------------
 
-TIP: You'll find that the output from +rake routes+ is much more readable if you widen your terminal window until the output lines don't wrap.
+TIP: Z pewnością przekonasz się, że wyniki komendy `rake routes` są o wiele bardziej czytelne gdy poszerzysz okno terminala.
 
-=== Testing Routes
+=== Testowanie dróg routingu
 
-Routes should be included in your testing strategy (just like the rest of your application). Rails offers three link:http://api.rubyonrails.com/classes/ActionController/Assertions/RoutingAssertions.html[built-in assertions] designed to make testing routes simpler:
+Drogi routingu powinny być stałym punktem Twojej strategii testowania strony (podobnie jak reszta aplikacji). Railsy oferują trzy link:http://api.rubyonrails.com/classes/ActionController/Assertions/RoutingAssertions.html [wbudowane narzędzia] służące uproszczeniu tej procedury:
 
-* +assert_generates+
-* +assert_recognizes+
-* +assert_routing+
+* `assert_generates`
+* `assert_recognizes`
+* `assert_routing`
 
-==== The +assert_generates+ Assertion
+==== `Assert_generates`
 
-Use +assert_generates+ to assert that a particular set of options generate a particular path. You can use this with default routes or custom routes
+Używamy `assert_generates` dla upewnienia się, że dany zestaw opcji wygeneruje wymaganą ścieżkę. Dotyczy to dróg domyślnych i dróg posiadających dodatkowe opcje:
 
 [source, ruby]
 -------------------------------------------------------
@@ -939,32 +939,32 @@ assert_generates "/photos/1", { :controller => "photos", :action => "show", :id 
 assert_generates "/about", :controller => "pages", :action => "about"
 -------------------------------------------------------
 
-==== The +assert_recognizes+ Assertion
+==== `Assert_recognizes`
 
-The +assert_recognizes+ assertion is the inverse of +assert_generates+. It asserts that Rails recognizes the given path and routes it to a particular spot in your application.
+`Assert_recognizes` jest przeciwieństwem `assert_generates`. Sprawdza on, czy Rails rozpoznaje wskazaną ścieżkę i kieruje ją do wymaganego elementu aplikacji.
 
 [source, ruby]
 -------------------------------------------------------
 assert_recognizes { :controller => "photos", :action => "show", :id => "1" }, "/photos/1"
 -------------------------------------------------------
 
-You can supply a +:method+ argument to specify the HTTP verb:
+Możesz użyć dodatkowego argumentu `:method`, by sprecyzować typ żądania HTTP:
 
 [source, ruby]
 -------------------------------------------------------
 assert_recognizes { :controller => "photos", :action => "create" }, { :path => "photos", :method => :post }
 -------------------------------------------------------
 
-You can also use the RESTful helpers to test recognition of a RESTful route:
+Możesz także użyć helperów RESTful dla rozpoznania ścieżki drogi RESTful:
 
 [source, ruby]
 -------------------------------------------------------
 assert_recognizes new_photo_url, { :path => "photos", :method => :post }
 -------------------------------------------------------
 
-==== The +assert_routing+ Assertion
+==== `Assert_routing`
 
-The +assert_routing+ assertion checks the route both ways: it tests that the path generates the options, and that the options generate the path. Thus, it combines the functions of +assert_generates+ and +assert_recognizes+.
+`Assert_routing` sprawdza obydwa aspekty routingu: sprawdza czy ścieżka wywołuje odpowiednie opcje oraz czy opcje generują odpowiednią ścieżkę. W zasadzie polega to na połączeniu funkcji `assert_generates` i `assert_recognizes`.
 
 [source, ruby]
 -------------------------------------------------------
