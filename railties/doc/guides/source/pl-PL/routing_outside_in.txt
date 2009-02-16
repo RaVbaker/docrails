@@ -1,30 +1,29 @@
-Rails Routing from the Outside In
+Routing w Railsach
 =================================
 
-This guide covers the user-facing features of Rails routing. By referring to this guide, you will be able to:
+Poniższy tekst to przewodnik po opcjach związanych z routingiem (routing) we frameworku Rails, z którymi spotykają użytkownicy. W oparciu o niego, będziesz mógł:
+* Poznać i zrozimieć sens routingu
+* Rozszyfrować kod pliku `routes.rb`
+* Tworzyć własne drogi routingu (routes) w klasycznym stylu hash lub popularnym obecnie RESTful
+* Rozpoznać jak droga routingu wskazuje do kontrolera i akcji.
 
-* Understand the purpose of routing
-* Decipher the code in +routes.rb+
-* Construct your own routes, using either the classic hash style or the now-preferred RESTful style
-* Identify how a route will map to a controller and action
+== Podwójny cel routingu
 
-== The Dual Purpose of Routing
+Routing w Railsach jest to dwukierunkowy mechanizm - tak, jakby móc przerobić drzewa na papier, a potem z papieru z powrotem utworzyć drzewa. Dokładnie rzecz biorąc, drogi routingu łączą nadchodzące żądania HTTP z kodem w kontrolerach Twojej aplikacji i pomagają generować adresy URL bez konieczności ręcznego zapisania ich jako łańcuchy znaków.
 
-Rails routing is a two-way piece of machinery - rather as if you could turn trees into paper, and then turn paper back into trees. Specifically, it both connects incoming HTTP requests to the code in your application's controllers, and helps you generate URLs without having to hard-code them as strings.
+=== Łączenie adresu URL z kodem
 
-=== Connecting URLs to Code
-
-When your Rails application receives an incoming HTTP request, say
+Silnik routingu wewnątrz Railsów jest to fragment kodu, który przekazuje żądanie HTTP do odpowiedniego fragmentu aplikacji. Gdy Twoja aplikacja otrzymuje żądanie, np.
 
 -------------------------------------------------------
 GET /patients/17
 -------------------------------------------------------
 
-the routing engine within Rails is the piece of code that dispatches the request to the appropriate spot in your application. In this case, the application would most likely end up running the +show+ action within the +patients+ controller, displaying the details of the patient whose ID is 17.
+najprawdopodobniej wykona akcję `show` dla kontrolera `patients`, wyświetlając informacje o pacjencie posiadającym ID równe 17.
  
-=== Generating URLs from Code
+=== Generowanie adresu URL z kodu źródłowego
 
-Routing also works in reverse. If your application contains this code:
+Routing działa także w drugą stronę. Załóżmy, że Twoja aplikacja zawiera kod:
 
 [source, ruby]
 -------------------------------------------------------
@@ -32,9 +31,9 @@ Routing also works in reverse. If your application contains this code:
 <%= link_to "Patient Record", patient_path(@patient) %>
 -------------------------------------------------------
 
-Then the routing engine is the piece that translates that to a link to a URL such as +http://example.com/patients/17+. By using routing in this way, you can reduce the brittleness of your application as compared to one with hard-coded URLs, and make your code easier to read and understand.
+Mechanizm rutingu działa jako element tłumaczący ten kod na adres URL, np `http://example.com/patients/17`. Korzystając z routingu w ten sposób, możesz sprawisz, że Twoja aplikacja będzie bardziej niezawodna i łatwiejsza do zrozumienia niż w wypadku, gdybyś ręcznie wpisywał wszystkie linki URL.
 
-NOTE: Patient needs to be declared as a resource for this style of translation via a named route to be available.
+NOTE:  Obiekt `Patient` musi być zadeklarowany jako zasób dostępny dla drogi nazwanej, by mógł zostać prawidłowo obsłużony przez ten kod.
 
 == Quick Tour of Routes.rb
 
