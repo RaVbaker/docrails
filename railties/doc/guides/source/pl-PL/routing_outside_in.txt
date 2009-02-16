@@ -35,45 +35,45 @@ Mechanizm rutingu działa jako element tłumaczący ten kod na adres URL, np `ht
 
 NOTE:  Obiekt `Patient` musi być zadeklarowany jako zasób dostępny dla drogi nazwanej, by mógł zostać prawidłowo obsłużony przez ten kod.
 
-== Quick Tour of Routes.rb
+== Krótki przegląd routes.rb
 
-There are two components to routing in Rails: the routing engine itself, which is supplied as part of Rails, and the file +config/routes.rb+, which contains the actual routes that will be used by your application. Learning exactly what you can put in +routes.rb+ is the main topic of this guide, but before we dig in let's get a quick overview.
+Za routing w Railsach odpowiadają dwa moduły: silnik routingu, który jest integralną częścią frameworku oraz plik `config/routes.rb`, zawierający definicje dróg routingu używanych w aplikacji. Poznanie dokładnej zawartości pliku `routes.rb` jest podstawowym celem tego przewodnika. Zanim jednak zagłębimy się w tym temacie, proponuję krótki przegląd pliku.
 
-=== Processing the File
+=== Przetwarzanie pliku
 
-In format, +routes.rb+ is nothing more than one big block sent to +ActionController::Routing::Routes.draw+. Within this block, you can have comments, but it's likely that most of your content will be individual lines of code - each line being a route in your application. You'll find five main types of content in this file:
+Pod względem formatu, `routes.rb` jest po prostu dużym blokiem wysłanym do `ActionController::Routing::Routes.draw`. Wewnątrz tego bloku możesz umieszczać komentarze, jednak najprawdopodobniej większość jego zawartości to pojedyncze linie kodu - każda z nich odpowiada za drogę routingu w aplikacji. W pliku tym można znaleźć pięć podstawowych typów zawartości:
 
-* RESTful Routes
-* Named Routes
-* Nested Routes
-* Regular Routes
-* Default Routes
+* drogi RESTful
+* drogi nazwane
+* drogi zagnieżdżone
+* drogi regularne
+* drogi domyślne
 
-Each of these types of route is covered in more detail later in this guide.
+Każdą z nich omówimy dokładniej w dalszej części tego przewodnika.
 
-The +routes.rb+ file is processed from top to bottom when a request comes in. The request will be dispatched to the first matching route. If there is no matching route, then Rails returns HTTP status 404 to the caller.
+W momencie nadejścia żądania, plik `routes.rb jest przetwarzany w kolejności "z góry na dół". W momencie odnalezienia pierwszego pasującego wpisu, żądanie zostaje przekazane przez powiązaną z nim drogę do odpowiedniego kontrolera.W przypadku, gdy w pliku nie będzie żadnej pasującej do żądania drogi routingu, Railsy zwrócą status 404.
 
-=== RESTful Routes
+=== Drogi RESTful
 
-RESTful routes take advantage of the built-in REST orientation of Rails to wrap up a lot of routing information in a single declaration. A RESTful route looks like this:
+Drogi RESTful korzystają z wbudowanej w Rails orientacji REST, by umożliwić zapisanie jak najwięcej informacji routingu w jednej deklaracji. Ścieżka RESTful wygląda tak:
 
 [source, ruby]
 -------------------------------------------------------
 map.resources :books
 -------------------------------------------------------
 
-=== Named Routes
+=== Drogi nazwane
 
-Named routes give you very readable links in your code, as well as handling incoming requests. Here's a typical named route:
+Drogi nazwane dają bardzo czytelne linki w kodzie źródłowym. Poniżej przedstawiona została typowa droga nazwana:
 
 [source, ruby]
 -------------------------------------------------------
 map.login '/login', :controller => 'sessions', :action => 'new'
 -------------------------------------------------------
 
-=== Nested Routes
+=== Drogi zagnieżdżone
 
-Nested routes let you declare that one resource is contained within another resource. You'll see later on how this translates to URLs and paths in your code. For example, if your application includes parts, each of which belongs to an assembly, you might have this nested route declaration:
+Drogi zagnieżdżone umożliwiają deklarację ścieżki do zasobu zawartego wewnątrz innego zasobu. Później zobaczysz jak taka droga umożliwia tłumaczenie kodu na adresy i ścieżki dostępu. Na przykład, jeśli aplikacja składa się z kilku części, a każda z nich należy do pewnej grupy, możesz stosować zagnieżdżoną drogę routingu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -82,18 +82,18 @@ map.resources :assemblies do |assemblies|
 end
 -------------------------------------------------------
 
-=== Regular Routes
+=== Drogi regularne
 
-In many applications, you'll also see non-RESTful routing, which explicitly connects the parts of a URL to a particular action. For example,
+W wielu aplikacjach spotkasz się także z niezgodnym z założeniami REST routingiem, który wskazuje wprost powiązanie fragmentów URL z konkretną akcją. Przykład ścieżki regularnej to:
 
 [source, ruby]
 -------------------------------------------------------
 map.connect 'parts/:number', :controller => 'inventory', :action => 'show'
 -------------------------------------------------------
 
-=== Default Routes
+=== Drogi domyślne
 
-The default routes are a safety net that catch otherwise-unrouted requests. Many Rails applications will contain this pair of default routes:
+Domyślne drogi routingu są siecią zabezpieczeń, obsługującą żądania które nie pasowały do żadnej innej drogi. Wiele aplikacji Railsowych zawiera taką parę ścieżek domyślnych: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -101,7 +101,7 @@ map.connect ':controller/:action/:id'
 map.connect ':controller/:action/:id.:format'
 -------------------------------------------------------
 
-These default routes are automatically generated when you create a new Rails application. If you're using RESTful routing for everything in your application, you will probably want to remove them. But be sure you're not using the default routes before you remove them!
+Te drogi routingu są automatycznie generowane podczas tworzenia nowej aplikacji Railsowej. Jeśli cała Twoja aplikacja jest korzysta z routingu RESTful, prawdopodobnie będziesz chciał je usunąć. Zanim jednak to zrobisz, upewnij się, że nie są one nigdy używane!
 
 == RESTful Routing: the Rails Default
 
