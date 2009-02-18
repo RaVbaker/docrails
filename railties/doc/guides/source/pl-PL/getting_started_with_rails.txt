@@ -3,24 +3,28 @@ Zaczynamy z Rails
 
 Ten przewodnik jest wprowadzeniem do Ruby on Rails. Po jego przeczytaniu będziesz zaznajomiony z:
 
-* Instalowaniem Railsów, tworzeniem nowej aplikacji oraz zestawianiem połączenia z bazę danych
-* Ogólnym układem aplikacji
-* Podstawami modelu MVC (Model, View, Controller) oraz architektury RESTful
-* Szybkim generowaniem podstawowych elementów aplikacji
+* instalowaniem Railsów, tworzeniem nowej aplikacji oraz zestawianiem połączenia z bazę danych
+* ogólnym układem aplikacji
+* podstawami modelu MVC (Model, View, Controller) oraz architektury RESTful
+* szybkim generowaniem podstawowych elementów aplikacji
 
 == Co obejmuje przewodnik?
 
-Ten przewodnik jest przeznaczony dla początkujących, którzy chcą rozpocząć tworzenie aplikacji opartych na Railsach. Nie zakładamy, że masz wcześniejsze doświadczenia z Railsami. Niemniej jednak, do jak najlepszego wykorzystania tego przewodnika, konieczne jest:
+Ten przewodnik jest przeznaczony dla początkujących, którzy chcą rozpocząć
+tworzenie aplikacji opartych na Railsach. Nie zakłada, że masz wcześniejsze
+doświadczenia z Railsami. Niemniej jednak, do jak najlepszego wykorzystania
+tego przewodnika, konieczna jest instalacja:
 
-* link:http://www.ruby-lang.org/en/downloads/[Ruby] - podstawowa wiedza z zakresu języka Ruby
+* języka link:http://www.ruby-lang.org/en/downloads/[Ruby]
 * link:http://rubyforge.org/frs/?group_id=126[RubyGems] - narzędzie do dystrybuowania i instalowania paczek zawierających moduły i rozszerzenia języka Ruby
-* Zarządzanie bazą danych link:http://www.sqlite.org/[SQLite] (preferowane), link:http://www.mysql.com/[MySQL] lub link:http://www.postgresql.org/[PostgreSQL]
+* systemu zarządzania bazą danych link:http://www.sqlite.org/[SQLite] (preferowane), link:http://www.mysql.com/[MySQL] lub link:http://www.postgresql.org/[PostgreSQL]
 
 Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygody z Railsami. Znacznie łatwiej jest śledzić, co się dzieje w Railsach, rozumiejąc podstawowy składni Ruby. Railsy nie będą w stanie w magiczny sposób zrewolucjonizować sztuki pisania aplikacji internetowych, jeżeli nie masz doświadczenia w używaniu języka. W Internecie istnieje kilka dobrych darmowych źródeł pomocnych w nauce języka Ruby, w tym:
 
 * link:http://www.humblelittlerubybook.com/[Mr. Neigborly's Humble Little Ruby Book]
 * link:http://www.rubycentral.com/book/[Programming Ruby]
 * link:http://poignantguide.net/ruby/[Why's (Poignant) Guide to Ruby]
+* link:http://www.apohllo.pl/dydaktyka/ruby/intro/[Wprowadzenie do języka Ruby (po polsku)]
 
 == Co to są Railsy?
 
@@ -38,13 +42,13 @@ Filozofia Railsów zawiera kilka zasad:
 
 Railsy są zorganizowane wokół trzech komponentów aplikacji: modelu (model), widoku (view), kontrolera (controller), co w skrócie nazywany MVC. Wzorzec MVC obejmuje: 
 
-* Odizolowanie logiki biznesowej od interfejsu użytkownika 
-* Łatwość utrzymania kodu zgodnie z zasadą DRY 
-* Wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co ułatwia zarządzenie tym kodem
+* odizolowanie logiki biznesowej od interfejsu użytkownika 
+* łatwość utrzymania kodu zgodnie z zasadą DRY 
+* wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co ułatwia zarządzenie tym kodem
 
-==== Models
+==== Modele
 
-Model przedstawia informacje (dane) dla aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.
+Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.
 
 ==== Widoki
 
