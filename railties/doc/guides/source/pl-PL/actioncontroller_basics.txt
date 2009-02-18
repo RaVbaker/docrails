@@ -1,0 +1,947 @@
+Podstawowe informacje o module Action Controller
+================================================
+
+W tym przewodniku dowiesz się jak pracują kontrolery (controllers) oraz w jaki sposób używać ich w cyklu żądań twojej aplikacji. Po przeczytaniu tego przewodnika, będziesz potrafił:
+
+* kierować przepływ żądania do kontrolera
+* zrozumieć jak i dlaczego przechowywać dane w sesji lub cookies
+* pracować z filtrami, po to by móc wykonywać kod podczas przetwarzania żądania
+* używać wbudowanego w moduł Action Controller uwieżytelniania HTTP 
+* przesyłać dane bezpośrednio do przeglądarki użytkownika
+* filtrować niejawne parametry, tak by nie pojawiały się w logach aplikacji
+* radzić sobie z wyjątkami, które mogą wystąpić podczas przetwarzania żądania
+
+== Co robi kontroler? ==
+
+Moduł Action Controller odpowiada literze C we wzorcu MVC. Po tym, jak routing określi, którego kontrolera użyć do wykonania żądania, twój kontroler jest odpowiedzialny za zrozumienie tego żądania i za stworzenie odpowiednich danych wyjściowych. Na szczęście moduł Action Controller wykonuje większość podstawowej pracy za ciebie, używa inteligentnych konwencji po to, by uczynić wszystko tak prostym, jak to tylko możliwe.
+
+Dla większości typowych aplikacji RESTful, kontroler otrzyma żądanie (co nie
+jest widoczne dla ciebie jako programisty), zapisze albo pobierze dane z
+modelu i użyje widoku w celu stworzenia wyjściowej strony HTML. Jeżeli twój
+kontroler potrzebuje wykonywać pewne rzeczy trochę inaczej - nie ma problemu,
+to jest tylko najbardziej typowy sposób pracy kontrolera.
+
+Kontroler może być zatem traktowany jako pośrednik między modelami a widokami. Udostępnia on dane modelu do widoku, który następnie wyświetla dane użytkownikowi. I w drugą stronę - kontroler zapisuje bądź uaktualnia dane w modelu pobierając je od użytkownika. 
+
+NOTE: Aby dowiedzieć się więcej o procesie routingu, zajrzyj do
+      link:routing_outside_in.html[Routingu w Ruby on Rails].
+
+== Metody i akcje ==
+
+Kontroler jest klasą języka Ruby dziedziczącą z klasy ApplicationController,
+posiada metody jak każda inna klasa. Kiedy twoja aplikacja otrzymuje żądanie,
+routing określa, który wybrać kontroler i którą akcję wykonać, a następnie
+Railsy tworzą instancję klasy danego kontrolera i wywołuje publiczną metodę o tej samej nazwie co akcja.
+
+[source, ruby]
+----------------------------------------------
+class ClientsController < ApplicationController
+
+  # Actions are public methods
+  def new
+  end
+
+  # Action methods are responsible for producing output
+  def edit
+  end
+
+# Helper methods are private and can not be used as actions
+private
+
+  def foo
+  end
+
+end
+----------------------------------------------
+
+Nie ma zasady mówiącej, że metoda na kontrolerze musi być akcją; równie dobrze może być użyta do innych celów, takich jak filtrowanie, które będzie omówione w dalszej części tego przewodnika.
+
+Na przykład, jeżeli użytkownik przejdzie do `/clients/new` w twojej aplikacji, aby dodać nowego klienta, Rails stworzy instancję klasy ClientsController i uruchomi metodę `new`. Zwróć uwagę, że pusta metoda z przykładu powyżej może działać dobrze, ponieważ Rails domyślnie wyrenderuje widok `new.html.erb`, chyba że akcja powie inaczej. Metoda `new` może udostępnić do widoku zmienną instancyjną `@client` poprzez stworzenie nowego klienta.
+
+[source, ruby]
+----------------------------------------------
+def new
+  @client = Client.new
+end
+----------------------------------------------
+
+Przewodnik link:layouts_and_rendering.html[Layouty oraz renderowanie] wyjaśnia to szczegółowo.
+
+Klasa ApplicationController dziedziczy z klasy ActionController::Base, która
+definiuje szereg pomocnych metod. Niniejszy przewodnik obejmuje niektóre z
+nich, ale jeśli jesteś ciekaw, możesz zobaczyć je wszystkie w dokumentacji API
+albo w kodzie źródłowym.
+
+== Parametry ==
+
+Prawdopodobnie będziesz chciał uzyskać dostęp do danych przesłanych przez
+użytkownika lub innych parametrów występujących w akcjach twojego kontrolera.
+Mamy dwa rodzaje parametrów występujących w aplikacjach webowych. Pierwszy typ
+to parametry, które są wysyłane jako część adresu URL, która to część jest
+nazywana ciągiem zapytania (ang. query string). Ciąg zapytania to wszystko, co
+znajduje się po znaku "?" w adresie URL. Drugi typ parametrów jest zazwyczaj
+określany jako dane POST (ang. POST data). Te informacje pochodzą zwykle z
+formularza HTML, który został wypełniony przez użytkownika. Są nazywane jako
+dane POST, ponieważ mogą być wysłane jedynie jako część żądania HTTP POST.
+Railsy nie tworzą żadnego rozróżnienia pomiędzy parametrami ciągu zapytania a
+parametrami POST. Oba typy są dostępne w tablicy asocjacyjnej (ang. hash) `params` w twoim kontrolerze:
+
+[source, ruby]
+-------------------------------------
+class ClientsController < ActionController::Base
+
+  # This action uses query string parameters because it gets run by a HTTP 
+  # GET request, but this does not make any difference to the way in which 
+  # the parameters are accessed. The URL for this action would look like this 
+  # in order to list activated clients: /clients?status=activated
+  def index
+    if params[:status] = "activated"
+      @clients = Client.activated
+    else
+      @clients = Client.unativated
+    end
+  end
+
+  # This action uses POST parameters. They are most likely coming from an HTML
+  # form which the user has submitted. The URL for this RESTful request will
+  # be "/clients", and the data will be sent as part of the request body.
+  def create
+    @client = Client.new(params[:client])
+    if @client.save
+      redirect_to @client
+    else
+      # This line overrides the default rendering behavior, which would have been
+      # to render the "create" view.
+      render :action => "new"
+    end
+  end
+
+end
+-------------------------------------
+
+=== Parametry tablic zwykłych (ang. array) i tablic asocjacyjnych (ang. hash) ===
+
+Tablica haszująca `params` nie musi być ograniczona do jednego wymiaru. Możemy stworzyć tablicę wielowymiarową, która zawiera w sobie zagnieżdżone tablice haszujące lub zwykłe tablice. Aby wysłać tablicę wartości, dołącz "[]" do nazwy klucza.
+
+-------------------------------------
+GET /clients?ids[]=1&ids[]=2&ids[]=3
+-------------------------------------
+
+NOTE: Rzeczywisty URL w tym przykładzie byłby zakodowany jako "/clients?ids%5b%5d=1&ids%5b%5d=2&ids%5b%5b=3", jako że znaki [ i ] nie są dozwolone w adresach URL. Najczęściej nie będziesz się musiał o to martwić, ponieważ przeglądarka będzie dbać o to za ciebie, a Railsy, gdy otrzymają taki ciąg, będą dekodować to z powrotem. Ale jeśli kiedyś znajdziesz się w konieczności, by wysłać takie żądanie do serwera ręcznie, musisz o tym pamiętać.
+
+Wartość `params[:ids]` będzie teraz wynosić `["1", "2", "3"]`. Zauważ, że
+wartości parametru są zawsze łańcuchami znaków). Railsy nie próbują odgadywać ani rzutować typu.
+
+Aby przesłać tablicę haszującą, zawrzyj nazwę klucza wewnątrz nawiasów:
+
+-------------------------------------
+<form action="/clients" method="post">
+  <input type="text" name="client[name]" value="Acme" />
+  <input type="text" name="client[phone]" value="12345" />
+  <input type="text" name="client[address][postcode]" value="12345" />
+  <input type="text" name="client[address][city]" value="Carrot City" />
+</form>
+-------------------------------------
+
+Wartość tablicy `params[:client]` po tym, jak ten formularz zostanie przekazany, będzie wynosić `{"name" => "Acme", "phone" => "12345", "address" => {"postcode" => "12345", "city" => "Carrot City"}}`. Zwróć uwagę na zagnieżdżoną tablicę haszującą w `params[:client][:address]`.
+
+Zauważ też, że tablica haszująca params jest w rzeczywistości instancją klasy
+`HashWithIndifferentAccess` (z modułu Active Support), która jest podklasą
+klasy Hash. Pozwala ona na stosowanie zamiennie symboli oraz łańcuchów znaków jako kluczy.
+
+=== Parametry routingu ===
+
+Tablica haszująca `params` będzie zawsze zawierać klucze `:controller` i
+`:action`, ale należy używać metod `controller_name` i `action_name` zamiast
+odwoływać się do ich wartości. Wszelkie inne parametry określone przez
+routing, takie jak `:id` będą również dostepne. Jako przykład, rozważ listę
+klientów, gdzie lista może wyświetlić albo aktywnych, albo nieaktywnych
+klientów. Możemy dodać drogę routingu (ang. route), która ujmie parametr `:status` w zgrabny adres URL:
+
+[source, ruby]
+------------------------------------
+# ...
+map.connect "/clients/:status", :controller => "clients", :action => "index", :foo => "bar"
+# ...
+------------------------------------
+
+W tym przypadku, gdy użytkownik otwiera URL `/clients/active`, `params[:status]` zostanie ustawiony na "active". Gdy ta reguła jest stosowana, także `params[:foo]` zostanie ustawiony na "bar", tak jak zostało to przekazane w ciągu zapytania. Na tej samej zasadzie `params[:action]` będzie zawierać "index".
+
+=== `default_url_options` ===
+
+Możesz ustawić domyślne parametry globalne, które będą wykorzystywane podczas generowania adresów URL z użyciem `default_url_options`. Aby to zrobić, zdefiniuj metodę o takiej nazwie w swoim kontrolerze:
+
+[source, ruby]
+------------------------------------
+class ApplicationController < ActionController::Base
+
+  #The options parameter is the hash passed in to +url_for+
+  def default_url_options(options)
+    {:locale => I18n.locale}
+  end
+
+end
+------------------------------------
+
+Opcje te zostaną wykorzystane jako punkt wyjścia podczas generowania, więc
+jest możliwe, że zostaną nadpisane przez +url_for+. Ponieważ metoda ta jest
+zdefiniowana w kontrolerze, możesz określić ją w klasie ApplicationController,
+wtedy będzie używana dla wszystkich tworzonych adresów URL. Ale możesz także
+określić ją tylko w wybranym kontrolerze dla adresów URL tam generowanych.
+
+== Sesja ==
+
+Twoja aplikacja tworzy sesję dla każdego użytkownika, w której możesz
+zapisywać nieiwelkie ilości danych. Dane te są utrzymywane pomiędzy żądaniami.
+Sesja jest dostępna jedynie w kontrolerze i w widoku i może korzystać z wielu różnych mechanizmów przechowywania: 
+
+ * CookieStore - przechowuje wszystko po stronie klienta.
+ * DRbStore - przechowuje dane na serwerze DRb.
+ * MemCacheStore - przechowuje dane w memcache.
+ * ActiveRecordStore - przechowuje dane w bazie danych przy użyciu Active Record.
+
+Wszystkie sesje używają cookie - jest to wymagane i Railsy nie pozwalają, by któraś część sesji była przekazana w inny sposób (np. nie można użyć ciągu zapytania do przekazywania identyfikatora sesji) z powodów bezpieczeństwa (łatwiej jest przejąć sesję, gdy identyfikator jest częścią adresu URL).
+
+Większość mechanizmów przechowywania używa cookie do przechowywania
+identyfikatora sesji, który jest następnie używany do sprawdzenia danych sesji
+na serwerze. Domyślny i zalecany mechanizm, CookieStore, nie przechowuje
+danych sesji na serwerze, ale w samym cookie. Dane są kryptograficznie
+oznaczone, by były odporne na manipulacje, ale nie są szyfrowane. To znaczy,
+że każda osoba mająca do nich dostęp, może odczytać ich zawartość, ale nie
+może ich edytować (Railsy nie zaakceptują danych, jeśli były edytowane).
+CookieStore może przechować tylko około 4kB danych - znacznie mniej niż
+pozostałe mechanizmy - ale zazwyczaj jest to wystarczająca ilość.
+Przechowywanie dużych ilości danych jest odradzane niezależnie od tego, który
+mechanizm do przechowywania danych sesji wybierzesz w swojej aplikacji. Należy
+unikać przechowywania w sesji szczególnie złożonych obiektów (innych niż
+podstawowe obiekty Rubiego, najbardziej powszechnym przykładem jest instancja
+modelu), ponieważ serwer może nie być w stanie ponownie ich odtworzyć pomiędzy żądaniami, co w rezultacie może zakończyć się błędem. CookieStore posiada dodatkową korzyść - nie wymaga żadnych uprzednich ustawień - Railsy wygenerują "tajny klucz", który będzie użyty do oznaczenia cookie.
+
+Poczytaj więcej o przechowywaniu sesji w przewodniku link:security.html[Bezpieczeństwo w Ruby on Rails].
+
+Jeśli potrzbujesz innego mechanizmu przechowywania sesji, możesz zmienić go w pliku `config/environment.rb`
+
+[source, ruby]
+------------------------------------------
+# Wstaw jeden spośród [:active_record_store, :drb_store, :mem_cache_store, :cookie_store]
+config.action_controller.session_store = :active_record_store
+------------------------------------------
+
+=== Dostępność sesji ===
+
+W twoim kontrolerze masz dostęp do sesji poprzez metodę instancyją 'session'.
+
+NOTE: Sesje są leniwie ładowane (ang. lazily loaded). Jeśli nie korzystasz z sesji w kodzie akcji, nie będzie ona ładowana. Dlatego nie musisz wyłączać mechanizmu sesji, wystarczy, że z niego nie korzystasz.
+
+Wartości sesji są przechowywane z użyciem par klucz/wartość:
+
+[source, ruby]
+------------------------------------------
+class ApplicationController < ActionController::Base
+
+private
+
+  # Znajdowanie użytkownika, którego ID jest przechowywane w sesji, za pomocą klucza :current_user_id
+  # To jest typowy sposób obsługi logowania użytkownika w aplikacjach Railsowych;
+  # logując ustawia wartość sesji i wylogowując usuwa ją
+  def current_user
+    @_current_user ||= session[:current_user_id] && User.find(session[:current_user_id])
+  end
+
+end
+------------------------------------------
+
+Aby zapisać coś w sesji, wystarczy przypisać to do klucza:
+
+[source, ruby]
+------------------------------------------
+class LoginsController < ApplicationController
+
+  # "Stwórz" login, aka "zaloguj użytkownika"
+  def create
+    if user = User.authenticate(params[:username, params[:password])
+      # Zapisanie identyfikatora użytkownika w sesji, by mógł być wykorzystany w kolejnych żądaniach
+      session[:current_user_id] = user.id
+      redirect_to root_url
+    end
+  end
+
+end
+------------------------------------------
+
+Żeby usunąć coś z sesji, przypisz kluczowi wartość `nil`:
+
+[source, ruby]
+------------------------------------------
+class LoginsController < ApplicationController
+
+  # "Usuń" login, aka "wyloguj użytkownika"
+  def destroy
+    # Usunięcie ID użytkownika z sesji
+    session[:current_user_id] = nil
+    redirect_to root_url
+  end
+
+end
+------------------------------------------
+
+Aby skasować całą sesję, użyj `reset_session".
+
+=== Flash ===
+
+Flash jest specjalną częścią sesji, która jest czyszczona przy każdym żądaniu,
+w takim sensie, że wartości tam przechowywane są dostępne tylko w następnym
+żądaniu. Jest to przydatne do przechowywania komunikatów o błędach itp. Jest
+ona dostępna w bardzo podobny sposób jak sama sesja, czyli jako tablica
+haszująca. Jako przykładu użyjmy mechanizmu wylogowywania. Kontroler może wysłać komunikat, który będzie wyświetlony użytkownikowi przy następnym żądaniu:
+
+[source, ruby]
+------------------------------------------
+class LoginsController < ApplicationController
+
+  def destroy
+    session[:current_user_id] = nil
+    flash[:notice] = "You have successfully logged out"
+    redirect_to root_url
+  end
+
+end
+------------------------------------------
+
+Akcja `destroy` przekierowuje do `root_url` aplikacji, gdzie komunikat będzie wyświetlony. Należy podkreślić, że obowiązkiem następnej akcji jest zdecydować, co (jeśli cokolwiek) ma zrobić z tym, co wcześniejsza akcja umieściła we flash'u. Konwencją jest wyświetlenie ewentualnych błędów lub powiadomień z flash w layoutcie aplikacji:
+
+------------------------------------------
+<html>
+  <!-- <head/> -->
+  <body>
+    <% if flash[:notice] -%>
+      <p class="notice"><%= flash[:notice] %></p>
+    <% end -%>
+    <% if flash[:error] -%>
+      <p class="error"><%= flash[:error] %></p>
+    <% end -%>
+    <!-- more content -->
+  </body>
+</html>
+------------------------------------------
+
+W ten sposób, jeśli akcja umieści komunikat błędu lub powiadomienie, layout wyświetli je automatycznie.
+
+Jeśli chcesz, by wartość flash była przeniesiona do innego żądania, użyj metody `keep`:
+
+[source, ruby]
+------------------------------------------
+class MainController < ApplicationController
+
+  # Powiedzmy, że ta akcja odpowiada root_url, ale chcesz, żeby wszystkie żądania tutaj były przekierowane do
+  # UsersController#index. Jeżeli akcja umieści flash i przekieruje tutaj, wartości normalnie zostaną utracone
+  # wraz z następnym przekierowaniem. Ale możesz użyć metody keep, by je utrwalić dla innych żądań.
+  def index
+    flash.keep # Utrzymane zostaną wszystkie wartości flash. Możesz także użyć klucza, żeby utrzymać tylko wybraną wartość: flash.keep(:notice)
+    redirect_to users_url
+  end
+
+end
+------------------------------------------
+
+==== +flash.now+ ====
+
+Domyślnie dodanie wartości do flash czyni je dostpępnymi w następnym żądaniu.
+Ale czasami możesz potrzebować dostępu do tych wartości już w tym żądaniu. Na
+przykład, jeżeli akcji `create` nie uda się zapisać zasobów i ty natychmiast
+wyrenderujesz szablon `new`, nie będzie to prowadzić do nowego żądania, ale ty i tak będziesz potrzebować wyświetlić komunikat używając flash. Możesz to zrobić przy użyciu `flash.now`. Robi się to tak samo jak przy normalnym `flash`:
+
+
+[source, ruby]
+------------------------------------------
+class ClientsController < ApplicationController
+
+  def create
+    @client = Client.new(params[:client])
+    if @client.save
+      # ...
+    else
+      flash.now[:error] = "Could not save client"
+      render :action => "new"
+    end
+  end
+
+end
+------------------------------------------
+
+== Cookies ==
+
+Twoja aplikacja może przechowywać małe ilości danych po stronie klienta w postaci tzw. cookies. Mogą one trwać poprzez wiele żądań, a nawet sesji. Railsy zapewniają łatwy dostęp do cookies za pomocą metody `cookies`, która podobnie jak metoda `session`, działa jako tablica haszująca:
+
+[source, ruby]
+-----------------------------------------
+class CommentsController < ApplicationController
+
+  def new
+    #Auto-fill the commenter's name if it has been stored in a cookie
+    @comment = Comment.new(:name => cookies[:commenter_name])
+  end
+
+  def create
+    @comment = Comment.new(params[:comment])
+    if @comment.save
+      flash[:notice] = "Thanks for your comment!"
+      if params[:remember_name]
+        # Remember the commenter's name
+        cookies[:commenter_name] = @comment.name
+      else
+        # Don't remember, and delete the name if it has been remembered before
+        cookies.delete(:commenter_name)
+      end
+      redirect_to @comment.article
+    else
+      render :action => "new"
+    end
+  end
+
+end
+-----------------------------------------
+
+Zwróć uwagę: żeby skasować wartości sesji, musisz przypisać kluczowi wartość `nil`. Natomiast żeby skasować wartość cookie, powinieneś użyć `cookies.delete(:key)`.
+
+== Filtry ==
+
+Filtry są metodami, które są uruchamiane przed, po lub wokół akcji kontrolera.
+Na przykład, jeden filtr może sprawdzać czy zalogowany użytkownik ma prawa
+dostępu do tego konkretnego kontrolera lub akcji. Filtry są dziedziczone, więc
+jeśli ustawisz filtr w `ApplicationController`, będzie wykonywany w każdym
+kontrolerze w twojej aplikacji. Typowy, prosty filtr wymaga, by użytkownik był zalogowany, aby akcja została wykonana.
+
+[source, ruby]
+---------------------------------
+class ApplicationController < ActionController::Base
+
+private
+
+  def require_login
+    unless logged_in?
+      flash[:error] = "You must be logged in to access this section"
+      redirect_to new_login_url # Prevents the current action from running
+    end
+  end
+
+  # The logged_in? method simply returns true if the user is logged in and
+  # false otherwise. It does this by "booleanizing" the current_user method
+  # we created previously using a double ! operator. Note that this is not
+  # common in Ruby and is discouraged unless you really mean to convert something
+  # into true or false.
+  def logged_in?
+    !!current_user
+  end
+
+end
+---------------------------------
+
+Ta metoda po prostu przechowuje komunikat o błędzie (we flash) i przekierowuje
+do formularza logowania, jeśli użytkownik jest niezalogowany. Jeśli filtr
+wstępny (ang. _before filter_; filtr, który jest uruchamiany przed akcją) renderuje lub przekierowuje, akcja nie będzie wykonana. Jeśli istnieją dodatkowe filtry, które miały być wykonane po filtrze renderującym bądź przekierowującym, zostaną one anulowane. Aby użyć tego filtra w kontrolerze, skorzystaj z metody `before_filter`:
+
+[source, ruby]
+---------------------------------
+class ApplicationController < ActionController::Base
+
+  before_filter :require_login
+
+end
+---------------------------------
+
+W tym przykładzie, filtr jest dodany do `ApplicationController`, a tym samym do wszystkich kontrolerów w aplikacji. W ten sposób każdy element aplikacji wymaga, by użytkownik był zalogowany, aby cokolwiek zrobić. Z oczywistych powodów (użytkownik nie będzie mmógł zalogować się już na starcie!) nie każdy kontroler lub akcja powinien tego wymagać. Możesz zapobiec uruchomieniu tego filtra przed szczególną, określoną akcją za pomocą metody `skip_before_filter`:
+
+[source, ruby]
+---------------------------------
+class LoginsController < Application
+
+  skip_before_filter :require_login, :only => [:new, :create]
+
+end
+---------------------------------
+
+Teraz akcje `new` i `create` klasy `LoginsController` będą działać bez wymagania, by użytkownik był zalogowany. Opcja `:only` jest użyta w takim celu, żeby pominięcie dotyczyło tylko tego filtra dla wskazanych akcji. Istnieje też opcja `:except`, która działa odwrotnie do opcji `:only`. Te opcje mogą być użyte także podczas dodawania filtrów. Możesz więc dodać filtr dla wybranych akcji, który uruchomi się w pierwszej kolejności (tzn. przed samą akcją). 
+
+=== Filtry końcowe i okalające ===
+
+W uzupełnieniu do filtrów wstępnych (uruchamianych przed akcją), możesz
+wywoływać filtry uruchamiane po akcji albo oba typy na raz - i przed, i po.
+Filtr końcowy (ang. after filter) jest podobny do filtra wstępnego, ale
+ponieważ w tym wypadku akcja już jest uruchomiona, filtr ma dostęp do danych
+zwrotnych, które zostały wysłane do klienta. Oczywiście filtr taki nie może
+zatrzymać akcji przed uruchomieniem. Filtr okalający (ang. around filter; 
+filtr uruchamiany jakby jednocześnie, "wokół" akcji) jest odpowiedzialny
+za uruchomienie akcji i może zdecydować żeby tego nie robić, co jest
+sposobem na jej zatrzymanie. 
+
+
+[source, ruby]
+---------------------------------
+# Przykład zaczerpnięty z dokumentacji API Railsów:
+# http://api.rubyonrails.org/classes/ActionController/Filters/ClassMethods.html
+class ApplicationController < Application
+
+  around_filter :catch_exceptions
+
+private
+
+  def catch_exceptions
+    yield
+  rescue => exception
+    logger.debug "Caught exception! #{exception}"
+    raise
+  end
+
+end
+---------------------------------
+
+=== Inne sposoby wykorzystania filtrów ===
+
+Choć najczęstszym sposobem używania filtrów jest tworzenie prywatnych metod  i
+używanie `*_filter` dla dodania ich, istnieją jeszcze dwa inne sposoby, aby zrobić to samo.
+
+Pierwszym jest użycie bloku bezpośrednio z metodą `*_filter`. Blok otrzymuje
+kontroler jako argument i filtr `require_login` z powyższych przykładów może
+być przepisany na blok:
+
+[source, ruby]
+---------------------------------
+class ApplicationController < ActionController::Base
+
+  before_filter { |controller| redirect_to new_login_url unless controller.send(:logged_in?) }
+
+end
+---------------------------------
+
+Zauważ, że filtr w tym przypadku używa `send`, a to dlatego, że metoda `logged_in?` jest metodą prywatną i filtr nie jest wywołany w obszarze kontrolera. Nie jest to zalecany sposób implementacji tego konkretnego filtra, ale w licznych prostych przypadkach może być przydatny.
+
+Drugim sposobem jest użycie klasy (właściwie, każdy obiekt, który odpowiada
+właściwej metodzie będzie odpowiedni) do obsłużenia filtrowania. Jest to
+przydatne w przypadkach, które są bardziej złożone, których zaimplementowanie
+w sposób czytelny i odtwarzalny nie jest możliwe przy użyciu dwóch poprzednich
+metod. Jako przykład, mógłbyś przepisać filtr logowania przy użyciu klasy:
+
+[source, ruby]
+---------------------------------
+class ApplicationController < ActionController::Base
+
+  before_filter LoginFilter
+
+end
+
+class LoginFilter
+
+  def self.filter(controller)
+    unless logged_in?
+      controller.flash[:error] = "You must be logged in to access this section"
+      controller.redirect_to controller.new_login_url
+    end
+  end
+
+end
+---------------------------------
+
+Znowu, to nie jest idealny przykład dla tego filtra, ponieważ nie działa on w
+obszarze kontrolera, tylko otrzymuje kontroler przekazany jako argument. Klasa
+filtra posiada metodę klasową `filter`, która zostanie uruchomiona przed lub
+po akcji, w zależności od tego, czy jest to filtr wstępny czy końcowy. Klasy
+używane jako filtry okalające również mogą używać tej samej metody `filter`, która będzie działać tak samo. Metoda musi użyć instrukcji `yield`, aby wykonać akcję. Alternatywnie, może mieć obie metody, i `before`, i `after`, które będą wywołane i przed, i po akcji.
+
+Dokumentacja API Railsów zawiera
+link:http://api.rubyonrails.org/classes/ActionController/Filters/ClassMethods.html[więcej
+informacji na temat sposobu korzystania z filtrów].
+
+== Weryfikacja ==
+
+Weryfikacja to sprawdzenie czy pewne kryteria są spełnione, aby uruchomić
+kontroler lub akcję. Może określać, że pewien klucz (lub kilka kluczy w formie
+tablicy) jest obecny w tablicy haszującej `params`, `session` lub `flash` lub
+to, że jakaś metoda HTTP została użyta lub to, że żądanie zostało wykonane
+przy użyciu XMLHTTPRequest (Ajax). Gdy kryteria nie są spełnione, domyślnie
+podejmowaną akcją jest wyrenderowanie błędu 400 (Bad Request), ale możesz to
+zmienić wedle swojego uznania, na przykład podając adres URL pod który akcja
+ma zostać przekierowana. Możesz wyrenderować cokolwiek innego albo na przykład dodać wiadomości we flash i nagłówki HTTP do odpowiedzi. Jest to dokładnie opisane w link:http://api.rubyonrails.org/classes/ActionController/Verification/ClassMethods.html[dokumentacji API] jako "essentially a special kind of before_filter".
+
+Oto przykład użycia weryfikacji sprawdzającej czy użytkownik dostarczył login i hasło do zalogowania:
+
+[source, ruby]
+---------------------------------------
+class LoginsController < ApplicationController
+
+  verify :params => [:username, :password],
+         :render => {:action => "new"},
+         :add_flash => {:error => "Username and password required to log in"}
+
+  def create
+    @user = User.authenticate(params[:username], params[:password])
+    if @user
+      flash[:notice] = "You're logged in"
+      redirect_to root_url
+    else
+      render :action => "new"
+    end
+  end
+
+end
+---------------------------------------
+
+Teraz akcja `create` nie będzie wywoływana dopóki parametry `username` i `password` nie zostaną podane. Jeśli się nie pojawią, do flash zostanie dodany komunikat błędu i zostanie wyrenderowana akcja `new`. Ale jest jeszcze coś ważnego, czego nie dopracowaliśmy w weryfikacji powyżej: będzie ona używana dla każdej akcji klasy LoginsController, a nie o to nam chodzi. Możesz wskazać dla których akcji weryfikacja ma być używana za pomocą opcji `:only` i `:except` tak jak w przypadku filtrów:
+
+[source, ruby]
+---------------------------------------
+class LoginsController < ApplicationController
+
+  verify :params => [:username, :password],
+         :render => {:action => "new"},
+         :add_flash => {:error => "Username and password required to log in"},
+         :only => :create # weryfikacja będzie uruchamiana tylko dla akcji "create"
+
+end
+---------------------------------------
+
+== Ochrona przed atakami typu Cross-site request forgery ==
+
+Cross-site request forgery to metoda ataku na stronę internetową, polegająca
+na tym, że użytkownik nieświadomie wysyła spreparowane przez hackera żądania.
+W ten sposób hacker może dodać, zmodyfikować lub usunąć dane ze strony bez
+wiedzy i pozwolenia użytkownika. Pierwszym krokiem do uniknięcia takiego
+zagrożenia jest upewnienie się, że wszystkie "destrukcyjne" akcje (create,
+update, destroy) są dostępne jedynie za pomocą żądań innych niż GET. Jeżeli
+stosujesz się do konwencji RESTful, na pewno już jest to zrobione. Jednak
+złośliwa strona nadal może wysyłać żądania inne niż GET do twojej strony i to
+całkiem prosto. I tu z pomocą przychodzi ochrona przed atakami typu Cross-site
+request forgery. Jak sama nazwa mówi, jest to ochrona przed fałszywymi
+żądaniami. Sposobem na zabezpieczenie naszej strony jest dodanie
+niezgadywalnego jednorazowego kodu (ang. token) do każdego osobnego żądania.
+Kod ten jest znany tylko twojemu serwerowi. Na tej zasadzie jeśli żądanie
+przyjdzie bez właściwego kodu, dostęp zostanie mu zabroniony.
+
+Jeśli wygenerujesz formularz taki jak ten:
+
+[source, ruby]
+-----------------------------------------
+<% form_for @user do |f| -%>
+  <%= f.text_field :username %>
+  <%= f.text_field :password -%>
+<% end -%>
+-----------------------------------------
+
+Możesz dodoać token jako ukryte pole:
+
+[source, html]
+-----------------------------------------
+<form action="/users/1" method="post">
+<div><!-- ... --><input type="hidden" value="67250ab105eb5ad10851c00a5621854a23af5489" name="authenticity_token"/></div>
+<!-- Fields -->
+</form>
+-----------------------------------------
+
+Railsy dodają ten token do każdego formularza, który jest generowany przy użyciu link:form_helpers.html[helperów formularzy], więc w większości przypadków nie musisz się o nic martwić. Jeśli piszesz swój formularz ręcznie, albo potrzebujesz dodać token z innych przyczyn, jest to możliwe za pomocą metody `form_authenticity_token`:
+
+.Dodanie zmiennej JavaScript zawierającej token przy użyciu AJAXa
+-----------------------------------------
+<%= javascript_tag "MyApp.authenticity_token = '#{form_authenticity_token}'" %>
+-----------------------------------------
+
+Przewodnik link:security.html[Bezpieczeństwo w Ruby On Rails] zawiera więcej informacji na ten temat, a także wiele innych zagadnień związanych z bezpieczeństwem, których powinieneś być świadomy podczas opracowywania aplikacji internetowych.
+
+== Obiekty +request+ i +response+ ==
+
+W każdym kontrolerze występują dwie metody dostępowe wskazujące na obiekty żądania i odpowiedzi, które są związane z cyklem żądań będącym obecnie w realizacji. Metoda `request` zawiera instancję klasy AbstractRequest, a metoda `response` zwraca obiekt +response+ prezentujący co zostanie odesłane z powrotem do klienta.
+
+=== Obiekt +request+ ===
+
+Obiekt request zawiera wiele przydatnych informacji na temat żądania przychodzącego od klienta. Aby uzyskać pełną listę dostępnych metod, odwołaj się do link:http://api.rubyonrails.org/classes/ActionController/AbstractRequest.html[dokumentacji API]. Wśród właściwości tego obiektu, do których możesz mieć dostęp, są:
+
+ * `host` - nazwa hosta użytego do wysłania tego żądania.
+ * `domain(n=2)` - pierwszych `n` segmentów nazwy hosta, zaczynając od prawej (TLD).
+ * `format` - typ zawartości żądanej przez klienta.
+ * `method` - metoda HTTP użyta do wysłania żądania.
+ * `get?`, `post?`, `put?`, `delete?`, `head?` - zwraca `true` jeśli metoda HTTP to GET/POST/PUT/DELETE/HEAD.
+ * `headers` - zwraca tablicę haszującą zawierającą nagłówki stowarzyszone z żądaniem.
+ * `port` - numer portu (typ integer) użyty w żądaniu.
+ * `protocol` - zwraca łańcuch zawierający użyty protokół plus "://", na przykład "http://"
+ * `query_string` - ciąg zapytania (część adresu URL - wszystko po znaku "?").
+ * `remote_ip` - adres IP klienta.
+ * `url` - cały adres URL użyty w żądaniu.
+
+==== +path_parameters+, +query_parameters+ i +request_parameters+ ====
+
+Railsy gromadzą wszystkie parametry przesłane wraz z żądaniem w tablicy haszującej `params`, bez względu czy zostały przesłane jako część ciągu zapytania czy jako zawartość POST. Obiekt request posiada trzy akcesory (ang. accessors) umożliwiające ci dostęp do tych parametrów w zależności od ich pochodzenia. Tablica haszująca `query_parameters` zawiera parametry, które były wysłane jako część ciągu zapytania, natomiast tablica haszująca `request_parameters` zawiera parametry wysłane jako POST. Tablica haszująca `path_parameters` zawiera parametry, które zostały rozpoznane przez routing jako część ścieżki prowadzącej do tego konkretnego kontrolera i akcji.
+
+=== Obiekt +response+ ===
+
+Obiekt `response` nie jest zazwyczaj stosowany od razu, ale jest tworzony w
+trakcie wykonywania akcji i renderuje dane, które są przesyłane z powrotem do
+użytkownika. Ale czasami - jak w przypadku filtrów końcowych -  może być potrzebny dostęp do tych danych natychmiast. Niektóre z tych akcesorów posiadają jeszcze settery (ang. setters), umożliwiające ci zmianę wartości.
+
+ * `body` - jest to ciąg danych przesyłanych z powrotem do klienta. Najczęściej jest to HTML.
+ * `status` - kod statusu HTTP, na przykład 200 dla pomyślnie zrealizowanego żądania, lub 404 gdy plik nie został znaleziony.
+ * `location` - adres URL pod który klient jest przekierowywany (o ile jest).
+ * `content_type` - typ zawartości zwracanych danych.
+ * `charset` - kodowanie znaków, zazwyczaj ustawione na"utf8".
+ * `headers` - nagłówki użyte w zwracanych danych.
+
+==== Ustawienie niestandardowych nagłówków ====
+
+Jeśli chcesz ustawić niestandardowe nagłówki dla danych zwrotnych, miejscem na
+to jest `response.headers`. Atrybut headers jest tablicą haszującą, który
+mapuje nazwę nagłówka na jego wartość, a Railsy ustawiają niektóre z nich -
+np. `Content-Type` - automatycznie. Jeśli chcesz dodać lub zmienić nagłówek, dopisz go do `headers` z nazwą i wartością:  
+
+[source, ruby]
+-------------------------------------
+response.headers["Content-Type"] = "application/pdf"
+-------------------------------------
+
+== Podstawowe uwierzytelnianie HTTP ==
+
+Railsy mają wbudowany mechanizm podstawowego uwierzyrzytelniania HTTP. Jest to system uwierzytelniania, który jest obsługiwany przez większość przeglądarek i innych klientów HTTP. Jako przykład, rozważmy sekcję administracyjną, która będzie dostępna tylko po wprowadzeniu nazwy użytkownika i hasła do podstawowego okna dialogowego HTTP przeglądarki. Korzystanie z tego wbudowanego uwierzytelniania jest całkiem proste i wymaga jedynie użycia jednej metody - `authenticate_or_request_with_http_basic`
+
+[source, ruby]
+-------------------------------------
+class AdminController < ApplicationController
+
+  USERNAME, PASSWORD = "humbaba", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8"
+
+  before_filter :authenticate
+
+private
+
+  def authenticate
+    authenticate_or_request_with_http_basic do |username, password|
+      username == USERNAME && Digest::SHA1.hexdigest(password) == PASSWORD
+    end
+  end
+
+end
+-------------------------------------
+
+W tym miejscu możesz utworzyć kontrolery w odpowiedniej przestrzeni nazw,
+które będą dziedziczyć z klasy `AdminController`. Filtr wstępny będzie zatem wywoływany dla wsztskich akcji w tamtych kontrolerach, chroniąc je przy użyciu podstawowego uwierzytelniania HTTP.
+
+== Przesyłanie strumieniowe i pobieranie plików ==
+
+Czasami możesz chcieć przesłać do użytkownika plik zamiast renderować stronę HTML. Wszystkie kontrolery w Railsach posiadają metody `send_data` i `send_file`, obie z nich przesyłają strumieniowo dane do klienta. `send_file` jest wygodną metodą, która pozwala dostarczyć nazwę pliku znajdującego się na dysku i przesłać zawartość tego pliku.
+
+Aby przesłać dane do klienta, użyj `send_data`:
+
+[source, ruby]
+----------------------------
+require "prawn"
+class ClientsController < ApplicationController
+
+  # Generate a PDF document with information on the client and return it.
+  # The user will get the PDF as a file download.
+  def download_pdf
+    client = Client.find(params[:id])
+    send_data(generate_pdf, :filename => "#{client.name}.pdf", :type => "application/pdf")
+  end
+
+private
+
+  def generate_pdf(client)
+    Prawn::Document.new do
+      text client.name, :align => :center
+      text "Address: #{client.address}"
+      text "Email: #{client.email}"
+    end.render
+  end
+
+end
+----------------------------
+
+Akcja `download_pdf` w przykładzie powyżej wezwie prywatną metodę, która
+właściwie generuje plik (dokument PDF) i zwróci to jako string. Ten string
+będzie następnie przesłany do klienta jako plik do pobrania, a nazwa pliku
+będzie użytkownikowi sugerowana. Czasami kiedy  przesyłasz pliki do
+użytkownika, możesz nie chcieć, aby plik był do pobrania. Weźmy na przykład
+obrazki, które są wbudowane w treść strony HTML. Aby poinformować
+przeglądarkę, że plik nie jest do pobrania, możesz ustawić opcję
+`:disposition` na `inline`. Przeciwną i zarazem domyślną wartością dla tej
+opcji jest `attachment`.
+
+=== Wysyłanie plików ===
+
+Jeżeli chcesz wysłać plik, który już istnieje na dysku, użyj metody `send_file`. Jest to zwykle nie zalecane, ale może być przydatne, jeżeli chcesz wykonać jakąś weryfikację przed pozwoleniem użytkownikowi na pobranie tego pliku.
+
+[source, ruby]
+----------------------------
+class ClientsController < ApplicationController
+
+  # Stream a file that has already been generated and stored on disk
+  def download_pdf
+    client = Client.find(params[:id])
+    send_data("#{RAILS_ROOT}/files/clients/#{client.id}.pdf", :filename => "#{client.name}.pdf", :type => "application/pdf")
+  end
+
+end
+----------------------------
+
+Ta metoda będzie czytać i przesyłać strumieniowo plik w blokach po 4 Kb, unikając ładowania całego pliku do pamięci na raz. Możesz wyłączyć strumieniowanie poprzez opcję `:stream` albo ustawić rozmiar bloku poprzez opcję `:buffer_size`.
+
+WARNING: Bądź ostrożny kiedy używasz (lub po prostu nie używaj) zewnętrznych danych (parametrów, cookis, itp) do zlokalizowania pliku na dysku, jest to ryzykowne z punktu widzenia bezpieczeństwa i może pozwolić komuś na uzyskanie dostępu do plików które nie są przeznaczone do oglądania.
+
+TIP: Nie zaleca się przesyłania statycznych plików przez Railsy, jeśli możesz
+zamiast tego trzymaj je w folderze publicznym na twoim serwerze. O wiele
+bardziej efektywne jest umożliwienie użytkownikowi pobierania pliku
+bezpośrednio za pomocą serwera Apache lub innego serwera www, ponieważ
+utrzymywane żądanie przechodzi niepotrzebnie przez cały stos Railsów. Jednak
+jeśli potrzebujesz aby z jakiegoś powodu żądanie przeszło przez Railsy możesz
+ustawić opcję `:x_sendfile` na `true`, wówczas Railsy pozwolą serwerowi www
+obsłużyć wysyłanie pliku do użytkownika, uwalniając od tego proces Railsów.
+Pamiętaj, że Twój serwer www musi obsługiwać nagłówek `X-Sendfile`, oraz musisz uważać, aby nie używać wejścia użytkownika w sposób, który pozwoli komuś na pobieranie przypadkowych plików.
+
+=== Pobieranie plików w aplkacjach RESTful ===
+
+Chociaż metoda `send_data` działa całkiem dobrze, jeśli tworzysz aplikację
+RESTful posiadającą osobne akcje dla pobierania plików, zwykle będzie ona
+niepotrzebna. W terminologii REST, plik PDF z przykładu powyżej można uznać za
+kolejną reprezentację danych zwracachych do klienta. Railsy zapewniają łatwy i
+dosyć gładki sposób na "RESTful downloads". Oto jak możesz przepisać wcześniejszy przykład, tak aby pobranie pliku PDF było częścią akcji `show`, bez przesyłania strumieniowego:
+
+[source, ruby]
+----------------------------
+class ClientsController < ApplicationController
+
+  # The user can request to receive this resource as HTML or PDF.
+  def show
+    @client = Client.find(params[:id])
+
+    respond_to do |format|
+      format.html
+      format.pdf{ render :pdf => generate_pdf(@client) }
+    end
+  end
+
+end
+----------------------------
+
+Aby ten przykład zadziałał, musisz dodać typ PDF jako MIME type w Railsach. Można to zrobić poprzez dodanie następującej linii do pliku `config/initializers/mime_types.rb`:
+
+[source, ruby]
+----------------------------
+Mime::Type.register "application/pdf", :pdf
+----------------------------
+
+NOTE: Pliki konfiguracyjne nie są wczytywane przy kazdym żądaniu, więc musisz uruchomić ponownie serwer, aby uaktywnić zmiany.
+
+Teraz użytkownik może zażądać pobrania wersji PDF strony tylko przez dodanie rozszerzenia ".pdf" do adresu URL:
+
+----------------------------
+GET /clients/1.pdf
+----------------------------
+
+== Filtrowanie parametrów ==
+
+Railsy trzymają pliki logów dla każdego środowiska (rozwojowego, testowania i
+produkcji) w folderze `log`. Są one niezwykle przydatne podczas debugowania,
+żeby zobaczyć co faktycznie działo się w aplikacji, ale w czasie późniejszego
+działania aplikacji możesz nie chcieć, żeby każda informacja była zapisywany w
+pliku logu. Metoda `filter_parameter_logging` może być używana do
+odfiltrowywania poufnych informacji z logu. Działa ona poprzez zastępowania
+pewnych wartości z tablicy haszującej `params` przez "[FILTERED]" przy
+zapisywaniu do logu. Jako przykład zobaczmy, jak filtrować wszystkie parametry
+z kluczem zawierającym `password`:
+
+[source, ruby]
+-------------------------
+class ApplicationController < ActionController::Base
+
+  filter_parameter_logging :password
+
+end
+-------------------------
+
+Metoda działa rekursywnie na wszystkich poziomach tablicy haszującej params.
+Może przyjmować drugi opcjonalny parametr, który jeśli występuje, jest używany
+jako tekst zastępujący. Funkcja ta może też przyjąć blok, który sprawdza warunek dla każdego klucza i zastępuje te, dla których blok zwraca ‘true’.
+
+== Obsługa błędów ==
+
+Jest bardzo prawdopodobne, że twoja aplikacja będzie zawierać błędy albo w
+innym razie będzie wyrzucać jakieś wyjątki, które muszą być rozpatrzone. Na
+przykład, jeśli użytkownik użyje linka do zasobu, który już nie istnieje w
+bazie danych, moduł Active Record rzuci wyjąkiem
+`ActiveRecord::RecordNotFound`. Przy wystąpieniu jakiegokolwiek wyjątku Railsy
+domyślnie wyświetlają komunikat błędu 500, czyli wewnętrzny błąd serwera (500
+Server Error). Jeżeli żądanie było wywołane lokalnie, dzięki prześledzeniu go
+od początku i kilku dodatkowym informacjom, które zostaną wyświetlone, możesz
+dowiedzieć się, co poszło źle i jak sobie z tym poradzić. Jeżeli żądanie było
+zdalne, Railsy wyświetlą tylko zwykły komunikat  "500 Server Error" lub "404
+Not Found", jeżeli jest to błąd routingu albo zapis nie został znaleziony.
+Czasami możesz chcieć dostosować sposób, w jaki te błędy będą złapane i jak
+zostaną wyświetlone użytkownikowi. Istnieje kilka poziomów obsługi wyjątków
+dostępnych w aplikacjach Railsowych, które omówione są niżej.
+
+=== Domyślne szablony błędów 500 and 404 ===
+
+Domyślnym działaniem aplikacji jest wyrenderowanie komunikatu błędu 404 lub 500. Komunikaty te zawarte są w statycznych plikach HTML w katalogu `public`, odpowiednio w plikach `404.html` i `500.html`. Możesz dostosować te pliki poprzez zamieszczenie kilku dodatkowych informacji i rozmieszczenie graficzne, ale pamiętaj, że są to pliki statyczne, tzn. nie możesz użyć w nich RHTML lub layoutów, tylko czysty HTML. 
+
+=== `rescue_from` ===
+
+Jeżeli chcesz zrobić coś bardziej wymyślnego dla obsługi błędu, możesz użyć `rescue_from`, który obsługuje wyjątki pewnego typu (lub wielu typów) w całym kontrolerze i jego podklasach. Kiedy pojawia się wyjątek, który złapany został przez dyrektywę +rescue_from+ obiekt wyjątku zostaje przekazany do  handlera. Handler może być metodą lub obiektem Proc przekazywanym do opcji `:with`. Możesz także użyć bezpośrednio bloku, zamiast wyraźnego obiektu Proc.
+
+Oto jak możesz użyć +rescue_from+ do przechwycenia wszystkich błędów
+`ActiveRecord::RecordNotFound` i zrobienia czegoś z nimi.
+
+[source, ruby]
+-----------------------------------
+class ApplicationController < ActionController::Base
+
+  rescue_from ActiveRecord::RecordNotFound, :with => :record_not_found
+
+private
+
+  def record_not_found
+    render :text => "404 Not Found", :status => 404
+  end
+
+end
+-----------------------------------
+
+Oczywiście ten przykład jest niczym więcej jak opracowaniem i w ogóle nie polepsza domyślnej obsługi błędów, ale kiedyś możesz chcieć złapać wszystkie wyjątki, wtedy będziesz mógł zrobić z nimi co tylko chcesz. Na przykład, możesz utworzyć własne klasy wyjątków, które zostaną rzucone, jeśli użytkownik nie ma dostępu do niektórych części aplikacji:
+
+[source, ruby]
+-----------------------------------
+class ApplicationController < ActionController::Base
+
+  rescue_from User::NotAuthorized, :with => :user_not_authorized
+
+private
+
+  def user_not_authorized
+    flash[:error] = "You don't have access to this section."
+    redirect_to :back
+  end
+
+end
+
+class ClientsController < ApplicationController
+
+  # Check that the user has the right authorization to access clients.
+  before_filter :check_authorization
+
+  # Note how the actions don't have to worry about all the auth stuff.
+  def edit
+    @client = Client.find(params[:id])
+  end
+
+private
+
+  # If the user is not authorized, just throw the exception.
+  def check_authorization
+    raise User::NotAuthorized unless current_user.admin?
+  end
+
+end
+-----------------------------------
+
+NOTE: Niektóre wyjątki są obsługiwalne tylko w klasie ApplicationController, ponieważ występują zanim sam kontroler zostanie zainicjalizowany i będzie mógł podjąć akcję. Zobacz link:http://m.onkey.org/2008/7/20/rescue-from-dispatching[artykuł] autorstwa Pratik'a Naik'a na ten temat, aby zaczerpnąć więcej informacji.
+
+== Changelog ==
+
+http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/17[Lighthouse ticket]
+
+* November 4, 2008: First release version by Tore Darrell

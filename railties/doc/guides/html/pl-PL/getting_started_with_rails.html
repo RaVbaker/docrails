@@ -145,22 +145,22 @@
 <div class="ulist"><ul>
 <li>
 <p>
-Instalowaniem Railsów, tworzeniem nowej aplikacji oraz zestawianiem połączenia z bazę danych
+instalowaniem Railsów, tworzeniem nowej aplikacji oraz zestawianiem połączenia z bazę danych
 </p>
 </li>
 <li>
 <p>
-Ogólnym układem aplikacji
+ogólnym układem aplikacji
 </p>
 </li>
 <li>
 <p>
-Podstawami modelu MVC (Model, View, Controller) oraz architektury RESTful
+podstawami modelu MVC (Model, View, Controller) oraz architektury RESTful
 </p>
 </li>
 <li>
 <p>
-Szybkim generowaniem podstawowych elementów aplikacji
+szybkim generowaniem podstawowych elementów aplikacji
 </p>
 </li>
 </ul></div>
@@ -168,11 +168,14 @@ Szybkim generowaniem podstawowych elementów aplikacji
 </div>
 <h2 id="_co_obejmuje_przewodnik">1. Co obejmuje przewodnik?</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Ten przewodnik jest przeznaczony dla początkujących, którzy chcą rozpocząć tworzenie aplikacji opartych na Railsach. Nie zakładamy, że masz wcześniejsze doświadczenia z Railsami. Niemniej jednak, do jak najlepszego wykorzystania tego przewodnika, konieczne jest:</p></div>
+<div class="paragraph"><p>Ten przewodnik jest przeznaczony dla początkujących, którzy chcą rozpocząć
+tworzenie aplikacji opartych na Railsach. Nie zakłada, że masz wcześniejsze
+doświadczenia z Railsami. Niemniej jednak, do jak najlepszego wykorzystania
+tego przewodnika, konieczna jest instalacja:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-<a href="http://www.ruby-lang.org/en/downloads/">Ruby</a> - podstawowa wiedza z zakresu języka Ruby
+języka <a href="http://www.ruby-lang.org/en/downloads/">Ruby</a>
 </p>
 </li>
 <li>
@@ -182,7 +185,7 @@ Szybkim generowaniem podstawowych elementów aplikacji
 </li>
 <li>
 <p>
-Zarządzanie bazą danych <a href="http://www.sqlite.org/">SQLite</a> (preferowane), <a href="http://www.mysql.com/">MySQL</a> lub <a href="http://www.postgresql.org/">PostgreSQL</a>
+systemu zarządzania bazą danych <a href="http://www.sqlite.org/">SQLite</a> (preferowane), <a href="http://www.mysql.com/">MySQL</a> lub <a href="http://www.postgresql.org/">PostgreSQL</a>
 </p>
 </li>
 </ul></div>
@@ -201,6 +204,11 @@ Zarządzanie bazą danych <a href="http://www.sqlite.org/">SQLite</a> (preferowa
 <li>
 <p>
 <a href="http://poignantguide.net/ruby/">Why&#8217;s (Poignant) Guide to Ruby</a>
+</p>
+</li>
+<li>
+<p>
+<a href="http://www.apohllo.pl/dydaktyka/ruby/intro/">Wprowadzenie do języka Ruby (po polsku)</a>
 </p>
 </li>
 </ul></div>
@@ -232,22 +240,22 @@ REST jest najlepszym wzorem dla aplikacji internetowych - organizowanie aplikacj
 <div class="ulist"><ul>
 <li>
 <p>
-Odizolowanie logiki biznesowej od interfejsu użytkownika
+odizolowanie logiki biznesowej od interfejsu użytkownika
 </p>
 </li>
 <li>
 <p>
-Łatwość utrzymania kodu zgodnie z zasadą DRY
+łatwość utrzymania kodu zgodnie z zasadą DRY
 </p>
 </li>
 <li>
 <p>
-Wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co ułatwia zarządzenie tym kodem
+wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co ułatwia zarządzenie tym kodem
 </p>
 </li>
 </ul></div>
-<h4 id="_models">2.1.1. Models</h4>
-<div class="paragraph"><p>Model przedstawia informacje (dane) dla aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.</p></div>
+<h4 id="_modele">2.1.1. Modele</h4>
+<div class="paragraph"><p>Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.</p></div>
 <h4 id="_widoki">2.1.2. Widoki</h4>
 <div class="paragraph"><p>Widoki tworzą interfejs użytkownika aplikacji. W Railsach, widoki są często plikami HTML zawierającymi kod w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją danych. Przede wszystkim są odpowiedzialne za dostarczanie danych do przeglądarki internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.</p></div>
 <h4 id="_kontrolery">2.1.3. Kontrolery</h4>

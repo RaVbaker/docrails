@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Action Controller basics</title>
+  <title>Podstawowe informacje o module Action Controller</title>
   <!--[if lt IE 8]>
   <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js" type="text/javascript"></script>
   <![endif]-->
@@ -31,30 +31,30 @@
       <h2>Chapters</h2>
       <ol>
           <li>
-          <a href="#_what_does_a_controller_do">What Does a Controller do?</a>
+          <a href="#_co_robi_kontroler">Co robi kontroler?</a>
           </li>
           <li>
-          <a href="#_methods_and_actions">Methods and Actions</a>
+          <a href="#_metody_i_akcje">Metody i akcje</a>
           </li>
           <li>
-          <a href="#_parameters">Parameters</a>
+          <a href="#_parametry">Parametry</a>
             <ul>
             
-              <li><a href="#_hash_and_array_parameters">Hash and Array Parameters</a></li>
+              <li><a href="#_parametry_tablic_zwyk_ych_ang_array_i_tablic_asocjacyjnych_ang_hash">Parametry tablic zwykłych (ang. array) i tablic asocjacyjnych (ang. hash)</a></li>
             
-              <li><a href="#_routing_parameters">Routing Parameters</a></li>
+              <li><a href="#_parametry_routingu">Parametry routingu</a></li>
             
               <li><a href="#_tt_default_url_options_tt"><tt>default_url_options</tt></a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_session">Session</a>
+          <a href="#_sesja">Sesja</a>
             <ul>
             
-              <li><a href="#_accessing_the_session">Accessing the Session</a></li>
+              <li><a href="#_dost_pno_sesji">Dostępność sesji</a></li>
             
-              <li><a href="#_the_flash">The flash</a></li>
+              <li><a href="#_flash">Flash</a></li>
             
             </ul>
           </li>
@@ -62,52 +62,52 @@
           <a href="#_cookies">Cookies</a>
           </li>
           <li>
-          <a href="#_filters">Filters</a>
+          <a href="#_filtry">Filtry</a>
             <ul>
             
-              <li><a href="#_after_filters_and_around_filters">After Filters and Around Filters</a></li>
+              <li><a href="#_filtry_ko_cowe_i_okalaj_ce">Filtry końcowe i okalające</a></li>
             
-              <li><a href="#_other_ways_to_use_filters">Other Ways to Use Filters</a></li>
+              <li><a href="#_inne_sposoby_wykorzystania_filtr_w">Inne sposoby wykorzystania filtrów</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_verification">Verification</a>
+          <a href="#_weryfikacja">Weryfikacja</a>
           </li>
           <li>
-          <a href="#_request_forgery_protection">Request Forgery Protection</a>
+          <a href="#_ochrona_przed_atakami_typu_cross_site_request_forgery">Ochrona przed atakami typu Cross-site request forgery</a>
           </li>
           <li>
-          <a href="#_the_tt_request_tt_and_tt_response_tt_objects">The <tt>request</tt> and <tt>response</tt> Objects</a>
+          <a href="#_obiekty_tt_request_tt_i_tt_response_tt">Obiekty <tt>request</tt> i <tt>response</tt></a>
             <ul>
             
-              <li><a href="#_the_tt_request_tt_object">The <tt>request</tt> Object</a></li>
+              <li><a href="#_obiekt_tt_request_tt">Obiekt <tt>request</tt></a></li>
             
-              <li><a href="#_the_tt_response_tt_object">The <tt>response</tt> Object</a></li>
+              <li><a href="#_obiekt_tt_response_tt">Obiekt <tt>response</tt></a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_http_basic_authentication">HTTP Basic Authentication</a>
+          <a href="#_podstawowe_uwierzytelnianie_http">Podstawowe uwierzytelnianie HTTP</a>
           </li>
           <li>
-          <a href="#_streaming_and_file_downloads">Streaming and File Downloads</a>
+          <a href="#_przesy_anie_strumieniowe_i_pobieranie_plik_w">Przesyłanie strumieniowe i pobieranie plików</a>
             <ul>
             
-              <li><a href="#_sending_files">Sending Files</a></li>
+              <li><a href="#_wysy_anie_plik_w">Wysyłanie plików</a></li>
             
-              <li><a href="#_restful_downloads">RESTful Downloads</a></li>
+              <li><a href="#_pobieranie_plik_w_w_aplkacjach_restful">Pobieranie plików w aplkacjach RESTful</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_parameter_filtering">Parameter Filtering</a>
+          <a href="#_filtrowanie_parametr_w">Filtrowanie parametrów</a>
           </li>
           <li>
-          <a href="#_rescue">Rescue</a>
+          <a href="#_obs_uga_b_d_w">Obsługa błędów</a>
             <ul>
             
-              <li><a href="#_the_default_500_and_404_templates">The Default 500 and 404 Templates</a></li>
+              <li><a href="#_domy_lne_szablony_b_d_w_500_and_404">Domyślne szablony błędów 500 and 404</a></li>
             
               <li><a href="#_tt_rescue_from_tt"><tt>rescue_from</tt></a></li>
             
@@ -120,66 +120,74 @@
     </div>
     
     <div id="content">
-        <h1>Action Controller basics</h1>
+        <h1>Podstawowe informacje o module Action Controller</h1>
       <div id="preamble">
 <div class="sectionbody">
-<div class="paragraph"><p>In this guide you will learn how controllers work and how they fit into the request cycle in your application. After reading this guide, you will be able to:</p></div>
+<div class="paragraph"><p>W tym przewodniku dowiesz się jak pracują kontrolery (controllers) oraz w jaki sposób używać ich w cyklu żądań twojej aplikacji. Po przeczytaniu tego przewodnika, będziesz potrafił:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Follow the flow of a request through a controller
+kierować przepływ żądania do kontrolera
 </p>
 </li>
 <li>
 <p>
-Understand why and how to store data in the session or cookies
+zrozumieć jak i dlaczego przechowywać dane w sesji lub cookies
 </p>
 </li>
 <li>
 <p>
-Work with filters to execute code during request processing
+pracować z filtrami, po to by móc wykonywać kod podczas przetwarzania żądania
 </p>
 </li>
 <li>
 <p>
-Use Action Controller&#8217;s built-in HTTP authentication
+używać wbudowanego w moduł Action Controller uwieżytelniania HTTP
 </p>
 </li>
 <li>
 <p>
-Stream data directly to the user&#8217;s browser
+przesyłać dane bezpośrednio do przeglądarki użytkownika
 </p>
 </li>
 <li>
 <p>
-Filter sensitive parameters so they do not appear in the application&#8217;s log
+filtrować niejawne parametry, tak by nie pojawiały się w logach aplikacji
 </p>
 </li>
 <li>
 <p>
-Deal with exceptions that may be raised during request processing
+radzić sobie z wyjątkami, które mogą wystąpić podczas przetwarzania żądania
 </p>
 </li>
 </ul></div>
 </div>
 </div>
-<h2 id="_what_does_a_controller_do">1. What Does a Controller do?</h2>
+<h2 id="_co_robi_kontroler">1. Co robi kontroler?</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Action Controller is the C in MVC. After routing has determined which controller to use for a request, your controller is responsible for making sense of the request and producing the appropriate output. Luckily, Action Controller does most of the groundwork for you and uses smart conventions to make this as straight-forward as possible.</p></div>
-<div class="paragraph"><p>For most conventional RESTful applications, the controller will receive the request (this is invisible to you as the developer), fetch or save data from a model and use a view to create HTML output. If your controller needs to do things a little differently, that&#8217;s not a problem, this is just the most common way for a controller to work.</p></div>
-<div class="paragraph"><p>A controller can thus be thought of as a middle man between models and views. It makes the model data available to the view so it can display that data to the user, and it saves or updates data from the user to the model.</p></div>
+<div class="paragraph"><p>Moduł Action Controller odpowiada literze C we wzorcu MVC. Po tym, jak routing określi, którego kontrolera użyć do wykonania żądania, twój kontroler jest odpowiedzialny za zrozumienie tego żądania i za stworzenie odpowiednich danych wyjściowych. Na szczęście moduł Action Controller wykonuje większość podstawowej pracy za ciebie, używa inteligentnych konwencji po to, by uczynić wszystko tak prostym, jak to tylko możliwe.</p></div>
+<div class="paragraph"><p>Dla większości typowych aplikacji RESTful, kontroler otrzyma żądanie (co nie
+jest widoczne dla ciebie jako programisty), zapisze albo pobierze dane z
+modelu i użyje widoku w celu stworzenia wyjściowej strony HTML. Jeżeli twój
+kontroler potrzebuje wykonywać pewne rzeczy trochę inaczej - nie ma problemu,
+to jest tylko najbardziej typowy sposób pracy kontrolera.</p></div>
+<div class="paragraph"><p>Kontroler może być zatem traktowany jako pośrednik między modelami a widokami. Udostępnia on dane modelu do widoku, który następnie wyświetla dane użytkownikowi. I w drugą stronę - kontroler zapisuje bądź uaktualnia dane w modelu pobierając je od użytkownika.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">For more details on the routing process, see <a href="../routing_outside_in.html">Rails Routing from the Outside In</a>.</td>
+<td class="content">Aby dowiedzieć się więcej o procesie routingu, zajrzyj do
+      <a href="routing_outside_in.html">Routingu w Ruby on Rails</a>.</td>
 </tr></table>
 </div>
 </div>
-<h2 id="_methods_and_actions">2. Methods and Actions</h2>
+<h2 id="_metody_i_akcje">2. Metody i akcje</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>A controller is a Ruby class which inherits from ApplicationController and has methods just like any other class. When your application receives a request, the routing will determine which controller and action to run, then Rails creates an instance of that controller and runs the public method with the same name as the action.</p></div>
+<div class="paragraph"><p>Kontroler jest klasą języka Ruby dziedziczącą z klasy ApplicationController,
+posiada metody jak każda inna klasa. Kiedy twoja aplikacja otrzymuje żądanie,
+routing określa, który wybrać kontroler i którą akcję wykonać, a następnie
+Railsy tworzą instancję klasy danego kontrolera i wywołuje publiczną metodę o tej samej nazwie co akcja.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -202,8 +210,8 @@ private
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>There&#8217;s no rule saying a method on a controller has to be an action; they may well be used for other purposes such as filters, which will be covered later in this guide.</p></div>
-<div class="paragraph"><p>As an example, if a user goes to <tt>/clients/new</tt> in your application to add a new client, Rails will create an instance of ClientsController and run the <tt>new</tt> method. Note that the empty method from the example above could work just fine because Rails will by default render the <tt>new.html.erb</tt> view unless the action says otherwise. The <tt>new</tt> method could make available to the view a <tt>@client</tt> instance variable by creating a new Client:</p></div>
+<div class="paragraph"><p>Nie ma zasady mówiącej, że metoda na kontrolerze musi być akcją; równie dobrze może być użyta do innych celów, takich jak filtrowanie, które będzie omówione w dalszej części tego przewodnika.</p></div>
+<div class="paragraph"><p>Na przykład, jeżeli użytkownik przejdzie do <tt>/clients/new</tt> w twojej aplikacji, aby dodać nowego klienta, Rails stworzy instancję klasy ClientsController i uruchomi metodę <tt>new</tt>. Zwróć uwagę, że pusta metoda z przykładu powyżej może działać dobrze, ponieważ Rails domyślnie wyrenderuje widok <tt>new.html.erb</tt>, chyba że akcja powie inaczej. Metoda <tt>new</tt> może udostępnić do widoku zmienną instancyjną <tt>@client</tt> poprzez stworzenie nowego klienta.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -212,12 +220,25 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> new
   <span style="color: #009900">@client</span> <span style="color: #990000">=</span> Client<span style="color: #990000">.</span>new
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>The <a href="../layouts_and_rendering.html">Layouts &amp; rendering guide</a> explains this in more detail.</p></div>
-<div class="paragraph"><p>ApplicationController inherits from ActionController::Base, which defines a number of helpful methods. This guide will cover some of these, but if you&#8217;re curious to see what&#8217;s in there, you can see all of them in the API documentation or in the source itself.</p></div>
+<div class="paragraph"><p>Przewodnik <a href="layouts_and_rendering.html">Layouty oraz renderowanie</a> wyjaśnia to szczegółowo.</p></div>
+<div class="paragraph"><p>Klasa ApplicationController dziedziczy z klasy ActionController::Base, która
+definiuje szereg pomocnych metod. Niniejszy przewodnik obejmuje niektóre z
+nich, ale jeśli jesteś ciekaw, możesz zobaczyć je wszystkie w dokumentacji API
+albo w kodzie źródłowym.</p></div>
 </div>
-<h2 id="_parameters">3. Parameters</h2>
+<h2 id="_parametry">3. Parametry</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>You will probably want to access data sent in by the user or other parameters in your controller actions. There are two kinds of parameters possible in a web application. The first are parameters that are sent as part of the URL, called query string parameters. The query string is everything after "?" in the URL. The second type of parameter is usually referred to as POST data. This information usually comes from a HTML form which has been filled in by the user. It&#8217;s called POST data because it can only be sent as part of an HTTP POST request. Rails does not make any distinction between query string parameters and POST parameters, and both are available in the <tt>params</tt> hash in your controller:</p></div>
+<div class="paragraph"><p>Prawdopodobnie będziesz chciał uzyskać dostęp do danych przesłanych przez
+użytkownika lub innych parametrów występujących w akcjach twojego kontrolera.
+Mamy dwa rodzaje parametrów występujących w aplikacjach webowych. Pierwszy typ
+to parametry, które są wysyłane jako część adresu URL, która to część jest
+nazywana ciągiem zapytania (ang. query string). Ciąg zapytania to wszystko, co
+znajduje się po znaku "?" w adresie URL. Drugi typ parametrów jest zazwyczaj
+określany jako dane POST (ang. POST data). Te informacje pochodzą zwykle z
+formularza HTML, który został wypełniony przez użytkownika. Są nazywane jako
+dane POST, ponieważ mogą być wysłane jedynie jako część żądania HTTP POST.
+Railsy nie tworzą żadnego rozróżnienia pomiędzy parametrami ciągu zapytania a
+parametrami POST. Oba typy są dostępne w tablicy asocjacyjnej (ang. hash) <tt>params</tt> w twoim kontrolerze:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -252,8 +273,8 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<h3 id="_hash_and_array_parameters">3.1. Hash and Array Parameters</h3>
-<div class="paragraph"><p>The params hash is not limited to one-dimensional keys and values. It can contain arrays and (nested) hashes. To send an array of values, append "[]" to the key name:</p></div>
+<h3 id="_parametry_tablic_zwyk_ych_ang_array_i_tablic_asocjacyjnych_ang_hash">3.1. Parametry tablic zwykłych (ang. array) i tablic asocjacyjnych (ang. hash)</h3>
+<div class="paragraph"><p>Tablica haszująca <tt>params</tt> nie musi być ograniczona do jednego wymiaru. Możemy stworzyć tablicę wielowymiarową, która zawiera w sobie zagnieżdżone tablice haszujące lub zwykłe tablice. Aby wysłać tablicę wartości, dołącz "[]" do nazwy klucza.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>GET /clients?ids[]=1&amp;ids[]=2&amp;ids[]=3</tt></pre>
@@ -263,11 +284,12 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">The actual URL in this example will be encoded as "/clients?ids%5b%5d=1&amp;ids%5b%5d=2&amp;ids%5b%5b=3" as [ and ] are not allowed in URLs. Most of the time you don&#8217;t have to worry about this because the browser will take care of it for you, and Rails will decode it back when it receives it, but if you ever find yourself having to send those requests to the server manually you have to keep this in mind.</td>
+<td class="content">Rzeczywisty URL w tym przykładzie byłby zakodowany jako "/clients?ids%5b%5d=1&amp;ids%5b%5d=2&amp;ids%5b%5b=3", jako że znaki [ i ] nie są dozwolone w adresach URL. Najczęściej nie będziesz się musiał o to martwić, ponieważ przeglądarka będzie dbać o to za ciebie, a Railsy, gdy otrzymają taki ciąg, będą dekodować to z powrotem. Ale jeśli kiedyś znajdziesz się w konieczności, by wysłać takie żądanie do serwera ręcznie, musisz o tym pamiętać.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>The value of <tt>params[:ids]</tt> will now be <tt>["1", "2", "3"]</tt>. Note that parameter values are always strings; Rails makes no attempt to guess or cast the type.</p></div>
-<div class="paragraph"><p>To send a hash you include the key name inside the brackets:</p></div>
+<div class="paragraph"><p>Wartość <tt>params[:ids]</tt> będzie teraz wynosić <tt>["1", "2", "3"]</tt>. Zauważ, że
+wartości parametru są zawsze łańcuchami znaków). Railsy nie próbują odgadywać ani rzutować typu.</p></div>
+<div class="paragraph"><p>Aby przesłać tablicę haszującą, zawrzyj nazwę klucza wewnątrz nawiasów:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>&lt;form action="/clients" method="post"&gt;
@@ -277,10 +299,17 @@ http://www.gnu.org/software/src-highlite -->
   &lt;input type="text" name="client[address][city]" value="Carrot City" /&gt;
 &lt;/form&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>The value of <tt>params[:client]</tt> when this form is submitted  will be <tt>{"name" =&gt; "Acme", "phone" =&gt; "12345", "address" =&gt; {"postcode" =&gt; "12345", "city" =&gt; "Carrot City"}}</tt>. Note the nested hash in <tt>params[:client][:address]</tt>.</p></div>
-<div class="paragraph"><p>Note that the params hash is actually an instance of HashWithIndifferentAccess from Active Support which is a subclass of Hash which lets you use symbols and strings interchangeably as keys.</p></div>
-<h3 id="_routing_parameters">3.2. Routing Parameters</h3>
-<div class="paragraph"><p>The <tt>params</tt> hash will always contain the <tt>:controller</tt> and <tt>:action</tt> keys, but you should use the methods <tt>controller_name</tt> and <tt>action_name</tt> instead to access these values. Any other parameters defined by the routing, such as <tt>:id</tt> will also be available. As an example, consider a listing of clients where the list can show either active or inactive clients. We can add a route which captures the <tt>:status</tt> parameter in a "pretty" URL:</p></div>
+<div class="paragraph"><p>Wartość tablicy <tt>params[:client]</tt> po tym, jak ten formularz zostanie przekazany, będzie wynosić <tt>{"name" =&gt; "Acme", "phone" =&gt; "12345", "address" =&gt; {"postcode" =&gt; "12345", "city" =&gt; "Carrot City"}}</tt>. Zwróć uwagę na zagnieżdżoną tablicę haszującą w <tt>params[:client][:address]</tt>.</p></div>
+<div class="paragraph"><p>Zauważ też, że tablica haszująca params jest w rzeczywistości instancją klasy
+<tt>HashWithIndifferentAccess</tt> (z modułu Active Support), która jest podklasą
+klasy Hash. Pozwala ona na stosowanie zamiennie symboli oraz łańcuchów znaków jako kluczy.</p></div>
+<h3 id="_parametry_routingu">3.2. Parametry routingu</h3>
+<div class="paragraph"><p>Tablica haszująca <tt>params</tt> będzie zawsze zawierać klucze <tt>:controller</tt> i
+<tt>:action</tt>, ale należy używać metod <tt>controller_name</tt> i <tt>action_name</tt> zamiast
+odwoływać się do ich wartości. Wszelkie inne parametry określone przez
+routing, takie jak <tt>:id</tt> będą również dostepne. Jako przykład, rozważ listę
+klientów, gdzie lista może wyświetlić albo aktywnych, albo nieaktywnych
+klientów. Możemy dodać drogę routingu (ang. route), która ujmie parametr <tt>:status</tt> w zgrabny adres URL:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -289,69 +318,90 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-style: italic"><span style="color: #9A1900"># ...</span></span>
 map<span style="color: #990000">.</span>connect <span style="color: #FF0000">"/clients/:status"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>controller <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"clients"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>action <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"index"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>foo <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"bar"</span>
 <span style="font-style: italic"><span style="color: #9A1900"># ...</span></span></tt></pre></div></div>
-<div class="paragraph"><p>In this case, when a user opens the URL <tt>/clients/active</tt>, <tt>params[:status]</tt> will be set to "active". When this route is used, <tt>params[:foo]</tt> will also be set to "bar" just like it was passed in the query string in the same way <tt>params[:action]</tt> will contain "index".</p></div>
+<div class="paragraph"><p>W tym przypadku, gdy użytkownik otwiera URL <tt>/clients/active</tt>, <tt>params[:status]</tt> zostanie ustawiony na "active". Gdy ta reguła jest stosowana, także <tt>params[:foo]</tt> zostanie ustawiony na "bar", tak jak zostało to przekazane w ciągu zapytania. Na tej samej zasadzie <tt>params[:action]</tt> będzie zawierać "index".</p></div>
 <h3 id="_tt_default_url_options_tt">3.3. <tt>default_url_options</tt></h3>
-<div class="paragraph"><p>You can set global default parameters that will be used when generating URLs with <tt>default_url_options</tt>. To do this, define a method with that name in your controller:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>class ApplicationController &lt; ActionController::Base
-
-  #The options parameter is the hash passed in to +url_for+
-  def default_url_options(options)
-    {:locale =&gt; I18n.locale}
-  end
-
-end</tt></pre>
-</div></div>
-<div class="paragraph"><p>These options will be used as a starting-point when generating, so it&#8217;s possible they&#8217;ll be overridden by <tt>url_for</tt>. Because this method is defined in the controller, you can define it on ApplicationController so it would be used for all URL generation, or you could define it on only one controller for all URLs generated there.</p></div>
-</div>
-<h2 id="_session">4. Session</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Your application has a session for each user in which you can store small amounts of data that will be persisted between requests. The session is only available in the controller and the view and can use one of a number of different storage mechanisms:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-CookieStore - Stores everything on the client.
-</p>
-</li>
-<li>
-<p>
-DRbStore - Stores the data on a DRb server.
-</p>
-</li>
-<li>
-<p>
-MemCacheStore - Stores the data in a memcache.
-</p>
-</li>
-<li>
-<p>
-ActiveRecordStore - Stores the data in a database using Active Record.
-</p>
-</li>
-</ul></div>
-<div class="paragraph"><p>All session stores use a cookie - this is required and Rails does not allow any part of the session to be passed in any other way (e.g. you can&#8217;t use the query string to pass a session ID) because of security concerns (it&#8217;s easier to hijack a session when the ID is part of the URL).</p></div>
-<div class="paragraph"><p>Most stores use a cookie to store the session ID which is then used to look up the session data on the server. The default and recommended store, the CookieStore, does not store session data on the server, but in the cookie itself. The data is cryptographically signed to make it tamper-proof, but it is not encrypted, so anyone with access to it can read its contents but not edit it (Rails will not accept it if it has been edited). It can only store about 4kB of data - much less than the others - but this is usually enough. Storing large amounts of data is discouraged no matter which session store your application uses. You should especially avoid storing complex objects (anything other than basic Ruby objects, the most common example being model instances) in the session, as the server might not be able to reassemble them between requests, which will result in an error. The CookieStore has the added advantage that it does not require any setting up beforehand - Rails will generate a "secret key" which will be used to sign the cookie when you create the application.</p></div>
-<div class="paragraph"><p>Read more about session storage in the <a href="../security.html">Security Guide</a>.</p></div>
-<div class="paragraph"><p>If you need a different session storage mechanism, you can change it in the <tt>config/environment.rb</tt> file:</p></div>
+<div class="paragraph"><p>Możesz ustawić domyślne parametry globalne, które będą wykorzystywane podczas generowania adresów URL z użyciem <tt>default_url_options</tt>. Aby to zrobić, zdefiniuj metodę o takiej nazwie w swoim kontrolerze:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># Set to one of [:active_record_store, :drb_store, :mem_cache_store, :cookie_store]</span></span>
+<pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ApplicationController <span style="color: #990000">&lt;</span> ActionController<span style="color: #990000">::</span>Base
+
+  <span style="font-style: italic"><span style="color: #9A1900">#The options parameter is the hash passed in to +url_for+</span></span>
+  <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> default_url_options<span style="color: #990000">(</span>options<span style="color: #990000">)</span>
+    <span style="color: #FF0000">{</span><span style="color: #990000">:</span>locale <span style="color: #990000">=&gt;</span> I18n<span style="color: #990000">.</span>locale<span style="color: #FF0000">}</span>
+  <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
+
+<span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
+<div class="paragraph"><p>Opcje te zostaną wykorzystane jako punkt wyjścia podczas generowania, więc
+jest możliwe, że zostaną nadpisane przez <tt>url_for</tt>. Ponieważ metoda ta jest
+zdefiniowana w kontrolerze, możesz określić ją w klasie ApplicationController,
+wtedy będzie używana dla wszystkich tworzonych adresów URL. Ale możesz także
+określić ją tylko w wybranym kontrolerze dla adresów URL tam generowanych.</p></div>
+</div>
+<h2 id="_sesja">4. Sesja</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Twoja aplikacja tworzy sesję dla każdego użytkownika, w której możesz
+zapisywać nieiwelkie ilości danych. Dane te są utrzymywane pomiędzy żądaniami.
+Sesja jest dostępna jedynie w kontrolerze i w widoku i może korzystać z wielu różnych mechanizmów przechowywania:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+CookieStore - przechowuje wszystko po stronie klienta.
+</p>
+</li>
+<li>
+<p>
+DRbStore - przechowuje dane na serwerze DRb.
+</p>
+</li>
+<li>
+<p>
+MemCacheStore - przechowuje dane w memcache.
+</p>
+</li>
+<li>
+<p>
+ActiveRecordStore - przechowuje dane w bazie danych przy użyciu Active Record.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Wszystkie sesje używają cookie - jest to wymagane i Railsy nie pozwalają, by któraś część sesji była przekazana w inny sposób (np. nie można użyć ciągu zapytania do przekazywania identyfikatora sesji) z powodów bezpieczeństwa (łatwiej jest przejąć sesję, gdy identyfikator jest częścią adresu URL).</p></div>
+<div class="paragraph"><p>Większość mechanizmów przechowywania używa cookie do przechowywania
+identyfikatora sesji, który jest następnie używany do sprawdzenia danych sesji
+na serwerze. Domyślny i zalecany mechanizm, CookieStore, nie przechowuje
+danych sesji na serwerze, ale w samym cookie. Dane są kryptograficznie
+oznaczone, by były odporne na manipulacje, ale nie są szyfrowane. To znaczy,
+że każda osoba mająca do nich dostęp, może odczytać ich zawartość, ale nie
+może ich edytować (Railsy nie zaakceptują danych, jeśli były edytowane).
+CookieStore może przechować tylko około 4kB danych - znacznie mniej niż
+pozostałe mechanizmy - ale zazwyczaj jest to wystarczająca ilość.
+Przechowywanie dużych ilości danych jest odradzane niezależnie od tego, który
+mechanizm do przechowywania danych sesji wybierzesz w swojej aplikacji. Należy
+unikać przechowywania w sesji szczególnie złożonych obiektów (innych niż
+podstawowe obiekty Rubiego, najbardziej powszechnym przykładem jest instancja
+modelu), ponieważ serwer może nie być w stanie ponownie ich odtworzyć pomiędzy żądaniami, co w rezultacie może zakończyć się błędem. CookieStore posiada dodatkową korzyść - nie wymaga żadnych uprzednich ustawień - Railsy wygenerują "tajny klucz", który będzie użyty do oznaczenia cookie.</p></div>
+<div class="paragraph"><p>Poczytaj więcej o przechowywaniu sesji w przewodniku <a href="security.html">Bezpieczeństwo w Ruby on Rails</a>.</p></div>
+<div class="paragraph"><p>Jeśli potrzbujesz innego mechanizmu przechowywania sesji, możesz zmienić go w pliku <tt>config/environment.rb</tt></p></div>
+<div class="listingblock">
+<div class="content"><!-- Generator: GNU source-highlight 2.11
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># Wstaw jeden spośród [:active_record_store, :drb_store, :mem_cache_store, :cookie_store]</span></span>
 config<span style="color: #990000">.</span>action_controller<span style="color: #990000">.</span>session_store <span style="color: #990000">=</span> <span style="color: #990000">:</span>active_record_store</tt></pre></div></div>
-<h3 id="_accessing_the_session">4.1. Accessing the Session</h3>
-<div class="paragraph"><p>In your controller you can access the session through the <tt>session</tt> instance method.</p></div>
+<h3 id="_dost_pno_sesji">4.1. Dostępność sesji</h3>
+<div class="paragraph"><p>W twoim kontrolerze masz dostęp do sesji poprzez metodę instancyją <em>session</em>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Sessions are lazily loaded. If you don&#8217;t access sessions in your action&#8217;s code, they will not be loaded. Hence you will never need to disable sessions, just not accessing them will do the job.</td>
+<td class="content">Sesje są leniwie ładowane (ang. lazily loaded). Jeśli nie korzystasz z sesji w kodzie akcji, nie będzie ona ładowana. Dlatego nie musisz wyłączać mechanizmu sesji, wystarczy, że z niego nie korzystasz.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Session values are stored using key/value pairs like a hash:</p></div>
+<div class="paragraph"><p>Wartości sesji są przechowywane z użyciem par klucz/wartość:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -361,15 +411,15 @@ http://www.gnu.org/software/src-highlite -->
 
 private
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Finds the User with the ID stored in the session with the key :current_user_id</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># This is a common way to handle user login in a Rails application; logging in sets the</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># session value and logging out removes it.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Znajdowanie użytkownika, którego ID jest przechowywane w sesji, za pomocą klucza :current_user_id</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># To jest typowy sposób obsługi logowania użytkownika w aplikacjach Railsowych;</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># logując ustawia wartość sesji i wylogowując usuwa ją</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> current_user
     <span style="color: #009900">@_current_user</span> <span style="color: #990000">||=</span> session<span style="color: #990000">[:</span>current_user_id<span style="color: #990000">]</span> <span style="color: #990000">&amp;&amp;</span> User<span style="color: #990000">.</span>find<span style="color: #990000">(</span>session<span style="color: #990000">[:</span>current_user_id<span style="color: #990000">])</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>To store something in the session, just assign it to the key like a hash:</p></div>
+<div class="paragraph"><p>Aby zapisać coś w sesji, wystarczy przypisać to do klucza:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -377,17 +427,17 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> LoginsController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># "Create" a login, aka "log the user in"</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># "Stwórz" login, aka "zaloguj użytkownika"</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> create
     <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> user <span style="color: #990000">=</span> User<span style="color: #990000">.</span>authenticate<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>username<span style="color: #990000">,</span> params<span style="color: #990000">[:</span>password<span style="color: #990000">])</span>
-      <span style="font-style: italic"><span style="color: #9A1900"># Save the user ID in the session so it can be used in subsequent requests</span></span>
+      <span style="font-style: italic"><span style="color: #9A1900"># Zapisanie identyfikatora użytkownika w sesji, by mógł być wykorzystany w kolejnych żądaniach</span></span>
       session<span style="color: #990000">[:</span>current_user_id<span style="color: #990000">]</span> <span style="color: #990000">=</span> user<span style="color: #990000">.</span>id
       redirect_to root_url
     <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>To remove something from the session, assign that key to be <tt>nil</tt>:</p></div>
+<div class="paragraph"><p>Żeby usunąć coś z sesji, przypisz kluczowi wartość <tt>nil</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -395,17 +445,21 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> LoginsController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># "Delete" a login, aka "log the user out"</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># "Usuń" login, aka "wyloguj użytkownika"</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> destroy
-    <span style="font-style: italic"><span style="color: #9A1900"># Remove the user id from the session</span></span>
+    <span style="font-style: italic"><span style="color: #9A1900"># Usunięcie ID użytkownika z sesji</span></span>
     session<span style="color: #990000">[:</span>current_user_id<span style="color: #990000">]</span> <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">nil</span></span>
     redirect_to root_url
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>To reset the entire session, use <tt>reset_session</tt>.</p></div>
-<h3 id="_the_flash">4.2. The flash</h3>
-<div class="paragraph"><p>The flash is a special part of the session which is cleared with each request. This means that values stored there will only be available in the next request, which is useful for storing error messages etc. It is accessed in much the same way as the session, like a hash. Let&#8217;s use the act of logging out as an example. The controller can send a message which will be displayed to the user on the next request:</p></div>
+<div class="paragraph"><p>Aby skasować całą sesję, użyj `reset_session".</p></div>
+<h3 id="_flash">4.2. Flash</h3>
+<div class="paragraph"><p>Flash jest specjalną częścią sesji, która jest czyszczona przy każdym żądaniu,
+w takim sensie, że wartości tam przechowywane są dostępne tylko w następnym
+żądaniu. Jest to przydatne do przechowywania komunikatów o błędach itp. Jest
+ona dostępna w bardzo podobny sposób jak sama sesja, czyli jako tablica
+haszująca. Jako przykładu użyjmy mechanizmu wylogowywania. Kontroler może wysłać komunikat, który będzie wyświetlony użytkownikowi przy następnym żądaniu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -420,7 +474,7 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>The <tt>destroy</tt> action redirects to the application&#8217;s <tt>root_url</tt>, where the message will be displayed. Note that it&#8217;s entirely up to the next action to decide what, if anything, it will do with what the previous action put in the flash. It&#8217;s conventional to display eventual errors or notices from the flash in the application&#8217;s layout:</p></div>
+<div class="paragraph"><p>Akcja <tt>destroy</tt> przekierowuje do <tt>root_url</tt> aplikacji, gdzie komunikat będzie wyświetlony. Należy podkreślić, że obowiązkiem następnej akcji jest zdecydować, co (jeśli cokolwiek) ma zrobić z tym, co wcześniejsza akcja umieściła we flash&#8217;u. Konwencją jest wyświetlenie ewentualnych błędów lub powiadomień z flash w layoutcie aplikacji:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>&lt;html&gt;
@@ -436,8 +490,8 @@ http://www.gnu.org/software/src-highlite -->
   &lt;/body&gt;
 &lt;/html&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>This way, if an action sets an error or a notice message, the layout will display it automatically.</p></div>
-<div class="paragraph"><p>If you want a flash value to be carried over to another request, use the <tt>keep</tt> method:</p></div>
+<div class="paragraph"><p>W ten sposób, jeśli akcja umieści komunikat błędu lub powiadomienie, layout wyświetli je automatycznie.</p></div>
+<div class="paragraph"><p>Jeśli chcesz, by wartość flash była przeniesiona do innego żądania, użyj metody <tt>keep</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -445,17 +499,20 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> MainController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Let's say this action corresponds to root_url, but you want all requests here to be redirected to</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># UsersController#index. If an action sets the flash and redirects here, the values would normally be</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># lost when another redirect happens, but you can use keep to make it persist for another request.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Powiedzmy, że ta akcja odpowiada root_url, ale chcesz, żeby wszystkie żądania tutaj były przekierowane do</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># UsersController#index. Jeżeli akcja umieści flash i przekieruje tutaj, wartości normalnie zostaną utracone</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># wraz z następnym przekierowaniem. Ale możesz użyć metody keep, by je utrwalić dla innych żądań.</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> index
-    flash<span style="color: #990000">.</span>keep <span style="font-style: italic"><span style="color: #9A1900"># Will persist all flash values. You can also use a key to keep only that value: flash.keep(:notice)</span></span>
+    flash<span style="color: #990000">.</span>keep <span style="font-style: italic"><span style="color: #9A1900"># Utrzymane zostaną wszystkie wartości flash. Możesz także użyć klucza, żeby utrzymać tylko wybraną wartość: flash.keep(:notice)</span></span>
     redirect_to users_url
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h4 id="_tt_flash_now_tt">4.2.1. <tt>flash.now</tt></h4>
-<div class="paragraph"><p>By default, adding values to the flash will make them available to the next request, but sometimes you may want to access those values in the same request. For example, if the <tt>create</tt> action fails to save a resource and you render the <tt>new</tt> template directly, that&#8217;s not going to result in a new request, but you may still want to display a message using the flash. To do this, you can use <tt>flash.now</tt> in the same way you use the normal <tt>flash</tt>:</p></div>
+<div class="paragraph"><p>Domyślnie dodanie wartości do flash czyni je dostpępnymi w następnym żądaniu.
+Ale czasami możesz potrzebować dostępu do tych wartości już w tym żądaniu. Na
+przykład, jeżeli akcji <tt>create</tt> nie uda się zapisać zasobów i ty natychmiast
+wyrenderujesz szablon <tt>new</tt>, nie będzie to prowadzić do nowego żądania, ale ty i tak będziesz potrzebować wyświetlić komunikat używając flash. Możesz to zrobić przy użyciu <tt>flash.now</tt>. Robi się to tak samo jak przy normalnym <tt>flash</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -477,7 +534,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <h2 id="_cookies">5. Cookies</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Your application can store small amounts of data on the client - called cookies - that will be persisted across requests and even sessions. Rails provides easy access to cookies via the <tt>cookies</tt> method, which - much like the <tt>session</tt> - works like a hash:</p></div>
+<div class="paragraph"><p>Twoja aplikacja może przechowywać małe ilości danych po stronie klienta w postaci tzw. cookies. Mogą one trwać poprzez wiele żądań, a nawet sesji. Railsy zapewniają łatwy dostęp do cookies za pomocą metody <tt>cookies</tt>, która podobnie jak metoda <tt>session</tt>, działa jako tablica haszująca:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -508,11 +565,15 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Note that while for session values you set the key to <tt>nil</tt>, to delete a cookie value you should use <tt>cookies.delete(:key)</tt>.</p></div>
+<div class="paragraph"><p>Zwróć uwagę: żeby skasować wartości sesji, musisz przypisać kluczowi wartość <tt>nil</tt>. Natomiast żeby skasować wartość cookie, powinieneś użyć <tt>cookies.delete(:key)</tt>.</p></div>
 </div>
-<h2 id="_filters">6. Filters</h2>
+<h2 id="_filtry">6. Filtry</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Filters are methods that are run before, after or "around" a controller action. For example, one filter might check to see if the logged in user has the right credentials to access that particular controller or action. Filters are inherited, so if you set a filter on ApplicationController, it will be run on every controller in your application. A common, simple filter is one which requires that a user is logged in for an action to be run. You can define the filter method this way:</p></div>
+<div class="paragraph"><p>Filtry są metodami, które są uruchamiane przed, po lub wokół akcji kontrolera.
+Na przykład, jeden filtr może sprawdzać czy zalogowany użytkownik ma prawa
+dostępu do tego konkretnego kontrolera lub akcji. Filtry są dziedziczone, więc
+jeśli ustawisz filtr w <tt>ApplicationController</tt>, będzie wykonywany w każdym
+kontrolerze w twojej aplikacji. Typowy, prosty filtr wymaga, by użytkownik był zalogowany, aby akcja została wykonana.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -539,7 +600,9 @@ private
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>The method simply stores an error message in the flash and redirects to the login form if the user is not logged in. If a before filter (a filter which is run before the action) renders or redirects, the action will not run. If there are additional filters scheduled to run after the rendering or redirecting filter, they are also cancelled. To use this filter in a controller, use the <tt>before_filter</tt> method:</p></div>
+<div class="paragraph"><p>Ta metoda po prostu przechowuje komunikat o błędzie (we flash) i przekierowuje
+do formularza logowania, jeśli użytkownik jest niezalogowany. Jeśli filtr
+wstępny (ang. <em>before filter</em>; filtr, który jest uruchamiany przed akcją) renderuje lub przekierowuje, akcja nie będzie wykonana. Jeśli istnieją dodatkowe filtry, które miały być wykonane po filtrze renderującym bądź przekierowującym, zostaną one anulowane. Aby użyć tego filtra w kontrolerze, skorzystaj z metody <tt>before_filter</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -550,7 +613,7 @@ http://www.gnu.org/software/src-highlite -->
   before_filter <span style="color: #990000">:</span>require_login
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>In this example, the filter is added to ApplicationController and thus all controllers in the application. This will make everything in the application require the user to be logged in in order to use it. For obvious reasons (the user wouldn&#8217;t be able to log in in the first place!), not all controllers or actions should require this. You can prevent this filter from running before particular actions with <tt>skip_before_filter</tt>:</p></div>
+<div class="paragraph"><p>W tym przykładzie, filtr jest dodany do <tt>ApplicationController</tt>, a tym samym do wszystkich kontrolerów w aplikacji. W ten sposób każdy element aplikacji wymaga, by użytkownik był zalogowany, aby cokolwiek zrobić. Z oczywistych powodów (użytkownik nie będzie mmógł zalogować się już na starcie!) nie każdy kontroler lub akcja powinien tego wymagać. Możesz zapobiec uruchomieniu tego filtra przed szczególną, określoną akcją za pomocą metody <tt>skip_before_filter</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -561,15 +624,23 @@ http://www.gnu.org/software/src-highlite -->
   skip_before_filter <span style="color: #990000">:</span>require_login<span style="color: #990000">,</span> <span style="color: #990000">:</span>only <span style="color: #990000">=&gt;</span> <span style="color: #990000">[:</span>new<span style="color: #990000">,</span> <span style="color: #990000">:</span>create<span style="color: #990000">]</span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Now, the LoginsController&#8217;s <tt>new</tt> and <tt>create</tt> actions will work as before without requiring the user to be logged in. The <tt>:only</tt> option is used to only skip this filter for these actions, and there is also an <tt>:except</tt> option which works the other way. These options can be used when adding filters too, so you can add a filter which only runs for selected actions in the first place.</p></div>
-<h3 id="_after_filters_and_around_filters">6.1. After Filters and Around Filters</h3>
-<div class="paragraph"><p>In addition to the before filters, you can run filters after an action has run or both before and after. The after filter is similar to the before filter, but because the action has already been run it has access to the response data that&#8217;s about to be sent to the client. Obviously, after filters can not stop the action from running. Around filters are responsible for running the action, but they can choose not to, which is the around filter&#8217;s way of stopping it.</p></div>
+<div class="paragraph"><p>Teraz akcje <tt>new</tt> i <tt>create</tt> klasy <tt>LoginsController</tt> będą działać bez wymagania, by użytkownik był zalogowany. Opcja <tt>:only</tt> jest użyta w takim celu, żeby pominięcie dotyczyło tylko tego filtra dla wskazanych akcji. Istnieje też opcja <tt>:except</tt>, która działa odwrotnie do opcji <tt>:only</tt>. Te opcje mogą być użyte także podczas dodawania filtrów. Możesz więc dodać filtr dla wybranych akcji, który uruchomi się w pierwszej kolejności (tzn. przed samą akcją).</p></div>
+<h3 id="_filtry_ko_cowe_i_okalaj_ce">6.1. Filtry końcowe i okalające</h3>
+<div class="paragraph"><p>W uzupełnieniu do filtrów wstępnych (uruchamianych przed akcją), możesz
+wywoływać filtry uruchamiane po akcji albo oba typy na raz - i przed, i po.
+Filtr końcowy (ang. after filter) jest podobny do filtra wstępnego, ale
+ponieważ w tym wypadku akcja już jest uruchomiona, filtr ma dostęp do danych
+zwrotnych, które zostały wysłane do klienta. Oczywiście filtr taki nie może
+zatrzymać akcji przed uruchomieniem. Filtr okalający (ang. around filter;
+filtr uruchamiany jakby jednocześnie, "wokół" akcji) jest odpowiedzialny
+za uruchomienie akcji i może zdecydować żeby tego nie robić, co jest
+sposobem na jej zatrzymanie.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># Example taken from the Rails API filter documentation:</span></span>
+<pre><tt><span style="font-style: italic"><span style="color: #9A1900"># Przykład zaczerpnięty z dokumentacji API Railsów:</span></span>
 <span style="font-style: italic"><span style="color: #9A1900"># http://api.rubyonrails.org/classes/ActionController/Filters/ClassMethods.html</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ApplicationController <span style="color: #990000">&lt;</span> Application
 
@@ -585,9 +656,12 @@ private
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<h3 id="_other_ways_to_use_filters">6.2. Other Ways to Use Filters</h3>
-<div class="paragraph"><p>While the most common way to use filters is by creating private methods and using *_filter to add them, there are two other ways to do the same thing.</p></div>
-<div class="paragraph"><p>The first is to use a block directly with the *_filter methods. The block receives the controller as an argument, and the <tt>require_login</tt> filter from above could be rewritten to use a block:</p></div>
+<h3 id="_inne_sposoby_wykorzystania_filtr_w">6.2. Inne sposoby wykorzystania filtrów</h3>
+<div class="paragraph"><p>Choć najczęstszym sposobem używania filtrów jest tworzenie prywatnych metod  i
+używanie <tt>*_filter</tt> dla dodania ich, istnieją jeszcze dwa inne sposoby, aby zrobić to samo.</p></div>
+<div class="paragraph"><p>Pierwszym jest użycie bloku bezpośrednio z metodą <tt>*_filter</tt>. Blok otrzymuje
+kontroler jako argument i filtr <tt>require_login</tt> z powyższych przykładów może
+być przepisany na blok:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -598,8 +672,12 @@ http://www.gnu.org/software/src-highlite -->
   before_filter <span style="color: #FF0000">{</span> <span style="color: #990000">|</span>controller<span style="color: #990000">|</span> redirect_to new_login_url <span style="font-weight: bold"><span style="color: #0000FF">unless</span></span> controller<span style="color: #990000">.</span>send<span style="color: #990000">(:</span>logged_in?<span style="color: #990000">)</span> <span style="color: #FF0000">}</span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Note that the filter in this case uses <tt>send</tt> because the <tt>logged_in?</tt> method is private and the filter is not run in the scope of the controller. This is not the recommended way to implement this particular filter, but in more simple cases it might be useful.</p></div>
-<div class="paragraph"><p>The second way is to use a class (actually, any object that responds to the right methods will do) to handle the filtering. This is useful in cases that are more complex than can not be implemented in a readable and reusable way using the two other methods. As an example, you could rewrite the login filter again to use a class:</p></div>
+<div class="paragraph"><p>Zauważ, że filtr w tym przypadku używa <tt>send</tt>, a to dlatego, że metoda <tt>logged_in?</tt> jest metodą prywatną i filtr nie jest wywołany w obszarze kontrolera. Nie jest to zalecany sposób implementacji tego konkretnego filtra, ale w licznych prostych przypadkach może być przydatny.</p></div>
+<div class="paragraph"><p>Drugim sposobem jest użycie klasy (właściwie, każdy obiekt, który odpowiada
+właściwej metodzie będzie odpowiedni) do obsłużenia filtrowania. Jest to
+przydatne w przypadkach, które są bardziej złożone, których zaimplementowanie
+w sposób czytelny i odtwarzalny nie jest możliwe przy użyciu dwóch poprzednich
+metod. Jako przykład, mógłbyś przepisać filtr logowania przy użyciu klasy:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -621,13 +699,26 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Again, this is not an ideal example for this filter, because it&#8217;s not run in the scope of the controller but gets the controller passed as an argument. The filter class has a class method <tt>filter</tt> which gets run before or after the action, depending on if it&#8217;s a before or after filter. Classes used as around filters can also use the same <tt>filter</tt> method, which will get run in the same way. The method must <tt>yield</tt> to execute the action. Alternatively, it can have both a <tt>before</tt> and an <tt>after</tt> method that are run before and after the action.</p></div>
-<div class="paragraph"><p>The Rails API documentation has <a href="http://api.rubyonrails.org/classes/ActionController/Filters/ClassMethods.html">more information on using filters</a>.</p></div>
+<div class="paragraph"><p>Znowu, to nie jest idealny przykład dla tego filtra, ponieważ nie działa on w
+obszarze kontrolera, tylko otrzymuje kontroler przekazany jako argument. Klasa
+filtra posiada metodę klasową <tt>filter</tt>, która zostanie uruchomiona przed lub
+po akcji, w zależności od tego, czy jest to filtr wstępny czy końcowy. Klasy
+używane jako filtry okalające również mogą używać tej samej metody <tt>filter</tt>, która będzie działać tak samo. Metoda musi użyć instrukcji <tt>yield</tt>, aby wykonać akcję. Alternatywnie, może mieć obie metody, i <tt>before</tt>, i <tt>after</tt>, które będą wywołane i przed, i po akcji.</p></div>
+<div class="paragraph"><p>Dokumentacja API Railsów zawiera
+<a href="http://api.rubyonrails.org/classes/ActionController/Filters/ClassMethods.html">więcej
+informacji na temat sposobu korzystania z filtrów</a>.</p></div>
 </div>
-<h2 id="_verification">7. Verification</h2>
+<h2 id="_weryfikacja">7. Weryfikacja</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Verifications make sure certain criteria are met in order for a controller or action to run. They can specify that a certain key (or several keys in the form of an array) is present in the <tt>params</tt>, <tt>session</tt> or <tt>flash</tt> hashes or that a certain HTTP method was used or that the request was made using XMLHTTPRequest (Ajax). The default action taken when these criteria are not met is to render a 400 Bad Request response, but you can customize this by specifying a redirect URL or rendering something else and you can also add flash messages and HTTP headers to the response. It is described in the <a href="http://api.rubyonrails.org/classes/ActionController/Verification/ClassMethods.html">API documentation</a> as "essentially a special kind of before_filter".</p></div>
-<div class="paragraph"><p>Here&#8217;s an example of using verification to make sure the user supplies a username and a password in order to log in:</p></div>
+<div class="paragraph"><p>Weryfikacja to sprawdzenie czy pewne kryteria są spełnione, aby uruchomić
+kontroler lub akcję. Może określać, że pewien klucz (lub kilka kluczy w formie
+tablicy) jest obecny w tablicy haszującej <tt>params</tt>, <tt>session</tt> lub <tt>flash</tt> lub
+to, że jakaś metoda HTTP została użyta lub to, że żądanie zostało wykonane
+przy użyciu XMLHTTPRequest (Ajax). Gdy kryteria nie są spełnione, domyślnie
+podejmowaną akcją jest wyrenderowanie błędu 400 (Bad Request), ale możesz to
+zmienić wedle swojego uznania, na przykład podając adres URL pod który akcja
+ma zostać przekierowana. Możesz wyrenderować cokolwiek innego albo na przykład dodać wiadomości we flash i nagłówki HTTP do odpowiedzi. Jest to dokładnie opisane w <a href="http://api.rubyonrails.org/classes/ActionController/Verification/ClassMethods.html">dokumentacji API</a> jako "essentially a special kind of before_filter".</p></div>
+<div class="paragraph"><p>Oto przykład użycia weryfikacji sprawdzającej czy użytkownik dostarczył login i hasło do zalogowania:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -650,7 +741,7 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Now the <tt>create</tt> action won&#8217;t run unless the "username" and "password" parameters are present, and if they&#8217;re not, an error message will be added to the flash and the <tt>new</tt> action will be rendered. But there&#8217;s something rather important missing from the verification above: It will be used for <strong>every</strong> action in LoginsController, which is not what we want. You can limit which actions it will be used for with the <tt>:only</tt> and <tt>:except</tt> options just like a filter:</p></div>
+<div class="paragraph"><p>Teraz akcja <tt>create</tt> nie będzie wywoływana dopóki parametry <tt>username</tt> i <tt>password</tt> nie zostaną podane. Jeśli się nie pojawią, do flash zostanie dodany komunikat błędu i zostanie wyrenderowana akcja <tt>new</tt>. Ale jest jeszcze coś ważnego, czego nie dopracowaliśmy w weryfikacji powyżej: będzie ona używana dla każdej akcji klasy LoginsController, a nie o to nam chodzi. Możesz wskazać dla których akcji weryfikacja ma być używana za pomocą opcji <tt>:only</tt> i <tt>:except</tt> tak jak w przypadku filtrów:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -661,14 +752,27 @@ http://www.gnu.org/software/src-highlite -->
   verify <span style="color: #990000">:</span>params <span style="color: #990000">=&gt;</span> <span style="color: #990000">[:</span>username<span style="color: #990000">,</span> <span style="color: #990000">:</span>password<span style="color: #990000">],</span>
          <span style="color: #990000">:</span>render <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">{</span><span style="color: #990000">:</span>action <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"new"</span><span style="color: #FF0000">}</span><span style="color: #990000">,</span>
          <span style="color: #990000">:</span>add_flash <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">{</span><span style="color: #990000">:</span>error <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"Username and password required to log in"</span><span style="color: #FF0000">}</span><span style="color: #990000">,</span>
-         <span style="color: #990000">:</span>only <span style="color: #990000">=&gt;</span> <span style="color: #990000">:</span>create <span style="font-style: italic"><span style="color: #9A1900"># Only run this verification for the "create" action</span></span>
+         <span style="color: #990000">:</span>only <span style="color: #990000">=&gt;</span> <span style="color: #990000">:</span>create <span style="font-style: italic"><span style="color: #9A1900"># weryfikacja będzie uruchamiana tylko dla akcji "create"</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 </div>
-<h2 id="_request_forgery_protection">8. Request Forgery Protection</h2>
+<h2 id="_ochrona_przed_atakami_typu_cross_site_request_forgery">8. Ochrona przed atakami typu Cross-site request forgery</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Cross-site request forgery is a type of attack in which a site tricks a user into making requests on another site, possibly adding, modifying or deleting data on that site without the user&#8217;s knowledge or permission. The first step to avoid this is to make sure all "destructive" actions (create, update and destroy) can only be accessed with non-GET requests. If you&#8217;re following RESTful conventions you&#8217;re already doing this. However, a malicious site can still send a non-GET request to your site quite easily, and that&#8217;s where the request forgery protection comes in. As the name says, it protects from forged requests. The way this is done is to add a non-guessable token which is only known to your server to each request. This way, if a request comes in without the proper token, it will be denied access.</p></div>
-<div class="paragraph"><p>If you generate a form like this:</p></div>
+<div class="paragraph"><p>Cross-site request forgery to metoda ataku na stronę internetową, polegająca
+na tym, że użytkownik nieświadomie wysyła spreparowane przez hackera żądania.
+W ten sposób hacker może dodać, zmodyfikować lub usunąć dane ze strony bez
+wiedzy i pozwolenia użytkownika. Pierwszym krokiem do uniknięcia takiego
+zagrożenia jest upewnienie się, że wszystkie "destrukcyjne" akcje (create,
+update, destroy) są dostępne jedynie za pomocą żądań innych niż GET. Jeżeli
+stosujesz się do konwencji RESTful, na pewno już jest to zrobione. Jednak
+złośliwa strona nadal może wysyłać żądania inne niż GET do twojej strony i to
+całkiem prosto. I tu z pomocą przychodzi ochrona przed atakami typu Cross-site
+request forgery. Jak sama nazwa mówi, jest to ochrona przed fałszywymi
+żądaniami. Sposobem na zabezpieczenie naszej strony jest dodanie
+niezgadywalnego jednorazowego kodu (ang. token) do każdego osobnego żądania.
+Kod ten jest znany tylko twojemu serwerowi. Na tej zasadzie jeśli żądanie
+przyjdzie bez właściwego kodu, dostęp zostanie mu zabroniony.</p></div>
+<div class="paragraph"><p>Jeśli wygenerujesz formularz taki jak ten:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -678,7 +782,7 @@ http://www.gnu.org/software/src-highlite -->
   <span style="color: #FF0000">&lt;%= f.text_field :username %&gt;</span>
   <span style="color: #FF0000">&lt;%= f.text_field :password -%&gt;</span>
 <span style="color: #FF0000">&lt;% end -%&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>You will see how the token gets added as a hidden field:</p></div>
+<div class="paragraph"><p>Możesz dodoać token jako ukryte pole:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -688,114 +792,119 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-weight: bold"><span style="color: #0000FF">&lt;div&gt;</span></span><span style="font-style: italic"><span style="color: #9A1900">&lt;!-- ... --&gt;</span></span><span style="font-weight: bold"><span style="color: #0000FF">&lt;input</span></span> <span style="color: #009900">type</span><span style="color: #990000">=</span><span style="color: #FF0000">"hidden"</span> <span style="color: #009900">value</span><span style="color: #990000">=</span><span style="color: #FF0000">"67250ab105eb5ad10851c00a5621854a23af5489"</span> <span style="color: #009900">name</span><span style="color: #990000">=</span><span style="color: #FF0000">"authenticity_token"</span><span style="font-weight: bold"><span style="color: #0000FF">/&gt;&lt;/div&gt;</span></span>
 <span style="font-style: italic"><span style="color: #9A1900">&lt;!-- Fields --&gt;</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">&lt;/form&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Rails adds this token to every form that&#8217;s generated using the <a href="../form_helpers.html">form helpers</a>, so most of the time you don&#8217;t have to worry about it. If you&#8217;re writing a form manually or need to add the token for another reason, it&#8217;s available through the method <tt>form_authenticity_token</tt>:</p></div>
+<div class="paragraph"><p>Railsy dodają ten token do każdego formularza, który jest generowany przy użyciu <a href="form_helpers.html">helperów formularzy</a>, więc w większości przypadków nie musisz się o nic martwić. Jeśli piszesz swój formularz ręcznie, albo potrzebujesz dodać token z innych przyczyn, jest to możliwe za pomocą metody <tt>form_authenticity_token</tt>:</p></div>
 <div class="listingblock">
-<div class="title">Add a JavaScript variable containing the token for use with Ajax</div>
+<div class="title">Dodanie zmiennej JavaScript zawierającej token przy użyciu AJAXa</div>
 <div class="content">
 <pre><tt>&lt;%= javascript_tag "MyApp.authenticity_token = '#{form_authenticity_token}'" %&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>The <a href="../security.html">Security Guide</a> has more about this and a lot of other security-related issues that you should be aware of when developing a web application.</p></div>
+<div class="paragraph"><p>Przewodnik <a href="security.html">Bezpieczeństwo w Ruby On Rails</a> zawiera więcej informacji na ten temat, a także wiele innych zagadnień związanych z bezpieczeństwem, których powinieneś być świadomy podczas opracowywania aplikacji internetowych.</p></div>
 </div>
-<h2 id="_the_tt_request_tt_and_tt_response_tt_objects">9. The <tt>request</tt> and <tt>response</tt> Objects</h2>
+<h2 id="_obiekty_tt_request_tt_i_tt_response_tt">9. Obiekty <tt>request</tt> i <tt>response</tt></h2>
 <div class="sectionbody">
-<div class="paragraph"><p>In every controller there are two accessor methods pointing to the request and the response objects associated with the request cycle that is currently in execution. The <tt>request</tt> method contains an instance of AbstractRequest and the <tt>response</tt> method returns a <tt>response</tt> object representing what is going to be sent back to the client.</p></div>
-<h3 id="_the_tt_request_tt_object">9.1. The <tt>request</tt> Object</h3>
-<div class="paragraph"><p>The request object contains a lot of useful information about the request coming in from the client. To get a full list of the available methods, refer to the <a href="http://api.rubyonrails.org/classes/ActionController/AbstractRequest.html">API documentation</a>. Among the properties that you can access on this object are:</p></div>
+<div class="paragraph"><p>W każdym kontrolerze występują dwie metody dostępowe wskazujące na obiekty żądania i odpowiedzi, które są związane z cyklem żądań będącym obecnie w realizacji. Metoda <tt>request</tt> zawiera instancję klasy AbstractRequest, a metoda <tt>response</tt> zwraca obiekt <tt>response</tt> prezentujący co zostanie odesłane z powrotem do klienta.</p></div>
+<h3 id="_obiekt_tt_request_tt">9.1. Obiekt <tt>request</tt></h3>
+<div class="paragraph"><p>Obiekt request zawiera wiele przydatnych informacji na temat żądania przychodzącego od klienta. Aby uzyskać pełną listę dostępnych metod, odwołaj się do <a href="http://api.rubyonrails.org/classes/ActionController/AbstractRequest.html">dokumentacji API</a>. Wśród właściwości tego obiektu, do których możesz mieć dostęp, są:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-host - The hostname used for this request.
+<tt>host</tt> - nazwa hosta użytego do wysłania tego żądania.
 </p>
 </li>
 <li>
 <p>
-domain(n=2) - The hostname&#8217;s first <tt>n</tt> segments, starting from the right (the TLD)
+<tt>domain(n=2)</tt> - pierwszych <tt>n</tt> segmentów nazwy hosta, zaczynając od prawej (TLD).
 </p>
 </li>
 <li>
 <p>
-format - The content type requested by the client.
+<tt>format</tt> - typ zawartości żądanej przez klienta.
 </p>
 </li>
 <li>
 <p>
-method - The HTTP method used for the request.
+<tt>method</tt> - metoda HTTP użyta do wysłania żądania.
 </p>
 </li>
 <li>
 <p>
-get?, post?, put?, delete?, head? - Returns true if the HTTP method is GET/POST/PUT/DELETE/HEAD.
+<tt>get?</tt>, <tt>post?</tt>, <tt>put?</tt>, <tt>delete?</tt>, <tt>head?</tt> - zwraca <tt>true</tt> jeśli metoda HTTP to GET/POST/PUT/DELETE/HEAD.
 </p>
 </li>
 <li>
 <p>
-headers - Returns a hash containing the headers associated with the request.
+<tt>headers</tt> - zwraca tablicę haszującą zawierającą nagłówki stowarzyszone z żądaniem.
 </p>
 </li>
 <li>
 <p>
-port - The port number (integer) used for the request.
+<tt>port</tt> - numer portu (typ integer) użyty w żądaniu.
 </p>
 </li>
 <li>
 <p>
-protocol - Returns a string containing the prototol used plus "://", for example "http://"
+<tt>protocol</tt> - zwraca łańcuch zawierający użyty protokół plus "://", na przykład "http://"
 </p>
 </li>
 <li>
 <p>
-query_string - The query string part of the URL - everything after "?".
+<tt>query_string</tt> - ciąg zapytania (część adresu URL - wszystko po znaku "?").
 </p>
 </li>
 <li>
 <p>
-remote_ip - The IP address of the client.
+<tt>remote_ip</tt> - adres IP klienta.
 </p>
 </li>
 <li>
 <p>
-url - The entire URL used for the request.
+<tt>url</tt> - cały adres URL użyty w żądaniu.
 </p>
 </li>
 </ul></div>
-<h4 id="_tt_path_parameters_tt_tt_query_parameters_tt_and_tt_request_parameters_tt">9.1.1. <tt>path_parameters</tt>, <tt>query_parameters</tt> and <tt>request_parameters</tt></h4>
-<div class="paragraph"><p>Rails collects all of the parameters sent along with the request in the <tt>params</tt> hash, whether they are sent as part of the query string or the post body. The request object has three accessors that give you access to these parameters depending on where they came from. The <tt>query_parameters</tt> hash contains parameters that were sent as part of the query string while the <tt>request_parameters</tt> hash contains parameters sent as part of the post body. The <tt>path_parameters</tt> hash contains parameters that were recognized by the routing as being part of the path leading to this particular controller and action.</p></div>
-<h3 id="_the_tt_response_tt_object">9.2. The <tt>response</tt> Object</h3>
-<div class="paragraph"><p>The response object is not usually used directly, but is built up during the execution of the action and rendering of the data that is being sent back to the user, but sometimes - like in an after filter - it can be useful to access the response directly. Some of these accessor methods also have setters, allowing you to change their values.</p></div>
+<h4 id="_tt_path_parameters_tt_tt_query_parameters_tt_i_tt_request_parameters_tt">9.1.1. <tt>path_parameters</tt>, <tt>query_parameters</tt> i <tt>request_parameters</tt></h4>
+<div class="paragraph"><p>Railsy gromadzą wszystkie parametry przesłane wraz z żądaniem w tablicy haszującej <tt>params</tt>, bez względu czy zostały przesłane jako część ciągu zapytania czy jako zawartość POST. Obiekt request posiada trzy akcesory (ang. accessors) umożliwiające ci dostęp do tych parametrów w zależności od ich pochodzenia. Tablica haszująca <tt>query_parameters</tt> zawiera parametry, które były wysłane jako część ciągu zapytania, natomiast tablica haszująca <tt>request_parameters</tt> zawiera parametry wysłane jako POST. Tablica haszująca <tt>path_parameters</tt> zawiera parametry, które zostały rozpoznane przez routing jako część ścieżki prowadzącej do tego konkretnego kontrolera i akcji.</p></div>
+<h3 id="_obiekt_tt_response_tt">9.2. Obiekt <tt>response</tt></h3>
+<div class="paragraph"><p>Obiekt <tt>response</tt> nie jest zazwyczaj stosowany od razu, ale jest tworzony w
+trakcie wykonywania akcji i renderuje dane, które są przesyłane z powrotem do
+użytkownika. Ale czasami - jak w przypadku filtrów końcowych -  może być potrzebny dostęp do tych danych natychmiast. Niektóre z tych akcesorów posiadają jeszcze settery (ang. setters), umożliwiające ci zmianę wartości.</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-body - This is the string of data being sent back to the client. This is most often HTML.
+<tt>body</tt> - jest to ciąg danych przesyłanych z powrotem do klienta. Najczęściej jest to HTML.
 </p>
 </li>
 <li>
 <p>
-status - The HTTP status code for the response, like 200 for a successful request or 404 for file not found.
+<tt>status</tt> - kod statusu HTTP, na przykład 200 dla pomyślnie zrealizowanego żądania, lub 404 gdy plik nie został znaleziony.
 </p>
 </li>
 <li>
 <p>
-location - The URL the client is being redirected to, if any.
+<tt>location</tt> - adres URL pod który klient jest przekierowywany (o ile jest).
 </p>
 </li>
 <li>
 <p>
-content_type - The content type of the response.
+<tt>content_type</tt> - typ zawartości zwracanych danych.
 </p>
 </li>
 <li>
 <p>
-charset - The character set being used for the response. Default is "utf8".
+<tt>charset</tt> - kodowanie znaków, zazwyczaj ustawione na"utf8".
 </p>
 </li>
 <li>
 <p>
-headers - Headers used for the response.
+<tt>headers</tt> - nagłówki użyte w zwracanych danych.
 </p>
 </li>
 </ul></div>
-<h4 id="_setting_custom_headers">9.2.1. Setting Custom Headers</h4>
-<div class="paragraph"><p>If you want to set custom headers for a response then <tt>response.headers</tt> is the place to do it. The headers attribute is a hash which maps header names to their values, and Rails will set some of them - like "Content-Type" - automatically. If you want to add or change a header, just assign it to <tt>headers</tt> with the name and value:</p></div>
+<h4 id="_ustawienie_niestandardowych_nag_wk_w">9.2.1. Ustawienie niestandardowych nagłówków</h4>
+<div class="paragraph"><p>Jeśli chcesz ustawić niestandardowe nagłówki dla danych zwrotnych, miejscem na
+to jest <tt>response.headers</tt>. Atrybut headers jest tablicą haszującą, który
+mapuje nazwę nagłówka na jego wartość, a Railsy ustawiają niektóre z nich -
+np. <tt>Content-Type</tt> - automatycznie. Jeśli chcesz dodać lub zmienić nagłówek, dopisz go do <tt>headers</tt> z nazwą i wartością:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -803,9 +912,9 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>response<span style="color: #990000">.</span>headers<span style="color: #990000">[</span><span style="color: #FF0000">"Content-Type"</span><span style="color: #990000">]</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"application/pdf"</span></tt></pre></div></div>
 </div>
-<h2 id="_http_basic_authentication">10. HTTP Basic Authentication</h2>
+<h2 id="_podstawowe_uwierzytelnianie_http">10. Podstawowe uwierzytelnianie HTTP</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Rails comes with built-in HTTP Basic authentication. This is an authentication scheme that is supported by the majority of browsers and other HTTP clients. As an example, consider an administration section which will only be available by entering a username and a password into the browser&#8217;s HTTP Basic dialog window. Using the built-in authentication is quite easy and only requires you to use one method, <tt>authenticate_or_request_with_http_basic</tt>.</p></div>
+<div class="paragraph"><p>Railsy mają wbudowany mechanizm podstawowego uwierzyrzytelniania HTTP. Jest to system uwierzytelniania, który jest obsługiwany przez większość przeglądarek i innych klientów HTTP. Jako przykład, rozważmy sekcję administracyjną, która będzie dostępna tylko po wprowadzeniu nazwy użytkownika i hasła do podstawowego okna dialogowego HTTP przeglądarki. Korzystanie z tego wbudowanego uwierzytelniania jest całkiem proste i wymaga jedynie użycia jednej metody - <tt>authenticate_or_request_with_http_basic</tt></p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -826,12 +935,13 @@ private
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>With this in place, you can create namespaced controllers that inherit from AdminController. The before filter will thus be run for all actions in those controllers, protecting them with HTTP Basic authentication.</p></div>
+<div class="paragraph"><p>W tym miejscu możesz utworzyć kontrolery w odpowiedniej przestrzeni nazw,
+które będą dziedziczyć z klasy <tt>AdminController</tt>. Filtr wstępny będzie zatem wywoływany dla wsztskich akcji w tamtych kontrolerach, chroniąc je przy użyciu podstawowego uwierzytelniania HTTP.</p></div>
 </div>
-<h2 id="_streaming_and_file_downloads">11. Streaming and File Downloads</h2>
+<h2 id="_przesy_anie_strumieniowe_i_pobieranie_plik_w">11. Przesyłanie strumieniowe i pobieranie plików</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Sometimes you may want to send a file to the user instead of rendering an HTML page. All controllers in Rails have the <tt>send_data</tt> and the <tt>send_file</tt> methods, that will both stream data to the client. <tt>send_file</tt> is a convenience method which lets you provide the name of a file on the disk and it will stream the contents of that file for you.</p></div>
-<div class="paragraph"><p>To stream data to the client, use <tt>send_data</tt>:</p></div>
+<div class="paragraph"><p>Czasami możesz chcieć przesłać do użytkownika plik zamiast renderować stronę HTML. Wszystkie kontrolery w Railsach posiadają metody <tt>send_data</tt> i <tt>send_file</tt>, obie z nich przesyłają strumieniowo dane do klienta. <tt>send_file</tt> jest wygodną metodą, która pozwala dostarczyć nazwę pliku znajdującego się na dysku i przesłać zawartość tego pliku.</p></div>
+<div class="paragraph"><p>Aby przesłać dane do klienta, użyj <tt>send_data</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -858,9 +968,17 @@ private
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>The <tt>download_pdf</tt> action in the example above will call a private method which actually generates the file (a PDF document) and returns it as a string. This string will then be streamed to the client as a file download and a filename will be suggested to the user. Sometimes when streaming files to the user, you may not want them to download the file. Take images, for example, which can be embedded into HTML pages. To tell the browser a file is not meant to be downloaded, you can set the <tt>:disposition</tt> option to "inline". The opposite and default value for this option is "attachment".</p></div>
-<h3 id="_sending_files">11.1. Sending Files</h3>
-<div class="paragraph"><p>If you want to send a file that already exists on disk, use the <tt>send_file</tt> method. This is usually not recommended, but can be useful if you want to perform some authentication before letting the user download the file.</p></div>
+<div class="paragraph"><p>Akcja <tt>download_pdf</tt> w przykładzie powyżej wezwie prywatną metodę, która
+właściwie generuje plik (dokument PDF) i zwróci to jako string. Ten string
+będzie następnie przesłany do klienta jako plik do pobrania, a nazwa pliku
+będzie użytkownikowi sugerowana. Czasami kiedy  przesyłasz pliki do
+użytkownika, możesz nie chcieć, aby plik był do pobrania. Weźmy na przykład
+obrazki, które są wbudowane w treść strony HTML. Aby poinformować
+przeglądarkę, że plik nie jest do pobrania, możesz ustawić opcję
+<tt>:disposition</tt> na <tt>inline</tt>. Przeciwną i zarazem domyślną wartością dla tej
+opcji jest <tt>attachment</tt>.</p></div>
+<h3 id="_wysy_anie_plik_w">11.1. Wysyłanie plików</h3>
+<div class="paragraph"><p>Jeżeli chcesz wysłać plik, który już istnieje na dysku, użyj metody <tt>send_file</tt>. Jest to zwykle nie zalecane, ale może być przydatne, jeżeli chcesz wykonać jakąś weryfikację przed pozwoleniem użytkownikowi na pobranie tego pliku.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -875,13 +993,13 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>This will read and stream the file 4Kb at the time, avoiding loading the entire file into memory at once. You can turn off streaming with the <tt>:stream</tt> option or adjust the block size with the <tt>:buffer_size</tt> option.</p></div>
+<div class="paragraph"><p>Ta metoda będzie czytać i przesyłać strumieniowo plik w blokach po 4 Kb, unikając ładowania całego pliku do pamięci na raz. Możesz wyłączyć strumieniowanie poprzez opcję <tt>:stream</tt> albo ustawić rozmiar bloku poprzez opcję <tt>:buffer_size</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/warning.png" alt="Warning" />
 </td>
-<td class="content">Be careful when using (or just don&#8217;t use) "outside" data (params, cookies, etc) to locate the file on disk, as this is a security risk that might allow someone to gain access to files they are not meant to see.</td>
+<td class="content">Bądź ostrożny kiedy używasz (lub po prostu nie używaj) zewnętrznych danych (parametrów, cookis, itp) do zlokalizowania pliku na dysku, jest to ryzykowne z punktu widzenia bezpieczeństwa i może pozwolić komuś na uzyskanie dostępu do plików które nie są przeznaczone do oglądania.</td>
 </tr></table>
 </div>
 <div class="admonitionblock">
@@ -889,11 +1007,23 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">It is not recommended that you stream static files through Rails if you can instead keep them in a public folder on your web server. It is much more efficient to let the user download the file directly using Apache or another web server, keeping the request from unnecessarily going through the whole Rails stack. Although if you do need the request to go through Rails for some reason, you can set the <tt>:x_sendfile</tt> option to true, and Rails will let the web server handle sending the file to the user, freeing up the Rails process to do other things. Note that your web server needs to support the <tt>X-Sendfile</tt> header for this to work, and you still have to be careful not to use user input in a way that lets someone retrieve arbitrary files.</td>
+<td class="content">Nie zaleca się przesyłania statycznych plików przez Railsy, jeśli możesz
+zamiast tego trzymaj je w folderze publicznym na twoim serwerze. O wiele
+bardziej efektywne jest umożliwienie użytkownikowi pobierania pliku
+bezpośrednio za pomocą serwera Apache lub innego serwera www, ponieważ
+utrzymywane żądanie przechodzi niepotrzebnie przez cały stos Railsów. Jednak
+jeśli potrzebujesz aby z jakiegoś powodu żądanie przeszło przez Railsy możesz
+ustawić opcję <tt>:x_sendfile</tt> na <tt>true</tt>, wówczas Railsy pozwolą serwerowi www
+obsłużyć wysyłanie pliku do użytkownika, uwalniając od tego proces Railsów.
+Pamiętaj, że Twój serwer www musi obsługiwać nagłówek <tt>X-Sendfile</tt>, oraz musisz uważać, aby nie używać wejścia użytkownika w sposób, który pozwoli komuś na pobieranie przypadkowych plików.</td>
 </tr></table>
 </div>
-<h3 id="_restful_downloads">11.2. RESTful Downloads</h3>
-<div class="paragraph"><p>While <tt>send_data</tt> works just fine, if you are creating a RESTful application having separate actions for file downloads is usually not necessary. In REST terminology, the PDF file from the example above can be considered just another representation of the client resource. Rails provides an easy and quite sleek way of doing "RESTful downloads". Here&#8217;s how you can rewrite the example so that the PDF download is a part of the <tt>show</tt> action, without any streaming:</p></div>
+<h3 id="_pobieranie_plik_w_w_aplkacjach_restful">11.2. Pobieranie plików w aplkacjach RESTful</h3>
+<div class="paragraph"><p>Chociaż metoda <tt>send_data</tt> działa całkiem dobrze, jeśli tworzysz aplikację
+RESTful posiadającą osobne akcje dla pobierania plików, zwykle będzie ona
+niepotrzebna. W terminologii REST, plik PDF z przykładu powyżej można uznać za
+kolejną reprezentację danych zwracachych do klienta. Railsy zapewniają łatwy i
+dosyć gładki sposób na "RESTful downloads". Oto jak możesz przepisać wcześniejszy przykład, tak aby pobranie pliku PDF było częścią akcji <tt>show</tt>, bez przesyłania strumieniowego:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -912,7 +1042,7 @@ http://www.gnu.org/software/src-highlite -->
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>In order for this example to work, you have to add the PDF MIME type to Rails. This can be done by adding the following line to the file <tt>config/initializers/mime_types.rb</tt>:</p></div>
+<div class="paragraph"><p>Aby ten przykład zadziałał, musisz dodać typ PDF jako MIME type w Railsach. Można to zrobić poprzez dodanie następującej linii do pliku <tt>config/initializers/mime_types.rb</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -924,18 +1054,26 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Configuration files are not reloaded on each request, so you have to restart the server in order for their changes to take effect.</td>
+<td class="content">Pliki konfiguracyjne nie są wczytywane przy kazdym żądaniu, więc musisz uruchomić ponownie serwer, aby uaktywnić zmiany.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Now the user can request to get a PDF version of a client just by adding ".pdf" to the URL:</p></div>
+<div class="paragraph"><p>Teraz użytkownik może zażądać pobrania wersji PDF strony tylko przez dodanie rozszerzenia ".pdf" do adresu URL:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>GET /clients/1.pdf</tt></pre>
 </div></div>
 </div>
-<h2 id="_parameter_filtering">12. Parameter Filtering</h2>
+<h2 id="_filtrowanie_parametr_w">12. Filtrowanie parametrów</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Rails keeps a log file for each environment (development, test and production) in the <tt>log</tt> folder. These are extremely useful when debugging what&#8217;s actually going on in your application, but in a live application you may not want every bit of information to be stored in the log file. The <tt>filter_parameter_logging</tt> method can be used to filter out sensitive information from the log. It works by replacing certain values in the <tt>params</tt> hash with "[FILTERED]" as they are written to the log. As an example, let&#8217;s see how to filter all parameters with keys that include "password":</p></div>
+<div class="paragraph"><p>Railsy trzymają pliki logów dla każdego środowiska (rozwojowego, testowania i
+produkcji) w folderze <tt>log</tt>. Są one niezwykle przydatne podczas debugowania,
+żeby zobaczyć co faktycznie działo się w aplikacji, ale w czasie późniejszego
+działania aplikacji możesz nie chcieć, żeby każda informacja była zapisywany w
+pliku logu. Metoda <tt>filter_parameter_logging</tt> może być używana do
+odfiltrowywania poufnych informacji z logu. Działa ona poprzez zastępowania
+pewnych wartości z tablicy haszującej <tt>params</tt> przez "[FILTERED]" przy
+zapisywaniu do logu. Jako przykład zobaczmy, jak filtrować wszystkie parametry
+z kluczem zawierającym <tt>password</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -946,16 +1084,32 @@ http://www.gnu.org/software/src-highlite -->
   filter_parameter_logging <span style="color: #990000">:</span>password
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>The method works recursively through all levels of the params hash and takes an optional second parameter which is used as the replacement string if present. It can also take a block which receives each key in turn and replaces those for which the block returns true.</p></div>
+<div class="paragraph"><p>Metoda działa rekursywnie na wszystkich poziomach tablicy haszującej params.
+Może przyjmować drugi opcjonalny parametr, który jeśli występuje, jest używany
+jako tekst zastępujący. Funkcja ta może też przyjąć blok, który sprawdza warunek dla każdego klucza i zastępuje te, dla których blok zwraca ‘true’.</p></div>
 </div>
-<h2 id="_rescue">13. Rescue</h2>
+<h2 id="_obs_uga_b_d_w">13. Obsługa błędów</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Most likely your application is going to contain bugs or otherwise throw an exception that needs to be handled. For example, if the user follows a link to a resource that no longer exists in the database, Active Record will throw the ActiveRecord::RecordNotFound exception. Rails' default exception handling displays a 500 Server Error message for all exceptions. If the request was made locally, a nice traceback and some added information gets displayed so you can figure out what went wrong and deal with it. If the request was remote Rails will just display a simple "500 Server Error" message to the user, or a "404 Not Found" if there was a routing error or a record could not be found. Sometimes you might want to customize how these errors are caught and how they&#8217;re displayed to the user. There are several levels of exception handling available in a Rails application:</p></div>
-<h3 id="_the_default_500_and_404_templates">13.1. The Default 500 and 404 Templates</h3>
-<div class="paragraph"><p>By default a production application will render either a 404 or a 500 error message. These messages are contained in static HTML files in the <tt>public</tt> folder, in <tt>404.html</tt> and <tt>500.html</tt> respectively. You can customize these files to add some extra information and layout, but remember that they are static; i.e. you can&#8217;t use RHTML or layouts in them, just plain HTML.</p></div>
+<div class="paragraph"><p>Jest bardzo prawdopodobne, że twoja aplikacja będzie zawierać błędy albo w
+innym razie będzie wyrzucać jakieś wyjątki, które muszą być rozpatrzone. Na
+przykład, jeśli użytkownik użyje linka do zasobu, który już nie istnieje w
+bazie danych, moduł Active Record rzuci wyjąkiem
+<tt>ActiveRecord::RecordNotFound</tt>. Przy wystąpieniu jakiegokolwiek wyjątku Railsy
+domyślnie wyświetlają komunikat błędu 500, czyli wewnętrzny błąd serwera (500
+Server Error). Jeżeli żądanie było wywołane lokalnie, dzięki prześledzeniu go
+od początku i kilku dodatkowym informacjom, które zostaną wyświetlone, możesz
+dowiedzieć się, co poszło źle i jak sobie z tym poradzić. Jeżeli żądanie było
+zdalne, Railsy wyświetlą tylko zwykły komunikat  "500 Server Error" lub "404
+Not Found", jeżeli jest to błąd routingu albo zapis nie został znaleziony.
+Czasami możesz chcieć dostosować sposób, w jaki te błędy będą złapane i jak
+zostaną wyświetlone użytkownikowi. Istnieje kilka poziomów obsługi wyjątków
+dostępnych w aplikacjach Railsowych, które omówione są niżej.</p></div>
+<h3 id="_domy_lne_szablony_b_d_w_500_and_404">13.1. Domyślne szablony błędów 500 and 404</h3>
+<div class="paragraph"><p>Domyślnym działaniem aplikacji jest wyrenderowanie komunikatu błędu 404 lub 500. Komunikaty te zawarte są w statycznych plikach HTML w katalogu <tt>public</tt>, odpowiednio w plikach <tt>404.html</tt> i <tt>500.html</tt>. Możesz dostosować te pliki poprzez zamieszczenie kilku dodatkowych informacji i rozmieszczenie graficzne, ale pamiętaj, że są to pliki statyczne, tzn. nie możesz użyć w nich RHTML lub layoutów, tylko czysty HTML.</p></div>
 <h3 id="_tt_rescue_from_tt">13.2. <tt>rescue_from</tt></h3>
-<div class="paragraph"><p>If you want to do something a bit more elaborate when catching errors, you can use <tt>rescue_from</tt>, which handles exceptions of a certain type (or multiple types) in an entire controller and its subclasses. When an exception occurs which is caught by a <tt>rescue_from</tt> directive, the exception object is passed to the handler. The handler can be a method or a Proc object passed to the <tt>:with</tt> option. You can also use a block directly instead of an explicit Proc object.</p></div>
-<div class="paragraph"><p>Here&#8217;s how you can use <tt>rescue_from</tt> to intercept all ActiveRecord::RecordNotFound errors and do something with them.</p></div>
+<div class="paragraph"><p>Jeżeli chcesz zrobić coś bardziej wymyślnego dla obsługi błędu, możesz użyć <tt>rescue_from</tt>, który obsługuje wyjątki pewnego typu (lub wielu typów) w całym kontrolerze i jego podklasach. Kiedy pojawia się wyjątek, który złapany został przez dyrektywę <tt>rescue_from</tt> obiekt wyjątku zostaje przekazany do  handlera. Handler może być metodą lub obiektem Proc przekazywanym do opcji <tt>:with</tt>. Możesz także użyć bezpośrednio bloku, zamiast wyraźnego obiektu Proc.</p></div>
+<div class="paragraph"><p>Oto jak możesz użyć <tt>rescue_from</tt> do przechwycenia wszystkich błędów
+<tt>ActiveRecord::RecordNotFound</tt> i zrobienia czegoś z nimi.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -972,7 +1126,7 @@ private
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Of course, this example is anything but elaborate and doesn&#8217;t improve on the default exception handling at all, but once you can catch all those exceptions you&#8217;re free to do whatever you want with them. For example, you could create custom exception classes that will be thrown when a user doesn&#8217;t have access to a certain section of your application:</p></div>
+<div class="paragraph"><p>Oczywiście ten przykład jest niczym więcej jak opracowaniem i w ogóle nie polepsza domyślnej obsługi błędów, ale kiedyś możesz chcieć złapać wszystkie wyjątki, wtedy będziesz mógł zrobić z nimi co tylko chcesz. Na przykład, możesz utworzyć własne klasy wyjątków, które zostaną rzucone, jeśli użytkownik nie ma dostępu do niektórych części aplikacji:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1014,7 +1168,7 @@ private
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Certain exceptions are only rescuable from the ApplicationController class, as they are raised before the controller gets initialized and the action gets executed. See Pratik Naik&#8217;s <a href="http://m.onkey.org/2008/7/20/rescue-from-dispatching">article</a> on the subject for more information.</td>
+<td class="content">Niektóre wyjątki są obsługiwalne tylko w klasie ApplicationController, ponieważ występują zanim sam kontroler zostanie zainicjalizowany i będzie mógł podjąć akcję. Zobacz <a href="http://m.onkey.org/2008/7/20/rescue-from-dispatching">artykuł</a> autorstwa Pratik&#8217;a Naik&#8217;a na ten temat, aby zaczerpnąć więcej informacji.</td>
 </tr></table>
 </div>
 </div>

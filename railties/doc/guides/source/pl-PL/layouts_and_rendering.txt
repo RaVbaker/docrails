@@ -47,10 +47,11 @@ end
 -------------------------------------------------------
 
 Railsy automatycznie po wykonaniu metody wyrenderuje plik +app/views/books/show.html.erb+.
-Właściwie, jeśli masz domyślną regułę catch-all w pliku config/routing.rb (+map.connect
+Właściwie, jeśli masz domyślną regułę catch-all w pliku config/routes.rb (+map.connect
 \':controller/:action/:id'+), Railsy wyrenderują nawet widoki, które nie mają żadnego
-kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną regułę i nadejdzie
-żądanie dla +/books/sale_list+, Railsy w odpowiedzi wyrenderują +app/views/books/sale_list.html.erb+.
+kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną drogę
+routowania i nadejdzie żądanie dla +/books/sale_list+, Railsy w odpowiedzi 
+wyrenderują +app/views/books/sale_list.html.erb+.
 
 NOTE: Właściwe renderowanie jest wykonywane przez podklasę +ActionView::TemplateHandlers+.
 Ten tutorial nie zagłębia się w ten proces, ale należy pamiętać, że rozszerzenie pliku

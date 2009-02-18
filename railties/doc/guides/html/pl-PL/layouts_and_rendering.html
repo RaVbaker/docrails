@@ -146,10 +146,11 @@ http://www.gnu.org/software/src-highlite -->
   <span style="color: #009900">@book</span> <span style="color: #990000">=</span> Book<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Railsy automatycznie po wykonaniu metody wyrenderuje plik <tt>app/views/books/show.html.erb</tt>.
-Właściwie, jeśli masz domyślną regułę catch-all w pliku config/routing.rb (<tt>map.connect
+Właściwie, jeśli masz domyślną regułę catch-all w pliku config/routes.rb (<tt>map.connect
 ':controller/:action/:id'</tt>), Railsy wyrenderują nawet widoki, które nie mają żadnego
-kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną regułę i nadejdzie
-żądanie dla <tt>/books/sale_list</tt>, Railsy w odpowiedzi wyrenderują <tt>app/views/books/sale_list.html.erb</tt>.</p></div>
+kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną drogę
+routowania i nadejdzie żądanie dla <tt>/books/sale_list</tt>, Railsy w odpowiedzi
+wyrenderują <tt>app/views/books/sale_list.html.erb</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
