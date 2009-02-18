@@ -151,12 +151,12 @@ W przypadku korzystania z popularnej wtyczki RestfulAuthentication do zarządzan
   
 Innym sposobem obrony jest [,#fffcdb]#zapisywanie specyficznych właściwości użytkownika w sesji#, weryfikowanie ich przy każdym żądaniu i odmowa dostępu, jeśli informacje te nie pasują do siebie. Takimi właściwościami mogą być adres IP lub user agent (nazwa przeglądarki internetowej), choć ta ostatnia nie jest aż tak bardzo charakterystyczna dla użytkownika. Podczas zapisywania adresu IP, musisz pamiętać, że istnieją dostawcy usług internetowych oraz duże organizacje, które oferują swoim użytkownikom dostęp do Internetu przez proxy. [,#fffcdb]# Adresy IP tych użytkowników mogą ulegać zmianom w trakcie sesji#, więc nie będą oni mogli korzystać z aplikacji, lub tylko w ograniczonym zakresie.
 
-=== Session expiry
+=== Wygasanie sesji
 
--- _Sessions that never expire extend the time-frame for attacks such as cross-site reference forgery (CSRF), session hijacking and session fixation._
-
-One possibility is to set the expiry time-stamp of the cookie with the session id. However the client can edit cookies that are stored in the web browser so expiring sessions on the server is safer. Here is an example of how to [,#fffcdb]#expire sessions in a database table#. Call Session.sweep("20m") to expire sessions that were used longer than 20 minutes ago.
-
+_Sesja, która nigdy nie wygasa daje więcej czasu atakującym na przeprowadzenie ataku typu cross-site reference forgery (CSRF), przechwytywanie sesji i session fixation._
+ 
+Jedną z możliwości jest ustawienie czasu wygaśnięcia cookie przechowującego id sesji. Jednak klient może edytować pliki cookies, które są przechowywane w przeglądarce internetowej tak, żeby wygasające sesje na serwerze były bezpieczniejsze. Oto przykład, jak [,#fffcdb]#ustawić wygasanie sesji w tabeli bazy danych#. Session.sweep(„20m”) powoduje wygaśnięcie sesji, które były używane wcześniej niż 20 minut temu.
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 class Session < ActiveRecord::Base
@@ -172,59 +172,58 @@ class Session < ActiveRecord::Base
  end
 ----------------------------------------------------------------------------
 
-The section about session fixation introduced the problem of maintained sessions. An attacker maintaining a session every five minutes can keep the session alive forever, although you are expiring sessions. A simple solution for this would be to add a created_at column to the sessions table. Now you can delete sessions that were created a long time ago. Use this line in the sweep method above:
-
+W Sekcji na temat ataku typu session fixation zapoznaliśmy się problemem utrzymania sesji. Atakujący odświeżając sesję co pięć minut jest w stanie bez końca utrzymywać sesję przy życiu, mimo tego, że sesja użytkownika już wygasła. Prostym rozwiązaniem tego problemu może być dodanie kolumny created_at do tabeli sesji. W ten sposób możesz usunąć sesje, które zostały stworzone dawno temu. Dodaj tą linię kodu, do metody, która opisałem powyżej:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 self.delete_all "updated_at < '#{time.to_s(:db)}' OR created_at < '#{2.days.ago.to_s(:db)}'"
 ----------------------------------------------------------------------------
 
-== Cross-Site Reference Forgery (CSRF)
--- _This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands._
-
+-- _Ta metoda ataku dodaje złośliwy kod lub link na stronie internetowej, która jest odpowiedzialna za dostęp do aplikacji, w taki sposób że użytkownikowi wydaje się, że został uwierzytelniony. Jeśli sesja dla tej aplikacji nie wygasła, atakujący może bezprawnie wykonywać polecenia._
+ 
 image::images/csrf.png[CSRF]
-
-In the session chapter you have learned that most Rails applications use cookie-based sessions. Either they store the session id in the cookie and have a server-side session hash, or the entire session hash is on the client-side. In either case the browser will automatically send along the cookie on every request to a domain, if it can find a cookie for that domain. The controversial point is, that it will also send the cookie, if the request comes from a site of a different domain. Let's start with an example:
-
-- Bob browses a message board and views a post from a hacker where there is a crafted HTML image element. The element references a command in Bob's project management application, rather than an image file.
+ 
+W rozdziale o sesjach dowiedzieliśmy się, że większość aplikacji Railsowych wykorzystuje sesje oparte na cookies. Każda z nich przechowuje identyfikator sesji w pliku cookie i hash sesji trzymaja po stronie serwera, lub też cały hash sesji przechowuje po stronie klienta. We wszystkich przypadkach przeglądarka, na każde żądanie, automatycznie przesyła dalej cookie do domeny, oczywiście jeśli może odnaleźć cookie dla danej domeny. Zagrożeniem może być fakt, że przeglądarka będzie również wysłać plik cookie, jeśli żądanie przyjdzie ze strony na innej domenie. Zacznijmy od przykładu:
+ 
+- Bob przegląda forum i widzi wpis (post) hakera, zawierający spreparowany element HTML typu img (obrazek). Element odnosi się raczej do komendy w aplikacji zarządzania projektem Boba, zamiast obrazka. 
 - +<img src="http://www.webapp.com/project/1/destroy">+
-- Bob's session at www.webapp.com is still alive, because he didn't log out a few minutes ago.
-- By viewing the post, the browser finds an image tag. It tries to load the suspected image from www.webapp.com. As explained before, it will also send along the cookie with the valid session id.
-- The web application at www.webapp.com verifies the user information in the corresponding session hash and destroys the project with the ID 1. It then returns a result page which is an unexpected result for the browser, so it will not display the image.
-- Bob doesn't notice the attack -- but a few days later he finds out that project number one is gone.
+- Sesja Bob na www.webapp.com jest wciąż aktywna, bo nie wylogował się kilka minut temu. 
+- Poprzez oglądanie wpisu, przeglądarka znajdzie tag obrazka. Następnie spróbuje wczytać podejrzany obrazek z www.webapp.com. Zgodnie z tym, co napisałem wcześniej, przeglądarka prześle również cookie z ważnym identyfikator sesji. 
+- Aplikacja internetowa na www.webapp.com sprawdzi informacje o użytkowniku w odpowiednim hashu sesji i zniszczy projekt z ID 1. Następnie zwróci stronę, która będzie nieoczekiwanym wynikiem dla przeglądarki, więc nie wyświetli się żaden obrazek. 
+- Bob nie zauważy ataku -- ale po kilku dniach stwierdzi, że projekt numer 1 zniknał.
+ 
+Ważne jest, aby zauważyć, że spreparowany obrazek lub link nie koniecznie musi znajdować się na domenie, gdzie znajduje się aplikacja - może być w dowolnym miejscu - na forum, blogu lub w mailu. 
+ 
+CSRF pojawia się bardzo rzadko w CVE (Common Vulnerabilities and Exposures) -- mniej niż 0,1% w 2006 r. -- ale tak naprawdę jest to "śpiący olbrzym" [Grossman]. Kontrastuje to znacząco z wynikami moich (i innych) zleceń dotyczących pracy z bezpieczeństwem - [,#fffcdb]#CSRF jest ważną kwestią bezpieczeństwa#.
 
-It is important to notice that the actual crafted image or link doesn't necessarily have to be situated in the web application's domain, it can be anywhere – in a forum, blog post or email.
+=== Sposoby ochrony przed atakiem typu CSRF 
 
-CSRF appears very rarely in CVE (Common Vulnerabilities and Exposures) -- less than 0.1% in 2006 -- but it really is a 'sleeping giant' [Grossman]. This is in stark contrast to the results in my (and others) security contract work – [,#fffcdb]#CSRF is an important security issue#.
+-- _Po pierwsze, jak to jest wymagane przez W3C, używaj odpowiednio GET i POST. Po drugie, używaj tokena zabezpieczającego przy metodach non-GET, żeby chronić aplikację przed CSRF.
 
-=== CSRF Countermeasures
+Protokół HTTP przewiduje zasadniczo dwa główne rodzaje wniosków - GET i POST (i więcej, ale nie są one obsługiwane przez większość przeglądarek). World Wide Web Consortium (W3C) podaje spis sytuacji, w których stosujemy GET lub POST:
+ 
+*Używaj GET jeśli:*
 
--- _First, as is required by the W3C, use GET and POST appropriately. Secondly, a security token in non-GET requests will protect your application from CSRF._
+- Interakcja przypomina [,#fffcdb]#zapytanie# (np. jeśli jest to bezpieczna operacja taka jak kwerenda (query), operacja czytania (read operation), albo wyszukiwania (lookup).
+ 
+*Używaj  POST jeśli:*
+ 
+- Interakcja przypomina [,#fffcdb]#komendę#, lub
+- Interakcja [,#fffcdb]#powoduje zmianę# zasobów w sposób zauważalny dla użytkownika (np. subskrypcja serwisu), lub
+- Użytkownik [,#fffcdb]#jest odpowiedzialny za wynik działania# interakcji.
 
-The HTTP protocol basically provides two main types of requests - GET and POST (and more, but they are not supported by most browsers). The World Wide Web Consortium (W3C) provides a checklist for choosing HTTP GET or POST:
-
-*Use GET if:*
-
-- The interaction is more [,#fffcdb]#like a question# (i.e., it is a safe operation such as a query, read operation, or lookup).
-
-*Use POST if:*
-
-- The interaction is more [,#fffcdb]#like an order#, or
-- The interaction [,#fffcdb]#changes the state# of the resource in a way that the user would perceive (e.g., a subscription to a service), or
-- The user is [,#fffcdb]#held accountable for the results# of the interaction.
-
-If your web application is RESTful, you might be used to additional HTTP verbs, such as PUT or DELETE. Most of today‘s web browsers, however do not support them - only GET and POST. Rails uses a hidden +_method+ field to handle this barrier.
-
-[,#fffcdb]#The verify method in a controller can make sure that specific actions may not be used over GET#. Here is an example to verify the use of the transfer action over POST. If the action comes in using any other verb, it redirects to the list action.
-
+Jeśli aplikacja internetowa jest RESTful, możesz również korzystać z dodatkowych  metod HTTP, takich jak PUT lub DELETE. Większość współczesnych przeglądarek internetowych ich nie obsługuje, jednak Railsy wykorzystują ukryte pole +_method+, żeby ominąć tą barierę.
+ 
+[,#fffcdb]#Sprawdzanie metody (verify method) w kontrolerze sprawdza czy konkretne akcje nie mogą być wykorzystywane przez GET#. Oto przykład, w którym sprawdzane jest wykorzystanie akcji transferu przez POST. Jeżeli akcja jakiejkolwiek innej metody HTTP, zostaje ona przekierowana do listy akcji.
+ 
 .................................................................................
 verify :method => :post, :only => [:transfer], :redirect_to => {:action => :list}
 .................................................................................
 
-With this precaution, the attack from above will not work, because the browser sends a GET request for images, which will not be accepted by the web application.
-
-But this was only the first step, because [,#fffcdb]#POST requests can be send automatically, too#. Here is an example for a link which displays www.harmless.com as destination in the browser's status bar. In fact it dynamically creates a new form that sends a POST request.
-
+Dzięki tej ostrożności, wyżej opisany atak nie zadziała, ponieważ przeglądarka wysyła żądanie GET dla obrazków, które nie zostanie zaakceptowane przez aplikację internetową. 
+ 
+Ale to dopiero pierwszy krok, ponieważ [,#fffcdb]#żądanie POST również może być wysłane automatycznie#. Oto przykład linku, który wyświetla www.harmless.com jako miejsce docelowe w pasku statusu przeglądarki. W rzeczywistości to dynamicznie tworzy nowy formularz, który wysyła żądanie POST.
+ 
 [source, html]
 ----------------------------------------------------------------------------
 <a href="http://www.harmless.com/" onclick="
@@ -237,28 +236,30 @@ But this was only the first step, because [,#fffcdb]#POST requests can be send a
   return false;">To the harmless survey</a>
 ----------------------------------------------------------------------------
 
-Or the attacker places the code into the onmouseover event handler of an image:
-
+Atakujący może też umieścić kod w zdarzeniu onmouseover dla obrazka:
+ 
 +<img src="http://www.harmless.com/img" width="400" height="400" onmouseover="..." />+
-
-There are many other possibilities, including Ajax to attack the victim in the background. The  [,#fffcdb]#solution to this is including a security token in non-GET requests# which check on the server-side. In Rails 2 or higher, this is a one-liner in the application controller:
-
+ 
+Istnieje wiele innych możliwości (w tym Ajax) ataku ofiary w tle.  [,#fffcdb]#Rozwiązaniem tego problemu może być użycie tokena zabezpieczającego w żądaniach typu non-GET# sprawdzanego po stronie serwera. W Rails 2 lub wyższym, jest to jedna linia kodu w kontrolerze aplikacji: 
+ 
 +protect_from_forgery :secret => "123456789012345678901234567890..."+
+ 
+Spowoduje to automatyczne dołączenie zabezpieczenia tokena, wyliczonego na podstawie bieżącej sesji i tajnego klucza (secret), we wszystkich formularzach i żądaniach Ajaxowych generowanych w Railsach. Klucz (secret) nie będzie potrzebny, jeśli używasz CookieStorage jako ze sposobu przechowywania sesji. Aplikacja wyrzuci błąd ActionController::InvalidAuthenticityToken jeśli token nie będzie poprawny.
+ 
+Należy pamiętać, że [,#fffcdb]#atak typu cross-site scripting (XSS) omija wszystkie zabezpieczenia przed atakami typu CSRF#. XSS pozwala atakującemu na dostęp do wszystkich elementów na stronie, także może on odczytać token zabezpieczający przed CSRF z formularza lub bezpośrednio wysłać formularz. Więcej informacji o atakach typu XSS znajduje się w dalszej części podręcznika.
+ 
+== Przekierowania i pliki
 
-This will automatically include a security token, calculated from the current session and the server-side secret, in all forms and Ajax requests generated by Rails. You won't need the secret, if you use CookieStorage as session storage. It will raise an ActionController::InvalidAuthenticityToken error, if the security token doesn't match what was expected.
+Inną grupą elementów podatnych na atak są przekierowania i pliki w aplikacjach internetowych.
+ 
+=== Przekierowania
+ 
+-- _Przekierowanie w aplikacji internetowej to niedoceniane narzędzie krakingu: Atakujący może zarówno weprowadzić użytkownika na stronę-pułapkę, jak i przygotować niezależny atak._
+ 
+Każdy przypadek, gdy użytkownik ma możliwość rozwinięcia linku (jego części) do przekierowania, stanowi prawdopodobne zagrożone. Najbardziej oczywisty atak to przekierowanie użytkowników do fałszywych stron, które wyglądają dokładnie jak oryginalne. Ten atak (typu phishing) działa poprzez wysłanie zwyczajnie wyglądających linków w wiadomości e-mai, injecting the link by XSS in the web application or umieszczanie linków do innych stron. It is unsuspicious, because the link starts with the URL to the web application and the URL to the malicious site is hidden in the redirection parameter: http://www.example.com/site/redirect?to= www.attacker.com. Here is an example of a legacy action:
 
-Note that [,#fffcdb]#cross-site scripting (XSS) vulnerabilities bypass all CSRF protections#. XSS gives the attacker access to all elements on a page, so he can read the CSRF security token from a form or directly submit the form. Read more about XSS later.
-
-== Redirection and Files
-
-Another class of security vulnerabilities surrounds the use of redirection and files in web applications.
-
-=== Redirection
-
--- _Redirection in a web application is an underestimated cracker tool: Not only can the attacker forward the user to a trap web site, he may also create a self-contained attack._
-
-Whenever the user is allowed to pass (parts of) the URL for redirection, it is possibly vulnerable. The most obvious attack would be to redirect users to a fake web application which looks and feels exactly as the original one. This so-called phishing attack works by sending an unsuspicious link in an email to the users, injecting the link by XSS in the web application or putting the link into an external site. It is unsuspicious, because the link starts with the URL to the web application and the URL to the malicious site is hidden in the redirection parameter: http://www.example.com/site/redirect?to= www.attacker.com. Here is an example of a legacy action:
-
+Nie wygląda to podejrzanie, ponieważ URL zaczyna się jak link do zwyczajnej, niegroźnej strony internetowej, a URL do strony, z której płynie zagrożenie, jest ukryty w parametrze przekierowania: http://www.example.com/site/redirect?to= www.attacker.com. Oto przykład akcji dziedziczenia (legacy action):
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 def legacy
@@ -266,28 +267,28 @@ def legacy
 end
 ----------------------------------------------------------------------------
 
-This will redirect the user to the main action if he tried to access a legacy action. The intention was to preserve the URL parameters to the legacy action and pass them to the main action. However, it can exploited by an attacker if he includes a host key in the URL:
-
+Będzie ona przekierowywać użytkownika do głównej akcji, jeśli próbował uzyskać dostęp do akcji dziedziczenia. Naszym zamiarem było zabezpieczenie parametrów w adresach URL w akcji dziedziczenia i przekazanie ich do głównej akcji. Jednakże może to być wykorzystane przez atakującego, jeśli zawrze on klucz hosta adresie URL:
+ 
 +http://www.example.com/site/legacy?param1=xy&param2=23&host=www.attacker.com+
-
-If it is at the end of the URL it will hardly be noticed and redirects the user to the attacker.com host. A simple countermeasure would be to [,#fffcdb]#include only the expected parameters in a legacy action# (again a whitelist approach, as opposed to removing unexpected parameters). [,#fffcdb]#And if you redirect to an URL, check it with a whitelist or a regular expression#.
-
-==== Self-contained XSS
-
-Another redirection and self-contained XSS attack works in Firefox and Opera by the use of the data protocol. This protocol displays its contents directly in the browser and can be anything from HTML or JavaScript to entire images:
+ 
+Jeśli jest on na końcu adresu URL, ciężko go zauważyć i przekierowuje użytkownika do hosta attacker.com. Prostą ochroną byłoby [#,fffcdb]#zawieranie tylko oczekiwanych parametrów akcji dziedziczenia# (biała lista (whitelist) uchodzi za alternatywę dla usuwania nieoczekiwanych parametrów). [#,fffcdb]#Każde przekierowanie do adresu URL, należy sprawdzać z białą listą lub dozwolonymi wyrażeniami regularnymi#. 
+ 
+==== Niezależny atak typu XSS
+ 
+Kolejnymi atakami są przekierowywania i niezależny atak XSS działające w przeglądarkach Firefox i Opera przez wykorzystanie protokołu danych. Protokół ten wyświetla swoją zawartość bezpośrednio w przeglądarce i może mieć postać wszystkiego - od kodu HTML lub JavaScript do całego zdjęcia: 
 
 +data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K+
+ 
+W tym przykładzie został użyty zaszyfrowany, metodą Base64, kod JavaScript, który wyświetla proste okno dialogowe. W przekierowaniu URL, atakujący może przekierować użytkownika na adres URL ze złośliwym kodem. Żeby bronić się przed takimi atakami, [#,fffcdb]#nie powinieneś pozwalać użytkownikowi na przekierowania (części) adresu URL#.
+ 
+=== Wysyłanie (upload) plików
+ 
+-- _Upewnij się, że pliki wysyłane na serwer nie nadpiszą ważnych plików i że są one przetwarzane asynchronicznie._
 
-This example is a Base64 encoded JavaScript which displays a simple message box. In a redirection URL, an attacker could redirect to this URL with the malicious code in it. As a countermeasure, [,#fffcdb]#do not allow the user to supply (parts of) the URL to be redirected to#.
-
-=== File uploads
-
--- _Make sure file uploads don't overwrite important files, and process media files asynchronously._
-
-Many web applications allow users to upload files. [,#fffcdb]#File names, which the user may choose (partly), should always be filtered# as an attacker could use a malicious file name to overwrite any file on the server. If you store file uploads at /var/www/uploads, and the user enters a file name like “../../../etc/passwd”, it may overwrite an important file. Of course, the Ruby interpreter would need the appropriate permissions to do so – one more reason to run web servers, database servers and other programs as a less privileged Unix user.
-
-When filtering user input file names, [,#fffcdb]#don't try to remove malicious parts#. Think of a situation where the web application removes all “../” in a file name and an attacker uses a string such as “....//” - the result will be “../”. It is best to use a whitelist approach, which [,#fffcdb]#checks for the validity of a file name with a set of accepted characters#. This is opposed to a blacklist approach which attempts to remove not allowed characters. In case it isn't a valid file name, reject it (or replace not accepted characters), but don't remove them. Here is the file name sanitizer from the http://github.com/technoweenie/attachment_fu/tree/master[attachment_fu plugin]:
-
+Wiele aplikacji internetowych pozwala użytkownikowi na wysyłanie własnych plików. [,#fffcdb]#Nazwy plików, które wybierze użytkownik zawsze powinny być filtrowane# ponieważ atakujący może użyć złośliwych nazw plików, żeby nadpisać ważne pliki na serwerze. Jeśli przechowujesz wczytane pliki w katalogu /var/www/uploads i jeśli użytkownik wyśle plik o nazwie „../../../etc/passwd”, może nadpisać któryś z ważnych plików. Oczywiście interpreter Ruby wymaga odpowiednich praw, żeby to zrobić – kolejny powód, żeby odpalać serwery, serwery baz danych i inne programy jako mniej uprzywilejowany użytkownik Unixowy. 
+ 
+Gdy filtrujesz pliki nadesłane przez użytkownika, [,#fffcdb]#nie staraj się usunąć złośliwych części#. Pomyśl o sytuacji, gdy aplikacja internetowa usuwa wszystkie “../” w nazwie pliku, a atakujący użyje takiej nazwy: “....//” – rezultat będzie taki: “../”. Najlepszym rozwiązaniem będzie stworzenie białej listy, dzięki której [,#fffcdb]# będzie można sprawdzić czy nazwa pliku zawiera dozwolone znaki#. Jest to alternatywa dla czarnej listy, która ma za zadanie usuwać niedozwolone znaki. W przypadku, gdy nazwa jest niepoprawna odrzuć ją (lub zastąp niedozwolone znaki), ale nie usuwaj jej. Pod tym likniem znajdziesz przydatne narzędzie do obsługi nazw plików: http://github.com/technoweenie/attachment_fu/tree/master[attachment_fu plugin]:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 def sanitize_filename(filename)
@@ -302,31 +303,31 @@ def sanitize_filename(filename)
 end
 ----------------------------------------------------------------------------
 
-A significant disadvantage of synchronous processing of file uploads (as the attachment_fu plugin may do with images), is its [,#fffcdb]#vulnerability to denial-of-service attacks#. An attacker can synchronously start image file uploads from many computers which increases the server load and may eventually crash or stall the server.
+Znaczna niekorzyść synchronicznego przetwarzania wczytywania plików (jak np. plugin attachment_fu może zrobić z obrazami), jest jego [#,fffcdb]#podatność na ataki typu danial-of-service#. Atakujący może synchronicznie rozpocząć wysyłanie obrazka z wielu komputerów, co zwiększa obciążenie serwera i może prowadzić do awarii serwera. 
 
-The solution to this, is best to [,#fffcdb]#process media files asynchronously#: Save the media file and schedule a processing request in the database. A second process will handle the processing of the file in the background.
+Najlepszym rozwiązaniem jest [#,fffcdb]#asynchroniczne przetwarzanie plików (w szczególności obrazków i filmów)#: Zapisz plik i ustaw harmonogram przetwarzania żądania w bazie danych. Drugi proces zajmie się przetwarzaniem plików w tle. 
+ 
+=== Wykonywalny kod we wczytywanych plikach
 
-=== Executable code in file uploads
+-- _Kod źródłowy we wczytywanych plikach może być wykonywany, gdy umieszczony jest w konkretnych katalogów. Nie należy umieszczać wczytywanych plików w Rails / katalog publiczny, jeżeli jest katalog domowy Apache._ 
 
--- _Source code in uploaded files may be executed when placed in specific directories. Do not place file uploads in Rails /public directory if it is Apache's home directory._
+Popularny serwer Apache posiada opcję o nazwie DocumentRoot. Jest to katalog domowy strony internetowej. Wszystko w tym drzewie katalogów będzie obsługiwane przez serwer WWW. Jeśli istnieją pliki o określonych rozszerzeniach, kod zostanie wykonany, jeśli przyjdzie żądanie (może wymagać niektórych opcji do ustalenia). Przykładem mogą być pliki PHP i CGI. Teraz pomyśl o sytuacji, gdy atakujący wysyła na serwer plik "file.cgi" zawierający kod, który zostanie wykonany, gdy ktoś pobiera plik.
+ 
+[,#fffcdb]#Jeśli DocumentRoot w Apache odnosi się do katalogu Rails' /public directory, nie umieszczaj w nim wczytywanych plików#, przechowuj pliki co najmniej jeden poziom niżej.
+ 
+=== Ściąganie plików
 
-The popular Apache web server has an option called DocumentRoot. This is the home directory of the web site, everything in this directory tree will be served by the web server. If there are files with a certain file name extension, the code in it will be executed when requested (might require some options to be set). Examples for this are PHP and CGI files. Now think of a situation where an attacker uploads a file “file.cgi” with code in it, which will be executed when someone downloads the file.
+-- _Upewnij się, czy użytkownicy nie mogą pobierać dowolnych plików._
 
-[,#fffcdb]#If your Apache DocumentRoot points to Rails' /public directory, do not put file uploads in it#, store files at least one level downwards.
-
-=== File downloads
-
--- _Make sure users cannot download arbitrary files._
-
-Just as you have to filter file names for uploads, you have to do so for downloads. The send_file() method sends files from the server to the client. If you use a file name, that the user entered, without filtering, any file can be downloaded:
-
+Tak ja to było przy wysyłaniu plików na serwer, musisz filtrować nazwy plików przy pobieraniu. Metoda send_file() wysyła pliki z serwera do klienta. Jeśli używana jest nazwa pliku wpisywana użytkownika, bez filtrowania, można pobrać każdy plik:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 send_file('/var/www/uploads/' + params[:filename])
 ----------------------------------------------------------------------------
 
-Simply pass a file name like “../../../etc/passwd” to download the server's login information. A simple solution against this, is to [,#fffcdb]#check that the requested file is in the expected directory#:
-
+Wystarczy podać nazwę pliku, taką jak "../../../etc/passwd" żeby pobrać dane do logowania serwera. Prostym rozwiązaniem jest [#,fffcdb]#sprawdzenie czy żądany plik znajduje się w tym katalogu, w którym się spodziewasz#:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 basename = File.expand_path(File.join(File.dirname(__FILE__), '../../files'))
@@ -336,45 +337,45 @@ raise if basename =!
 send_file filename, :disposition => 'inline'
 ----------------------------------------------------------------------------
 
-Another (additional) approach is to store the file names in the database and name the files on the disk after the ids in the database. This is also a good approach to avoid possible code in an uploaded file to be executed. The attachment_fu plugin does this in a similar way.
+Inny (dodatkowy) sposób to przechowywanie nazw plików w bazie danych i nazywanie plików na dysku według identyfikatorów w bazie danych. Jest to również dobry sposób, żeby uniknąć problemu kodu w nazwach wysyłanych plików. Wtyczka attachment_fu działa w podobny sposób.
+ 
+== Ochrona Intranetu I nardzędzi administracyjnych
+  
+-- _Intranet i interfejsy administracyjne są popularnymi celami ataku, ponieważ umożliwiają one uprzywilejowany dostęp. Mimo to wymagają kilku dodatkowych środków bezpieczeństwa, odwrotnie jest w rzeczywistym świecie._
 
-== Intranet and Admin security
+W 2007 roku pojawił się pierwszy, wykonany na zamówienie http://www.symantec.com/enterprise/security_response/weblog/2007/08/a_monster_trojan.html [Trojan], który ukradł informacje z Intranetu, czyli "Potwór dla pracodawców” strony internetowej Monster.com – strony do rekrutacji online. Indywidualnie stworzone Trojany są bardzo rzadkie, jak dotąd, a ryzyko ich użycia przeciw aplikacjom jest dość niskie, ale jest taka możliwość i jest to też przykład jak bezpieczeństwo hosta klienta jest ważne. Jednak najwyższe zagrożenie dla Intranetu i panelów Administracyjnych pochodzi z XSS i CSRF.  
 
--- _Intranet and administration interfaces are popular attack targets, because they allow privileged access. Although this would require several extra-security measures, the opposite is the case in the real world._
+*XSS*  Jeśli aplikacja ponownie wyświetla dane wejściowe złośliwego użytkownika z ekstranetu, aplikacja będzie podatny na XSS. Nazwy użytkowników, komentarze, spam raporty, adresy kolejności – to tylko kilka przykładów, które można zaatakować przez XSS. 
 
-In 2007 there was the first tailor-made http://www.symantec.com/enterprise/security_response/weblog/2007/08/a_monster_trojan.html[Trojan] which stole information from an Intranet, namely the "Monster for employers" web site of Monster.com, an online recruitment web application. Tailor-made Trojans are very rare, so far, and the risk is quite low, but it is certainly a possibility and an example of how the security of the client host is important, too. However, the highest threat to Intranet and Admin applications are XSS and CSRF. 
+Nawet jedno miejsce w interfejsie administratora lub Intranecie, w którym dane wejściowe nie zostały sprawdzone, sprawia, że cała aplikacja staje się wrażliwa na atak. Atakującemu umożliwia to kradzież uprzywilejowanych cookies administratora, wstawianie kodu IFRAME, żeby wykraść hasła administratora lub instalowanie złośliwego oprogramowania poprzez luki w zabezpieczeniach przeglądarki w celach przejęcia kontroli nad komputerem administratora. 
 
-*XSS*  If your application re-displays malicious user input from the extranet, the application will be vulnerable to XSS. User names, comments, spam reports, order addresses are just a few uncommon examples, where there can be XSS.
+Zapoznaj się z sekcją o atakach i ochronie przed XSS. [#,fffcdb]#Zalecane jest korzystanie z wtyczki SafeErb# również w intranecie lub interfejsie administratora. 
 
-Having one single place in the admin interface or Intranet where the input has not been sanitized, makes the entire application vulnerable. Possible exploits include stealing the privileged administrator's cookie, injecting an iframe to steal the administrator's password or installing malicious software through browser security holes to take over the administrator's computer.
+*CSRF*  Cross-Site Reference Forgery (CSRF) jest bardzo groźną metodą ataku. Pozwala ona atakującemu zrobić dokładnie to samo, co administrator lub użytkownik intranetu. Wcześniej dowiedziałeś się jak działa CSRF, a teraz czas na kilka przykładów:
+ 
+W świecie rzeczywistym przykładem jest http://www.symantec.com/enterprise/security_response/weblog/2008/01/driveby_pharming_in_the_ wild.html[rekonfiguracja routera przez CSRF]. Atakujący rozesłał złośliwe maile z CSRF do meksykańskich użytkowników. E-mail informował o e-kartce czekającej na użytkowników, ale zawierał również Tag obrazka, które poprzez żądanie http-GET miał rekonfigurować router użytkownika (który jest popularnym modelem w Meksyku). Żądanie zmieniało ustawienia DNS w ten sposób, że żądania wysyłane do Meksykańskiego banku były mapowane do witryny atakującego. Każdy, kto odwiedził witrynę banku za pośrednictwem tego routera trafiał do fałszywej strony atakującego, a jego listy uwierzytelniające zostały skradzione. 
 
-Refer to the Injection section for countermeasures against XSS. It is [,#fffcdb]#recommended to use the SafeErb plugin# also in an Intranet or administration interface.
+Inny przykład zmieniał e-mail i hasło do Google Adsense przez http://www.0x000000.com/index.php?i=213&bin=11010101 [CSRF]. Jeżeli ofiara była zalogowana do programu Google Adsense, interfejsu administracyjnego kampanii reklamowych Google, atakujący mógł zmienić jego listy uwierzytelniające.  
 
-*CSRF*  Cross-Site Reference Forgery (CSRF) is a giant attack method, it allows the attacker to do everything the administrator or Intranet user may do. As you have already seen above how CSRF works, here are a few examples of what attackers can do in the Intranet or admin interface.
+Innym popularnym atakiem jest spamowanie twojej strony, bloga lub forum, w celu rozprzestrzenienia złośliwego XSS. Oczywiście, osoba atakująca musi znać strukturę URL, ale większość tych wykorzystywanych przez Railsy jest dość prosta, lub łatwa do odgadnięcia, jeśli jest to jeden z open sourcowych interfejsów administracyjnych. Atakujący może zrobić nawet do 1000 szczęśliwych trafów zawierając złośliwe IMG-tagi które próbują każdej możliwej kombinacji.
 
-A real-world example is a http://www.symantec.com/enterprise/security_response/weblog/2008/01/driveby_pharming_in_the_ wild.html[router reconfiguration by CSRF]. The attackers sent a malicious e-mail, with CSRF in it, to Mexican users. The e-mail claimed there was an e-card waiting for them, but it also contained an image tag that resulted in a HTTP-GET request to reconfigure the user's router (which is a popular model in Mexico). The request changed the DNS-settings so that requests to a Mexico-based banking site would be mapped to the attacker's site. Everyone who accessed the banking site through that router saw the attacker's fake web site and had his credentials stolen.
+Informacje o [#,fffcdb]#ochronie przeciwko CSRF w interfejsach administracyjnych i aplikacjach intranetowych, znajdują się w dziale o ochronie przeciw CSRF#. 
+  
+=== Dodatkowe środki ostrożności 
 
-Another example changed Google Adsense's e-mail address and password by http://www.0x000000.com/index.php?i=213&bin=11010101[CSRF]. If the victim was logged into Google Adsense, the administration interface for Google advertisements campaigns, an attacker could change his credentials. 
+Przeciętny interfejs administracyjny działa tak: jest umieszczony w www.example.com/admin, może być dostępny tylko wtedy, gdy flaga administratora jest ustawiona w modelu użytkownika, ponownie wyświetla wejście użytkownika i pozwala adminowi usuwać/dodawać/edytować wszysto, na co ma ochotę. Oto kilka słów na ten temat:
+ 
+- Bardzo ważne jest, [#,fffcdb]#żeby myśleć o najgorszym przypadku#: Co zrobić, jeśli ktoś naprawdę przejmie moje pliki cookie lub poświadczenia użytkownika. Można [#,fffcdb]#wprowadzić role# dla interfejsu administratora, aby ograniczyć możliwości atakującego. A może [#,fffcdb]#specjalne poświadczenie logowania# do interfejsu administratora, inne niż te używane do publicznej części aplikacji. Lub [#,fffcdb]#specjalne hasło do bardzo poważnych działań#?
 
-Another popular attack is to spam your web application, your blog or forum to propagate malicious XSS. Of course, the attacker has to know the URL structure, but most Rails URLs are quite straightforward or they will be easy to find out, if it is an open-source application's admin interface. The attacker may even do 1,000 lucky guesses by just including malicious IMG-tags which try every possible combination.
+- Czy admin naprawdę ma dostęp do interfejsu z każdego miejsca na świecie? Pomyśl o [#,fffcdb]#ograniczeniu logowania na kilka adresów IP#. Zbadaj request.remote_ip, aby dowiedzieć się o adresach IP użytkowników. Nie gwarantuje to stu procentowej ochrony, ale na pewno stanowi dużą przeszkodę. Pamiętaj, że ktoś może używać serwera Proxy.
+ 
+- [#,Fffcdb]#Umieść specjalny interfejs administracyjny w sub-domenie# takiej jak admin.application.com i stwórz z niej odrębną aplikację, z własnym zarządzaniem uzytkownikami. To sprawia, że kradzież cookie admina ze zwykłej domenie www.application.com jest niemożliwa. Wynika to z konceptu „same origin Policy” w przeglądarce: skrypt (XSS) wstawiony na stronie www.application.com nie może odczytać cookie z admin.application.com i vice versa.
+ 
+== Masowe przypisanie
 
-For [,#fffcdb]#countermeasures against CSRF in administration interfaces and Intranet applications, refer to the countermeasures in the CSRF section#.
-
-=== Additional precautions
-
-The common admin interface works like this: it's located at www.example.com/admin, may be accessed only if the admin flag is set in the User model, re-displays user input and allows the admin to delete/add/edit whatever data desired. Here are some thoughts about this:
-
-- It is very important to [,#fffcdb]#think about the worst case#: What if someone really got hold of my cookie or user credentials. You could [,#fffcdb]#introduce roles# for the admin interface to limit the possibilities of the attacker. Or how about [,#fffcdb]#special login credentials# for the admin interface, other than the ones used for the public part of the application. Or a [,#fffcdb]#special password for very serious actions#?
-
-- Does the admin really have to access the interface from everywhere in the world? Think about [,#fffcdb]#limiting the login to a bunch of source IP addresses#. Examine request.remote_ip to find out about the user's IP address. This is not bullet-proof, but a great barrier. Remember that there might be a proxy in use, though.
-
-- [,#fffcdb]#Put the admin interface to a special sub-domain# such as admin.application.com and make it a separate application with its own user management. This makes stealing an admin cookie from the usual domain, www.application.com, impossible. This is because of the same origin policy in your browser: An injected (XSS) script on www.application.com may not read the cookie for admin.application.com and vice-versa.
-
-== Mass assignment
-
--- _Without any precautions Model.new(params[:model]) allows attackers to set any database column's value._
-
-The mass-assignment feature may become a problem, as it allows an attacker to set any model's attribute by manipulating the hash passed to a model's new() method:
+-- _Bez zachowania środków ostrożności Model.new(params[:model]) pozwala atakującemu na ustawienie wartości każdej kolumnie w bazie danych._
+  
+Masowe przypisanie może stać się problemem, ponieważ umożliwia atakującemu ustawienie atrybutów każdego modelu poprzez manipulację hash przekazanego do metody nowego modelu():
 
 [source, ruby]
 ----------------------------------------------------------------------------
@@ -384,39 +385,39 @@ def signup
 end
 ----------------------------------------------------------------------------
 
-Mass-assignment saves you much work, because you don't have to set each value individually. Simply pass a hash to the new() method, or assign attributes=(attributes) a hash value, to set the model's attributes to the values in the hash. The problem is that it is often used in conjunction with the parameters (params) hash available in the controller, which may be manipulated by an attacker. He may do so by changing the URL like this:
-
+Masowe przypisanie może zaoszczędzić ciężkiej pracy, ponieważ nie musisz ustawiać wszystkich wartości indywidualni. Wystarczy przekazać hash do metody new() lub przypisać atrybuty=(atrybuty) wartość hash, aby ustawić atrybuty modelu do wartości w hashu. Problemem jest, że jest to często używane w połączeniu z parametrami (params) hasha dostępnego w kontrolerze, który może być manipulowany przez atakującego. Może to zrobić poprzez zmianę adresu URL w taki sposób:
+ 
 ..........
 http://www.example.com/user/signup?user[name]=ow3ned&user[admin]=1
 ..........
-
-This will set the following parameters in the controller:
-
+ 
+Pozwoli to ustalić następujące parametry w kontrolerze:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 params[:user] #=> {:name => “ow3ned”, :admin => true}
 ----------------------------------------------------------------------------
 
-So if you create a new user using mass-assignment, it may be too easy to become an administrator.
+Więc tworząc nowego użytkownika za pomocą masowego przypisania, w prosty sposób można stać się administratorem.
+ 
+=== Sposoby ochrony
 
-=== Countermeasures
-
-To avoid this, Rails provides two class methods in your ActiveRecord class to control access to your attributes. The attr_protected method takes a list of attributes that will not be accessible for mass-assignment. For example:
-
+Aby tego uniknąć, Railsy oferują dwie klasowe metody w klasie ActiveRecord do kontroli dostępu do atrybutów. Metoda attr_protected stanowi listę atrybutów, które nie będą dostępne dla masowego przypisania. Na przykład:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 attr_protected :admin
 ----------------------------------------------------------------------------
-
-A much better way, because it follows the whitelist-principle, is the [,#fffcdb]#attr_accessible method#. It is the exact opposite of attr_protected, because [,#fffcdb]#it takes a list of attributes that will be accessible#. All other attributes will be protected. This way you won't forget to protect attributes when adding new ones in the course of development. Here is an example:
+ 
+O wiele lepsze rozwiązanie, kierujące się zasadą białej listy to [#,fffcdb]#metoda attr_accessible#. Jest dokładne naprzeciwieństwo attr_protected, ponieważ [#,fffcdb]#dotyczy listy atrybutów, które będą dostępne#. Wszystkie inne atrybuty będą chronione. W ten sposób nigdy nie zapomnisz o ochronie atrybutów podczas ich dodawania nowych w trakcie rozwoju. Oto przykład:
 
 [source, ruby]
 ----------------------------------------------------------------------------
 attr_accessible :name
 ----------------------------------------------------------------------------
 
-If you want to set a protected attribute, you will to have to assign it individually:
-
+Jeśli chcesz ustawić atrybut chroniony, będziesz musiał przypisać go indywidualnie: 
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 params[:user] #=> {:name => "ow3ned", :admin => true}
@@ -425,119 +426,119 @@ params[:user] #=> {:name => "ow3ned", :admin => true}
 @user.admin = true
 @user.admin #=> true
 ----------------------------------------------------------------------------
+ 
+== Zarządzanie użytkownikami
 
-== User management
+-- _Prawie każda aplikacja internetowa ma do czynienia z uwierzytelnianiem i autoryzacją. Zamiast kroczenia własną drogą, wskazane jest stosowanie typowych wtyczek (pluginów). Ale ważne jest, aby je aktualizować. Kilka dodatkowych środków ostrożności sprawi, że twoja aplikacja będzie jeszcze bezpieczniejsza._ 
 
--- _Almost every web application has to deal with authorization and authentication. Instead of rolling your own, it is advisable to use common plug-ins. But keep them up-to-date, too. A few additional precautions can make your application even more secure._
-
-There are some authorization and authentication plug-ins for Rails available. A good one saves only encrypted passwords, not plain-text passwords. The most popular plug-in is [,#fffcdb]#restful_authentication# which protects from session fixation, too. However, earlier versions allowed you to login without user name and password in certain circumstances.
-
-Every new user gets an activation code to activate his account when he gets an e-mail with a link in it. After activating the account, the activation_code columns will be set to NULL in the database. If someone requested an URL like these, he would be logged in as the first activated user found in the database (and chances are that this is the administrator):
-
+Istnieje kilka wtyczek obsługujących uwierzytelnianie i autoryzację, dostępnych w Railsach. Te lepsze zapisują tylko zaszyfrowane hasła, a nie te czysto tekstowe. Najbardziej popularną wtyczką jest [#,fffcdb]#restful_authentication#, która chroni również przed atakami typu session fixation. Jednak wcześniejsze wersje dopuszczały do logowanie bez nazwy użytkownika i hasła w niektórych okolicznościach.
+ 
+Każdy nowy użytkownik otrzymuje kod aktywacyjny, aby aktywować swoje konto. Link do aktywacji wysyłany jest w mailu. Po aktywacji konta, kolumna activation_code w bazie danych będzie ustawiona na NULL. Jeśli ktoś wyśle żądanie o taki URL, będzie zalogowany jako pierwszy aktywowany użytkownika, jakiego można znaleźć w bazie danych (i są szanse, że będzie to administrator):
+ 
 ..........
 http://localhost:3006/user/activate
 http://localhost:3006/user/activate?id=
 ..........
-
-This is possible because on some servers, this way the parameter id, as in params[:id], would be nil. However, here is the finder from the activation action:
+ 
+Jest to możliwe, gdyż na niektórych serwerach parametr id, tak jak w params[:id], miałby wartość nil. Jednakże, oto wyszukiwarka z akcji aktywacji: 
 
 [source, ruby]
 ----------------------------------------------------------------------------
 User.find_by_activation_code(params[:id])
 ----------------------------------------------------------------------------
 
-If the parameter was nil, the resulting SQL query will be
-
+Jeśli parametr miałby wartość nil, wynikające zapytanie SQL będzie takie: 
+ 
 ..........
 SELECT * FROM users WHERE (users.`activation_code` IS NULL) LIMIT 1
 ..........
+ 
+I tak wyszukiwarka znalazła pierwszego użytkownika w bazie danych, zwróciła go i został zalogowany. Więcej możesz przeczytać na http://www.rorsecurity.info/2007/10/28/restful_authentication-login-security/[moim blogu]. [#,fffcdb]#Od czasu do czasu Powinieneś aktualizować swoje wtyczki#. Ponadto możesz przeglądnąć swoją aplikację, żeby znaleźć więcej takich wad.
 
-And thus it found the first user in the database, returned it and logged him in. You can find out more about it in http://www.rorsecurity.info/2007/10/28/restful_authentication-login-security/[my blog post]. [,#fffcdb]#It is advisable to update your plug-ins from time to time#. Moreover, you can review your application to find more flaws like this.
+=== Ataki typu brute-force na konta użytkowników
+ 
+-- _Ataki typu brute-force na dane logowania użytkowników są robione metodą prób i błędów. Możesz odpierać je stosując bardziej ogólne komunikaty o błędach i ewentualnie wymagać wprowadzania CAPTCHA._
 
-=== Brute-forcing accounts
+Lista nazw użytkowników dla aplikacji internetowej może być wykorzystana do ataku typu brute-force na odpowiadające hasła, ponieważ większość ludzi nie używa wyszukanych haseł. Większość haseł stanowi połączenie wyrazów ze słownika i ewentualnie numerów. Uzbrojony w listę nazw użytkowników i w słownik, automatyczny program może znaleźć odpowiednie hasło w ciągu kilku minut.
 
--- _Brute-force attacks on accounts are trial and error attacks on the login credentials. Fend them off with more generic error messages and possibly require to enter a CAPTCHA._
+Z tego powodu, większość aplikacji internetowych wyświetli ogólny komunikat o błędzie "Błędna nazwa użytkownika lub hasło", jeśli jedna z nich nie jest poprawna. Jeśli komunikat brzmi: "Wpisana nazwa użytkownika nie została znaleziona", atakujący mógłby automatycznie sporządzić listę nazw użytkowników. 
+ 
+Jednak tym, co najczęściej zaniedbują projektanci aplikacji internetowych, są strony z zapomnianymi hasłami . Strony te często przyznają, że wpisana nazwa użytkownika lub adres e-mail (nie) została znaleziona. To pozwala atakującemu na skompilowanie listy nazw użytkowników i atak typu brute-force na ich konta.
+ 
+W celu złagodzenia takich ataków, [#,fffcdb]#wyświetlaj ogólne komunikat o błędzie, również na stronach z zapomnianymi hasłami#. Ponadto, możesz [#,fffcdb]#wymagać, aby wprowadzić CAPTCHA po kilku błędów logowania z pewnego adresu IP#. Należy jednak pamiętać, że nie jest to stu procentowa ochrona przed automatycznymi programami, ponieważ te programy mogą bardzo często zmieniać adres IP. Jednakże zwiększa do poziom ochrony przed atakiem.
+ 
+=== Przejęcie konta użytkownika
 
-A list of user names for your web application may be misused to brute-force the corresponding passwords, because most people don't use sophisticated passwords. Most passwords are a combination of dictionary words and possibly numbers. So armed with a list of user name's and a dictionary, an automatic program may find the correct password in a matter of minutes.
+-- _Wiele aplikacji internetowych ułatwiają przejęcie kont użytkowników. Dlaczego by nie zrobić na odwrót i tego nie utrudnić?_
 
-Because of this, most web applications will display a generic error message “user name or password not correct”, if one of these are not correct. If it said “the user name you entered has not been found”, an attacker could automatically compile a list of user names.
+==== Hasła
+ 
+Pomyśl o sytuacji, gdy atakujący posiada skradzione cookie sesji użytkownika, a zatem może wspólnie z użytkownikiem używać aplikacji. Jeżeli zmiana hasła jest łatwa, atakujący będzie mógł przejąć konto w kilku kliknięciach. Lub jeżeli formularz zmiany hasła jest podatny na atak CSRF, atakujący będzie mógł zmienić hasło ofiary wabiąc ją do strony internetowej, gdzie jest spreparowany IMG-tag, który odpala CSRF. Można temu zaradzić i [#,fffcdb]#stworzyć formularz zmiany hasła odporny na CSRF#. I [#,fffcdb]#wymagać od użytkownika, aby wprowadzał stare hasło przy jego zmianie#.
+ 
+==== Maile
+ 
+Jednakże, atakujący może również przejąć konto zmieniając adres e-mail. Po jego zmianie, przejdzie na stronę z zapomnianym hasłem i (prawdopodobnie nowy) hasło zostanie wysłane na adres e-mail atakującej osoby. Żeby temu zaradzić, można[#,fffcdb]#wymagać od użytkownika, aby wprowadził hasło przy zmianie adresu e-mail#. 
 
-However, what most web application designers neglect, are the forgot-password pages. These pages often admit that the entered user name or e-mail address has (not) been found. This allows an attacker to compile a list of user names and brute-force the accounts.
+==== Inne
 
-In order to mitigate such attacks, [,#fffcdb]#display a generic error message on forgot-password pages, too#. Moreover, you can [,#fffcdb]#require to enter a CAPTCHA after a number of failed logins from a certain IP address#. Note, however, that this is not a bullet-proof solution against automatic programs, because these programs may change their IP address exactly as often. However, it raises the barrier of an attack.
+W zależności od Twojej aplikacji internetowej, może być więcej sposobów na przejęcie konta użytkownika. W wielu przypadkach można to zrobić za pomocą XSS i CSRF. Na przykład, podatność na CSRF w http://www.gnucitizen.org/blog/google-gmail-e-mail-hijack-technique/ [Google Mail]. W dowodzie koncepcji (proof-of-concept) tego ataku, ofiara miała być zwabiona do witryny internetowej kontrolowanej przez atakującego. Na tej stronie jest spreparowany IMG-tag, którego skutkiem jest żądanie HTTP GET,  zmieniające ustawienia filtru w Google Mail. Jeżeli ofiara byłaby zalogowana na Google Mail, atakujący zmieniłby filtry i ustawił przekazywanie wszystkich wiadomości e-mail na jego adres e-mail. Jest to prawie tak szkodliwe, jak przejęcie całego konta. Można temu zaradzić [#,fffcdb]#przeglądając logikę aplikacji i eliminując wszystkie luki wrażliwe na XSS i CSRF#.
+ 
+=== CAPTCHA
+  
+-- _CAPTCHA jest testem typu challenge-response w celu ustalenia, że odpowiedź nie jest generowana przez komputer. Jest często używany do ochrony formularzy komentarza przed automatycznymi spam-botami. CAPTCHA prosi użytkownika o wypisanie liter z zniekształconego obrazka. Pomysł negatywnego CAPTCHA nie jest po to by udowadniać, że użytkownik jest człowiekiem, lecz po to, by ujawniać, że robot jest robotem._
 
-=== Account hijacking
+Ale nie tylko spam roboty (boty) są problemem. Boty automatycznie logogujące również są problematyczne. Popularnym CAPTCHA API jest http://recaptcha.net/[reCAPTCHA], który wyświetla dwa zniekształcone obrazy zawierające słowa ze starych książek. reCAPTCHA dodaje również ukośne linie, zamiast zniekształcania tła i wysokiego poziomu wyginania tekstu jak to było w przypadku wcześniejszych CAPTCHA, które zostały złamane. Jako dodatek, używanie reCAPTCHA pomaga w tworzeniu cyfrowych wersji starych książek. http://ambethia.com/recaptcha/[ReCAPTCHA] jest także Railsową wtyczką, o takiej samej nazwie jak API.
 
--- _Many web applications make it easy to hijack user accounts. Why not be different and make it more difficult?_
+Otrzymasz dwa klucze od API, publiczny i prywatny, który trzeba umieścić w swoim środowisku Railsowym. Po tym możesz użyć metody recaptcha_tags w widoku i metody verify_recaptcha w kontrolerze. Verify_recaptcha zwróci false, jeżeli walidacja zawiedzie. 
+Problem z CAPTCHA jest taki, że są irytujące. Ponadto, niektórzy niedowidzący użytkownicy uznali, że niektóre rodzaje zniekształcenia CAPTCHA są trudne do odczytania. Pomysł negatywnego CAPTCHA nie jest po to by udowadniać, że użytkownik jest człowiekiem, lecz po to, by ujawniać, że robot jest robotem.
+ 
+Większość botów jest naprawdę głupia – przeszukują sieć i umieszczają spam w każdym znalezionym polu formularza. Negatywne CAPTCHA wykorzystują to i umieszczają pole "honeypot" w formularzu, które będzie ukryte przed człowiekiem przez CSS lub JavaScript.  
 
-==== Passwords
+Oto kilka pomysłów, jak ukryć pola honeypot przez JavaScript i/lub CSS: 
+  
+- Umieszczenie pola poza widocznym obszarem strony 
+- Stworzenie bardzo małych elementów lub w tym samym kolorze, co tło strony 
+- Zostaw pola widoczne, ale poinformuj ludzi, żeby pozostawić je puste 
 
-Think of a situation where an attacker has stolen a user's session cookie and thus may co-use the application. If it is easy to change the password, the attacker will hijack the account with a few clicks. Or if the change-password form is vulnerable to CSRF, the attacker will be able to change the victim's password by luring him to a web page where there is a crafted IMG-tag which does the CSRF. As a countermeasure, [,#fffcdb]#make change-password forms safe against CSRF#, of course. And [,#fffcdb]#require the user to enter the old password when changing it#.
+Najprostsze negatywne CAPTCHA to te, ukryte w polach honeypot. Po stronie serwera, sprawdzana jest wartość pola: Jeśli zawiera tekst, to musi być bot. Następnie można zignorować dodany post, lub zwrócić pozytywny wynik, ale nie zapisywać posta w bazie danych. W ten sposób bot będzie zadowolony i przejdzie dalej. Można to również zrobić z irytującymi użytkownikami. 
 
-==== E-Mail
+Bardziej wyrafinowane negatywne CAPTCHA możesz znaleźć na http://nedbatchelder.com/text/stopbots.html [blogu Batchelder Ned’a]: 
+ 
+- Dołącz pole z aktualnym znacznikiem czasowym UTC i sprawdź go na serwerze. Jeżeli jest on zbyt daleko w przeszłości, lub w przyszłości, formularz jest nieprawidłowy. 
+- Nazwy pól dobieraj losowo 
+- Umieszczaj więcej niż jedno pole honeypot we wszelkich rodzajach, również w przycisku wysyłania. 
 
-However, the attacker may also take over the account by changing the e-mail address. After he changed it, he will go to the forgotten-password page and the (possibly new) password will be mailed to the attacker's e-mail address. As a countermeasure [,#fffcdb]#require the user to enter the password when changing the e-mail address, too#.
+Zauważ, że to chroni Cię jedynie przed automatycznymi botami, specjalnie wykonane roboty nie mogą być w ten sposób zatrzymane. Więc CAPTCHA może okazać się nienajlepszym sposobem by chronić formularze logowania. 
 
-==== Other
+=== Logowanie
+ 
+-- _Postaraj się, żeby Railsy nie wpisywały haseł w rejestrze._
 
-Depending on your web application, there may be more ways to hijack the user's account. In many cases CSRF and XSS will help to do so. For example, as in a CSRF vulnerability in http://www.gnucitizen.org/blog/google-gmail-e-mail-hijack-technique/[Google Mail]. In this proof-of-concept attack, the victim would have been lured to a web site controlled by the attacker. On that site is a crafted IMG-tag which results in a HTTP GET request that changes the filter settings of Google Mail. If the victim was logged in to Google Mail, the attacker would change the filters to forward all e-mails to his e-mail address. This is nearly as harmful as hijacking the entire account. As a countermeasure, [,#fffcdb]#review your application logic and eliminate all XSS and CSRF vulnerabilities#.
-
-=== CAPTCHAs
-
--- _A CAPTCHA is a challenge-response test to determine that the response is not generated by a computer. It is often used to protect comment forms from automatic spam bots by asking the user to type the letters of a distorted image. The idea of a negative CAPTCHA is not to ask a user to proof that he is human, but reveal that a robot is a robot._
-
-But not only spam robots (bots) are a problem, but also automatic login bots. A popular CAPTCHA API is http://recaptcha.net/[reCAPTCHA] which displays two distorted images of words from old books. It also adds an angled line, rather than a distorted background and high levels of warping on the text as earlier CAPTCHAs did, because the latter were broken. As a bonus, using reCAPTCHA helps to digitize old books. http://ambethia.com/recaptcha/[ReCAPTCHA] is also a Rails plug-in with the same name as the API.
-
-You will get two keys from the API, a public and a private key, which you have to put into your Rails environment. After that you can use the recaptcha_tags method in the view, and the verify_recaptcha method in the controller. Verify_recaptcha will return false if the validation fails.
-The problem with CAPTCHAs is, they are annoying. Additionally, some visually impaired users have found certain kinds of distorted CAPTCHAs difficult to read. The idea of negative CAPTCHAs is not to ask a user to proof that he is human, but reveal that a spam robot is a bot.
-
-Most bots are really dumb, they crawl the web and put their spam into every form's field they can find. Negative CAPTCHAs take advantage of that and include a "honeypot" field in the form which will be hidden from the human user by CSS or JavaScript.
-
-Here are some ideas how to hide honeypot fields by JavaScript and/or CSS:
-
-- position the fields off of the visible area of the page
-- make the elements very small or colour them the same as the background of the page
-- leave the fields displayed, but tell humans to leave them blank
-
-The most simple negative CAPTCHA is one hidden honeypot field. On the server side, you will check the value of the field: If it contains any text, it must be a bot. Then, you can either ignore the post or return a positive result, but not saving the post to the database. This way the bot will be satisfied and moves on. You can do this with annoying users, too.
-
-You can find more sophisticated negative CAPTCHAs in Ned Batchelder's http://nedbatchelder.com/text/stopbots.html[blog post]:
-
-- Include a field with the current UTC time-stamp in it and check it on the server. If it is too far in the past, or if it is in the future, the form is invalid.
-- Randomize the field names
-- Include more than one honeypot field of all types, including submission buttons
-
-Note that this protects you only from automatic bots, targeted tailor-made bots cannot be stopped by this. So negative CAPTCHAs might not be good to protect login forms.
-
-=== Logging
-
--- _Tell Rails not to put passwords in the log files._
-
-By default, Rails logs all requests being made to the web application. But log files can be a huge security issue, as they may contain login credentials, credit card numbers etcetera. When designing a web application security concept, you should also think about what will happen if an attacker got (full) access to the web server. Encrypting secrets and passwords in the database will be quite useless, if the log files list them in clear text. You can [,#fffcdb]#filter certain request parameters from your log files# by the filter_parameter_logging method in a controller. These parameters will be marked [FILTERED] in the log.
-
+Domyślnie Railsy rejestrują wszystkie żądania do strony internetowej. Ale rejestry mogą stanowić ogromny problem związany z zabezpieczeniami, ponieważ mogą one zawierać dane logowania, numery kart kredytowych itp. Podczas projektowania konceptu bezpieczeństwa aplikacji internetowej, należy pomyśleć o tym, co się stanie, gdy atakujący będzie miał (pełny) dostęp do serwera WWW. Szyfrowanie klucze i hasła w bazie danych będą bezużyteczne, jeżeli rejestr wylistuje je jako zwykły tekst. Możesz [#,fffcdb]#filtrować niektóre parametry żądań z rejestru# dzięki metodzie w kontrolerze filter_parameter_logging. Parametry te będą oznaczone [filtrowane] w rejestrze.
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 filter_parameter_logging :password
 ----------------------------------------------------------------------------
+ 
+=== Dobre hasła
+ 
+-- _Czy ciężko Ci zapamiętać wszystkie hasła? Nie zapisuj ich, lecz korzystaj z pierwszych liter wyrazów w łatwym do zapamiętania zdaniu._
 
-=== Good passwords
-
--- _Do you find it hard to remember all your passwords? Don't write them down, but use the initial letters of each word in an easy to remember sentence._
-
-Bruce Schneier, a security technologist, http://www.schneier.com/blog/archives/2006/12/realworld_passw.html[has analysed] 34,000 real-world user names and passwords from the MySpace phishing attack mentioned earlier. It turns out that most of the passwords are quite easy to crack. The 20 most common passwords are:
+Bruce Schneier, technolog zabezpieczeń, http://www.schneier.com/blog/archives/2006/12/realworld_passw.html [przeanalizował] 34000 występujących w świecie rzeczywistym nazw użytkowników i haseł ze wspomnianej wcześniej próby wyłudzenia danych z MySpace. Okazuje się, że większość haseł jest dość łatwa do złamania. Oto 20 najpopularniejszych haseł: 
 
 password1, abc123, myspace1, password, blink182, qwerty1, ****you, 123abc, baseball1, football1, 123456, soccer, monkey1, liverpool1, princess1, jordan23, slipknot1, superman1, iloveyou1 and monkey.
 
-It is interesting that only 4% of these passwords were dictionary words and the great majority is actually alphanumeric. However, password cracker dictionaries contain a large number of today's passwords, and they try out all kinds of (alphanumerical) combinations. If an attacker knows your user name and you use a weak password, your account will be easily cracked.
+Interesujący jest fakt, że tylko 4% tych haseł to słownikowe wyrazy i większość to hasła alfanumeryczne. Jednak słowniki crackerów haseł zawierają wiele dzisiejszych haseł i próbują wszystkich (alfanumerycznych) kombinacji. Jeśli atakujący zna nazwę użytkownika, który używa słabego hasła, w łatwy sposób można dokonać włamania. 
 
-A good password is a long alphanumeric combination of mixed cases. As this is quite hard to remember, it is advisable to enter only the [,#fffcdb]#first letters of a sentence that you can easily remember#. For example "The quick brown fox jumps over the lazy dog" will be "Tqbfjotld". Note that this is just an example, you should not use well known phrases like these, as they might appear in cracker dictionaries, too.
+Dobrym hasłem jest długa mieszanka alfanumerycznych kombinacji różnego rodziaju. Ponieważ jest to dość trudne do zapamiętania, jest wskazane, aby zapisać tylko [#,fffcdb]#pierwsze litery zdania, która można łatwo zapamiętać#. Na przykład "Szybki brązowy lis przeskoczył nad leniwym psem" będzie "Sblpnlp". Zauważ, że jest to tylko przykład, nie należy używać znanego wyrażenia, które może pojawić się w słowniki crackera.
+ 
+=== Wyrażenia regularne
+ 
+-- _Powszechną pułapką w wyrażeniach regularnych w Ruby jest dopasowanie ciągu na początku i na końcu przez ^ i $, zamiast \A i \z._ 
 
-=== Regular expressions
-
--- _A common pitfall in Ruby's regular expressions is to match the string's beginning and end by ^ and $, instead of \A and \z._
-
-Ruby uses a slightly different approach than many other languages to match the end and the beginning of a string. That is why even many Ruby and Rails books make this wrong. So how is this a security threat? Imagine you have a File model and you validate the file name by a regular expression like this:
-
+Ruby używa nieco innego podejścia niż w wielu innych językach, aby dopasować koniec i początek ciągu znaków. Dlatego nawet w książkach o Ruby i Railsach popełnia się błędy. Więc w jaki sposób może to zagrażać bezpieczeństwu? Wyobraź sobie, że masz model pliku i walidujesz nazwę pliku przez wyrażenie regularne w taki sposób:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 class File < ActiveRecord::Base
@@ -545,14 +546,14 @@ class File < ActiveRecord::Base
 end
 ----------------------------------------------------------------------------
 
-This means, upon saving, the model will validate the file name to consist only of alphanumeric characters, dots, + and -. And the programmer added \^ and $ so that file name will contain these characters from the beginning to the end of the string. However, [,#fffcdb]#in Ruby ^ and $ matches the *line* beginning and line end#. And thus a file name like this passes the filter without problems:
+Oznacza to, że model potwierdzi nazwę pliku składającą się tylko ze znaków alfanumerycznych, kropek, + i -. I programista dodaje \^ i $ tak, że nazwa pliku będzie zawierać te znaki od początku do końca łańcucha. Jednakże [#,fffcdb]#w Ruby ^ i $ odpowiada *line* początkowi i końcu linii#. A więc taka nazwa pliku przechodzi przez filtr bez problemów: 
 
 ..........
 file.txt%0A<script>alert('hello')</script>
 ..........
-
-Whereas %0A is a line feed in URL encoding, so Rails automatically converts it to "file.txt\n<script>alert('hello')</script>". This file name passes the filter because the regular expression matches – up to the line end, the rest does not matter. The correct expression should read:
-
+ 
+Jak %0A jest feedem linii w kodowaniu URL, tak w Railsach automatycznie konwertuje je do "file.txt\n<script>alert(‘Hello’)</script>". Ta nazwa pliku przechodzi przez filtr, gdyż wyrażenie regularne pasuje - do końca linii, reszta nie ma znaczenia. Prawidłowe wyprażenie powinno brzmieć:
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 /\A[\w\.\-\+]+\z/
