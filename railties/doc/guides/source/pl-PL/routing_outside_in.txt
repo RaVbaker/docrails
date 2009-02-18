@@ -1,15 +1,20 @@
 Routing w Railsach
 ==================
 
-Poniższy tekst to przewodnik po opcjach związanych z routingiem (routing) we frameworku Rails, z którymi spotykają użytkownicy. W oparciu o niego, będziesz mógł:
+Poniższy tekst to przewodnik po opcjach związanych z routingiem (routing) w frameworku Rails, z którymi spotykają użytkownicy. W oparciu o niego, będziesz mógł:
+
 * Poznać i zrozimieć sens routingu
 * Rozszyfrować kod pliku `routes.rb`
 * Tworzyć własne drogi routingu (routes) w klasycznym stylu hash lub popularnym obecnie RESTful
-* Rozpoznać jak droga routingu wskazuje do kontrolera i akcji.
+* Rozpoznać jak droga routingu prowadzi do kontrolera i akcji.
 
 == Podwójny cel routingu
 
-Routing w Railsach jest to dwukierunkowy mechanizm - tak, jakby móc przerobić drzewa na papier, a potem z papieru z powrotem utworzyć drzewa. Dokładnie rzecz biorąc, drogi routingu łączą nadchodzące żądania HTTP z kodem w kontrolerach Twojej aplikacji i pomagają generować adresy URL bez konieczności ręcznego zapisania ich jako łańcuchy znaków.
+Routing w Railsach jest to dwukierunkowy mechanizm - tak, jakby móc przerobić
+drzewa na papier, a potem z papieru z powrotem utworzyć drzewa. Dokładnie
+rzecz biorąc, drogi routingu łączą nadchodzące żądania HTTP z kodem w
+kontrolerach Twojej aplikacji i pomagają generować adresy URL bez konieczności
+ręcznego zapisania ich jako łańcuchów znaków.
 
 === Łączenie adresu URL z kodem
 
@@ -31,9 +36,9 @@ Routing działa także w drugą stronę. Załóżmy, że Twoja aplikacja zawiera
 <%= link_to "Patient Record", patient_path(@patient) %>
 -------------------------------------------------------
 
-Mechanizm rutingu działa jako element tłumaczący ten kod na adres URL, np `http://example.com/patients/17`. Korzystając z routingu w ten sposób, możesz sprawisz, że Twoja aplikacja będzie bardziej niezawodna i łatwiejsza do zrozumienia niż w wypadku, gdybyś ręcznie wpisywał wszystkie linki URL.
+Mechanizm rutingu działa jako element tłumaczący ten kod na adres URL, np `http://example.com/patients/17`. Korzystając z routingu w ten sposób sprawisz, że Twoja aplikacja będzie bardziej niezawodna i łatwiejsza do zrozumienia niż w wypadku, gdybyś ręcznie wpisywał wszystkie linki URL.
 
-NOTE:  Obiekt `Patient` musi być zadeklarowany jako zasób dostępny dla drogi nazwanej, by mógł zostać prawidłowo obsłużony przez ten kod.
+NOTE:  Obiekt `Patient` musi być zadeklarowany jako zasób dostępny dla nazwanej drogi, by mógł zostać prawidłowo obsłużony przez ten kod.
 
 == Krótki przegląd routes.rb
 
@@ -51,11 +56,12 @@ Pod względem formatu, `routes.rb` jest po prostu dużym blokiem wysłanym do `A
 
 Każdą z nich omówimy dokładniej w dalszej części tego przewodnika.
 
-W momencie nadejścia żądania, plik `routes.rb jest przetwarzany w kolejności "z góry na dół". W momencie odnalezienia pierwszego pasującego wpisu, żądanie zostaje przekazane przez powiązaną z nim drogę do odpowiedniego kontrolera.W przypadku, gdy w pliku nie będzie żadnej pasującej do żądania drogi routingu, Railsy zwrócą status 404.
+W momencie nadejścia żądania, plik `routes.rb` jest przetwarzany w kolejności "z góry na dół". W momencie odnalezienia pierwszego pasującego wpisu, żądanie zostaje przekazane przez powiązaną z nim drogę do odpowiedniego kontrolera. W przypadku, gdy w pliku nie będzie żadnej pasującej do żądania drogi routingu, Railsy zwrócą status 404.
 
 === Drogi RESTful
 
-Drogi RESTful korzystają z wbudowanej w Rails orientacji REST, by umożliwić zapisanie jak najwięcej informacji routingu w jednej deklaracji. Ścieżka RESTful wygląda tak:
+Drogi RESTful korzystają z wbudowanej w Railsy orientacji REST, by umożliwić
+zapisanie jak najwięcej informacji o routingu w jednej deklaracji. Ścieżka RESTful wygląda tak:
 
 [source, ruby]
 -------------------------------------------------------
@@ -101,7 +107,10 @@ map.connect ':controller/:action/:id'
 map.connect ':controller/:action/:id.:format'
 -------------------------------------------------------
 
-Te drogi routingu są automatycznie generowane podczas tworzenia nowej aplikacji Railsowej. Jeśli cała Twoja aplikacja jest korzysta z routingu RESTful, prawdopodobnie będziesz chciał je usunąć. Zanim jednak to zrobisz, upewnij się, że nie są one nigdy używane!
+Te drogi routingu są automatycznie generowane podczas tworzenia nowej
+aplikacji Railsowej. Jeśli cała Twoja aplikacja korzysta z routingu RESTful,
+prawdopodobnie będziesz chciał je usunąć. Zanim jednak to zrobisz, upewnij
+się, że nie są one faktycznie nigdy używane!
 
 == RESTful Routing: the Rails Default
 

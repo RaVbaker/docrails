@@ -1,10 +1,10 @@
 Osoby, które tłumaczyły przewodniki na język polski
 ===================================================
 
-* Getting Started with Rails MW
+* Getting Started with Rails *Martyna Wnuk*
 * Rails Database Migrations + Rails Routing from the Outside In *Mateusz Targosz*
 * Active Record Associations *Lidia Wilczyńska*
-* Layouts and Rendering in Rails JZ
+* Layouts and Rendering in Rails *Joanna Zagrobelny*
 * Basics of Action Controller + Debugging Rails Applications *Monika Szałas*
 * Securing Rails Applications *Krzysztof Dąbrowski*
 * The Basics of Creating Rails Plugins *Piotr Śpiałek*

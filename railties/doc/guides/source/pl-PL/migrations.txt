@@ -1,9 +1,13 @@
 Migracje
-==========
+========
 
-Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś potem samemu zatroszczyć się o to, by poinformować inny projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia `rake db:migrate`. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
+Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę
+danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś
+potem samemu zatroszczyć się o to, by poinformować innych projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia `rake db:migrate`. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
 
-Migracje pozwalają na opisanie zmian bazy danych w Rubym. Dzięki temu, podobnie jak większość funkcji modułu Active Record, nie zależą one od używanej przez Ciebie wersji bazy danych. Nie musisz więc martwić się o dokładną składnię komendy CREATE TABLE ani zastanawiać się nad różnymi wariacjami polecenia SELECT *. Możesz na przykład użyć SQLite3 podczas tworzenia, a MySQL w gotowym, udostępnionym serwisie.
+Migracje pozwalają na opisanie zmian bazy danych w Rubim. Dzięki temu,
+podobnie jak większość funkcji modułu Active Record, nie zależą one od
+używanego przez Ciebie systemu zarządzania bazą danych. Nie musisz więc martwić się o dokładną składnię komendy CREATE TABLE ani zastanawiać się nad różnymi wariacjami polecenia SELECT *. Możesz na przykład użyć SQLite3 podczas tworzenia, a MySQL w gotowym, udostępnionym serwisie.
 
 W poniższym przewodniku dowiesz się wszystkiego o migracjach. W szczególności, tekst opisuje:
 
@@ -54,12 +58,18 @@ class AddReceiveNewsletterToUsers < ActiveRecord::Migration
 end
 ------------------------
 
-Ta migracja dodaje kolumnę `receive_newsletter` do tabeli `users`. Pole to mówi nam o przypisaniu użytkownika na listę odbiorców aktualności. Chcemy, by domyślnie zawierało ono wartość false dla nowych użytkowników, ale użytkownicy juz zarejestrowani są zgłoszeni do otrzymywania aktualności, więc możemy użyć modelu User do ustawienia dla nich flagi reveive_newsletter jako `true`.
+Ta migracja dodaje kolumnę `receive_newsletter` do tabeli `users`. Pole to
+mówi nam o przypisaniu użytkownika na listę odbiorców aktualności. Chcemy, by
+domyślnie zawierało ono wartość false dla nowych użytkowników, ale użytkownicy
+juz zarejestrowani są zgłoszeni do otrzymywania aktualności, więc możemy użyć
+modelu `User` do ustawienia dla nich flagi `reveive_newsletter` jako `true`.
  
 NOTE: <<models,Ostrzeżenie>> dotyczące używania modeli w migracjach.
 
 === Migracje są klasami ===
-Migracja jest podklasą klasy ActiveRecord::Migration, która posiada zaimplementowane dwie metody: +up+ (wykonaj żądane transformacje) i +down+ (odwróć je).
+Migracja jest podklasą klasy ActiveRecord::Migration, która posiada
+zaimplementowane dwie metody: +up+ (wykonaj żądane transformacje) i +down+
+(wycofaj je).
 
 Moduł Active Record udostępnia metody, służące do typowych operacji na bazach danych w sposób niezależny od typu używanej bazy (ich dokładniejszy opis będzie zamieszczony w dalszej części):
 
@@ -74,14 +84,22 @@ Moduł Active Record udostępnia metody, służące do typowych operacji na baza
 * `remove_index`
 
 
-Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych (np. utworzyć <<foreign_key,klucz obcy>>), możesz do tego celu wykorzystać funkcję `execute`, która umożliwia Ci wykonanie skryptu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.
+Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych
+(np. utworzyć <<foreign_key,klucz obcy>>), możesz do tego celu wykorzystać
+funkcję `execute`, która umożliwia Ci wykonanie kodu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.
 
-W bazach danych obsługujących transakcje zmieniające schemat bazy danych (takich jak PostgreSQL), migracje są realizowane jako transakcje. Jeśli baza danych nie posiada takiej funkcjonalności (np. MySQL i SQLite), w przypadku niepowodzenia migracji etapy już wykonane nie zostaną automatycznie cofnięte. Wymaga to ręcznego usunięcia już wprowadzonych zmian.
+W bazach danych obsługujących transakcje zmieniające schemat bazy danych
+(takich jak PostgreSQL), migracje są realizowane jako transakcje. Jeśli baza
+danych nie posiada takiej funkcjonalności (np. MySQL i SQLite), w przypadku
+niepowodzenia migracji, etapy już wykonane nie zostaną automatycznie wycofane. 
+Wymaga to ręcznego usunięcia już wprowadzonych zmian.
 
 === Co kryje się w nazwie ===
 
-Każda klasa migracji jest przechowywana w oddzielnym pliku w katalogu `db/migrate`. Nazwa pliku jest w formacie `YYYYMMDDHHMMSS_create_products.rb`, zawierającym znacznik czasowy (w czasie UTC) oraz - po podkreślniku - nazwę migracji. Nazwa taka musi się zgadzać z migracją, którą plik zawiera, np:
-`20080906120000_create_products` powinna definiować migrację CreateProducts, a `20080906120001_add_details_to_products - migrację AddDetailsToProducts`. Jeśli z jakichś przyczyn zmienisz nazwę pliku, MUSISZ poprawić także nazwę klasy - w przeciwnym wypadku Railsy będą informowały Cię o braku wymaganej klasy.
+Każda klasa migracji jest przechowywana w oddzielnym pliku w katalogu
+`db/migrate`. Nazwa pliku posiada format `YYYYMMDDHHMMSS_create_products.rb`, zawierającym znacznik czasowy (w czasie UTC) oraz - po podkreślniku - nazwę migracji. Nazwa taka musi się zgadzać z migracją, którą plik zawiera, np:
+`20080906120000_create_products` powinna definiować migrację CreateProducts, a
+`20080906120001_add_details_to_products` - migrację AddDetailsToProducts. Jeśli z jakichś przyczyn zmienisz nazwę pliku, MUSISZ poprawić także nazwę klasy - w przeciwnym wypadku Railsy będą informowały Cię o braku wymaganej klasy.
 
 Railsy wykorzystują jedynie numer migracji (czyli jej znacznik czasowy) do jej identyfikacji. Wersje wcześniejsze niż 2.1 numerowały migracje liczbami naturalnymi począwszy od 1, przypisując każdej nowej migracji kolejną liczbę. W przypadku pracy w zespołach kolizje oznaczeń były nieuniknione, co wymagało wycofania zmian i przenumerowania wszystkich migracji. Od wersji 2.1 rozwiązano ten problem identyfikując migrację poprzez datę jej utworzenia. Można przywrócić starszy sposób numeracji, ustawiając w pliku `environment.rb` zmienną `config.active_record.timestamped_migrations` na wartość `false`.
 
@@ -93,7 +111,8 @@ Oczywiście nie zastąpi to w pełni komunikacji wewnątrz zespołu. Na przykła
 
 === Zmiany w migracjach ===
 
-Czasem popełnisz błąd podczas tworzenia migracji. Jeśli już ją wykonałeś, nie możesz po prostu wyedytować migracji i wykonać ponownie: Railsy uznają, że została już ona wykonana i kolejne wpisanie komendy `rake db:migrate` nie zaowocuje wprowadzeniem poprawek. Musisz w tym celu wycofać migrację (np. komendą `rake db:rollback`), poprawić błędy w migracji i ponownie ją wykonać poleceniem `rake db:migrate`.
+Czasem popełnisz błąd podczas tworzenia migracji. Jeśli już ją wykonałeś, nie
+możesz po prostu jej wyedytować i wykonać ją ponownie: Railsy uznają, że została już wykonana i kolejne wpisanie komendy `rake db:migrate` nie zaowocuje wprowadzeniem poprawek. Musisz w tym celu wycofać migrację (np. komendą `rake db:rollback`), poprawić błędy w migracji i ponownie ją wykonać poleceniem `rake db:migrate`.
 
 Ogólnie rzecz biorąc, edycja istniejących migracji nie jest dobrym pomysłem: dodajesz tym samym pracy sobie i swoim współpracownikom. Może to być przyczyną poważnych kłopotów, jeżeli Twoja migracja została już uruchomiona na docelowym serwerze. Lepszym rozwiązaniem jest stworzenie nowej migracji, która wprowadzi wymagane zmiany. Edycja świeżo utworzonej migracji, która nie została jeszcze przekazana na serwer docelowy jest stosunkowo bezpieczna.
 
@@ -101,9 +120,11 @@ Ogólnie rzecz biorąc, edycja istniejących migracji nie jest dobrym pomysłem:
 
 === Tworzenie modelu ===
 
-Generatory modelu i szkieletu utworzą migrację odpowiednią dla tworzonego modelu. Migracja taka zawiera od razu instrukcje potrzebne do utworzenia powiązanej z danym modelem tablicy. Jeśli powiesz Railsom jakie kolumny powinny znaleźć się w tej tabeli, do migracji zostaną dodane odpowiednie formuły. Przykładowo, wykonanie polecenia 
+Generatory modelu i rusztowania (_scaffold_) utworzą migrację odpowiednią dla tworzonego modelu. Migracja taka zawiera od razu instrukcje potrzebne do utworzenia powiązanej z danym modelem tablicy. Jeśli powiesz Railsom jakie kolumny powinny znaleźć się w tej tabeli, do migracji zostaną dodane odpowiednie formuły. Przykładowo, wykonanie polecenia 
 
-`ruby script/generate model Product name:string description:text` spowoduje stworzenie następującej migracji:
+`ruby script/generate model Product name:string description:text` 
+
+spowoduje stworzenie następującej migracji:
 
 [source, ruby]
 -----------------------
@@ -144,7 +165,7 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 -----------------------
 
-Jeśli nazwa migracji podana w poleceniu generatora migracje jest formatu AddXXXToYYY lub RemoveXXXFromYYY i po niej wymieniona jest lista kolumn i ich typów, to w wyniku utworzona zostanie migracja z odpowiednimi poleceniami dodania/usunięcia kolumny, przykładowo:
+Jeśli nazwa podana w poleceniu generatora migracji jest formatu AddXXXToYYY lub RemoveXXXFromYYY i po niej wymieniona jest lista kolumn i ich typów, to w wyniku utworzona zostanie migracja z odpowiednimi poleceniami dodania/usunięcia kolumny, przykładowo:
 
 `ruby script/generate migration AddPartNumberToProducts part_number:string`
 
@@ -231,7 +252,9 @@ create_table :products do |t|
 end
 ---------------------
 
-Drugi sposób, tzw. "sexy" migracje, nie korzysta z nadmiarowej metody `column`. Zamiast niej wykorzystać można metody `string`, `integer` itp., tworzą kolumny odpowiednich typów. Pozostałe parametry są identyczne do parametrów metody `column`.
+Drugi sposób, tzw. "seksowne" migracje, nie korzysta z nadmiarowej metody
+`column`. Zamiast niej wykorzystać można metody `string`, `integer` itp.,
+które tworzą kolumny odpowiednich typów. Pozostałe parametry są identyczne do parametrów metody `column`.
 
 [source, ruby]
 ---------------------
@@ -240,7 +263,7 @@ create_table :products do |t|
 end
 ---------------------
 
-Domyślnie `create_table` stworzy klucz główny nazwany `id`. Możesz zmienić jego nazwę korzystając z opcji `:primiary_key` (nie zapomnij poprawić powiązanego z tabelą modelu) lub, jeśli nie chcesz w ogóle klucza głównego (np. dla tabeli HABTM, realizującej relację typu wiele-do-wielu) możesz dodać `id => false`. Jeśli chcesz dodać opcję specyficzną dla konkretnego typu bazy danych, możesz umieścić fragment kody SQL wewnątrz parametru `:options`. Na przykład:
+Domyślnie `create_table` stworzy klucz główny nazwany `id`. Możesz zmienić jego nazwę korzystając z opcji `:primiary_key` (nie zapomnij poprawić powiązanego z tabelą modelu) lub, jeśli nie chcesz w ogóle klucza głównego (np. dla tabeli HABTM, realizującej relację typu wiele-do-wielu) możesz dodać `id => false`. Jeśli chcesz dodać opcję specyficzną dla konkretnego typu bazy danych, możesz umieścić fragment kodu SQL wewnątrz parametru `:options`. Na przykład:
 
 [source, ruby]
 ---------------------
@@ -252,7 +275,9 @@ Opcja ta doda `ENGINE=BLACKHOLE` do kodu SQL użytego do tworzenia tabeli (dla M
 
 Typy obsługiwane przez moduł Active Record to `:primary_key`, `:string`, `:text`, `:integer`, `:float`, `:decimal`, `:datetime`, `:timestamp`, `:time`, `:date`, `:binary`, `:boolean`.
 
-Zostaną one zrealizowane poprzez odpowiednie dla bazy danych typy danych, np. w MySQL `:string` zostanie przetłumaczony na `VARCHAR(255)`. Możesz tworzyć kolumny innych niż wymienione typów pod warunkiem, że nie używasz "sexy" składni, przykładowo:
+Zostaną one zrealizowane poprzez odpowiednie dla bazy danych typy danych, np.
+w MySQL `:string` zostanie przetłumaczony na `VARCHAR(255)`. Możesz tworzyć
+kolumny innych niż wymienione typów pod warunkiem, że nie używasz "seksownej" składni, przykładowo:
 
 [source, ruby]
 ---------------------
@@ -290,7 +315,7 @@ rename_column :products, :upccode, :upc_code
 
 Stosując pierwszą składnię nie musisz powtarzać przy każdej komendzie nazwy tabeli - grupujesz wszystkie wykonane na niej operacje w jedną komendę. Dodatkowo nazwy transformacji są krótsze: `remove_column` zastępuje samo `remove` a `add_index` - po prostu `index`.
 
-=== Specjalne helpery (helpers) ===
+=== Specjalne helpery ===
 
 Moduł Active Record zapewnia kilka skrótów do najczęściej używanych opcji. Bardzo częste jest na przykład dodawanie kolumn `created_at` i `updated_at`, więc stworzono specjalną metodę, która to ułatwia:
 
@@ -366,7 +391,7 @@ Czasem Twoja migracja wykona transformację, która jest nieodwracalna, na przyk
 
 == Wykonywanie migracji ==
 
-Railsy zapewniają zestaw zadań Rake służących do działań na migracjach, sprowadzających się do wykonania określonych zestawów migracji. Prawdopodobnie najważniejszym zadaniem rake jest `db:migrate`. W swojej najbardziej podstawowej formie wykonuje ona metodę `up` dla każdej migracji, która nie została jeszcze wywołana. Jeśli nie ma takich migracji, polecenie po prostu kończy swoje działanie.
+Railsy zapewniają zestaw zadań Rake służących do działań na migracjach, sprowadzających się do wykonania określonych zestawów migracji. Prawdopodobnie najważniejszym zadaniem Rake jest `db:migrate`. W swojej najbardziej podstawowej formie wykonuje ona metodę `up` dla każdej migracji, która nie została jeszcze wywołana. Jeśli nie ma takich migracji, polecenie po prostu kończy swoje działanie.
 
 Warto zauważyć, że wywołanie `db:migrate` powoduje również uruchomienie zadania `db:schema:dump`, które zmienia zawartość pliku `db/schema.rb` tak, by odpowiadał on aktualnej strukturze bazy.
 
@@ -378,7 +403,7 @@ rake db:migrate VERSION=20080906120000
 
 Jeśli podana wersja jest późniejsza niż obecna, polecenie spowoduje wywołanie metod `up` kolejnych migracji aż do migracji 20080906120000 włącznie. W przeciwnym wypadku, wszystkie późniejsze niż wskazana migracje zostaną wycofane metodą `down`.
 
-=== Powroty ===
+=== Wycofywanie migracji ===
 
 Częstym zadaniem jest wycofanie ostatniej migracji, na przykład po to, by poprawić znaleziony w niej błąd. Zamiast wpisywać numer poprzedniej wersji, możemy po prostu wycofać ostatnią zmianę poleceniem:
 
@@ -402,11 +427,12 @@ rake db:migrate:redo STEP=3
 
 Żadne z powyższych zadań Rake nie wykonuje niczego, czego nie można osiągnąć przy pomocy podstawowego polecenia `db:migrate`. Są to po prostu wygodniejsze sposoby pracy na migracjach, nie wymagają bowiem podawania wprost docelowej wersji migracji.
 
-Ostatnim poleceniem jest `db:reset`. Służy ono usunięcia całej bazy danych, ponownego jej stworzenia i przywrócenia obecnego schematu.
+Ostatnim poleceniem jest `db:reset`. Służy ono do usunięcia całej bazy danych, ponownego jej stworzenia i przywrócenia obecnego schematu.
 
-NOTE: This is not the same as running all the migrations - see the section on <<schema,schema.rb>>.
+NOTE: Polecenie to nie jest idenyczne z wprowadzeniem wszystkich migracji -
+      szczegóły znajdziesz w sekcji <<schema,schema.rb>>.
 
-=== Konkretność ===
+=== Wywoływanie konkretnej migracji ===
 
 Jeśli chcesz wywołać metodę `up` lub `down` konkretnej migracji, możesz w tym celu użyć komend `db:migrate:up` i `db:migrate:down`. Wystarczy podać dokładną wersję migracji, a jej metoda `up` albo `down` zostanie wykonana. Na przykład
 
@@ -416,9 +442,9 @@ rake db:migrate:up VERSION=20080906120000
 
 wywoła metodę `up` dla migracji 20080906120000. Zadanie to sprawdza najpierw czy podana migracja została wcześniej wykonana, więc np. komenda `db:migrate:up VERSION=20080906120000` nie spowoduje żadnych zmian, jeśli moduł Active Record uzna, że ta migracja jest już wywołana.
 
-=== Komunikatywność ===
+=== Komunikaty ===
 
-Domyślnie migracja informuje Cię dokładnie o wykonywanej obecnie transformacji oraz o czasie który był potrzebny do wykonania ukończonych zadań. Migracja tworząca tabelę i indeks na niej może wygenerować na przykład taki komunikat:
+Domyślnie migracja informuje Cię dokładnie o wykonywanej obecnie transformacji oraz o czasie który był potrzebny do wykonania ukończonych zadań. Migracja tworząca tabelę i indeks może wygenerować na przykład taki komunikat:
 
 -------------------------
 == 20080906170109 CreateProducts: migrating ===================================
@@ -430,9 +456,10 @@ Domyślnie migracja informuje Cię dokładnie o wykonywanej obecnie transformacj
 -------------------------
 
 Istnieje kilka metod służących do kontroli komunikatów zwrotnych:
+
 * `suppress_messages` zawiesza wszystkie komunikaty generowane przez dany blok
-* `say` generuje tekst (drugi parametr służy do określenia czy tekst ma być w nowej linii czy nie)
-* `say_with_time` generuje wskazany tekst oraz czas potrzebny na wykonanie danego bloku. Jeśli blok zwróci liczbę typu integer, metoda traktuje ją jako liczbę wierszy zmodyfikowanych przez ten blok.
+* `say` wyświetla tekst (drugi parametr służy do określenia czy tekst ma być w nowej linii czy nie)
+* `say_with_time` wyświetla wskazany tekst oraz czas potrzebny na wykonanie bloku. Jeśli blok zwróci liczbę typu integer, metoda traktuje ją jako liczbę wierszy zmodyfikowanych przez ten blok.
 
 Na przykład migracja:
 
@@ -481,7 +508,7 @@ Jeśli chcesz po prostu zupełnie "uciszyć" moduł Active Record, możesz wykor
 
 Podczas tworzenia czy aktualizacji danych zawsze kusi wykorzystanie jednego z modeli. W zasadzie po to przecież tworzymy modele, by ułatwić dostęp do danych. Można to wykonać, zachowując jednak pewien warunek. 
 
-Wyobraźmy sobie na przykład migrację korzystającą z modelu Product w celu aktualizacji wiersza powiązanej z nim tabeli. Następnie Ania zmienia model Product, dodając nową kolumnę i walidację (validation) dla niej. Gdy Bartek wraca z wakacji, aktualizuje kod źródłowy i wpisując komendę `rake db:migrate` wykonuje wszystkie migracje, włącznie z migracją korzystającą z modelu Product. Ponieważ Bartek zaktualizował kod źródłowy, model Product zawiera nową walidację stworzoną przez Anię, podczas gdy baza nie posiada nowej kolumny. Spowoduje to błąd - walidacja będzie się odnosić do nieistniejącej kolumny.
+Wyobraźmy sobie na przykład migrację korzystającą z modelu Product w celu aktualizacji wiersza powiązanej z nim tabeli. Następnie Ania zmienia model Product, dodając nową kolumnę i walidację dla niej. Gdy Bartek wraca z wakacji, aktualizuje kod źródłowy i wpisując komendę `rake db:migrate` wykonuje wszystkie migracje, włącznie z migracją korzystającą z modelu Product. Ponieważ Bartek zaktualizował kod źródłowy, model Product zawiera nową walidację stworzoną przez Anię, podczas gdy baza nie posiada nowej kolumny. Spowoduje to błąd - walidacja będzie się odnosić do nieistniejącej kolumny.
 
 Często chcę po prostu zaktualizować wiersze danych w bazie bez konieczności ręcznego wpisywania kodu SQL; nie wykorzystuję żadnych specyficznych dla danego modelu cech. Jednym z rozwiązań jest w takim wypadku stworzenie kopii modelu wewnątrz samej migracji, na przykład:
 
@@ -504,7 +531,7 @@ Migracja posiada swoją własną kopię modelu Product i nie odnosi się już do
 
 === Praca na zmieniających się modelach ===
 
-Dla poprawy wydajności, informacja o kolumnach w modelu jest cachowana (cached). Na przykład, jeśli dodasz kolumnę do tabeli a potem spróbujesz użyć powiązanego modelu w celu dodania nowego rekordu, może on użyć starej informacji o kolumnach. Możesz zmusić moduł Active Record do ponownego odczytania informacji o kolumnach korzystając z metody `reset_column_information`. Na przykład:
+Dla poprawy wydajności, informacja o kolumnach w modelu jest cache'owana. Na przykład, jeśli dodasz kolumnę do tabeli a potem spróbujesz użyć powiązanego modelu w celu dodania nowego rekordu, może on użyć starej informacji o kolumnach. Możesz zmusić moduł Active Record do ponownego odczytania informacji o kolumnach korzystając z metody `reset_column_information`. Na przykład:
 
 [source, ruby]
 -------------------------
@@ -524,7 +551,7 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 -------------------------
 
-== Zrzuty schematów i Ty ==
+== Zrzuty schematów ==
 [[schema]]
 === Po co tworzyć pliki schematów? ===
 
@@ -534,7 +561,7 @@ Aby utworzyć nową kopię aplikacji nie musimy powtarzać wszystkich wykonanych
 
 Przykładowo, w celu utworzenia bazy do testów, należy pobrać zrzut aktualnego schematu bazy (do pliku `schema.rb` lub `development.sql`) a następnie wczytać go do bazy testowej.
 
-Pliki ze schematami są także przydatne, by szybko sprawdzić atrybuty obiektu modułu Active Record. Ta informacja nie jest zapisana w kodzie modelu, często wynika z w wielu kolejnych migracji, ale jej podsumowanie jest dostępne w pliku schematu. Warta polecenia jest wtyczka http://agilewebdevelopment.com/plugins/annotate_models[annotate_models], dodająca na górze każdego modelu komentarze podsumowujące jego schemat.
+Pliki ze schematami są także przydatne, by szybko sprawdzić atrybuty obiektu Active Record. Ta informacja nie jest zapisana w kodzie modelu, często wynika z w wielu kolejnych migracji, ale jej podsumowanie jest dostępne w pliku schematu. Warta polecenia jest wtyczka http://agilewebdevelopment.com/plugins/annotate_models[annotate_models], dodająca na górze każdego modelu komentarze podsumowujące jego schemat.
 
 === Typy zrzutów schematu === 
 
@@ -563,9 +590,11 @@ end
 
 Pod wieloma względami tak właśnie jest. Ten plik jest tworzony poprzez odpytywanie bazy danych i zapisanie jej struktury za pomocą kolejnych poleceń `create_table`, `add_index` itd. Plik taki może zostać wczytany do dowolnej bazy danych, ponieważ polecenia te są niezmienne dla wszystkich obsługiwanych przez moduł Active Record baz. To może być bardzo użyteczne, jeśli chcesz stworzyć aplikację działającą na kilku bazach danych.
 
-Wykorzystanie pliku `schema.rb` ma też swoje wady. Nie są w nim zapisywane informacje o funkcjach specyficznych tylko dla danego typu bazy, takich jak klucze opcje, triggery (triggers) czy procedury. O ile możesz ich używać podczas migracji, nie da się ich odtworzyć w zrzucie schematu. Jeśli korzystasz z takich opcji, powinieneś zmienić zawartość zmiennej konfiguracyjnej na `:sql`.
+Wykorzystanie pliku `schema.rb` ma też swoje wady. Nie są w nim zapisywane
+informacje o funkcjach specyficznych tylko dla danego typu bazy, takich jak
+klucze opcje, triggery czy procedury składowane. O ile możesz ich używać podczas migracji, nie da się ich odtworzyć w zrzucie schematu. Jeśli korzystasz z takich opcji, powinieneś zmienić zawartość zmiennej konfiguracyjnej na `:sql`.
 
-W takim przypadku, zamiast korzystać z wbudowanego narzędzia modułu Active Record, schmematy zapisywane są przez narzędzia stworzone dla danego typu bazy danych (poprzez polecenie `db:structure:dump`) do pliku `db/#\{RAILS_ENV\}_structure.sql`. Na przykład dla bazy PostgreSQL używane jest narzędzie `pg_dump`, a dla MySQL w pliku zapisywane są wyniki pytań SHOW CREATE TABLE dla kolejnych tabel. Wczytanie tak zapisanego schematu bazy sprowadza się do wykonania kodu SQL zapisanego we wskazanym pliku.
+W takim przypadku, zamiast korzystać z wbudowanego narzędzia modułu Active Record, schematy zapisywane są przez narzędzia stworzone dla danego typu bazy danych (poprzez polecenie `db:structure:dump`) do pliku `db/#\{RAILS_ENV\}_structure.sql`. Na przykład dla bazy PostgreSQL używane jest narzędzie `pg_dump`, a dla MySQL w pliku zapisywane są wyniki pytań SHOW CREATE TABLE dla kolejnych tabel. Wczytanie tak zapisanego schematu bazy sprowadza się do wykonania kodu SQL zapisanego we wskazanym pliku.
 
 Z założenia taki zrzut schematu umożliwia stworzenie idealnej kopii bazy danych. Niestety zwykle uniemożliwia to przeniesienie schematu na bazę innego typu.
 
@@ -578,7 +607,7 @@ Ponieważ pliki schematu powinny być wiarygodnym źródłem wiedzy o bazie dany
 
 Korzystanie z modułu Active Record powoduje przeniesienie części logiki z bazy danych do modeli. W związku z tym narzędzie takie jak triggery czy klucze obce, które tworzą dodatkową logikę wewnątrz bazy danych nie są zbyt często używane.
 
-Walidacje (validations) takie jak `validates_uniqueness_of` są jednym ze sposobów na wymuszenie integralności danych przez model. Opcja asocjacji `:dependent` pozwala modelowi automatycznie niszczyć obiekty potomne w przypadku usunięcia ich rodzica. Jak wszystkie opcje działające na poziomie aplikacji, wspomniane sposoby nie gwarantują zachowania integralności referencyjnej. Jest przyczyna dla której niektórzy wspierają je dodatkowo kluczami obcymi zawartymi w bazie danych.
+Walidacje takie jak `validates_uniqueness_of` są jednym ze sposobów na wymuszenie integralności danych przez model. Opcja asocjacji `:dependent` pozwala modelowi automatycznie niszczyć obiekty potomne w przypadku usunięcia ich rodzica. Jak wszystkie opcje działające na poziomie aplikacji, wspomniane sposoby nie gwarantują zachowania integralności referencyjnej. Jest przyczyna dla której niektórzy wspierają je dodatkowo kluczami obcymi zawartymi w bazie danych.
 
 Chociaż moduł Active Record nie zapewnia narzędzi do bezpośredniej obsługi kluczy obcych, można w tym celu wykorzystać metodę `execute`. Są także dostępne różne wtyczki, takie jak http://agilewebdevelopment.com/plugins/search?search=redhillonrails[redhillonrails], które poszerzają możliwości modułu Active Record o obsługę kluczy obcych (m.in. umożliwiają zapisywanie ich w schemacie bazy w pliku `schema.rb`).
 
