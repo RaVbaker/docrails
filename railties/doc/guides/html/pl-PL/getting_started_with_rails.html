@@ -34,7 +34,7 @@
           <a href="#_co_obejmuje_przewodnik">Co obejmuje przewodnik?</a>
           </li>
           <li>
-          <a href="#_co_to_jest_rails">Co to jest Rails?</a>
+          <a href="#_co_to_s_railsy">Co to są Railsy?</a>
             <ul>
             
               <li><a href="#_architektura_mvc">Architektura MVC</a></li>
@@ -71,7 +71,7 @@
           <a href="#_szybki_start_dzi_ki_rusztowaniu">Szybki start dzięki rusztowaniu.</a>
           </li>
           <li>
-          <a href="#_creating_a_resource">Creating a Resource</a>
+          <a href="#_tworzenie_obiektu">Tworzenie obiektu</a>
             <ul>
             
               <li><a href="#_uruchamianie_migracji">Uruchamianie Migracji</a></li>
@@ -172,7 +172,7 @@ Szybkim generowaniem podstawowych elementów aplikacji
 <div class="ulist"><ul>
 <li>
 <p>
-link:http://www.ruby-lang.org/en/downloads/ [Ruby] - podstawowa wiedza z zakresu języka Ruby
+<a href="http://www.ruby-lang.org/en/downloads/">Ruby</a> - podstawowa wiedza z zakresu języka Ruby
 </p>
 </li>
 <li>
@@ -186,11 +186,11 @@ Zarządzanie bazą danych <a href="http://www.sqlite.org/">SQLite</a> (preferowa
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygody z Railsami. Znacznie łatwiej jest śledzić, co się dzieje w Railsach, rozumiejąc podstawowy składni Ruby. Rails nie będzie w stanie w sposób magiczny zrewolucjonizować sztuki pisania aplikacji internetowych, jeżeli nie masz doświadczenia w używaniu języka. W Internecie istnieje kilka dobrych darmowych źródeł pomocnych w nauce języka Ruby, w tym:</p></div>
+<div class="paragraph"><p>Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygody z Railsami. Znacznie łatwiej jest śledzić, co się dzieje w Railsach, rozumiejąc podstawowy składni Ruby. Railsy nie będą w stanie w magiczny sposób zrewolucjonizować sztuki pisania aplikacji internetowych, jeżeli nie masz doświadczenia w używaniu języka. W Internecie istnieje kilka dobrych darmowych źródeł pomocnych w nauce języka Ruby, w tym:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-<a href="http://www.humblelittlerubybook.com/">Mr. Neigborlyâs Humble Little Ruby Book</a>
+<a href="http://www.humblelittlerubybook.com/">Mr. Neigborly&#8217;s Humble Little Ruby Book</a>
 </p>
 </li>
 <li>
@@ -205,9 +205,9 @@ Zarządzanie bazą danych <a href="http://www.sqlite.org/">SQLite</a> (preferowa
 </li>
 </ul></div>
 </div>
-<h2 id="_co_to_jest_rails">2. Co to jest Rails?</h2>
+<h2 id="_co_to_s_railsy">2. Co to są Railsy?</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Rails to internetowo rozwijany framework napisany w języku Ruby. Został on tak zaprojektowany, aby ułatwić programowanie aplikacji internetowych, dostarczając zbiór wytycznych, od których każdy deweloper musi zacząć. Pozwala on na pisanie krótszego kodu, niż jest to możliwe podczas używania większości innych języków i frameworków. Poza tym, projektanci uważają, że wykorzystanie Railsów przy tworzeniu aplikacjach internetowych sprawia przyjemność.</p></div>
+<div class="paragraph"><p>Railsy są internetowo rozwijanym frameworkiem napisanym w języku Ruby. Zostały one tak zaprojektowane, aby ułatwić programowanie aplikacji internetowych, dostarczając zbiór wytycznych, od których każdy deweloper musi zacząć. Pozwalają one na pisanie krótszego kodu, niż jest to możliwe podczas używania większości innych języków i frameworków. Poza tym, projektanci uważają, że wykorzystanie Railsów przy tworzeniu aplikacjach internetowych sprawia przyjemność.</p></div>
 <div class="paragraph"><p>Railsy są "upartym" oprogramowaniem. Oznacza to, że są stworzone, aby zachęcić do wyboru najlepszej drogi, a w niektórych przypadkach -  by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy nawykach charakterystycznych dla programowania w innych językach lub będziesz wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne.</p></div>
 <div class="paragraph"><p>Filozofia Railsów zawiera kilka zasad:</p></div>
 <div class="ulist"><ul>
@@ -247,7 +247,7 @@ Wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co u�
 </li>
 </ul></div>
 <h4 id="_models">2.1.1. Models</h4>
-<div class="paragraph"><p>Model przedstawia informacje (dane) dla aplikacji i reguły do manipulowania tymi danymi. W przypadku Rails, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.</p></div>
+<div class="paragraph"><p>Model przedstawia informacje (dane) dla aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.</p></div>
 <h4 id="_widoki">2.1.2. Widoki</h4>
 <div class="paragraph"><p>Widoki tworzą interfejs użytkownika aplikacji. W Railsach, widoki są często plikami HTML zawierającymi kod w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją danych. Przede wszystkim są odpowiedzialne za dostarczanie danych do przeglądarki internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.</p></div>
 <h4 id="_kontrolery">2.1.3. Kontrolery</h4>
@@ -321,7 +321,7 @@ Przesyłanie reprezentacji stanów tego zasobu pomiędzy elementami systemu.
 </ul></div>
 <div class="paragraph"><p>Na przykład, aplikacja Railsowa takie zapytanie:</p></div>
 <div class="paragraph"><p><tt>DELETE /photos/17</tt></p></div>
-<div class="paragraph"><p>będzie rozumiała jako odniesienia do źródła zdjęcia o ID 17, oraz wskaże żądane działanie - usunięcie tego źródła. REST to naturalny styl architektury aplikacji internetowych i Rails czyni go jeszcze bardziej naturalnym, poprzez korzystanie z konwencji, które pozwalają na nie przejmowanie się złożnością RESTful oraz różnicami pomiędzy przeglądarkami.</p></div>
+<div class="paragraph"><p>będzie rozumiała jako odniesienia do źródła zdjęcia o ID 17, oraz wskaże żądane działanie - usunięcie tego źródła. REST to naturalny styl architektury aplikacji internetowych i Railsy czynią go jeszcze bardziej naturalnym, poprzez korzystanie z konwencji, które pozwalają na nie przejmowanie się złożnością RESTful oraz różnicami pomiędzy przeglądarkami.</p></div>
 <div class="paragraph"><p>Jeśli chciałbyś dowiedzieć się czegoś więcej na temat REST jako styl architektonicznego, polecam bardziej przystępne źródła od tezy Fieldinga:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -485,7 +485,7 @@ Jeśli otworzysz ten plik w nowej aplikacji Railsowej, zostanie wyświetlona dom
 <div class="ulist"><ul>
 <li>
 <p>
-środowisko <tt>rozwojowe</tt> jest używane na komputerze programisty jako interfejs użytkownika.
+środowisko <tt>rozwojowe</tt> jest używane na komputerze programisty jako interfejs użytkownika
 </p>
 </li>
 <li>
@@ -500,7 +500,7 @@ Jeśli otworzysz ten plik w nowej aplikacji Railsowej, zostanie wyświetlona dom
 </li>
 </ul></div>
 <h4 id="_konfiguracja_bazy_danych_sqlite">3.3.1. Konfiguracja bazy danych SQLite</h4>
-<div class="paragraph"><p>ails ma wbudowaną obsługę <a href="http://www.sqlite.org/">SQLite</a>, który jest lekką, nie obciążającą serwera aplikacją bazy danych. Podczas przeciążenia SQLite przez środowisko produkcyjne, wciąż dobrze działa środowisko testowe i rozwojowe. Railsy domyślnie używają SQLite tworząc nowy projekt, ale zawsze można to później zmienić.</p></div>
+<div class="paragraph"><p>Railsy mają wbudowaną obsługę <a href="http://www.sqlite.org/">SQLite</a>, który jest lekką, nie obciążającą serwera aplikacją bazy danych. Podczas przeciążenia SQLite przez środowisko produkcyjne, wciąż dobrze działa środowisko testowe i rozwojowe. Railsy domyślnie używają SQLite tworząc nowy projekt, ale zawsze można to później zmienić.</p></div>
 <div class="paragraph"><p>Poniżej prezentujemy częśc domyślnej konfiguracji pliku z informacji dla środowiska rozwojowego:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -548,7 +548,7 @@ http://www.gnu.org/software/src-highlite -->
   password<span style="color: #990000">:</span></tt></pre></div></div>
 <div class="paragraph"><p>Konieczna jest zmiana nazwy użytkownika oraz hasła w kodzie dla części projektowej,</p></div>
 <h4 id="_tworzenie_bazy_danych">3.3.4. Tworzenie Bazy Danych</h4>
-<div class="paragraph"><p>Teraz, gdy masz już skonfigurowaną bazę danych, czas by Rails stworzył dla ciebie pustą baze danych. Możesz to zrobić uruchamiając komendę "rake":</p></div>
+<div class="paragraph"><p>Teraz, gdy masz już skonfigurowaną bazę danych, czas by Railsy stworzyły dla ciebie pustą bazę danych. Możesz to zrobić uruchamiając komendę "rake":</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -560,7 +560,7 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">"Rake" jest poleceniem startującym ogólnego zastosowania, które Rails używa do wielu rzeczy. By zobaczyć dostępne dla niego komendy uruchom "rake -T". :</td>
+<td class="content">"Rake" jest poleceniem startującym ogólnego zastosowania, które Railsy używają do wielu rzeczy. By zobaczyć dostępne dla nich komendy uruchom "rake -T". :</td>
 </tr></table>
 </div>
 </div>
@@ -578,10 +578,10 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">Jeżeli używasz Windows, lub gdy twój Ruby jest skonfigurowany w niestandardowy sposób, możliwe że będziesz potrzebował przekazać komendy <tt>script</tt> Railsów bezpośrednio do Rubyego: <tt>ruby script/generate controller home index</tt>.</td>
+<td class="content">Jeżeli używasz Windowsa, lub gdy twój Ruby jest skonfigurowany w niestandardowy sposób, możliwe że będziesz potrzebował przekazać komendy <tt>script</tt> Railsów bezpośrednio do Ruby&#8217;ego: <tt>ruby script/generate controller home index</tt>.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Rails stworzy dla Ciebie parę plików, włączając w to <tt>app/views/home/index.html.erb</tt> - czyli szablon, który będzie używany do pokazywania efektów <tt>index</tt> action (method) w <tt>home</tt> kontrolerze. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego ta pojedynczą linijkę kodu:</p></div>
+<div class="paragraph"><p>Railsy stworzyły dla Ciebie parę plików, włączając w to <tt>app/views/home/index.html.erb</tt> - czyli szablon, który będzie używany do pokazywania efektów <tt>index</tt> action (method) w <tt>home</tt> kontrolerze. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego tę pojedynczą linijkę kodu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -605,12 +605,12 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">By zatrzymać serwer WWW naciśnij Ctrl+C w oknie terminalu podczas jego działania. Generalnie, Raily w "trybie tworzenia" (development mode) nie wymaga zatrzymywania serwera by wprowadzić Twoje zmiany w plikach - zostaną one automatycznie wprowadzone na serwer.</td>
+<td class="content">By zatrzymać serwer WWW naciśnij Ctrl+C w oknie terminalu podczas jego działania. Generalnie, Railsy w "trybie tworzenia" (development mode) nie wymagają zatrzymywania serwera, by wprowadzić Twoje zmiany w plikach - zostaną one automatycznie wprowadzone na serwer.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Ekran powitalny jest pierwszą próbą dla nowego programu napisanego w Raily - upewnia nas, że oprogramowanie którym dysponujemy jest poprawnie skonfigurowana do działania strony. By ją zobaczyć, przejdź do <tt>http://localhost:3000/home/index</tt>.</p></div>
+<div class="paragraph"><p>Ekran powitalny jest pierwszą próbą dla nowego programu napisanego w Railsach - upewnia nas, że oprogramowanie którym dysponujemy jest poprawnie skonfigurowana do działania strony. Aby ją zobaczyć, przejdź do <tt>http://localhost:3000/home/index</tt>.</p></div>
 <h3 id="_konfiguracja_strony_domowej_programu">4.2. Konfiguracja Strony Domowej Programu.</h3>
-<div class="paragraph"><p>Prawdopodobnie chcesz zamienić domyślną stronę startową z tą Twojego programu. Pierwszym krokiem jest wykasowanie strony domyślnej z Twojego programu:</p></div>
+<div class="paragraph"><p>Prawdopodobnie chcesz zamienić domyślną stronę startową ze stroną Twojego programu. Pierwszym krokiem jest wykasowanie z niego strony domyślnej:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -633,7 +633,7 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>root <span style="color: #990000">:</span>controller <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"home"</span></tt></pre></div></div>
-<div class="paragraph"><p>Ta linijka ilustruje jeden mały kawałek podejścia zwanego „konwencja ponad konfiguracją” ("convention over configuration"): jeżeli nie podasz żadnej akcji, Rails założy domyślnie akcję <tt>index</tt>.</p></div>
+<div class="paragraph"><p>Ta linijka ilustruje jeden mały kawałek podejścia zwanego „konwencja ponad konfiguracją” ("convention over configuration"): jeżeli nie podasz żadnej akcji, Railsy założą domyślnie akcję <tt>index</tt>.</p></div>
 <div class="paragraph"><p>Po przejściu do strony <tt>http://localhost:3000</tt> , zobaczysz widok <tt>home/index</tt> .</p></div>
 <div class="admonitionblock">
 <table><tr>
@@ -648,7 +648,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="sectionbody">
 <div class="paragraph"><p>Railsowe rusztowanie (<em>scaffolding</em>) jest szybkim sposobem na stworzenia znacznej części programu. Jeśli chcesz stworzyć modele, widoki i kontrolery dla nowych zasobów w pojedynczej operacji, to jest to odpowiednim narzędziem dla Ciebie.</p></div>
 </div>
-<h2 id="_creating_a_resource">6. Creating a Resource</h2>
+<h2 id="_tworzenie_obiektu">6. Tworzenie obiektu</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>W przypadku programów takich jak blog, możesz zacząć od stworzenia obiektu typu Post („Post resource”), który odpowiada za pojedynczy post blogu, w oparciu o rusztowania. By to zrobić, wprowadź następującą komendę do terminalu:</p></div>
 <div class="listingblock">
@@ -740,7 +740,7 @@ cellspacing="0" cellpadding="4">
 </table>
 </div>
 <h3 id="_uruchamianie_migracji">6.1. Uruchamianie Migracji</h3>
-<div class="paragraph"><p>Jednym z produktów komendy: <tt>script/generate scaffold</tt> jest <em>database migration</em>. Migracje są jedną z klas Ruby które upraszczają tworzenie i modyfikowanie baz danych tabel. Railsy używają komendy „rake” by uruchamiać migracje, ale możliwe jest jej wycofanie po tym jak została dodana do Twojej bazy danych. Nazwy pilków migracji uwzględniają znaczniki czasowe by zapewnić ich przetwarzanie w porządku w jakim zostały stworzone.</p></div>
+<div class="paragraph"><p>Jednym z produktów komendy: <tt>script/generate scaffold</tt> jest <em>database migration</em>. Migracje są jedną z klas Ruby, które upraszczają tworzenie i modyfikowanie baz danych tabel. Railsy używają komendy „rake” by uruchamiać migracje, ale możliwe jest jej wycofanie po tym jak, została dodana do Twojej bazy danych. Nazwy plików migracji uwzględniają znaczniki czasowe by zapewnić ich przetwarzanie w porządku, w jakim zostały stworzone.</p></div>
 <div class="paragraph"><p>Oto co znajdziesz, gdy zajrzysz do pliku <tt>db/migrate/20090113124235_create_posts.rb</tt> (jego nazwa u Ciebie może się trochę różnić):</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -762,7 +762,7 @@ http://www.gnu.org/software/src-highlite -->
     drop_table <span style="color: #990000">:</span>posts
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Gdybyś chciał zawrzeć ten kod w słowach, brzmiałby on mniej więcej tak: gdy migracja jest uruchomiona, tworzy tabele o nazwie <tt>posts</tt> z dwoma szeregami kolumn (<tt>name</tt> i <tt>title</tt>) i tekst kolumny (<tt>content</tt>), a wraz z nią pola znaczników czasu by śledzić jej tworzenie oraz aktualizowanie. Więcej szczegółów na temat sposobu pisania migracji znajdziesz w przewodniku <a href="../migrations.html">Rails Database Migrations</a>.</p></div>
+<div class="paragraph"><p>Gdybyś chciał zawrzeć ten kod w słowach, brzmiałby on mniej więcej tak: gdy migracja jest uruchomiona, tworzy tabelę o nazwie <tt>posts</tt> z dwoma szeregami kolumn (<tt>name</tt> i <tt>title</tt>) i tekst kolumny (<tt>content</tt>), a wraz z nią pola znaczników czasu by śledzić jej tworzenie oraz aktualizowanie. Więcej szczegółów na temat sposobu pisania migracji znajdziesz w przewodniku <a href="../migrations.html">Rails Database Migrations</a>.</p></div>
 <div class="paragraph"><p>Teraz możesz użyć komendy „rake” by uruchomić migracje:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -780,7 +780,8 @@ $ rake db<span style="color: #990000">:</span>migrate</tt></pre></div></div>
 </tr></table>
 </div>
 <h3 id="_dodawanie_hiper_cza">6.2. Dodawanie hiperłącza.</h3>
-<div class="paragraph"><p>By połączyć posty ze stroną domową, którą już stworzyłeś, możesz dodać do niej hiperłącze. Otwórz <tt>/app/views/home/index.html.erb</tt> i dopisz do niego:</p></div>
+<div class="paragraph"><p>By połączyć posty ze stroną domową, którą już stworzyłeś, możesz dodać do niej hiperłącze.
+Otwórz <tt>/app/views/home/index.html.erb</tt> i dopisz do niego:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -795,7 +796,7 @@ http://www.gnu.org/software/src-highlite -->
 <div class="paragraph"><p><span class="image">
 <img src="images/posts_index.png" alt="Posts Index screenshot" title="Posts Index screenshot" />
 </span></p></div>
-<div class="paragraph"><p>Jest to rezultat renderingu indeksu widoku Twoich postów. Aktualnie nie ma żadnych wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link „nowa wiadomość”.  Możesz również przeglądać i edytować posty, a nawet je wykasować. Cały układ logiczny i HTML obsługuje pojedyncze polecenie <tt>script/generał scaffold</tt>.</p></div>
+<div class="paragraph"><p>Jest to rezultat renderingu indeksu widoku Twoich postów. Aktualnie nie ma żadnych wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link „nowa wiadomość”. Możesz również przeglądać i edytować posty, a nawet je wykasować. Cały układ logiczny i HTML obsługuje pojedyncze polecenie <tt>script/generał scaffold</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -835,9 +836,9 @@ http://www.gnu.org/software/src-highlite -->
   validates_presence_of <span style="color: #990000">:</span>name<span style="color: #990000">,</span> <span style="color: #990000">:</span>title
   validates_length_of <span style="color: #990000">:</span>title<span style="color: #990000">,</span> <span style="color: #990000">:</span>minimum <span style="color: #990000">=&gt;</span> <span style="color: #993399">5</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Dzięki nim mamy pewność, że każdy post będzie mieć nazwę oraz tytuł, a ten ostatni nie będzie miał mniej niż 5 znaków. Railsy mogą sprawdzać różne warunki w modelu, włączając w to obecność lub unikalność kolumn, ich format, i istnienie związanych z nimi obiektów.</p></div>
+<div class="paragraph"><p>Dzięki nim mamy pewność, że każdy post będzie mieć nazwę oraz tytuł, a ten ostatni nie będzie miał mniej niż 5 znaków. Railsy mogą sprawdzać różne warunki w modelu, włączając w to obecność lub unikalność kolumn, ich format i istnienie związanych z nimi obiektów.</p></div>
 <h3 id="_u_ywanie_konsoli">6.6. Używanie konsoli</h3>
-<div class="paragraph"><p>By zobaczyć, jak sprawdzanie poprawności danych działa w praktyce, użyjemy konsoli. Konsola, w postaci linii komend, jest narzędziem które umożliwia Ci wykonywanie kodów Ruby’ego w ramach działania Twojej aplikacji:</p></div>
+<div class="paragraph"><p>By zobaczyć, jak sprawdzanie poprawności danych działa w praktyce, użyjemy konsoli. Konsola, w postaci linii komend, jest narzędziem, które umożliwia Ci wykonywanie kodów Ruby’ego w ramach działania Twojej aplikacji:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -866,7 +867,7 @@ created_at<span style="color: #990000">:</span> nil<span style="color: #990000">
 title<span style="color: #990000">:</span> nil<span style="color: #990000">,</span> content<span style="color: #990000">:</span> <span style="color: #FF0000">"A new post"</span><span style="color: #990000">,</span> created_at<span style="color: #990000">:</span> nil<span style="color: #990000">,</span> updated_at<span style="color: #990000">:</span> nil<span style="color: #990000">&gt;,</span>
 @<span style="color: #009900">errors</span><span style="color: #990000">=</span>{<span style="color: #FF0000">"name"</span><span style="color: #990000">=&gt;[</span><span style="color: #FF0000">"can't be blank"</span><span style="color: #990000">],</span> <span style="color: #FF0000">"title"</span><span style="color: #990000">=&gt;[</span><span style="color: #FF0000">"can't be blank"</span><span style="color: #990000">,</span>
 <span style="color: #FF0000">"is too short (minimum is 5 characters)"</span><span style="color: #990000">]</span>}<span style="color: #990000">&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Powyższy kod przedstawia informację jaką otrzymasz, gdy chcesz stworzyć nowy, ale błędny <tt>Post</tt>. Mechanizm jest następujący: przy próbie zapisania pojawia się wartość zwrotna <tt>false</tt> (oznaczającą, że zapisanie się nie powiodło), a kod wyszczególnia nam wszystkie znalezione błędy <tt>errors</tt>.</p></div>
+<div class="paragraph"><p>Powyższy kod przedstawia informację, jaką otrzymasz, gdy chcesz stworzyć nowy, ale błędny <tt>Post</tt>. Mechanizm jest następujący: przy próbie zapisania pojawia się wartość zwrotna <tt>false</tt> (oznaczającą, że zapisanie się nie powiodło), a kod wyszczególnia nam wszystkie znalezione błędy <tt>errors</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -876,7 +877,7 @@ title<span style="color: #990000">:</span> nil<span style="color: #990000">,</sp
 </tr></table>
 </div>
 <h3 id="_listowanie_post_w">6.7. Listowanie postów</h3>
-<div class="paragraph"><p>Najłatwiejszym sposobem na zapoznanie się z możliwościami programu jest kod, który listuje wszystkie posty. Otwórz plik: <tt>app/controllers/posts_controller.rb + i przyjrzy się akcji +index</tt></p></div>
+<div class="paragraph"><p>Najłatwiejszym sposobem na zapoznanie się z możliwościami programu jest kod, który listuje wszystkie posty. Otwórz plik: <tt>app/controllers/posts_controller.rb</tt> i przyjrzy się akcji <tt>index</tt></p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -890,7 +891,7 @@ http://www.gnu.org/software/src-highlite -->
     format<span style="color: #990000">.</span>xml  <span style="color: #FF0000">{</span> render <span style="color: #990000">:</span>xml <span style="color: #990000">=&gt;</span> <span style="color: #009900">@posts</span> <span style="color: #FF0000">}</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Powyższy kod przypisuje przykładowa zmienną <tt>@posts</tt> do tablicy wszystkich postów w bazie danych. <tt>Post.find(:all)</tt> lub <tt>Post.all</tt> tworzy zawołanie dla modelu Post który bezwarunkowo zwraca wszystkie posty z bazy danych.</p></div>
+<div class="paragraph"><p>Powyższy kod przypisuje przykładowa zmienną <tt>@posts</tt> do tablicy wszystkich postów w bazie danych. <tt>Post.find(:all)</tt> lub <tt>Post.all</tt> tworzy zawołanie dla modelu Post, który bezwarunkowo zwraca wszystkie posty z bazy danych.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -899,7 +900,7 @@ http://www.gnu.org/software/src-highlite -->
 <td class="content">Więcej informacji na temat znajdowania rekordów za pomocą Active Record znajdziesz w <a href="../finders.html">Active Record Finders</a></td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Blok <tt>respond_to</tt> obsługuje obydwa zawołania dla tej akcji - zarówno HTML jak i XML. Jeśli przejdziesz do <tt>http://localhost:3000/posts.xml</tt> to zobaczysz wszystkie posty w formacie XML. Natomiast format HTML znajduję się w widoku <tt>app/views/posts</tt> nazwanym tak samo jak odpowiadająca mu akcja. Rails same przenoszą wszystkie przykładowe zmienne z dostępnych akcji do widoku. Oto <tt>app/view/posts/index.html.erb</tt>:</p></div>
+<div class="paragraph"><p>Blok <tt>respond_to</tt> obsługuje obydwa zawołania dla tej akcji - zarówno HTML jak i XML. Jeśli przejdziesz do <tt>http://localhost:3000/posts.xml</tt>, to zobaczysz wszystkie posty w formacie XML. Natomiast format HTML znajduję się w widoku <tt>app/views/posts</tt>, nazwanym tak samo jak odpowiadająca mu akcja. Rails same przenoszą wszystkie przykładowe zmienne z dostępnych akcji do widoku. Oto <tt>app/view/posts/index.html.erb</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -943,7 +944,7 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 <li>
 <p>
-<tt>edit_post_path</tt> jest helperem, który Rails udostępniają w ramach routingu RESTful. Zobaczysz jeszcze sporo różnych rodzajów takich helperów dla wielu, znajdujących się w kontrolerze, akcji.
+<tt>edit_post_path</tt> jest helperem, który Railsy udostępniają w ramach routingu RESTful. Zobaczysz jeszcze sporo różnych rodzajów takich helperów dla wielu, znajdujących się w kontrolerze, akcji.
 </p>
 </li>
 </ul></div>
@@ -956,7 +957,7 @@ http://www.gnu.org/software/src-highlite -->
 </tr></table>
 </div>
 <h3 id="_personalizacja_layoutu">6.8. Personalizacja Layoutu</h3>
-<div class="paragraph"><p>Widok stanowi tylko część całego procesu przedstawiania przez HTML Twojej strony www. Rails posiada też różne gotowe layouty <tt>layouts</tt>, w których trzymane są widoki. Renderowanie widoku dla przeglądarki odbywa się poprzez umieszczanie widoku HTML wewnątrz layoutu HTML. Komenda <tt>script/generate scaffold</tt> automatycznie tworzy dla postu domyślny layout: <tt>app/views/layouts/posts.html.erb</tt>. Używając edytora zmodyfikuj go w następujący sposób:</p></div>
+<div class="paragraph"><p>Widok stanowi tylko część całego procesu przedstawiania przez HTML Twojej strony www. Railsy posiadają też różne gotowe layouty <tt>layouts</tt>, w których trzymane są widoki. Renderowanie widoku dla przeglądarki odbywa się poprzez umieszczanie widoku HTML wewnątrz layoutu HTML. Komenda <tt>script/generate scaffold</tt> automatycznie tworzy dla postu domyślny layout: <tt>app/views/layouts/posts.html.erb</tt>. Używając edytora zmodyfikuj go w następujący sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -979,9 +980,9 @@ http://www.gnu.org/software/src-highlite -->
 
 <span style="color: #FF0000">&lt;/body&gt;</span>
 <span style="color: #FF0000">&lt;/html&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Gdy teraz odświeżysz stronę <tt>/posts</tt> zobaczysz szare tło. Taki sam będzie używany dla wszystkich widoków postów.</p></div>
+<div class="paragraph"><p>Gdy teraz odświeżysz stronę <tt>/posts</tt>, zobaczysz szare tło. Taki sam będzie używany dla wszystkich widoków postów.</p></div>
 <h3 id="_tworzenie_nowego_postu">6.9. Tworzenie nowego postu.</h3>
-<div class="paragraph"><p>Nowy post tworzy się za pomocą dwóch akcji. Pierwszą jest <tt>new</tt> która tworzy nowy, pusty obiekt <tt>Post</tt>:</p></div>
+<div class="paragraph"><p>Nowy post tworzy się za pomocą dwóch akcji. Pierwszą jest <tt>new</tt>, która tworzy nowy, pusty obiekt <tt>Post</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1024,7 +1025,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #FF0000">&lt;% end %&gt;</span>
 
 <span style="color: #FF0000">&lt;%= link_to 'Back', posts_path %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Blok <tt>form_for</tt> jest używany do tworzenia formy HTML. Wewnątrz niego masz dostęp do metod, które umożliwiają zbudowanie różnorodnych sposobów kontroli form. Przykładowo: <tt>f.text_field :name</tt> prosi Railsy by stworzyły w danej formie pole do wprowadzania tekstu i połączyły go z nazwą przykładowo wyświetlanego atrybutu. Możesz użyć tej metody tylko z takimi atrybutami modelu, które są podstawą formy (w tym wypadku <tt>name</tt>, <tt>title</tt>, i <tt>content</tt>). Rails preferencyjnie uzywa <tt>form_for</tt> do stworzenia surowego kodu HTML. Dzięki temu jest on bardziej zwięzły i wyraźnie widać związek formy z konkretnym modelem.</p></div>
+<div class="paragraph"><p>Blok <tt>form_for</tt> jest używany do tworzenia formy HTML. Wewnątrz niego masz dostęp do metod, które umożliwiają zbudowanie różnorodnych sposobów kontroli form. Przykładowo: <tt>f.text_field :name</tt> prosi Railsy, by stworzyły w danej formie pole do wprowadzania tekstu i połączyły go z nazwą przykładowo wyświetlanego atrybutu. Możesz użyć tej metody tylko z takimi atrybutami modelu, które są podstawą formy (w tym wypadku <tt>name</tt>, <tt>title</tt>, i <tt>content</tt>). Rails preferencyjnie uzywa <tt>form_for</tt> do stworzenia surowego kodu HTML. Dzięki temu jest on bardziej zwięzły i wyraźnie widać związek formy z konkretnym modelem.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -1033,7 +1034,7 @@ http://www.gnu.org/software/src-highlite -->
 <td class="content">Jeśli potrzebujesz stworzyć formę HTML, która pokazuje dowolne pole, nie pasujące do modelu, powinieneś użyć metody <tt>form_tag</tt>, umożliwiające szybkie zbudowanie form, których nie trzeba łączyć z konkretnym modelem.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Gdy użytkownik kliknie na przycisk <tt>create</tt>, przeglądarka wyśle informacje zwrotną do metody kontrolera <tt>create</tt> (Rails wiedzą, że mają posłuzyć się metodą <tt>create</tt> ponieważ forma jest wysyłana za pomocą żądania HTTP POST – jest to jedna z tych umownych rzeczy o których wspomniałem wcześniej):</p></div>
+<div class="paragraph"><p>Gdy użytkownik kliknie na przycisk <tt>create</tt>, przeglądarka wyśle informacje zwrotną do metody kontrolera <tt>create</tt> (Railsy wiedzą, że mają posłużyć się metodą <tt>create</tt>, ponieważ forma jest wysyłana za pomocą żądania HTTP POST – jest to jedna z tych umownych rzeczy, o których wspomniałem wcześniej):</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1053,10 +1054,10 @@ http://www.gnu.org/software/src-highlite -->
     <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Akcja <tt>create</tt> tworzy nowy obiekt Post z danych przekazanymi przez użytkownika w formie, który Rails udostępni w <tt>params</tt>. Po zapisaniu nowego postu, używa on <tt>flash[:notice]</tt> do stworzenia wiadomości informacyjnej dla użytkownika oraz przekierowuje do wyświetlanej akcji. Jeśli napotka jakiś problem, akcja <tt>create</tt> pokaże po raz drugi tylko widok new , ale wraz z wiadomością o błędzie.</p></div>
-<div class="paragraph"><p>Rails zapewniają hash: <tt>flash</tt> (zwyczajowo nazywany po prostu Flashem), stąd ta wiadomość może być przenoszona do innej akcji, dostarczaną użytkownikowi wraz z przydatnymi informacjami na temat statusu żądania. W przypadku <tt>create</tt> użytkownik nigdy nie widzi strony renderowanej podczas procesu tworzenia postu, ponieważ jest przekierowywany do nowego postu dopiero po zapisaniu rekordu. Flash przenosi informacje do następnej akcji, zatem gdy użytkownik jest przekierowywany spowrotem do akcji <tt>show</tt>, ukazuje mu się informacja „Post został stworzony”.</p></div>
+<div class="paragraph"><p>Akcja <tt>create</tt> tworzy nowy obiekt Post z danych przekazanymi przez użytkownika w formie, który Railsy udostępnią w <tt>params</tt>. Po zapisaniu nowego postu, używają one <tt>flash[:notice]</tt> do stworzenia wiadomości informacyjnej dla użytkownika oraz przekierowują do wyświetlanej akcji. Jeśli napotka jakiś problem, akcja <tt>create</tt> pokaże po raz drugi tylko widok new , ale wraz z wiadomością o błędzie.</p></div>
+<div class="paragraph"><p>Railsy zapewniają hash: <tt>flash</tt> (zwyczajowo nazywany po prostu Flashem), stąd ta wiadomość może być przenoszona do innej akcji, dostarczaną użytkownikowi wraz z przydatnymi informacjami na temat statusu żądania. W przypadku <tt>create</tt> użytkownik nigdy nie widzi strony renderowanej podczas procesu tworzenia postu, ponieważ jest przekierowywany do nowego postu dopiero po zapisaniu rekordu. Flash przenosi informacje do następnej akcji, zatem gdy użytkownik jest przekierowywany spowrotem do akcji <tt>show</tt>, ukazuje mu się informacja „Post został stworzony”.</p></div>
 <h3 id="_prezentacja_pojedynczego_postu">6.10. Prezentacja pojedynczego postu</h3>
-<div class="paragraph"><p>Gdy klikniesz w link <tt>show</tt> dla postu na stronie głównej, przeniesie Cie ona do adresu <tt>http://localhost:3000/posts/1</tt> (lub podobnego). Railsy traktują to jako prośbę o zasoby skierowaną do akcji <tt>show</tt> i przechodzącą w <tt>1</tt> z parametrem <tt>:id</tt>. Akcja <tt>show</tt> wygląda tak:</p></div>
+<div class="paragraph"><p>Gdy klikniesz w link <tt>show</tt> dla postu na stronie głównej, przeniesie Cię ona do adresu <tt>http://localhost:3000/posts/1</tt> (lub podobnego). Railsy traktują to jako prośbę o zasoby skierowaną do akcji <tt>show</tt> i przechodzącą w <tt>1</tt> z parametrem <tt>:id</tt>. Akcja <tt>show</tt> wygląda tak:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1070,8 +1071,8 @@ http://www.gnu.org/software/src-highlite -->
     format<span style="color: #990000">.</span>xml  <span style="color: #FF0000">{</span> render <span style="color: #990000">:</span>xml <span style="color: #990000">=&gt;</span> <span style="color: #009900">@post</span> <span style="color: #FF0000">}</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Akcja <tt>show</tt> używa <tt>Post.find</tt> by znaleźć w bazie danych pojedynczy rekord z jej wartością id.
-Rails wyświetla go używając <tt>show.html.erb</tt>:</p></div>
+<div class="paragraph"><p>Akcja <tt>show</tt> używa <tt>Post.find</tt>, by znaleźć w bazie danych pojedynczy rekord z jej wartością id.
+Railsy wyświetlają go używając <tt>show.html.erb</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1096,7 +1097,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #FF0000">&lt;%= link_to 'Edit', edit_post_path(@post) %&gt;</span> <span style="color: #990000">|</span>
 <span style="color: #FF0000">&lt;%= link_to 'Back', posts_path %&gt;</span></tt></pre></div></div>
 <h3 id="_edytowanie_post_w">6.11. Edytowanie postów</h3>
-<div class="paragraph"><p>Edytowanie postu, podobnie jak tworzenie nowego odbywa się dwustopniowo. Pierwszym krokiem jest polecenie <tt>edit_post_path(@post)</tt> odnoszące się do konkretnego postu. To wywołuje nam akcję <tt>edit</tt> w kontrolerze.:</p></div>
+<div class="paragraph"><p>Edytowanie postu, podobnie jak tworzenie nowego, odbywa się dwustopniowo. Pierwszym krokiem jest polecenie <tt>edit_post_path(@post)</tt> odnoszące się do konkretnego postu. To wywołuje nam akcję <tt>edit</tt> w kontrolerze.:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1105,7 +1106,7 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> edit
   <span style="color: #009900">@post</span> <span style="color: #990000">=</span> Post<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Po znalezieniu zażądanego postu, Rails, by nam go pokazać, używa <tt>edit.html.erb</tt> :</p></div>
+<div class="paragraph"><p>Po znalezieniu zażądanego postu, Railsy, by nam go pokazać, używają <tt>edit.html.erb</tt> :</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1135,7 +1136,7 @@ http://www.gnu.org/software/src-highlite -->
 
 <span style="color: #FF0000">&lt;%= link_to 'Show', @post %&gt;</span> <span style="color: #990000">|</span>
 <span style="color: #FF0000">&lt;%= link_to 'Back', posts_path %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Składając stworzoną przez ten widok formę odwołujemy się do akcji <tt>update</tt> wewnątrz kontrolera:</p></div>
+<div class="paragraph"><p>Składając stworzoną przez ten widok formę, odwołujemy się do akcji <tt>update</tt> wewnątrz kontrolera:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1155,17 +1156,17 @@ http://www.gnu.org/software/src-highlite -->
     <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>W akcji <tt>update</tt> Raily używają na początku parametru <tt>:id</tt>, przechodząc z widoku edycji do rekordu zlokalizowanego w edytowanej bazie. <tt>Update_attributes</tt> wywołuje, a następnie wykorzystuje pozostałe parametry, które zażądaliśmy i dołącza je do tego rekordu. Jeśli wszystko pójdzie dobrze, to użytkownik jest przekierowywany do widoku <tt>show</tt> postu. Gdy jednak wystąpią jakieś problemy, Railsy zwracają go do <tt>edit</tt>, aby umożliwić mu poprawienie błędów.</p></div>
+<div class="paragraph"><p>W akcji <tt>update</tt> Railsy używają na początku parametru <tt>:id</tt>, przechodząc z widoku edycji do rekordu zlokalizowanego w edytowanej bazie. <tt>Update_attributes</tt> wywołuje, a następnie wykorzystuje pozostałe parametry, które zażądaliśmy i dołącza je do tego rekordu. Jeśli wszystko pójdzie dobrze, to użytkownik jest przekierowywany do widoku <tt>show</tt> postu. Gdy jednak wystąpią jakieś problemy, Railsy zwracają go do <tt>edit</tt>, aby umożliwić mu poprawienie błędów.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Uważni czytelnicy zauważa zapewne, że deklaracja <tt>form_for</tt> jest identyczna dla widoków <tt>new</tt> i <tt>edit</tt>. Rails generuje inny kod dla każdego z formularzy, ponieważ jest wystarczająco mądry, żeby zauważyć, ze w jednym przypadku otrzymuje nowy rekord, który jeszcze nie był zapisany, natomiast w drugim istniejący rekord, który już został zapisany w bazie danych. W produkcyjnej aplikacji Rails normalnie wyeliminowałbyś tę duplikację poprzez przeniesienie powtarzającego się kodu do podszablonu (<em>partial template</em>), który następnie byłby włączany w oba nadrzędne szablony. Jednakże generator rusztowań próbuje nie robić zbyt wielu założeń i tworzy kod, który łatwo modyfikować, jeżeli chcesz mieć różne formularze do akcji <tt>create</tt> i <tt>edit</tt>.</td>
+<td class="content">Uważni czytelnicy zauważa zapewne, że deklaracja <tt>form_for</tt> jest identyczna dla widoków <tt>new</tt> i <tt>edit</tt>. Railsy generują inny kod dla każdego z formularzy, ponieważ są wystarczająco mądre, żeby zauważyć, że w jednym przypadku otrzymują nowy rekord, który jeszcze nie był zapisany, natomiast w drugim istniejący rekord, który już został zapisany w bazie danych. W produkcyjnej aplikacji Rails normalnie wyeliminowałbyś tę duplikację poprzez przeniesienie powtarzającego się kodu do podszablonu (<em>partial template</em>), który następnie byłby włączany w oba nadrzędne szablony. Jednakże generator rusztowań próbuje nie robić zbyt wielu założeń i tworzy kod, który łatwo modyfikować, jeżeli chcesz mieć różne formularze do akcji <tt>create</tt> i <tt>edit</tt>.</td>
 </tr></table>
 </div>
 <h3 id="_kasowanie_postu">6.12. Kasowanie Postu</h3>
-<div class="paragraph"><p>Ostatecznie, klikając na jednym z linków kategorii <tt>destroy</tt> wysyłane jest powiązane id do akcji <tt>destroy</tt> :</p></div>
+<div class="paragraph"><p>Ostatecznie, klikając na jednym z linków kategorii <tt>destroy</tt>, wysyłane jest powiązane id do akcji <tt>destroy</tt> :</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -1184,7 +1185,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <h2 id="_wykorzystanie_zasady_dry">7. Wykorzystanie zasady DRY</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>W tym miejscu warto byś przyjrzał się paru narzędziom, które Raily oferują do usuwania duplikatów w Twoim kodzie. Szczególnie zwrócimy uwagę na te, które możesz czasami używać do ich eliminacji z widoków oraz na filtrach (<em>filters</em>), które są pomocne przy takich operacjach.</p></div>
+<div class="paragraph"><p>W tym miejscu warto byś przyjrzał się paru narzędziom, które Railsy oferują do usuwania duplikatów w Twoim kodzie. Szczególnie zwrócimy uwagę na te, które możesz czasami używać do ich eliminacji z widoków oraz na filtrach (<em>filters</em>), które są pomocne przy takich operacjach.</p></div>
 <h3 id="_u_ywanie_podszablon_w_do_eliminacji_widocznych_duplikat_w">7.1. Używanie podszablonów do eliminacji widocznych duplikatów.</h3>
 <div class="paragraph"><p>Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji <tt>new</tt> i <tt>edit</tt> jest bardzo podobny. YMożesz przenieść dzielony kod prosto do podszablonu <tt>partial</tt>. Wymaga to edytowania widoków <tt>new</tt> i <tt>edit</tt> oraz dodania nowego szablonu. Nowy <tt>_form.html.erb</tt> szablon powinien być zapisany w tym samym folderze <tt>app/views/posts</tt> co plik, z którego został on wyprowadzony. Zauważ, że nazwa tego pliku zaczyna się od podkreślenia ' _ '(underscore) - jest to przyjęte przez Rails nazewnictwo dla podszablonów</p></div>
 <div class="paragraph"><p><tt>new.html.erb</tt>:</p></div>

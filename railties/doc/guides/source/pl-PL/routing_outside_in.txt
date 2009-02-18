@@ -118,16 +118,20 @@ Routing RESTful jest obecnie standardowy w Railsach i to jego powinieneś prefer
 
 === Czym jest REST?
 
-Założenia routingu REST pochodzą z pracy doktorskiej Roy'a Fielding'a: link:http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm[Architectural Styles and the Design of Network-based Software Architectures]. Na szczęście nie musisz czytać całego dokumentu, by zrozumieć ideę REST w Railsach. REST jest to skrót od angielskiej nazwy "Representational State Transfer", czyli Reprezentacyjny Transfer Stanu. Sprowadza się on do dwóch głównych założeń:
+Założenia routingu REST pochodzą z pracy doktorskiej Roya Fieldinga: link:http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm[Architectural Styles and the Design of Network-based Software Architectures]. Na szczęście nie musisz czytać całego dokumentu, by zrozumieć ideę REST w Railsach. REST jest to skrót od angielskiej nazwy "Representational State Transfer", czyli Reprezentacyjny Transfer Stanu. Sprowadza się on do dwóch głównych założeń:
 
-* używanie identyfikatorów zasobów (dla celów tego przewodnika możesz je utożsamiać z URL) do ich reprezentacji
+* używanie identyfikatorów zasobów (dla celów tego przewodnika możesz je
+  utożsamiać z adresami URL) do ich reprezentacji
 * transferowanie reprezentacji stanów każdego zasobu pomiędzy elementami systemu.
 
 Na przykład, żądanie takie jak:
 
 `DELETE /photos/17`
 
-będzie odczytane przez aplikację Railsową jako odniesienie do zasobu będącego zdjęciem o ID równym 17, a akcją wymaganą przez takie żądanie będzie wskazanego usunięcie zasobu. REST jest naturalnym stylem architektury aplikacji sieciowej, a Rails czyni go jeszcze bardziej przyjaznym dzięki konwencjom upraszczającym jego stosowanie.
+będzie odczytane przez aplikację railsową jako odniesienie do zasobu będącego
+zdjęciem o ID równym 17, a akcją wymaganą przez takie żądanie będzie usunięcie
+wskazanego zasobu. REST jest naturalnym stylem architektury aplikacji
+sieciowej, a Railsy czynią go jeszcze bardziej przyjaznym dzięki konwencjom upraszczającym jego stosowanie.
   
 === CRUD, typy żądań i akcje
 
@@ -238,7 +242,7 @@ Chociaż konwencje routingu RESTful są wystarczające dla większości aplikacj
 * `:only`
 * `:except`
 
-Możesz także tworzyć dodatkowe ścieżki routingu przy pomocy opcji `:member` i `:collection`, które zostaną omówione w dalszej części tego przewodnika.
+Możesz także tworzyć dodatkowe drogi routingu przy pomocy opcji `:member` i `:collection`, które zostaną omówione w dalszej części tego przewodnika.
 
 ==== Użycie :controller
 
@@ -278,7 +282,7 @@ Jeśli grupujesz w ten sposób kontrolery, zwróc uwagę na pewien niuans routin
 
 TIP: Aby zapewnić, że link wskazuje na kontroler najwyższego poziomu, poprzedź nazwę kontrolera ukośnikiem: `<%= link_to "show", {:controller => "/photos", :action => "show"} %>`
 
-Możesz także określić przestrzeń nazw kontrolera używając opcji `:namespace' zamiast podawać ścieżkę dostępu:
+Możesz także określić przestrzeń nazw kontrolera używając opcji `:namespace` zamiast podawać ścieżkę dostępu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -316,7 +320,7 @@ Możesz użyć opcji `:requirements` w drodze routingu RESTful, by wymusić odpo
 map.resources :photos, :requirements => {:id => /[A-Z][A-Z][0-9]+/}
 -------------------------------------------------------
 
-Ta deklaracja spowoduje, że parametr `:id` będzie musiał być zgodny z podanym wyrażeniem regularnym. W tym przypadku, żądanie `/photos/1` nie będzie dłużej pasowało do tej drogi routingu, ale np. `photos/RR27' będzie.
+Ta deklaracja spowoduje, że parametr `:id` będzie musiał być zgodny z podanym wyrażeniem regularnym. W tym przypadku, żądanie `/photos/1` nie będzie dłużej pasowało do tej drogi routingu, ale np. `photos/RR27` będzie.
 
 ==== Użycie :conditions
 
@@ -417,7 +421,8 @@ map.resources :photos, :only => [:index, :show]
 
 Przy takim wpisie, żądanie `GET` odnoszące się do zasobu `/photos` zostanie obsłużone, ale żądanie `POST` dla `/photos` (normalnie wskazujące na akcję `create`) już nie.
 
-Opcja `:except` jest odwrotnością `:only` - wskazuje ona na akcje, które _nie zostaną_ obsłużone przez wpis:
+Opcja `:except` jest odwrotnością `:only` - wskazuje ona na akcje, które _nie
+zostaną obsłużone_ przez wpis:
 
 [source, ruby]
 -------------------------------------------------------
@@ -498,7 +503,7 @@ ads_url(@magazine)
 edit_ad_path(@magazine, @ad)
 -------------------------------------------------------
 
-==== Użycie :has_one and :has_many
+==== Użycie :has_one i :has_many
 
 Opcje `:has_one` i `:has_many` umożliwiają zwięzłą notację prostych dróg zagnieżdżonych. Używamy `:has_one` dla zagnieżdżenia pojedynczego zasobu lub `:has_many` dla wielu zasobów:
 
@@ -623,7 +628,8 @@ Jak widzisz, taka wersja jest znacznie zwięźlejsza, a mimo tego daje takie sam
 
 === Dodawanie większej liczby akcji RESTful
 
-Nie jesteś ograniczony do siedmiu domyślnie tworzonych dróg routingu. Jeśli chcesz możesz dodawać kolejne drogi członkowskie (odnoszące się do konkretnego zasobu), a także drogi tworzące zasoby oraz drogi odnoszące się do zestawu zasobów jako całości.
+Nie jesteś ograniczony do siedmiu domyślnie tworzonych dróg routingu. Jeśli
+chcesz możesz dodawać kolejne drogi członkowskie (_member routes_; odnoszące się do konkretnego zasobu), a także drogi tworzące zasoby oraz drogi odnoszące się do zestawu zasobów jako całości.
 
 ==== Dodawanie dróg członkowskich
 
@@ -636,7 +642,8 @@ map.resources :photos, :member => { :preview => :get }
 
 Umożliwi to Railsom rozpoznanie adresów URL takich jak `/photos/1/preview` przy żądaniu HTTP GET i przekazanie ich do akcji `preview` kontrolera `Photos`. Stworzy to także helper `preview_photo`.
 
-Wewnątrz tablicy dróg członkowskich, każda z nich określa typ żądania HTTP, jak będzie rozpoznawać. Do dyspozycji mamy `:get`, `:put`, `:post`, `:delete` lub `:any`. Możesz także określić tablicę metod, jeśli potrzebujesz więcej niż jedną, ale nie chcesz dopuścić dowolnej:
+Wewnątrz tablicy dróg członkowskich, każda z nich określa typ żądania HTTP,
+jaki będzie rozpoznawać. Do dyspozycji mamy `:get`, `:put`, `:post`, `:delete` lub `:any`. Możesz także określić tablicę metod, jeśli potrzebujesz więcej niż jedną, ale nie chcesz dopuścić dowolnej:
 
 [source, ruby]
 -------------------------------------------------------
@@ -670,7 +677,7 @@ Aby dodać nową drogę tworzącą zasoby, używamy opcji `:new`:
 map.resources :photos, :new => { :upload => :post }
 -------------------------------------------------------
 
-Taki wpis sprawi, że Railsy rozpoznają URL takie jak `/photos/upload` wykorzystujące żądanie HTTP POST i skieruje je do akcji `upload` kontrolera `Photos`. Stworzony zostanie także helper `upload_photos`.
+Taki wpis sprawi, że Railsy rozpoznają URL-e takie jak `/photos/upload` wykorzystujące żądanie HTTP POST i skieruje je do akcji `upload` kontrolera `Photos`. Stworzony zostanie także helper `upload_photos`.
 
 TIP: Jeśli chcesz przedefiniować typ żądania akceptowanego przez jedną ze standardowych akcji, możesz to zrobić wprost poprzez wskazanie tej akcji, np:
 
@@ -764,7 +771,7 @@ Drogi regularne nie muszą korzystać z metody `connect`. Możesz użyć dowolne
 map.logout '/logout', :controller => 'sessions', :action => 'destroy'
 -------------------------------------------------------
 
-Taki wpis spowoduje dwie rzeczy. Po pierwsze, żądania dotyczące zasobu `/logout` będą przesłane do metody `destroy` kontrolera `Sessions`. Po drugie, Railsy ustanowią helpery `logout_path` i 'logout_url`.
+Taki wpis spowoduje dwie rzeczy. Po pierwsze, żądania dotyczące zasobu `/logout` będą przesłane do metody `destroy` kontrolera `Sessions`. Po drugie, Railsy ustanowią helpery `logout_path` i `logout_url`.
 
 === Wymagania dróg routingu
 
@@ -932,7 +939,7 @@ TIP: Z pewnością przekonasz się, że wyniki komendy `rake routes` są o wiele
 
 === Testowanie dróg routingu
 
-Drogi routingu powinny być stałym punktem Twojej strategii testowania strony (podobnie jak reszta aplikacji). Railsy oferują trzy link:http://api.rubyonrails.com/classes/ActionController/Assertions/RoutingAssertions.html [wbudowane narzędzia] służące uproszczeniu tej procedury:
+Drogi routingu powinny być stałym punktem Twojej strategii testowania strony (podobnie jak reszta aplikacji). Railsy oferują trzy link:http://api.rubyonrails.com/classes/ActionController/Assertions/RoutingAssertions.html[wbudowane narzędzia] służące uproszczeniu tej procedury:
 
 * `assert_generates`
 * `assert_recognizes`
