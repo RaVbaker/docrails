@@ -1,34 +1,39 @@
 Layouty i Renderowanie w Ruby on Rails
 ======================================
 
-Ten przewodnik opisuje podstawowe możliwości layoutów w modułach Action Controller
+Ten przewodnik opisuje podstawowe własności szablonów (ang. templates) i
+layoutów (ang. layouts) w modułach Action Controller
 i Action View. Po jego przeczytaniu powinieneś umieć:
 
-* Używać różnorodnych metod renderujących wbudowanych w Railsy
-* Tworzyć layouty podzielone na wiele sekcji
-* Używać podszablonów (ang. partials) by zastosować regułę DRY do swoich widoków
-* Używać zagnieżdżonych szablonów (sub-szablony ang. nested layouts, sub-templates)
+* używać różnorodnych metod renderujących wbudowanych w Railsy
+* tworzyć layouty podzielone na wiele sekcji
+* używać podszablonów (ang. partials) by zastosować regułę DRY do swoich
+  szablonów
+* używać zagnieżdżonych layoutów (ang. nested layouts)
 
 == Opis zawartości: Jak wszystko razem współgra
 
 Ten poradnik opisuje wzajemne relacje pomiędzy Kontrolerem a Widokiem 
 we wzorcu Model-View-Controller (MVC). Jak wiesz, drogi czytelniku, Kontroler jest 
-odpowiedzialny za nadzorowanie całego procesu obsługi zapytań w Railsach,
-pomimo że zazwyczaj przekazuje on każdy większy kod do Modelu. 
+odpowiedzialny za nadzorowanie całego procesu obsługi żądań w Railsach,
+pomimo że zazwyczaj większość kodu znajduje się w warstwie modelu Modelu. 
 Natomiast, gdy dojdzie do wysłania odpowiedzi użytkownikowi, 
 Kontroler przekazuje to zadanie Widokowi. 
 Tematem tego tutoriala jest właśnie to przekazywanie.
 
-Kontroler musi zadecydować co powinno być przesłane jako odpowiedź i wywołać odpowiednią metodę by tą odpowiedź stworzyć. W przypadku gdy jest ona rozwiniętym widokiem, dodatkowo jest opakowywana w layout i ewentualnie są do niej dołączane inne fragmenty widoków. Te wszystkie możliwości
-zobaczysz w późniejszej części poradnika.
+Kontroler musi zadecydować co powinno być przesłane jako odpowiedź i wywołać
+odpowiednią metodę by ją stworzyć. W przypadku gdy jest ona rozwiniętym
+szablonem, dodatkowo jest opakowywana w layout i ewentualnie są do niej
+dołączane inne podszablony. Te wszystkie możliwości
+zobaczysz w dalszej części tego przewodnika.
 
 == Tworzenie odpowiedzi
 
 Kontroler może stworzyć odpowiedź HTTP dla przeglądarki na trzy sposoby:
 
-* Wywołać +render+ by stworzyć pełną odpowiedź do odesłania przeglądarce
-* Wywołać +redirect_to+ by wysłać kod HTTP informujący o przekierowaniu
-* Wywołać +head+ by stworzyć odpowiedź zawierającą tylko nagłówki HTTP
+* wywołać +render+ by stworzyć pełną odpowiedź do odesłania przeglądarce
+* wywołać +redirect_to+ by wysłać kod HTTP informujący o przekierowaniu
+* wywołać +head+ by stworzyć odpowiedź zawierającą tylko nagłówki HTTP
 
 Wytłumaczę po kolei każdą z tych metod, ale najpierw kilka słów o najprostszej rzeczy, którą może wykonać kontroler w odpowiedzi na żądanie – nie robić nic :)
 
@@ -36,7 +41,7 @@ Wytłumaczę po kolei każdą z tych metod, ale najpierw kilka słów o najprost
 
 Słyszałeś zapewne, że Railsy promują strategię „convention over configuration”. Domyślny
 rendering jest wspaniałym tego przykładem. Standardowo, kontrolery w Railsach automatycznie
-renderują widoki z nazwami odpowiadającymi akcjom. Na przykład, jeśli masz poniższy
+renderują szablony z nazwami odpowiadającymi akcjom. Na przykład, jeśli masz poniższy
 kod w klasie +BooksController+:
 
 [source, ruby]
@@ -46,16 +51,16 @@ def show
 end
 -------------------------------------------------------
 
-Railsy automatycznie po wykonaniu metody wyrenderuje plik +app/views/books/show.html.erb+.
+Railsy automatycznie po wykonaniu metody wyrenderują plik +app/views/books/show.html.erb+.
 Właściwie, jeśli masz domyślną regułę catch-all w pliku config/routes.rb (+map.connect
-\':controller/:action/:id'+), Railsy wyrenderują nawet widoki, które nie mają żadnego
+\':controller/:action/:id'+), Railsy wyrenderują nawet szablony, dla których nie ma żadnego
 kodu w kontrolerze. Na przykład, jeśli masz ustawioną domyślną drogę
 routowania i nadejdzie żądanie dla +/books/sale_list+, Railsy w odpowiedzi 
 wyrenderują +app/views/books/sale_list.html.erb+.
 
 NOTE: Właściwe renderowanie jest wykonywane przez podklasę +ActionView::TemplateHandlers+.
 Ten tutorial nie zagłębia się w ten proces, ale należy pamiętać, że rozszerzenie pliku
-twojego widoku wpływa na wybór szablonu obsługi. W Railsach 2, standardowymi rozszerzeniami
+twojego szablonu wpływa na wybór szablonu obsługi. W Railsach 2, standardowymi rozszerzeniami
 są +.erb+ dla ERB (HTML z osadzonym Rubim), +.rjs+ dla RJS (JavaScript z Rubim) i
 +.builder+ dla Buildera (generator XML). Dodatkowo znajdziesz również pliki +.rhtml+
 używane dla szablonów ERB i +.rxml+ dla szablonów Buildera, jednak obecnie te rozszerzenia
@@ -64,14 +69,14 @@ są niezalecane i będą usuniętę w przyszłych wersjach Railsów.
 === Używanie +render+
 
 W większości przypadków, metoda +ActionController::Base#render+ wykonuje zdecydowaną większość 
-renderowania twojej aplikacji zaś sam proces można dostosować do własnych potrzeb. Możesz wyrenderować domyślny widok dla szablonu,
-specyficzny szablon pliku, fragment tekstu lub nawet (i tu niespodzianka) nic.
+renderowania w twojej aplikacji zaś sam proces można dostosować do własnych potrzeb. Możesz wyrenderować domyślny szablon,
+specyficzny szablon, fragment tekstu lub nawet (i tu niespodzianka) nic.
 Możesz renderować tekst, JSON lub XML. Możesz również ustalić typ zawartości lub stan
 HTTP wyrenderowanej odpowiedzi.
 
 TIP: Jeśli chcesz zobaczyć dokładny wynik wywołania +render+ bez potrzeby sprawdzania
 tego w przeglądarce, możesz wywołać +render_to_string+. Ta metoda ma dokładnie takie
-same opcje jak +render+, ale zwraca string zamiast wysyłać odpowiedź bezpośrednio
+same opcje jak +render+, ale zwraca łańcuch znaków zamiast wysyłać odpowiedź bezpośrednio
 do przeglądarki.
 
 ==== Renderowanie niczego
@@ -84,15 +89,15 @@ render :nothing => true
 -------------------------------------------------------
 
 To wywołanie wyśle pustą odpowiedź do przeglądarki (chociaż będzie ona zawierała 
-nagłówki statusu które ustawisz za pomocą opcji :status, omówionej poniżej).
+nagłówki statusu które ustawisz za pomocą opcji +:status+, omówionej poniżej).
 
 TIP: Prawdopodobnie będziesz chciał używać metody +head+, omówionej poniżej, zamiast
 +render:nothing+. Jest ona bardziej elastyczna i wskazuje, że generujesz tylko
 i wyłącznie nagłówki HTTP.
 
-==== Renderowanie widoku akcji
+==== Renderowanie szablonu dla akcji
 
-Jeśli chcesz wyrenderować widok odnoszący się do innej akcji w ramach tego samego
+Jeśli chcesz wyrenderować szablon odnoszący się do innej akcji w ramach tego samego
 kontrolera, możesz użyć funkcji +render+ razem z nazwą akcji:
 
 [source, ruby]
@@ -110,8 +115,8 @@ end
 Jeśli wywołanie +update_attributes+ się nie powiedzie, wywołanie akcji +update+ w
 kontrolerze wyrenderuje szablon +edit.html.erb+ należący do tego samego kontrolera.
 
-Jeśli wolisz, możesz używasz symbolu zamiast łańcucha znaków, 
-aby określić akcję do wyrenderowania.
+Jeśli wolisz, możesz użyć symbolu zamiast łańcucha znaków, 
+aby określić szablon do wyrenderowania.
 
 [source, ruby]
 -------------------------------------------------------
@@ -143,27 +148,27 @@ end
 -------------------------------------------------------
 
 WARNING: Używanie +render+ z +:action+ jest częstym źródłem nieporozumień dla początkujących
-programistów. Wybrana akcja jest używana do określenia, który widok należy wyrenderować,
+programistów. Wybrana akcja jest używana do określenia, który szablon należy wyrenderować,
 ale Railsy nie wykonują żadnego kodu dla tej akcji w kontrolerze. Wszystkie zmienne
-z których będziesz korzystać w widoku muszą być ustawione w aktualnej akcji przed
+z których będziesz korzystać w szablonie muszą być ustawione w aktualnej akcji przed
 wywołaniem +render+.
 
-==== Renderowanie szablonu akcji z innego kontrolera
+==== Renderowanie szablonu dla akcji z innego kontrolera
 
 Jeżeli nie wiesz co zrobić, aby wyrenderować szablon z zupełnie innego kontrolera, niż
 ten który zawiera kod akcji, tu znajdziesz odpowiedź. Możesz tego dokonać za pomocą +render+,
  które pobiera całą ścieżkę
 (relatywną do +app/views/+) kontrolera do wyrenderowania. Na przykład, jeśli uruchamiasz
 kod w +AdminProductsController+, który znajduje się w +app/controllers/admin+, możesz
-wyrenderować wynik akcji do szablonu +app/views/products+ w ten sposób:
+wyrenderować wynik akcji z wykorzystaniem szablonu +app/views/products+ w ten sposób:
 
 [source, ruby]
 -------------------------------------------------------
 render 'products/show'
 -------------------------------------------------------
 
-Railsy wiedzą, że widok ten należy do innego kontrolera dzięki wbudowanemu slashowi
-w ciąg znaków.  Jeśli chcesz to dodatkowo zaznaczyć w kodzie, możesz użyć opcji +:template+
+Railsy wiedzą, że szablon ten należy do innego kontrolera dzięki slashowi
+pojawiającemu się w łańcuchu znaków.  Jeśli chcesz to dodatkowo zaznaczyć w kodzie, możesz użyć opcji +:template+
 (która była wymagana w Railsach 2.2 i wcześniejszych):
 
 [source, ruby]
@@ -173,17 +178,18 @@ render :template => 'products/show'
 
 ==== Renderowanie dowolnego pliku
 
-Metoda +render+ może również korzystać z widoku, który znajduje się zupełnie poza
-aplikacją (gdy prawdopodobnie dzielisz widoki między dwoma aplikacjami):
+Metoda +render+ może również korzystać z szablonu, który znajduje się zupełnie poza
+aplikacją (gdy prawdopodobnie dzielisz szablony między dwoma aplikacjami):
 
 [source, ruby]
 -------------------------------------------------------
 render "/u/apps/warehouse_app/current/app/views/products/show"
 -------------------------------------------------------
 
-Railsy stwierdzą, że jest to renderowanie pliku dzięki slashowi na początku stringu.
+Railsy stwierdzą, że jest to renderowanie pliku dzięki slashowi na początku
+łańcucha znaków.
 Chcąc to dodatkowo zaznaczyć, możesz użyć opcji +:file+ (która była wymagana w Railsach
-2.2 i wcześniejszych wersjach):
+2.2 i wcześniejszych):
 
 [source, ruby]
 -------------------------------------------------------
@@ -191,7 +197,7 @@ render :file => "/u/apps/warehouse_app/current/app/views/products/show"
 -------------------------------------------------------
 
 Opcja +:file+ pobiera bezwzględną ścieżkę w systemie plików. Oczywiście, musisz mieć
-odpowiednie prawa odczytu widoku, którego używasz do wyrenderowania zawartości.
+odpowiednie prawa odczytu szablonu, którego używasz do wyrenderowania zawartości.
 
 NOTE: Domyślnie ten plik jest renderowany bez użycia aktualnego layoutu. Jeśli chcesz
 by Railsy zastosowały aktualny layout musisz dodać opcję +:layout => true+.
@@ -202,7 +208,7 @@ jak w Uniksie.
 
 ==== Używanie +render+ z +:inline+
 
-Metoda +render+ może obejść się bez jakiegokolwiek widoku, jeśli tylko użyjesz opcji
+Metoda +render+ może obejść się bez jakiegokolwiek szablonu, jeśli tylko użyjesz opcji
 +:inline+ przekazując ERB kod, który ma wyrenderować. Dlatego następujący kod jest całkowicie poprawny:
 
 [source, ruby]
@@ -213,7 +219,7 @@ render :inline => "<% products.each do |p| %><p><%= p.name %><p><% end %>"
 WARNING: Rzadko jednak istnieje dobry powód by użyć tej opcji. Mieszanie ERB wewnątrz
 twoich kontrolerów niszczy zorientowanie Railsów na MVC i powoduje, że innym developerom
 jest trudniej podążać za tokiem twojego myślenia. Zamiast tego lepiej używaj oddzielnych
-widoków erb.
+szablonów erb.
 
 Renderowanie typu inline domyślnie używa ERB. Możesz zmusić je by użyło zamiast
 tego np.  Buildera, za pomocą opcji +:type+:
@@ -255,7 +261,7 @@ zapytania lub zapytanie serwisu webowego, które spodziewają się czegoś inneg
 niż kod HTML.
 
 NOTE: Domyślnie, jeśli korzystasz z opcji +:text+, plik zostanie wyrenderowany bez
-użycia aktualnego layoutu. Jeśli chcesz by Railsy umieściły text wewnątrz aktualnego
+użycia aktualnego layoutu. Jeśli chcesz by Railsy umieściły tekst wewnątrz aktualnego
 layoutu, musisz skorzystać z opcji +:layout => true+.
 
 ==== Renderowanie JSON
@@ -270,7 +276,7 @@ render :json => @product
 -------------------------------------------------------
 
 TIP: Nie musisz wywoływać funkcji +to_json+ na obiekcie, który chcesz wyrenderować.
-Jeśli użyjesz opcji +:json, render+ automatycznie wywoła to +to_json+ za Ciebie.
+Jeśli użyjesz opcji +:json, render+ automatycznie wywoła +to_json+ za Ciebie.
 
 ==== Renderowanie XML
 
@@ -322,7 +328,7 @@ render :file => filename, :content_type => 'application/rss'
 Większość opcji renderowania wyświetla zawartość jako część aktualnego layoutu. Poznasz dokładniej layouty i jak z nich korzystać w dalszej części
 tego przewodnika.
 
-Możesz użyć opcji +:layout+ by zakomunikować Railsom, by użyło określonego pliku jako
+Możesz użyć opcji +:layout+ by zakomunikować Railsom, by użyły określonego pliku jako
 layout dla bieżącej akcji.
 
 [source, ruby]
@@ -398,7 +404,7 @@ class ApplicationController < ActionController::Base
 end
 -------------------------------------------------------
 
-Z tą deklaracją, wszystkie widoki w całej aplikacji będą korzystać z 
+Z tą deklaracją, wszystkie szablony w całej aplikacji będą korzystać z 
 +app/views/layouts/main.html.erb+ jako swojego layoutu.
 
 ===== Wybór layoutu w czasie wykonania
@@ -437,7 +443,7 @@ end
 ===== Warunkowe layouty
 
 Layouty określone w kontrolerze obsługują opcje +:only+ i +:except+, które
-akceptują albo pojedynczą nazwę metody albo tablicę nazw:
+akceptują albo pojedynczą nazwę akcji albo tablicę nazw:
 
 [source, ruby]
 -------------------------------------------------------
@@ -448,9 +454,9 @@ class ProductsController < ApplicationController
 end
 -------------------------------------------------------
 
-Z tymi deklaracjami, layout +inventory+ byłby wykorzystywany tylko do metody +index+,
-layout +product+ byłby wykorzystywany do wszystkiego oprócz metody +rss+, a metoda
-+rss+ będzie mieć layout określony poprzez domyślne zasady wyboru.
+Z tymi deklaracjami, layout +inventory+ byłby wykorzystywany tylko do akcji +index+,
+layout +product+ byłby wykorzystywany do wszystkiego oprócz akcji +rss+, a
+akcja +rss+ będzie mieć layout określony poprzez domyślne zasady wyboru.
 
 ===== Dziedziczenie layoutów
 
@@ -507,7 +513,7 @@ end
 
 W tej aplikacji:
 
-* Domyślnie widoki będą renderowane z wykorzystaniem layoutu +main+
+* domyślnie szablony będą renderowane z wykorzystaniem layoutu +main+
 * +PostController#index+ będzie używać layoutu +main+
 * +SpecialPostController#index+ będzie używać layoutu +special+
 * +01dPostsController#show+ nie będzie używać żadnego layoutu
@@ -534,8 +540,9 @@ end
 
 Jeśli +@book.special?+ ewaluuje do +true+, Railsy rozpoczną proces
 renderowania przez
-wrzucenie zmiennej +@book+ do widoku +special_show+. Ale to _nie_ zatrzyma reszty kodu
-w akcji +show+ przed wykonaniem i jeśli Railsy dojdą do końca akcji to nastąpi próba wyrenderowania widoku +show+ co spowoduje błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno
+wrzucenie zmiennej +@book+ do szablonu +special_show+. Ale to _nie_ zatrzyma reszty kodu
+w akcji +show+ przed wykonaniem i jeśli Railsy dojdą do końca akcji to nastąpi
+próba wyrenderowania szablonu +show+ co spowoduje błąd. Rozwiązanie jest proste: upewnij się, że masz tylko jedno
 wywołanie +render+ lub +redirect+ w jednej części kodu. Jedną z rzeczy, które mogą
 pomóc jest +and return+. Oto poprawiona wersja metody:
 
@@ -552,7 +559,7 @@ end
 === Używanie +redirect_to+
 
 Innym sposobem obsługi odpowiedzi na żądanie HTTP jest użycie +redirect_to+.
-Jak widziałeś, +render+ informuje Railsy, który widok użyć do konstrukcji odpowiedzi.
+Jak widziałeś, +render+ informuje Railsy, który szablon użyć do konstrukcji odpowiedzi.
 Metoda +redirect_to+ robi coś zupełnie innego: mówi przeglądarce by wysłać nowe zapytanie
 pod inny adres URL. Na przykład można przekierować z dowolnego miejsca w kodzie do indeksu
 zdjęć twojej aplikacji za pomocą tego wywołania:
@@ -609,7 +616,8 @@ end
 
 Kod w tej formie prawdopodobnie będzie stanowić problem, jeśli zmienna +@book+ jest
 ustawiona na +nil+. Pamiętaj, +render :action+ nie uruchamia żadnego kodu w docelowej
-akcji, więc nic nie ustawi zmiennej +@books+ na wartość, której oczekuje widok +index+.
+akcji, więc nic nie ustawi zmiennej +@books+ na wartość, której oczekuje
+szablonu +index+.
 Jednym sposobem aby to naprawić jest przekierowanie zamiast renderowania:
 
 [source, ruby]
@@ -648,33 +656,33 @@ head :created, :location => photo_path(@photo)
 
 == Strukturyzacja layoutów
 
-Kiedy Railsy renderują widok, łączą go z
+Kiedy Railsy renderują szablon, łączą go z
 bieżącym layoutem (stosując zasady wyboru layoutu,
 które zostały omówione we wcześniejszej części tutoriala). W layoucie masz dostęp
 do trzech narzędzi służących do łączenia różnych elementów do postaci
 wynikowej:
 
-* Asset tags
+* asset tags
 * +yield+ i +content_for+
-* Podszablony
+* podszablony
 
 Omówię każdą z nich po kolei.
 
 === Asset Tags
 
-Asset tags dostarczają metody do generowania kodu HTML, który łączy widoki z elementami
-zewnętrznymi takimi jak obrazki, javascript, arkusze stylów i kanały. Istnieją cztery typy
-tagów włączających:
+Helpery _asset tags_ dostarczają metod do generowania kodu HTML, który łączy szablon z elementami
+zewnętrznymi takimi jak obrazki, javascript, arkusze stylów i kanały. Istnieją
+cztery takie helpery:
 
-* auto_discovery_link_tag
-* javascript_include_tag
-* stylesheet_link_tag
-* image_tag
+* +auto_discovery_link_tag+
+* +javascript_include_tag+
+* +stylesheet_link_tag+
+* +image_tag+
 
-Możesz używać tych tagów w layoutach lub innych widokach, choć tagi inne niż +image_tag+
+Możesz używać tych tagów w layoutach lub innych szablonach, choć tagi inne niż +image_tag+
 są powszechnie używane w sekcji +<head>+ layoutu.
 
-WARNING: Asset tags _nie_ weryfikują tego czy dany element zewnętrzny istnieje w 
+WARNING: Helpery asset tags _nie_ weryfikują tego czy dany element zewnętrzny istnieje w 
 określonym miejscu. Po prostu zakładają, że wiesz co robisz i generują link.
 
 ==== Włączanie kanałów za pomocą +auto_discovery_link_tag+
@@ -876,16 +884,16 @@ Istnieją również trzy specjalne opcje, które można używać z +image_tag+:
 
 * +:alt+ określa alternatywny tekst dla obrazka (który domyślnie jest nazwą pliku,
   napisaną wielkimi literami bez rozszerzenia)
-* +:size+ ustawia zarówno szerokość jak i wysokość, w formacie "{width}x{height}"
-  (for example, "150x125")
+* +:size+ ustawia zarówno szerokość jak i wysokość, w formacie _width_ x _height_ 
+  (na przykład "150x125")
 * +:mouseover+ ustawia alternatywny obrazek, który ma być użyty w przypadku, gdy wywołane
-  jest zdarzenie onmouseover.
+  jest zdarzenie onmouseover
 
 === Zrozumienie +yield+
 
 W ramach kontekstu layoutu, +yield+ identyfikuje sekcję do której powinna być wstawiona
-zawartość widoku. Najprostszym sposobem użycia jest posiadanie jednego +yield+, w
-którym powinna być wstawiana cała zawartość obecnie renderowanego widoku.
+zawartość szablonu. Najprostszym sposobem użycia jest posiadanie jednego +yield+, w
+którym powinna być wstawiana cała zawartość obecnie renderowanego szablonu.
 
 [source, html]
 -------------------------------------------------------
@@ -912,13 +920,13 @@ Można również tworzyć layout z wieloma miejscami wstawiania kodu.
 </html>
 -------------------------------------------------------
 
-Główna część widoku będzie zawsze renderowana do +yield+ bez argumentu. Aby wyrenderować
+Główna część szablonu będzie zawsze renderowana do +yield+ bez argumentu. Aby wyrenderować
 zawartość w nazwanym +yield+, należy użyć metody +content_for+.
 
 === Używanie +content_for+
 
 Metoda ta pozwala wstawić treść do bloku +yield+ w twoim layoucie. Używa się +content_for+
-tylko po to by wstawić zawartość w nazwane yielda. Dla przykładu, ten widok będzie
+tylko po to by wstawić zawartość w nazwane yieldy. Dla przykładu, ten szablon będzie
 współpracował z powyższym layoutem:
 
 [source, html]
@@ -945,21 +953,21 @@ Wynik renderowania tej strony z tym layoutem powinien być taki:
 -------------------------------------------------------
 
 Metoda +content_for+ jest bardzo przydatna kiedy twój layout posiada odrębne regiony,
-takie jak paski boczne i stopki, które powinny mieć wstawiane własne bloki zawartości.
+takie jak paski boczne i stopki, które powinny mieć własne bloki zawartości.
 Jest to także przydatne do wstawiania tagów które wczytują specyficzny dla danej strony
 plik javascript lub css w nagłówek layoutu.
 
 === Używanie podszablonów
 
 Częściowe szablony (ang. partial templates) – zazwyczaj nazywane po prostu podszablonami
-lub ,,parszalami'' - są kolejnym narzędziem służącym do dzielenia procesu renderowania
+lub "parszalami" - są kolejnym narzędziem służącym do dzielenia procesu renderowania
 na mniejsze kawałki. Za pomocą podszablonów, możesz przenieść kod renderujący odpowiedniej
 części odpowiedzi do jego własnego pliku.
 
 ==== Nazywanie podszablonów
 
-By wyrenderować podszablon jako część widoku, musisz użyć metody render wewnątrz tego
-widoku i dołączyć opcję +:partial+:
+By wyrenderować podszablon jako część szablonu, musisz użyć metody +render+ wewnątrz tego
+szablonu i dołączyć opcję +:partial+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -967,9 +975,9 @@ widoku i dołączyć opcję +:partial+:
 -------------------------------------------------------
 
 To wyrenderuje plik nazwany +_menu.html.erb+ w tym momencie wewnątrz aktualnie 
-renderowanego widoku. Zauważ początkowy znak podkreślenia: 
+renderowanego szablonu. Zauważ początkowy znak podkreślenia: 
 podszablony są nazywane w ten sposób
-by odróżnić je od zwyczajnych widoków, nawet jeśli odnosi się do nich bez podkreślenia.
+by odróżnić je od zwyczajnych szablonów, nawet jeśli odnosi się do nich bez podkreślenia.
 To działa nawet jeśli włączasz podszablon z zupełnie innego folderu:
 
 [source, ruby]
@@ -979,12 +987,12 @@ To działa nawet jeśli włączasz podszablon z zupełnie innego folderu:
 
 Ten kod włączy podszablon z +app/views/shared/_menu.html.erb+.
 
-==== Korzystanie z podszablonów do uproszczenia widoków
+==== Korzystanie z podszablonów do uproszczenia szablonów
 
 Jednym ze sposobów wykorzystania podszablonów jest traktowanie ich jako
 odpowiedników procedur: jako sposób aby przenieść 
-detale na zewnątrz widoku, tak by łatwiej zrozumieć
-co się dzieje wewnątrz. Na przykład, możesz mieć widok, który wygląda w ten sposób:
+detale na zewnątrz szablonu, tak by łatwiej zrozumieć
+co się dzieje wewnątrz. Na przykład, możesz mieć szablon, który wygląda w ten sposób:
 
 [source, html]
 -------------------------------------------------------
@@ -1007,7 +1015,8 @@ możesz użyć podszablonów bezpośrednio z layoutów.
 
 ==== Layouty podszablonów
 
-Podszablon może użyć swojego własnego pliku layoutu, tak samo jak może to robić widok.
+Podszablon może użyć swojego własnego pliku layoutu, tak samo jak może to
+robić zwykły szablon.
 Na przykład możesz odwołać się do niego w ten sposób:
 
 [source, html]
@@ -1024,7 +1033,7 @@ znajdują się im odpowiadające podszablony (nie w głównym folderze +layouts+
 
 Możesz również przekazać lokalne zmienne do podszablonów, czyniąc z nich bardziej
 potężne i elastyczne narzędzie. Na przykład możesz użyć tej techniki do zredukowania
-powtarzania pomiędzy stronami new i edit, wciąż jednak utrzymując w nich nieco odmienną
+powtarzania pomiędzy stronami +new+ i +edit+, wciąż jednak utrzymując w nich nieco odmienną
 treść:
 
 +new.html.erb+:
@@ -1060,7 +1069,7 @@ treść:
 <% end %>
 -------------------------------------------------------
 
-Jakkolwiek ten sam podszablon będzie renderowany w obu widokach, etykieta na przycisku
+Jakkolwiek ten sam podszablon będzie renderowany w obu szablonach, etykieta na przycisku
 wysyłającym jest kontrolowana przez lokalną zmienną przekazywaną do podszablonów.
 
 Każdy podszablon ma także lokalną zmienną z taką samą nazwą jak on sam (minus podkreślenie).
@@ -1087,7 +1096,7 @@ zapisu:
 <%= render :partial => @customer %>
 -------------------------------------------------------
 
-Zakładając, że zmienna +@customer+ zawiera instancje modelu +Customer+,  do renderowania 
+Zakładając, że zmienna +@customer+ zawiera instancję modelu +Customer+,  do renderowania 
 użyty zostanie +_customer.html.erb+.
 
 ==== Renderowanie kolekcji
@@ -1187,7 +1196,7 @@ sposób, a Railsy wybierają właściwy podszablon dla każdego członka kolekcj
 <p>Name: <%= employee.name %></p>
 -------------------------------------------------------
 
-W tym przypadku, Railsy użyją podszablonu customer lub employee jako odpowiednie dla
+W tym przypadku, Railsy użyją podszablonu +customer+ lub +employee+ jako odpowiednie dla
 każdego elementu kolekcji.
 
 === Korzystanie z zagnieżdżonych layoutów
@@ -1195,7 +1204,7 @@ każdego elementu kolekcji.
 Może się okazać, że twoja aplikacja w jednym kontrolerze wymaga layoutu nieco różniącego się od standardowego layoutu twojej aplikacji. Rozwiązaniem, zamiast edycji kopii głównego layoutu, może być wykorzystanie mechanizmu zagnieżdżonych layoutów.
 Oto przykład:
 
-Załóżmy, że masz następujący layout ApplicationController:
+Załóżmy, że masz następujący layout dla `ApplicationController`:
 
 +app/views/layouts/application.erb+
 
@@ -1210,12 +1219,13 @@ Załóżmy, że masz następujący layout ApplicationController:
 <body>
   <div id="top_menu">Top menu items here</div>
   <div id="menu">Menu items here</div>
+  <div id="content"><%= yield :content %></div>
   <div id="main"><%= yield %></div>
 </body>
 </html>
 -------------------------------------------------------
 
-Na stronach generowanych przez NewsController, chciałbyś ukryć górne menu i dodać prawe:
+Na stronach generowanych przez +NewsController+, chciałbyś ukryć górne menu i dodać prawe:
 
 +app/views/layouts/news.erb+
 
@@ -1225,9 +1235,8 @@ Na stronach generowanych przez NewsController, chciałbyś ukryć górne menu i 
   #top_menu {display: none}
   #right_menu {float: right; background-color: yellow; color: black}
 <% end -%>
-<% content_for :main %>
+<% content_for :content %>
   <div id="right_menu">Right menu items here</div>
-  <%= yield %>
 <% end -%>
 <% render :file => 'layouts/application' %>
 -------------------------------------------------------
@@ -1235,7 +1244,8 @@ Na stronach generowanych przez NewsController, chciałbyś ukryć górne menu i 
 NOTE: W wersjach Railsów wcześniejszych niż 2.3, powinieneś użyć +render
 \'layouts/applications\'+ zamiast +render :file => \'layouts/applications'+
 
-I to wszystko. Widok News będzie używał nowego layoutu, ukrywającego górne menu i dodającego prawe menu wewnątrz div "content".
+I to wszystko. Szablon +news+ będzie używał nowego layoutu, ukrywającego górne
+menu i dodającego prawe menu wewnątrz sekcji +content+.
 
 Istnieje kilka sposobów otrzymania podobnych wyników za pomocą różnych schematów
 wykorzystania zagnieżdżonych layoutów wykorzystujących tą technikę. 
