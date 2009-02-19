@@ -560,148 +560,150 @@ Jak %0A jest feedem linii w kodowaniu URL, tak w Railsach automatycznie konwertu
 [source, ruby]
 ----------------------------------------------------------------------------
 
-=== Privilege escalation
+=== Eskalacja przywilejów
+  
+-- _Zmiana pojedynczego parametru może dać użytkownikowi nieautoryzowany dostęp. Pamiętaj, że każdy parametr może ulec zmianie, bez względu na to jak bardzo go ukrywasz zacierasz._ 
 
--- _Changing a single parameter may give the user unauthorized access. Remember that every parameter may be changed, no matter how much you hide or obfuscate it._
-
-The most common parameter that a user might tamper with, is the id parameter, as in +http://www.domain.com/project/1+, whereas 1 is the id. It will be available in params[:id] in the controller. There, you will most likely do something like this:
-
+Najpopularniejszym parametrem, który użytkownik może modyfikować, jest parametr id, jak w http://www.domain.com/project/1+, gdziet 1 jest identyfikatorem. Jest on dostępny w params[:id] w kontrolerze. Najprawdopodobniej będziesz mógł teraz zrobić coś takiego: 
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 @project = Project.find(params[:id])
 ----------------------------------------------------------------------------
 
-This is alright for some web applications, but certainly not if the user is not authorized to view all projects. If the user changes the id to 42, and he is not allowed to see that information, he will have access to it anyway. Instead, [,#fffcdb]#query the user's access rights, too#:
+Jest to w porządku dla niektórych aplikacji internetowych, ale z pewnością nie w przypadku, gdy użytkownik nie ma uprawnień, aby zobaczyć wszystkie projekty. Jeśli użytkownik zmienia id na 42 i nie jest uprawniony do przeglądania informacji, to i tak będzie miał do nich dostęp. Zamiast tego[#,fffcdb]#pytaj również o prawa dostępu użytkownika#: 
 
 [source, ruby]
 ----------------------------------------------------------------------------
 @project = @current_user.projects.find(params[:id])
 ----------------------------------------------------------------------------
 
-Depending on your web application, there will be many more parameters the user can tamper with. As a rule of thumb, [,#fffcdb]#no user input data is secure, until proven otherwise, and every parameter from the user is potentially manipulated#.
+W zależności od twojej aplikacji internetowej, może być o wiele więcej parametrów, które użytkownik może modyfikować. Przyjmij zasadę, że [#,fffcdb]#żadne dane wejściowe użytkownika nie są bezpieczne, dopóki nie zostanie udowodnione, że jest inaczej. Użytkownik może manipulować każdym parametrem#. 
+ 
+Nie daj się nabrać na ściemnione bezpieczeństwo i bezpieczeństwo JavaScript. Toolbar progamisty dla przeglądarki Mozilla Firefox pozwala przejrzeć i zmienić każde ukryte pole formularza. [#,fffcdb]#JavaScript może być wykorzystywany w celu weryfikacji danych użytkownika, ale z pewnością nie po to, by zapobiec wysyłaniu złośliwych żądań z nieoczekiwanymi wartościami#. Wtyczka Live Http Headers do przeglądarki Mozilla Firefox rejestruje każde żądanie, może go powtarzać i zmieniać. Jest to prosty sposób na ominięcie wszelkich walidacji przez JavaScript. Są też nawet proxy po stronie klienta, które pozwalają na przechwytywanie wszelkich żądań i odpowiedzi z i do Internetu. 
+ 
+== Atak typu Injection
+  
+- _Klasa ataków typu ijection polega na wprowadzeniu złośliwego kodu lub parametrów do aplikacji internetowej w celu uruchomienia jej w kontekście jej bezpieczeństwa. Czołowy przykład ataku typu injection jest atak cross-site scripting (XSS) I atak typu SQL injection._ 
 
-Don‘t be fooled by security by obfuscation and JavaScript security. The Web Developer Toolbar for Mozilla Firefox lets you review and change every form's hidden fields. [,#fffcdb]#JavaScript can be used to validate user input data, but certainly not to prevent attackers from sending malicious requests with unexpected values#. The Live Http Headers plugin for Mozilla Firefox logs every request and may repeat and change them. That is an easy way to bypass any JavaScript validations. And there are even client-side proxies that allow you to intercept any request and response from and to the Internet.
+Atak typu injection jest bardzo podstępny, ponieważ ten sam kod lub parametr może być złośliwy w jednym kontekście, ale całkowicie nieszkodliwy w innym. Kontekstem może być kodowanie, zapytania lub język programowania, powłoka (Shell) lub metoda w Ruby/Rails. Poniższe sekcje będą obejmować wszystkie ważne konteksty gdzie mogą wystąpić ataki typu injection. Pierwsza część obejmuje architektoniczne decyzje w związku z atakiem typu injection. 
+ 
+=== Białe listy vs Czarne listy
+  
+-- _Przy poprawianiu, ochronie lub sprawdzeniu czegoś, białe wygrywają z czarnymi listami._
 
-== Injection
+Czarna lista może być zbiorem złych adresów e-mail, niepublicznych działań lub złych tagów HTML. Jest przeciwieństwem do białej listy, która zawiera dobre adresy e-mail, publiczne działania, dobre znaczniki HTML i tak dalej. Chociaż czasami nie jest możliwe stworzenie białej (na przykład filtr antyspamowy), [,#fffcdb]#lepiej używać białej list#: 
+ 
+- Korzystaj z: before_filter:only => [...] zamiast: expect => [...]. W ten sposób nie zapomnisz go wyłączyć dla świeżo dodanych akcji. 
+- Korzystaj z: attr_accessible zamiast: attr_protected. Szczegóły znajdziesz w sekcji o masowym przypisaniu. 
+- Zezwól na <strong> zamiast usuwania <script> przeciwko Cross-Site Scripting (XSS). Zobacz poniżej. 
+- Nie próbuj poprawiać wejścia użytkownika przez czarne listy: 
+   * W ten sposób atak będzie działał tak: "<sc<script>ript>".gsub("<script>", "")
+   * Ale odrzucaj nieprawidłowe wejście 
+ 
+Białe są również dobre w przypadku gdy ludzie zapominają pewnych rzeczy umieścić na czarnych listach. 
 
--- _Injection is a class of attacks that introduce malicious code or parameters into a web application in order to run it within its security context. Prominent examples of injection are cross-site scripting (XSS) and SQL injection._
+=== Atak typu SQL Injection
+  
+-- _Dzięki zmyślnym metodom, ten problem zniknął już z większości aplikacji Railsowych. Jest to jednak bardzo niszczycielski i powszechny atak na aplikacje internetowe, więc ważne jest, aby zrozumieć problem._ 
 
-Injection is very tricky, because the same code or parameter can be malicious in one context, but totally harmless in another. A context can be a scripting, query or programming language, the shell or a Ruby/Rails method. The following sections will cover all important contexts where injection attacks may happen. The first section, however, covers an architectural decision in connection with Injection.
-
-=== Whitelists versus Blacklists
-
--- _When sanitizing, protecting or verifying something, whitelists over blacklists._
-
-A blacklist can be a list of bad e-mail addresses, non-public actions or bad HTML tags. This is opposed to a whitelist which lists the good e-mail addresses, public actions, good HTML tags and so on. Although, sometimes it is not possible to create a whitelist (in a SPAM filter, for example), [,#fffcdb]#prefer to use whitelist approaches#:
-
-- Use before_filter :only => [...] instead of :except => [...]. This way you don't forget to turn it off for newly added actions.
-- Use attr_accessible instead of attr_protected. See the mass-assignment section for details
-- Allow <strong> instead of removing <script> against Cross-Site Scripting (XSS). See below for details.
-- Don't try to correct user input by blacklists:
- * This will make the attack work: "<sc<script>ript>".gsub("<script>", "")
- * But reject malformed input
-
-Whitelists are also a good approach against the human factor of forgetting something in the blacklist.
-
-=== SQL Injection
-
--- _Thanks to clever methods, this is hardly a problem in most Rails applications. However, this is a very devastating and common attack in web applications, so it is important to understand the problem._
-
-==== Introduction
-
-SQL injection attacks aim at influencing database queries by manipulating web application parameters. A popular goal of SQL injection attacks is to bypass authorization. Another goal is to carry out data manipulation or reading arbitrary data. Here is an example of how not to use user input data in a query:
+==== Wstęp
+  
+Atak typu SQL injection ma na celu wpływanie na zapytania do bazy danych poprzez manipulowanie parametrami aplikacji internetowej. Popularnym celem ataków typu SQL injection jest ominięcie autoryzacji. Kolejnym celem jest manipulacja danymi lub odczyt dowolnych danych. Oto przykład, jak nie używać danych wejściowych użytkownika w zapytaniu: 
 
 [source, ruby]
 ----------------------------------------------------------------------------
 Project.find(:all, :conditions => "name = '#{params[:name]}'")
 ----------------------------------------------------------------------------
 
-This could be in a search action and the user may enter a project's name that he wants to find. If a malicious user enters ' OR 1=1', the resulting SQL query will be:
-
+Może to być w akcji wyszukiwania i użytkownik może wpisać nazwę projektu, który chce znaleźć. Jeśli złośliwy użytkownik wpisze ' OR 1=1', wynikiem zapytania SQL będzie:
+ 
 ..........
 SELECT * FROM projects WHERE name = '' OR 1 --'
 ..........
-
-The two dashes start a comment ignoring everything after it. So the query returns all records from the projects table including those blind to the user. This is because the condition is true for all records.
-
-==== Bypassing authorization
-
-Usually a web application includes access control. The user enters his login credentials, the web applications tries to find the matching record in the users table. The application grants access when it finds a record. However, an attacker may possibly bypass this check with SQL injection. The following shows a typical database query in Rails to find the first record in the users table which matches the login credentials parameters supplied by the user.
+ 
+Dwie kreski rozpoczynają komentarz ignorując wszystko po nim. Zatem zapytanie zwraca wszystkie rekordy z tabeli projekty, w tym te niewidoczne dla użytkownika. Dzieje się tak, ponieważ warunek jest prawdziwy dla wszystkich rekordów.
+ 
+==== Pominięcie autoryzacji
+ 
+Zwykle aplikacja internetowa zawiera kontrolę dostępu. Użytkownik wprowadza jego dane logowania, a aplikacja próbuje znaleźć pasujący rekord w tabeli użytkowników. Aplikacja zapewnia dostęp, jeżeli znajdzie rekord. Jednakże, osoba atakująca może ewentualnie pominąć ten krok poprzez atak SQL injection. Poniżej pokazane jest typowe zapytanie do bazy danych w Railsach w celu znalezienia pierwszego rekordu w tabeli użytkowników, który pasuje do parametrów logowania dostarczonych przez użytkownika. 
 
 [source, ruby]
 ----------------------------------------------------------------------------
 User.find(:first, "login = '#{params[:name]}' AND password = '#{params[:password]}'")
 ----------------------------------------------------------------------------
-
-If an attacker enters ' OR '1'='1 as the name, and ' OR '2'>'1 as the password, the resulting SQL query will be:
-
+ 
+Jeżeli atakujący wprowadzi ' OR '1'='1 jako imię i ' OR '2'>'1 jako hasło, rezultat zapytania SQL będzie następujący:
+ 
 .........
 SELECT * FROM users WHERE login = '' OR '1'='1' AND password = '' OR '2'>'1' LIMIT 1
 .........
-
-This will simply find the first record in the database, and grants access to this user.
-
-==== Unauthorized reading
-
-The UNION statement connects two SQL queries and returns the data in one set. An attacker can use it to read arbitrary data from the database. Let's take the example from above:
-
+ 
+To po prostu znajdzie pierwszego użytkownika w bazie danych i zapewni mu dostęp do aplikacji.
+ 
+==== Nieautoryzowane czytanie
+ 
+UNIA łączy dwa zapytania SQL i zwraca dane w jednym zestawie. Atakujący może jej użyć do odczytu arbitralnych danych z bazy danych. Weźmy przykład z góry: 
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 Project.find(:all, :conditions => "name = '#{params[:name]}'")
 ----------------------------------------------------------------------------
 
-And now let's inject another query using the UNION statement:
-
+A teraz wprowadźmy inne zapytanie używając UNII: 
+ 
 ............
 ') UNION SELECT id,login AS name,password AS description,1,1,1 FROM users --
 ............
-
-This will result in the following SQL query:
-
+ 
+W rezultacie otrzymamy następujące zapytanie SQL:
+ 
 ............
 SELECT * FROM projects WHERE (name = '') UNION 
   SELECT id,login AS name,password AS description,1,1,1 FROM users --')
 ............
 
-The result won't be a list of projects (because there is no project with an empty name), but a list of user names and their password. So hopefully you encrypted the passwords in the database! The only problem for the attacker is, that the number of columns has to be the same in both queries. That's why the second query includes a list of ones (1), which will be always the value 1, in order to match the number of columns in the first query.
+Rezultatem nie będzie lista projektów (ponieważ nie ma projektu z pustym polem nazwy), tylko lista nazw użytkowników i ich hasła. Więc miejmy nadzieję, że zaszyfrowałeś hasła w bazie danych! Jedynym problemem dla atakującego jest to, że liczba kolumn musi być taka sama w obu zapytaniach. Dlatego drugie zapytanie zawiera listę jedynek (1), która zawsze będzie mieć wartość 1, w celu dopasowania liczby kolumn w pierwszym zapytaniu. 
+ 
+Również drugie zapytanie zmienia nazwy niektórych kolumn korzystając z AS tak aby aplikacja internetowa wyświetlała wartości z tabeli użytkowników. Pamiętaj, aby zaktualizować Railsy http://www.rorsecurity.info/2008/09/08/sql-injection-issue-in-limit-and-offset-parameter/[przynajmniej do wersji 2.1.1]. 
 
-Also, the second query renames some columns with the AS statement so that the web application displays the values from the user table. Be sure to update your Rails http://www.rorsecurity.info/2008/09/08/sql-injection-issue-in-limit-and-offset-parameter/[to at least 2.1.1].
+ 
+==== Sposoby ochrony
+ 
+Ruby on Rails jest wyposażone w specjalny filtr dla znaków SQL, do których należą znaki ucieczki ' , " , znak NULL i podziały wiersza. [,#Fffcdb]#Korzystając z Model.find(id) lub Model.find_by_something(coś) automatycznie stosujesz ochronę#. Ale fragmenty SQL, szczególnie [,#fffcdb]#fragmenty w conditions (:conditions => "..."), metody connection.execute() lub Model.find_by_sql() muszą być stosowane ręcznie#. 
 
-==== Countermeasures
-
-Ruby on Rails has a built in filter for special SQL characters, which will escape ' , " , NULL character and line breaks. [,#fffcdb]#Using Model.find(id) or Model.find_by_some thing(something) automatically applies this countermeasure[,#fffcdb]#. But in SQL fragments, especially [,#fffcdb]#in conditions fragments (:conditions => "..."), the connection.execute() or Model.find_by_sql() methods, it has to be applied manually#.
-
-Instead of passing a string to the conditions option, you can pass an array to sanitize tainted strings like this:
+Zamiast przekazywania ciągu do opcji conditions, możesz przekazać tablicę do oczyszczenia zanieczyszczonego ciągu znaków w taki sposób: 
 
 [source, ruby]
 ----------------------------------------------------------------------------
 Model.find(:first, :conditions => ["login = ? AND password = ?", entered_user_name, entered_password])
 ----------------------------------------------------------------------------
 
-As you can see, the first part of the array is an SQL fragment with question marks. The sanitized versions of the variables in the second part of the array replace the question marks. Or you can pass a hash for the same result:
-
+Jak widać, pierwsza część tablicy jest fragmentem SQL ze znakami zapytania. W oczyszczonej wersji zmienne w drugiej części tablicy zastąpiły znaki zapytania. To samo można zrobić z hashem: 
+ 
 [source, ruby]
 ----------------------------------------------------------------------------
 Model.find(:first, :conditions => {:login => entered_user_name, :password => entered_password})
 ----------------------------------------------------------------------------
+ 
+Tablica lub formularz hasha jest dostępny tylko w instancjach modelu. Możesz spróbować +sanitize_sql()+ gdzie indziej. [,#fffcdb]#Nabierz nawyku myślenia o konsekwencjach dla bezpieczeństwa gdy korzystasz z zewnętrznego ciągu znaków w SQL#. 
 
-The array or hash form is only available in model instances. You can try +sanitize_sql()+ elsewhere. [,#fffcdb]#Make it a habit to think about the security consequences when using an external string in SQL#.
+=== Atak Cross-Site Scripting (XSS)
 
-=== Cross-Site Scripting (XSS)
+- _Najbardziej rozpowszechnionym i zarazem jednym z najbardziej niszczycielski dla aplikacji internetowych jest atak typu XSS. Ten złośliwy atak wprowadza wykonywalny kod po stronie klienta. Railsy dostarczają helpery, żeby się przed nim bronić._ 
 
--- _The most widespread, and one of the most devastating security vulnerabilities in web applications is XSS. This malicious attack injects client-side executable code. Rails provides helper methods to fend these attacks off._
+ 
+==== Punkty wejścia
 
-==== Entry points
+Punkt wejścia jest to podatny URL i jego parametry, gdzie atakujący może rozpocząć atak.
 
-An entry point is a vulnerable URL and its parameters where an attacker can start an attack.
+Najczęstszymi punktami wejścia są posty, komentarze użytkowników i księgi gości, ale tytuły projektów, nazwy dokumentów i strony z wynikami wyszukiwania również są narażone - niemal wszystkie miejsca, w których użytkownik może wprowadzać dane. Ale wejście nie musi pochodzić z pól wejścia na stronach internetowych. Może być to jakikolwiek parametr URL - nawet, ukryty lub wewnętrzny. Pamiętaj, że użytkownik może przechwycić jakikolwiek ruch. Aplikacje, takie jak http://livehttpheaders.mozdev.org/[wtyczka Live HTTP Headers Firefox] lub Proxy po stronie klienta ułatwiają zmianę żądania. 
 
-The most common entry points are message posts, user comments, and guest books, but project titles, document names and search result pages have also been vulnerable - just about everywhere where the user can input data. But the input does not necessarily have to come from input boxes on web sites, it can be in any URL parameter – obvious, hidden or internal. Remember that the user may intercept any traffic. Applications, such as the http://livehttpheaders.mozdev.org/[Live HTTP Headers Firefox plugin], or client-site proxies make it easy to change requests.
+Ataki XSS działają w taki sposób: Atakujący wprowadza jakiś kod, aplikacja internetowa zapisuje go i wyświetla na stronie, a później przedstawia ofiarze. Większość przykładów XSS prostu wyświetla okno ostrzegawcze (alert box), ale jest to dużo bardziej groźne. XSS może wykraść cookies, przechwytywać sesje; przekierowywać ofiary do fałszywej strony internetowej, wyświetlać reklamy na korzyść atakującego, zmieniać elementy na stronie internetowej, aby uzyskać poufne informacje lub instalować złośliwe oprogramowanie poprzez luki w przeglądarce internetowej. 
 
-XSS attacks work like this: An attacker injects some code, the web application saves it and displays it on a page, later presented to a victim. Most XSS examples simply display an alert box, but it is more powerful than that. XSS can steal the cookie, hijack the session; redirect the victim to a fake website, display advertisements for the benefit of the attacker, change elements on the web site to get confidential information or install malicious software through security holes in the web browser.
-
-During the second half of 2007, there were 88 vulnerabilities reported in Mozilla browsers, 22 in Safari, 18 in IE, and 12 in Opera. The http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf[Symantec Global Internet Security threat report] also documented 239 browser plug-in vulnerabilities in the last six months of 2007. http://pandalabs.pandasecurity.com/archive/MPack-uncovered_2100_.aspx[Mpack] is a very active and up-to-date attack framework which exploits these vulnerabilities. For criminal hackers, it is very attractive to exploit an SQL-Injection vulnerability in a web application framework and insert malicious code in every textual table column. In April 2008 more than 510,000 sites http://www.0x000000.com/?i=556[were hacked] like this, among them the British government, United Nations and many more high targets.
-
-A relatively new, and unusual, form of entry points are banner advertisements. In earlier 2008, malicious code appeared in banner ads on popular sites, such as MySpace and Excite, according to http://blog.trendmicro.com/myspace-excite-and-blick-serve-up-malicious-banner-ads/[Trend Micro].
+W drugiej połowie 2007 r. było 88 zgłoszonych usterek w Mozilli, 22 w Safari, 18 w IE, a 12 w Operze. W http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf[sprawozdaniu Symantec Internet Security Globalne] także udokumentowano 239 usterek we wtyczkach do przeglądarek w ciągu ostatnich sześciu miesięcy 2007 roku. http://pandalabs.pandasecurity.com/archive/MPack-uncovered_2100_.aspx [MPack] jest bardzo aktywnym i aktualnym frameworkiem ataku , który wykorzystuje te luki. Dla hakerów, wizja wykorzystania luk podatnych na ataki typu SQL Injection we frameworkach aplikacji internetowych i wprowadzenie złośliwego kodu w każdej kolumnie tabel tekstowych jest bardzo kuszące. W kwietniu 2008 ponad 510.000 stron http://www.0x000000.com/?i=556 [były zhakowane] jak tak. Wśród nich znalazły się strony brytyjskiego rządu, ONZ i wiele innych poważnych celów. 
+ 
+Stosunkowo nowymi i niecodziennymi formami punktów wejścia są banery reklamowe. We wcześniejszych miesiącach 2008 roku, złośliwy kod ukazał się w reklamach w formie baneru na popularnych witrynach, takich jak MySpace i Excite, zgodnie z http://blog.trendmicro.com/myspace-excite-and-blick-serve-up-malicious-banner-ads/[Trend Micro]. 
 
 ==== HTML/JavaScript Injection
 
