@@ -28,31 +28,31 @@ Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygod
 
 == Co to są Railsy?
 
-Railsy są internetowo rozwijanym frameworkiem napisanym w języku Ruby. Zostały one tak zaprojektowane, aby ułatwić programowanie aplikacji internetowych, dostarczając zbiór wytycznych, od których każdy deweloper musi zacząć. Pozwalają one na pisanie krótszego kodu, niż jest to możliwe podczas używania większości innych języków i frameworków. Poza tym, projektanci uważają, że wykorzystanie Railsów przy tworzeniu aplikacjach internetowych sprawia przyjemność.
+Railsy są internetowym frameworkiem napisanym w języku Ruby. Zostały one tak zaprojektowane, aby ułatwić programowanie aplikacji internetowych, dostarczając zbiór wytycznych, od których każdy deweloper musi zacząć. Pozwalają one na pisanie krótszego kodu, niż ma to miejsce podczas używania większości innych języków i frameworków. Poza tym, programiści uważają, że wykorzystanie Railsów przy tworzeniu aplikacjach internetowych sprawia przyjemność.
 
-Railsy są "upartym" oprogramowaniem. Oznacza to, że są stworzone, aby zachęcić do wyboru najlepszej drogi, a w niektórych przypadkach -  by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy nawykach charakterystycznych dla programowania w innych językach lub będziesz wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne. 
+Railsy są opiniowanym oprogramowaniem. Oznacza to, że są stworzone, aby zachęcić do wyboru najlepszej drogi, a w niektórych przypadkach -  by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy nawykach charakterystycznych dla programowania w innych językach lub będziesz wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne. 
 
 Filozofia Railsów zawiera kilka zasad:
 
-* DRY - "Don't Repeat Yourself" (Nie powtarzaj się) - sugeruje, że pisanie tego samego kodu przez cały czas jest złe.
-* Konwencja Ponad Konfiguracją - Railsy wychodzą z założenia, że wiesz co chcesz zrobić i w jaki sposób, dlatego nie zmuszają Cię do samodzielnego ustawiania każdego najdrobniejszego szczegółu
+* DRY - "Don't Repeat Yourself" (Nie powtarzaj się) - sugeruje, że wielokrotne pisanie tego samego kodu przez cały czas jest złe.
+* Konwencja Ponad Konfiguracją - Railsy przyjmują pewne założenia, na temat tego co chcesz zrobić i w jaki sposób, dlatego nie zmuszają Cię do samodzielnego ustawiania każdego najdrobniejszego szczegółu
 * REST jest najlepszym wzorem dla aplikacji internetowych - organizowanie aplikacji wokół zasobów i standardowych zapytań HTTP jest najszybszym możliwym rozwiązaniem
 
 === Architektura MVC 
 
 Railsy są zorganizowane wokół trzech komponentów aplikacji: modelu (model), widoku (view), kontrolera (controller), co w skrócie nazywany MVC. Wzorzec MVC obejmuje: 
 
-* odizolowanie logiki biznesowej od interfejsu użytkownika 
+* odizolowanie logiki biznesowej aplikacji od interfejsu użytkownika 
 * łatwość utrzymania kodu zgodnie z zasadą DRY 
 * wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co ułatwia zarządzenie tym kodem
 
 ==== Modele
 
-Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.
+Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Znaczna część logik biznesowych Twojej aplikacji będzie skoncentrowana w modelach.
 
 ==== Widoki
 
-Widoki tworzą interfejs użytkownika aplikacji. W Railsach, widoki są często plikami HTML zawierającymi kod w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją danych. Przede wszystkim są odpowiedzialne za dostarczanie danych do przeglądarki internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.
+Widoki tworzą interfejs użytkownika aplikacji. W Railsach widoki są często plikami HTML z zagnieżdżonym kodem w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją danych. Przede wszystkim są odpowiedzialne za dostarczanie danych do przeglądarki internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.
 
 ==== Kontrolery 
 
