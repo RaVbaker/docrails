@@ -28,31 +28,31 @@ Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygod
 
 == Co to są Railsy?
 
-Railsy są internetowym frameworkiem napisanym w języku Ruby. Zostały one tak zaprojektowane, aby ułatwić programowanie aplikacji internetowych, dostarczając zbiór wytycznych, od których każdy deweloper musi zacząć. Pozwalają one na pisanie krótszego kodu, niż ma to miejsce podczas używania większości innych języków i frameworków. Poza tym, programiści uważają, że wykorzystanie Railsów przy tworzeniu aplikacjach internetowych sprawia przyjemność.
+Railsy są internetowo rozwijanym frameworkiem napisanym w języku Ruby. Zostały one tak zaprojektowane, aby ułatwić programowanie aplikacji internetowych, dostarczając zbiór wytycznych, od których każdy deweloper musi zacząć. Pozwalają one na pisanie krótszego kodu, niż jest to możliwe podczas używania większości innych języków i frameworków. Poza tym, projektanci uważają, że wykorzystanie Railsów przy tworzeniu aplikacjach internetowych sprawia przyjemność.
 
-Railsy są opiniowanym oprogramowaniem. Oznacza to, że są stworzone, aby zachęcić do wyboru najlepszej drogi, a w niektórych przypadkach -  by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy nawykach charakterystycznych dla programowania w innych językach lub będziesz wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne. 
+Railsy są "upartym" oprogramowaniem. Oznacza to, że są stworzone, aby zachęcić do wyboru najlepszej drogi, a w niektórych przypadkach -  by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy nawykach charakterystycznych dla programowania w innych językach lub będziesz wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne. 
 
 Filozofia Railsów zawiera kilka zasad:
 
-* DRY - "Don't Repeat Yourself" (Nie powtarzaj się) - sugeruje, że wielokrotne pisanie tego samego kodu przez cały czas jest złe.
-* Konwencja Ponad Konfiguracją - Railsy przyjmują pewne założenia, na temat tego co chcesz zrobić i w jaki sposób, dlatego nie zmuszają Cię do samodzielnego ustawiania każdego najdrobniejszego szczegółu
+* DRY - "Don't Repeat Yourself" (Nie powtarzaj się) - sugeruje, że pisanie tego samego kodu przez cały czas jest złe.
+* Konwencja Ponad Konfiguracją - Railsy wychodzą z założenia, że wiesz co chcesz zrobić i w jaki sposób, dlatego nie zmuszają Cię do samodzielnego ustawiania każdego najdrobniejszego szczegółu
 * REST jest najlepszym wzorem dla aplikacji internetowych - organizowanie aplikacji wokół zasobów i standardowych zapytań HTTP jest najszybszym możliwym rozwiązaniem
 
 === Architektura MVC 
 
 Railsy są zorganizowane wokół trzech komponentów aplikacji: modelu (model), widoku (view), kontrolera (controller), co w skrócie nazywany MVC. Wzorzec MVC obejmuje: 
 
-* odizolowanie logiki biznesowej aplikacji od interfejsu użytkownika 
+* odizolowanie logiki biznesowej od interfejsu użytkownika 
 * łatwość utrzymania kodu zgodnie z zasadą DRY 
 * wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co ułatwia zarządzenie tym kodem
 
 ==== Modele
 
-Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Znaczna część logik biznesowych Twojej aplikacji będzie skoncentrowana w modelach.
+Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.
 
 ==== Widoki
 
-Widoki tworzą interfejs użytkownika aplikacji. W Railsach widoki są często plikami HTML z zagnieżdżonym kodem w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją danych. Przede wszystkim są odpowiedzialne za dostarczanie danych do przeglądarki internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.
+Widoki tworzą interfejs użytkownika aplikacji. W Railsach, widoki są często plikami HTML zawierającymi kod w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją danych. Przede wszystkim są odpowiedzialne za dostarczanie danych do przeglądarki internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.
 
 ==== Kontrolery 
 
@@ -60,7 +60,7 @@ Kontrolery "sklejają" modele i widoki. W Railsach odpowiadają za przetwarzanie
 
 === Składniki Railsów
 
-Rails dostarcza pełnego zestawu komponentów do tworzenia aplikacji internetowych. Są to: 
+Railsy dostarczają wszystkich potrzebnych komponentów do tworzenia aplikacji internetowych. Są to: 
 
 * Action Controller
 * Action View
@@ -72,15 +72,15 @@ Rails dostarcza pełnego zestawu komponentów do tworzenia aplikacji internetowy
 
 ==== Action Controller
 
-Action Controller jest komponentem zarządzającym kontrolerami w Railsowej aplikacji. Framework kontrolera Action Controller przetwarza przychodzące do aplikacji Railsowej zapytania, wydobywa z nich parametry i wysyła je do odpowiedniej akcji. Usługi świadczone przez Action Controller obejmują zarządzanie sesją (session), szablon renderowania (template rendering) i przekierowanie zarządzania.
+Action Controller jest komponentem zarządzającym kontrolerami w Railsowej aplikacji. Framework kontrolera Action Controller przetwarza przychodzące zapytania, wydobywa z nich parametry i wysyła je do odpowiedniej akcji. Usługi świadczone przez Action Controller obejmują zarządzanie sesją (session), szablon renderowania (template rendering) i przekierowanie zarządzania.
 
 ==== Action View
 
-Action View zarządza widokami Twojej Railsowej aplikacji. Możne tworzyć zarówno HTML i XML wyjście domyślnie. Action View zarządza szablonami renderowania, w tym zagnieżdżonymi szablonami i podszablonami (partial templates) i zagnieżdżonych szablonów, wykorzystując wbudowane wsparcie AJAX.
+Action View zarządza widokami Twojej Railsowej aplikacji. Może domyślnie tworzyć zarówno widok HTML jak i XML. Action View zarządza szablonami renderowania (w tym szablonami zagnieżdżonymi oraz podszablonami) i wykorzystuje wbudowane wsparcie AJAX.
 
 ==== Active Record
 
-Active Record jest podstawą dla modeli w Railsowej aplikacji. Dostarcza on niezależną bazę danych, dostarcza podstawowe funkcje aplikacji - CRUD (create, read, update and delete - utwórz, odczytaj, aktualizuj, usuń), zaawansowane znajdywanie możliwości i zdolność do wiązania modeli ze sobą pomiędzy różnymi usługami.
+Active Record jest podstawą dla modeli w Railsowej aplikacji. Dostarcza on niezależną bazę danych, podstawowe funkcje aplikacji - CRUD (create, read, update and delete - utwórz, odczytaj, aktualizuj, usuń), zaawansowane znajdywanie możliwości i zdolność do wiązania modeli ze sobą pomiędzy różnymi usługami.
 
 ==== Action Mailer
 
@@ -92,7 +92,7 @@ Active Resource dostarcza framework dla zarządzania połączeniami pomiędzy ob
 
 ==== Railties
 
-Railties jest rdzeniem kodu Rails, który buduje nowe aplikacje Railsowe i skleja ze sobą różne frameworki w Railsowych aplikacjach.
+Railties jest rdzeniem kodu Rails, który buduje nowe aplikacje Railsowe i skleja w nich ze sobą różne frameworki.
 
 ==== Active Support
 
@@ -102,15 +102,15 @@ Active Support jest obszernym zbiorem użytecznych klas oraz standardowych bibli
 
 Praca doktorska Roya Fieldinga link:http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm[Architectural Styles and the Design of Network-based Software Architectures] jest powszechnie uznawana za podstawę działania architektury RESTful. Na szczęście, nie musisz czytać tego całego dokumentu, aby zrozumieć, jak działa REST w Rails. REST (Representational State Transfer) jest stylem architektury oprogramowania sprowadzającym się do dwóch podstawowych zasad: 
 
-* Korzystanie z zasobów identyfikatorów (które na potrzeby tego przewodnika możesz traktować jakoadresy URL) w celu reprezentacji tych zasobów
+* Korzystanie z zasobów identyfikatorów (które na potrzeby tego przewodnika możesz traktować jako adresy URL) by je przedstawić.
 
-* Przesyłanie reprezentacji stanów tego zasobu pomiędzy elementami systemu. 
+* Przesyłanie przedstawień stanów tego zasobu pomiędzy elementami systemu. 
 
-Na przykład, aplikacja Railsowa takie zapytanie:
+Na przykład, dla aplikacja Railsowej takie zapytanie:
 
 +DELETE /photos/17+
 
-będzie rozumiała jako odniesienia do źródła zdjęcia o ID 17, oraz wskaże żądane działanie - usunięcie tego źródła. REST to naturalny styl architektury aplikacji internetowych i Railsy czynią go jeszcze bardziej naturalnym, poprzez korzystanie z konwencji, które pozwalają na nie przejmowanie się złożnością RESTful oraz różnicami pomiędzy przeglądarkami.
+będzie rozumiane jako odniesienie się do źródła zdjęcia o ID 17, oraz wskazanie żądanego działania - usunięcie tego źródła. REST to intuicyjny styl architektury aplikacji internetowych, które Railsy czynią jeszcze bardziej naturalnym, poprzez korzystanie z konwencji, które pozwalają na nie przejmowanie się złożnością RESTful oraz różnicami pomiędzy przeglądarkami.
 
 Jeśli chciałbyś dowiedzieć się czegoś więcej na temat REST jako styl architektonicznego, polecam bardziej przystępne źródła od tezy Fieldinga: 
 
@@ -133,9 +133,9 @@ $ gem install rails
 
 NOTE: Istnieją pewne szczególne okoliczności, w których można zastosować alternatywną strategię instalacji:
 
-* Jeśli pracujesz w systemie Windows, będzie Ci łatwiej zainstalować link:http://instantrails.rubyforge.org/wiki/wiki.pl[Instant Rails]. Powinieneś jednak uważać instalując Instant Rails, aby wersja Railsów była aktualna. Ponadto, Windowsowa wersja Railsów jest ogólnie mniej przyjazna w użyciu niż na innych systemach operacyjnych. Jeśli to możliwe, polecamy korzystanie z Linuksowej maszyny wirtualnej. 
+* Jeśli pracujesz w systemie Windows, będzie Ci łatwiej zainstalować link:http://instantrails.rubyforge.org/wiki/wiki.pl[Instant Rails]. Pamiętaj jednak, że Instant Rails rzadko są aktualną wersją Railsów. Ponadto, Windowsowa wersja Railsów jest ogólnie mniej przyjazna w użytowaniu niż na innych systemach operacyjnych. Jeśli to możliwe, polecamy korzystanie z Linuksowej maszyny wirtualnej. 
 
-* Jeżeli chcesz być na bieżąco z najnowszymi zmianami w środowisku Rails, proponujemy skopiowanie kodu źródłowego z  link:http://github.com/rails/rails/tree/master[githuba] Aczkolwiek nie jest to zalecane dla początkujących
+* Jeżeli chcesz być na bieżąco z najnowszymi zmianami w środowisku Rails, proponujemy skopiowanie kodu źródłowego z  link:http://github.com/rails/rails/tree/master[githuba], aczkolwiek nie jest to opcja zalecana dla początkujących
 
 === Tworzenie bloga 
 
@@ -160,7 +160,7 @@ A jeśli używasz PostgreSQL do przechowywania danych, zastosuj polecenie:
 $ rails blog -d postgresql
 -------------------------------------------------------
 
-NOTE: Uruchamiając raili -h możesz zobaczyć wszystkie akceptowane przez aplikację Railsową przełączniki. :
+NOTE: Uruchamiając raili -h możesz zobaczyć wszystkie akceptowane przez aplikację Railsową przełączniki.
 
 Po utworzeniu aplikacji, przejdź do odpowiedniego folderu, aby móc kontynuować swoją pracę:
 
@@ -169,29 +169,29 @@ Po utworzeniu aplikacji, przejdź do odpowiedniego folderu, aby móc kontynuowa�
 $ cd blog
 -------------------------------------------------------
 
-Railsy utworzy folder o nazwie "blog" w Twoim roboczym katalogu. Otwórz ten folder i przyjrzyj się jego zawartości. Podczas pracy z tym przewodnikiem, w większości będziemy korzystać z folderu app/, ale poniżej możesz zapoznać się z podstawowymi funkcjami, które domyślnie utworzą Railsy.
+Railsy utworzy folder o nazwie +blog+ w Twoim roboczym katalogu. Otwórz ten folder i przyjrzyj się jego zawartości. Podczas pracy z tym przewodnikiem, w większości będziemy korzystać z folderu +app/+, ale poniżej możesz zapoznać się z podstawowymi funkcjami, które domyślnie utworzą Railsy.
 
 [options="header"]
 |==========================================================================================================
 |File/Folder |Purpose
-|+README+		|Jest to krótka instrukcja dla danej aplikacji. Użyj jej, aby poinformować innych między innymi o tym, jak działa Twoja aplikacja i jak ją można uruchomić.
+|+README+		|Jest to krótka instrukcja dla danej aplikacji. Za jej pomocą możesz poinformować innych na przykład o tym, jak działa Twoja aplikacja i jak ją można uruchomić.
 |+Rakefile+	|Plik ten zawiera listę działań aplikacji, które można uruchomić poprzez terminal.
 |+app/+		|Folder zawiera kontrolery, modele i widoki dla danej aplikacji. Na tym folderze będziemy koncentrować się w dalszej części tego przewodnika.
-|+config/+		|Folder zawierający pliki konfiguracyjne dla aplikacji, odpowiadające za sposoby uruchamiania, bazę danych, ścieżki dostępu etc.
-|+db/+			|Pokazuje aktualny schemat bazy danych, jak również migracje (migration) baz danych. 
+|+config/+		|Folder zawierający pliki konfiguracyjne dla aplikacji, odpowiadające za sposoby jej uruchamiania, bazę danych, ścieżki dostępu etc.
+|+db/+			|Pokazuje aktualny schemat bazy danych, jak również ich migracje (o których niedługo będziemy się uczyć). 
 |+doc/+		|Pełna dokumentacja Twojej aplikacji.
 |+lib/+		|Dodatkowe moduły dla Twojej aplikacji, których nie uwzględniono w tym przewodniku
 |+log/+		|Archiwum plików
-|+public/+		|Jedyny całkowicie dostępny publicznie folder. Są to wszelkie zdjęcia, arkusze stylów (CSS),  To właśnie zdjęcia, JavaScript, arkuszy stylów (CSS), JavaScript i inne statyczne pliki wyjściowe
+|+public/+		|Jedyny całkowicie dostępny publicznie folder. Są to wszelkie zdjęcia, JavaScript, arkusze stylów (CSS) i inne statyczne pliki wyjściowe
 |+script/+		|Skrypty dostarczone przez Rails w celu wykonywania powtarzających się zadań, takich jak analiza porównawcza, instalowanie wtyczek (plugin) i uruchamianiu konsoli lub serwera WWW
 |+test/+		|Testy jednostkowe, tak zwane "fixtures" oraz inne narzędzia służące do przeprowadzania testów.  Są one opisane w: link:../testing_rails_applications.html[Testowanie aplikacji Rails]
 |+tmp/+		|Pliki tymczasowe
-|+vendor/+		|Miejsce na kod, którego sami nie napisaliśmy, ale chcemy wykorzystać (tak zwani "trzeci dostawcy"). W standardowej aplikacji środowiska Rails, zawiera Ruby Gems, kod źródłowy Rubiego (jeśli zastosujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
+|+vendor/+		|Miejsce na kod, którego sami nie napisaliśmy, ale chcemy wykorzystać (tak zwani "trzeci dostawcy"). W standardowej aplikacji środowiska Rails zawiera Ruby Gems, kod źródłowy Rubiego (jeśli zastosujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
 |==========================================================================================================
 
 === Konfiguracja bazy danych
 
-Każda aplikacja Railsowa korzysta z bazy danych. Rodzaj baza danych, której używamy, jest określony w pliku konfiguracyjnym +config/database.yml+.
+Prawie każda aplikacja Railsowa korzysta z bazy danych. Rodzaj baza danych, której używamy, jest określony w pliku konfiguracyjnym +config/database.yml+.
 Jeśli otworzysz ten plik w nowej aplikacji Railsowej, zostanie wyświetlona domyślna konfiguracja bazy danych SQLite. Plik zawiera części dla trzech różnych środowisk, w których Rails może być uruchomiony domyślnie: 
 
 * środowisko +rozwojowe+ jest używane na komputerze programisty jako interfejs użytkownika 
@@ -200,9 +200,9 @@ Jeśli otworzysz ten plik w nowej aplikacji Railsowej, zostanie wyświetlona dom
 
 ==== Konfiguracja bazy danych SQLite 
 
-Railsy mają wbudowaną obsługę link:http://www.sqlite.org/[SQLite], który jest lekką, nie obciążającą serwera aplikacją bazy danych. Podczas przeciążenia SQLite przez środowisko produkcyjne, wciąż dobrze działa środowisko testowe i rozwojowe. Railsy domyślnie używają SQLite tworząc nowy projekt, ale zawsze można to później zmienić.
+Railsy mają wbudowaną obsługę link:http://www.sqlite.org/[SQLite], który jest lekką, nie obciążającą serwera aplikacją bazy danych. Mimo przeciążenia SQLite przez środowisko produkcyjne, wciąż dobrze działa on podczas dalszego pisania programu oraz testów. Railsy domyślnie używają SQLite tworząc nowy projekt, ale zawsze można to później zmienić.
 
-Poniżej prezentujemy częśc domyślnej konfiguracji pliku z informacji dla środowiska rozwojowego:
+Poniżej znajduje się część domyślnej konfiguracji pliku z informacją dla środowiska rozwojowego:
 
 [source, ruby]
 -------------------------------------------------------
@@ -212,7 +212,7 @@ development:
   timeout: 5000
 -------------------------------------------------------
 
-Jeśli nie masz żadnej zainstalowanej bazy danych, najłatwiej będzie Ci skorzystać z SQLite, w czym może być pomocny Ruby Gems (Posiadacze Maca z OS X 10.5 lub nowszym mają to zainstalowane domyślnie):
+Jeśli nie masz żadnej zainstalowanej bazy danych, najłatwiej będzie Ci skorzystać z SQLite, w czym może być pomocny Ruby Gems (posiadacze Maca z OS X 10.5 lub nowszym mają to zainstalowane domyślnie):
 
 [source, shell]
 -------------------------------------------------------
@@ -259,11 +259,11 @@ Teraz, gdy masz już skonfigurowaną bazę danych, czas by Railsy stworzyły dla
 -------------------------------------------------------
 $ rake db:create
 -------------------------------------------------------
-NOTE: "Rake" jest poleceniem startującym ogólnego zastosowania, które Railsy używają do wielu rzeczy. By zobaczyć dostępne dla nich komendy uruchom "rake -T". :
+NOTE: "Rake" jest poleceniem startującym ogólnego zastosowania, które Railsy używają do wielu rzeczy. By zobaczyć dostępne dla nich komendy uruchom "rake -T".
 
 == Witaj Rails!
 
-Jednym z tradycyjnych sposobów uczenia się nowego języka jest pobieżne przeglądnięcie jego tekstu. By tak zrobić w Railsach, konieczne jest stworzenie przynajmniej kontrolera oraz widoku.. Na szczęście możesz to zrobić używając pojedynczej komendy, wpisując ją do terminala:
+Jednym z tradycyjnych sposobów uczenia się nowego języka jest pobieżne przeglądnięcie jego tekstu. By tak zrobić w Railsach, konieczne jest stworzenie przynajmniej kontrolera oraz widoku. Na szczęście możesz to zrobić używając pojedynczej komendy, wpisując ją do terminala:
 
 [source, shell]
 -------------------------------------------------------
@@ -272,7 +272,7 @@ $ script/generate controller home index
 
 TIP: Jeżeli używasz Windowsa, lub gdy twój Ruby jest skonfigurowany w niestandardowy sposób, możliwe że będziesz potrzebował przekazać komendy +script+ Railsów bezpośrednio do Ruby'ego: +ruby script/generate controller home index+.
 
-Railsy stworzyły dla Ciebie parę plików, włączając w to +app/views/home/index.html.erb+ - czyli szablon, który będzie używany do pokazywania efektów +index+ action (method) w +home+ kontrolerze. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego tę pojedynczą linijkę kodu:
+Railsy stworzyły dla Ciebie parę plików, włączając w to +app/views/home/index.html.erb+ - czyli szablon, który będzie używany do pokazywania efektów +index+ action (method) w kontrolerze +home+. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego tę pojedynczą linijkę kodu:
 
 
 [source, html]
@@ -282,7 +282,7 @@ Railsy stworzyły dla Ciebie parę plików, włączając w to +app/views/home/in
 
 === Uruchamianie serwera WWW.
 
-W chwili obecnej, za pomocą jedynie dwóch komend, masz gotowy i działający Railsowy program! Uruchamiając przeglądarkę na swoim komputerze programisty, za pomocą kolejnej komendy startowej: $ script/Server, będziesz mógł go zobaczyć.
+Teraz, za pomocą jedynie dwóch komend, masz gotowy i działający Railsowy program! Będziesz mógł go zobaczyć uruchamiając przeglądarkę na swoim komputerze, za pomocą kolejnej komendy startowej:
 
 [source, shell]
 -------------------------------------------------------
@@ -314,7 +314,7 @@ map.connect ':controller/:action/:id'
 map.connect ':controller/:action/:id.:format'
 -------------------------------------------------------
 
-Domyślne ścieżki przenoszą proste żądania, takie jak +/home/index+: Railsy tłumaczą je w postaci prośby do akcji +index+ w +home+ kontrolerze. Kolejny przykład, +/posts/edit/1+ uruchomi akcję +edit+ w +posts+ kontrollera z +id+ 1.
+Domyślne ścieżki przenoszą proste żądania, takie jak +/home/index+: Railsy tłumaczą je w postaci prośby do akcji +index+ w kontrolerze +home+. Kolejny przykład, +/posts/edit/1+ uruchomi akcję +edit+ w kontrolerze +posts+ z +id+ 1.
 
 By połączyć Twoją stronę domową, będziesz potrzebować kolejnej linii do pliku routingu, powyżej domyślnej ścieżki: 
 
@@ -331,7 +331,7 @@ NOTE: Więcej informacji na temat routingu znajdziesz w link:../routing_outside_
 
 == Szybki start dzięki rusztowaniu.
 
-Railsowe rusztowanie (_scaffolding_) jest szybkim sposobem na stworzenia znacznej części programu. Jeśli chcesz stworzyć modele, widoki i kontrolery dla nowych zasobów w pojedynczej operacji, to jest to odpowiednim narzędziem dla Ciebie.
+Railsowe rusztowanie (_scaffolding_) jest szybkim sposobem na napisanie znacznej części programu. Jeśli chcesz stworzyć modele, widoki i kontrolery dla nowych zasobów w pojedynczej operacji, to jest to odpowiednie narzędzie dla Ciebie.
 
 == Tworzenie obiektu
 
@@ -367,7 +367,7 @@ Generator rusztowania zbuduje w Twoim programie 14 plików, wspólnie z paroma f
 
 === Uruchamianie Migracji
 
-Jednym z produktów komendy: +script/generate scaffold+ jest _database migration_. Migracje są jedną z klas Ruby, które upraszczają tworzenie i modyfikowanie baz danych tabel. Railsy używają komendy „rake” by uruchamiać migracje, ale możliwe jest jej wycofanie po tym jak, została dodana do Twojej bazy danych. Nazwy plików migracji uwzględniają znaczniki czasowe by zapewnić ich przetwarzanie w porządku, w jakim zostały stworzone.
+Jednym z produktów komendy: +script/generate scaffold+ jest baza danych migracji. Migracje są jedną z klas Ruby, które upraszczają tworzenie i modyfikowanie baz danych tabel. Railsy używają komendy „rake” by uruchamiać migracje, ale możliwe jest jej wycofanie po tym jak, została dodana do Twojej bazy danych. Nazwy plików migracji uwzględniają znaczniki czasowe by zapewnić ich przetwarzanie w porządku, w jakim zostały stworzone.
 
 Oto co znajdziesz, gdy zajrzysz do pliku +db/migrate/20090113124235_create_posts.rb+ (jego nazwa u Ciebie może się trochę różnić):
 
@@ -422,7 +422,7 @@ Teraz jesteś już gotowy do pracy z postami. Na początek przejdź do: +http://
 
 image:images/posts_index.png[Posts Index screenshot]
 
-Jest to rezultat renderingu indeksu widoku Twoich postów. Aktualnie nie ma żadnych wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link „nowa wiadomość”. Możesz również przeglądać i edytować posty, a nawet je wykasować. Cały układ logiczny i HTML obsługuje pojedyncze polecenie +script/generał scaffold+.
+Jest to rezultat renderingu widoku +index+ Twoich postów. Aktualnie nie ma żadnych wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link +nowa wiadomoś+. Możesz również przeglądać i edytować posty, a nawet je wykasować. Cały układ logiczny i HTML obsługuje pojedyncze polecenie +script/generał scaffold+.
 
 TIP: W  środowisku rozwojowym (na nim domyślnie pracujesz) z każdym żądaniem przeglądarki Railsy wgrywają od nowa program, dzięki czemu nie jest konieczne wyłączanie serwera WWW.
 
@@ -438,7 +438,7 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Możliwości zmian tego pliku nie jest dużo – nie wolno jednak zapomnieć, że klasa +Post+ dziedziczy z +ActiveRecord:: Base+. Active Rekord za darmo dostarcza wielu funkcji dla Twoich Railsów, włączając w to podstawową baze danych operacji CRUD (Tworzenie, Czytanie, Aktualizowanie, Niszczenie) czy uwierzytelnianie danych – podobnie jak wsparcie  zaawansowanego wyszukiwania i zdolność do wiązania wielu różnych modeli jeden z drugim.
+Możliwości zmian tego pliku nie jest dużo – nie wolno jednak zapomnieć, że klasa +Post+ dziedziczy z +ActiveRecord::Base+. Active Rekord za darmo dostarcza wielu funkcji dla Twoich Railsów, włączając w to podstawową baze danych operacji CRUD (create, read, update and delete - utwórz, odczytaj, aktualizuj, usuń) czy uwierzytelnianie danych – podobnie jak wsparcie zaawansowanego wyszukiwania i zdolność do wiązania wielu różnych modeli jeden z drugim.
 
 === Sprawdzanie poprawności danych
 
@@ -479,7 +479,7 @@ title: nil, content: "A new post", created_at: nil, updated_at: nil>,
 "is too short (minimum is 5 characters)"]}>
 -------------------------------------------------------
 
-Powyższy kod przedstawia informację, jaką otrzymasz, gdy chcesz stworzyć nowy, ale błędny +Post+. Mechanizm jest następujący: przy próbie zapisania pojawia się wartość zwrotna +false+ (oznaczającą, że zapisanie się nie powiodło), a kod wyszczególnia nam wszystkie znalezione błędy +errors+.
+Powyższy kod przedstawia informację, jaką otrzymasz, gdy chcesz stworzyć nowy, ale błędny +Post+. Mechanizm jest następujący: przy próbie zapisania pojawia się wartość zwrotna +false+ (oznaczającą, że zapisanie się nie powiodło), a kod wyszczególnia nam wszystkie znalezione błędy w postaci +errors+.
 
 TIP: W przeciwieństwie do serwerów WWW, konsola nie wprowadza automatycznie Twojego kodu na nowo z każdą linią. By dokonać zmian w Twoim modelu za pomocą konsoli, musisz użyć komendy +reload!+
 
@@ -499,11 +499,11 @@ def index
 end
 -------------------------------------------------------
 
-Powyższy kod przypisuje przykładowa zmienną +@posts+ do tablicy wszystkich postów w bazie danych. +Post.find(:all)+ lub +Post.all+ tworzy zawołanie dla modelu Post, który bezwarunkowo zwraca wszystkie posty z bazy danych.
+Powyższy kod przypisuje przykładowa zmienną +@posts+ do tablicy wszystkich postów w bazie danych. +Post.find(:all)+ lub +Post.all+ tworzy zawołanie dla modelu +Post+, który bezwarunkowo zwraca wszystkie posty z bazy danych.
 
 TIP: Więcej informacji na temat znajdowania rekordów za pomocą Active Record znajdziesz w link:../finders.html[Active Record Finders]
 
-Blok +respond_to+ obsługuje obydwa zawołania dla tej akcji - zarówno HTML jak i XML. Jeśli przejdziesz do +http://localhost:3000/posts.xml+, to zobaczysz wszystkie posty w formacie XML. Natomiast format HTML znajduję się w widoku +app/views/posts+, nazwanym tak samo jak odpowiadająca mu akcja. Rails same przenoszą wszystkie przykładowe zmienne z dostępnych akcji do widoku. Oto +app/view/posts/index.html.erb+:
+Blok +respond_to+ obsługuje obydwa zawołania dla tej akcji - zarówno HTML jak i XML. Jeśli przejdziesz do +http://localhost:3000/posts.xml+, to zobaczysz wszystkie posty w formacie XML. Natomiast format HTML znajduję się w widoku +app/views/posts+, nazwanym tak samo jak odpowiadająca mu akcja. Railsy same przenoszą wszystkie przykładowe zmienne z dostępnych akcji do widoku. Oto +app/view/posts/index.html.erb+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1266,18 +1266,3 @@ http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/2[Lighthouse 
 * October 13, 2008: First complete draft by link:../authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
 * October 12, 2008: More detail, rearrangement, editing by link:../authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
 * September 8, 2008: initial version by James Miller (not yet approved for publication)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
