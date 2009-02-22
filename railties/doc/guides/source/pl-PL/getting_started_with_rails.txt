@@ -566,11 +566,11 @@ Widok stanowi tylko część całego procesu przedstawiania przez HTML Twojej st
 </html>
 -------------------------------------------------------
 
-Gdy teraz odświeżysz stronę +/posts+, zobaczysz szare tło. Taki sam będzie używany dla wszystkich widoków postów.
+Gdy teraz odświeżysz stronę +/posts+, zobaczysz szare tło. Takie samo będzie używane dla wszystkich widoków postów.
 
 === Tworzenie nowego postu.
 
-Nowy post tworzy się za pomocą dwóch akcji. Pierwszą jest +new+, która tworzy nowy, pusty obiekt +Post+:
+Nowy post kreuje się za pomocą dwóch akcji. Pierwszą jest +new+, która tworzy nowy, pusty obiekt +Post+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -615,7 +615,7 @@ Widok +new.html.erb+ wyświetli dla użytkownika pusty Post:
 
 Blok +form_for+ jest używany do tworzenia formy HTML. Wewnątrz niego masz dostęp do metod, które umożliwiają zbudowanie różnorodnych sposobów kontroli form. Przykładowo: +f.text_field :name+ prosi Railsy, by stworzyły w danej formie pole do wprowadzania tekstu i połączyły go z nazwą przykładowo wyświetlanego atrybutu. Możesz użyć tej metody tylko z takimi atrybutami modelu, które są podstawą formy (w tym wypadku +name+, +title+, i +content+). Rails preferencyjnie uzywa +form_for+ do stworzenia surowego kodu HTML. Dzięki temu jest on bardziej zwięzły i wyraźnie widać związek formy z konkretnym modelem.
 
-TIP: Jeśli potrzebujesz stworzyć formę HTML, która pokazuje dowolne pole, nie pasujące do modelu, powinieneś użyć metody +form_tag+, umożliwiające szybkie zbudowanie form, których nie trzeba łączyć z konkretnym modelem.
+TIP: Jeśli potrzebujesz stworzyć formę HTML, która pokazuje dowolne pole, niezwiązane z modelem, powinieneś użyć metody +form_tag+. Umożliwia ona szybkie zbudowanie form, których nie trzeba łączyć z konkretnym modelem.
 
 Gdy użytkownik kliknie na przycisk +create+, przeglądarka wyśle informacje zwrotną do metody kontrolera +create+ (Railsy wiedzą, że mają posłużyć się metodą +create+, ponieważ forma jest wysyłana za pomocą żądania HTTP POST – jest to jedna z tych umownych rzeczy, o których wspomniałem wcześniej):
 
@@ -637,9 +637,9 @@ def create
 end
 -------------------------------------------------------
 
-Akcja +create+ tworzy nowy obiekt Post z danych przekazanymi przez użytkownika w formie, który Railsy udostępnią w +params+. Po zapisaniu nowego postu, używają one +flash[:notice]+ do stworzenia wiadomości informacyjnej dla użytkownika oraz przekierowują do wyświetlanej akcji. Jeśli napotka jakiś problem, akcja +create+ pokaże po raz drugi tylko widok new , ale wraz z wiadomością o błędzie.
+Akcja +create+ tworzy nowy obiekt Post z danych przekazanymi przez użytkownika w formie, który Railsy udostępnią w +params+. Po zapisaniu nowego postu, używają one +flash[:notice]+ do stworzenia wiadomości informacyjnej dla użytkownika oraz przekierowują do wyświetlanej akcji. Jeśli napotka jakiś problem, akcja +create+ pokaże po prostu widok +new+ drugi raz, wraz z wiadomością o błędzie.
 
-Railsy zapewniają hash: +flash+ (zwyczajowo nazywany po prostu Flashem), stąd ta wiadomość może być przenoszona do innej akcji, dostarczaną użytkownikowi wraz z przydatnymi informacjami na temat statusu żądania. W przypadku +create+ użytkownik nigdy nie widzi strony renderowanej podczas procesu tworzenia postu, ponieważ jest przekierowywany do nowego postu dopiero po zapisaniu rekordu. Flash przenosi informacje do następnej akcji, zatem gdy użytkownik jest przekierowywany spowrotem do akcji +show+, ukazuje mu się informacja „Post został stworzony”.
+Railsy zapewniają hash: +flash+ (zwyczajowo nazywany Flashem), przez co wiadomość może być przeniesiona do nastepnej akcji, dając użytkownikowi przydatne informacje o statusie jego żądania. W przypadku +create+ użytkownik nigdy nie widzi strony renderowanej podczas procesu tworzenia postu, ponieważ jest przekierowywany do nowego postu dopiero po zapisaniu rekordu. Flash przenosi informacje do następnej akcji, zatem gdy użytkownik jest przekierowywany ponownie do akcji +show+, ukazuje mu się informacja „Post został stworzony”.
 
 === Prezentacja pojedynczego postu
 
