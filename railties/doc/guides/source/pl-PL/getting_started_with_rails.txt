@@ -684,7 +684,7 @@ Railsy wyświetlają go używając +show.html.erb+:
 
 === Edytowanie postów
 
-Edytowanie postu, podobnie jak tworzenie nowego, odbywa się dwustopniowo. Pierwszym krokiem jest polecenie +edit_post_path(@post)+ odnoszące się do konkretnego postu. To wywołuje nam akcję +edit+ w kontrolerze.:
+Edytowanie postu, podobnie jak tworzenie nowego, odbywa się dwustopniowo. Pierwszym krokiem jest żadanie +edit_post_path(@post)+ odnoszące się do konkretnego postu. To wywołuje nam akcję +edit+ w kontrolerze:
 
 [source, ruby]
 -------------------------------------------------------
@@ -693,7 +693,7 @@ def edit
 end
 -------------------------------------------------------
 
-Po znalezieniu zażądanego postu, Railsy, by nam go pokazać, używają +edit.html.erb+ :
+Railsy do wyświetlenia znalezionego postu używają +edit.html.erb+ :
 
 [source, ruby]
 -------------------------------------------------------
@@ -742,13 +742,13 @@ def update
 end
 -------------------------------------------------------
 
-W akcji +update+ Railsy używają na początku parametru +:id+, przechodząc z widoku edycji do rekordu zlokalizowanego w edytowanej bazie. +Update_attributes+ wywołuje, a następnie wykorzystuje pozostałe parametry, które zażądaliśmy i dołącza je do tego rekordu. Jeśli wszystko pójdzie dobrze, to użytkownik jest przekierowywany do widoku +show+ postu. Gdy jednak wystąpią jakieś problemy, Railsy zwracają go do +edit+, aby umożliwić mu poprawienie błędów.
+Railsy, by móc zlokalizować edytowany rekord bazy danych, wykorzystują znajdujący się w widoku edycji parametr +:id+ na samym początku akcji +update+. +Update_attributes+ wywołuje, a następnie wykorzystuje pozostałe parametry, które zażądaliśmy i dołącza je do tego rekordu. Gdy wszystko pójdzie dobrze użytkownik jest przekierowywany do widoku +show+ postu. Jeśli jednak wystąpią jakieś problemy, Railsy skierują go spowrotem do +edit+, aby umożliwić mu poprawienie błędów.
 
-NOTE: Uważni czytelnicy zauważa zapewne, że deklaracja +form_for+ jest identyczna dla widoków +new+ i +edit+. Railsy generują inny kod dla każdego z formularzy, ponieważ są wystarczająco mądre, żeby zauważyć, że w jednym przypadku otrzymują nowy rekord, który jeszcze nie był zapisany, natomiast w drugim istniejący rekord, który już został zapisany w bazie danych. W produkcyjnej aplikacji Rails normalnie wyeliminowałbyś tę duplikację poprzez przeniesienie powtarzającego się kodu do podszablonu (_partial template_), który następnie byłby włączany w oba nadrzędne szablony. Jednakże generator rusztowań próbuje nie robić zbyt wielu założeń i tworzy kod, który łatwo modyfikować, jeżeli chcesz mieć różne formularze do akcji +create+ i +edit+.
+NOTE: Uważni czytelnicy zapewne zauważyli, że deklaracja +form_for+ jest taka sama dla widoków +new+ i +edit+. Railsy generują inny kod dla każdego z formularzy, ponieważ są na tyle bystre, żeby zauważyć, że w jednym przypadku otrzymują nowy rekord, który jeszcze nie był zapisany, natomiast w drugim istniejący rekord, który już został zapisany w bazie danych. Podczas pisania programu w Railsach normalnie wyeliminowałbyś tę duplikację poprzez przeniesienie powtarzającego się kodu do podszablonu, który następnie byłby włączany w oba nadrzędne szablony. Jednakże generator rusztowań próbuje nie tworzyć zbyt wielu założeń i generuje kod, który łatwo modyfikować, gdy chcesz mieć różne formularze do akcji +create+ i +edit+.
 
 === Kasowanie Postu
 
-Ostatecznie, klikając na jednym z linków kategorii +destroy+, wysyłane jest powiązane id do akcji +destroy+ :
+Wreszcie, kliknięcie na jednym z linków kategorii +destroy+ wysyła powiązane id do akcji +destroy+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -763,15 +763,15 @@ def destroy
 end
 -------------------------------------------------------
 
-Metoda +destroy+ modelu Active Record natychmiast usuwa odpowiadający mu rekord z bazy danych. Gdy to zostanie zrobione, nie ma już żadnego rekordu do wyświetlenia, dlatego Railsy przekierowują przeglądarkę użytkownika prosto do widoku index tego modelu.
+Metoda +destroy+ modelu Active Record natychmiast usuwa odpowiadający mu rekord z bazy danych. Po tej operacji nie ma już żadnego rekordu do wyświetlenia, dlatego Railsy przekierowują przeglądarkę użytkownika prosto do widoku index tego modelu.
 
 == Wykorzystanie zasady DRY
 
-W tym miejscu warto byś przyjrzał się paru narzędziom, które Railsy oferują do usuwania duplikatów w Twoim kodzie. Szczególnie zwrócimy uwagę na te, które możesz czasami używać do ich eliminacji z widoków oraz na filtrach (_filters_), które są pomocne przy takich operacjach.
+W tym miejscu warto przyjrzeć się paru narzędziom, które Railsy oferują do usuwania duplikatów w Twoim kodzie. Szczególnie zwrócimy uwagę na _partials_, które możesz używać do eliminacji duplikatów z widoków oraz filtrach (_filters_), które pomagają się z nimi uporać w kontrolerach.
 
-=== Używanie podszablonów do eliminacji widocznych duplikatów.
+=== Używanie podszablonów do eliminacji duplikatów w widokach.
 
-Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i +edit+ jest bardzo podobny. YMożesz przenieść dzielony kod prosto do podszablonu +partial+. Wymaga to edytowania widoków +new+ i +edit+ oraz dodania nowego szablonu. Nowy +_form.html.erb+ szablon powinien być zapisany w tym samym folderze +app/views/posts+ co plik, z którego został on wyprowadzony. Zauważ, że nazwa tego pliku zaczyna się od podkreślenia ' _ '(underscore) - jest to przyjęte przez Rails nazewnictwo dla podszablonów 
+Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i +edit+ jest bardzo podobny. Możesz przenieść dzielony kod prosto do podszablonu. Wymaga to edytowania widoków +new+ i +edit+ oraz dodania nowego szablonu. Nowy +_form.html.erb+ szablon powinien być zapisany w tym samym folderze +app/views/posts+ co plik, z którego został on wyprowadzony. Zauważ, że nazwa tego pliku zaczyna się od podkreślenia ' _ ' - jest to przyjęte przez Rails nazewnictwo dla podszablonów.
 
 +new.html.erb+:
 
@@ -821,13 +821,13 @@ Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i 
 <% end %>
 -------------------------------------------------------
 
-Teraz, gdy Railsy generują widok +new+ lub +edit+, umieszczą go w szablonie +_form+ we wskazanym punkcie. Zwróć uwagę na nazewnictwo dla szablonów: jeśli odnosisz się do jego formy o nazwie +form+ wewnątrz widoku, odpowiadający mu plik to +_form.html.erb+, z podkreśleniem ' _ ' na początku.
+Teraz, gdy Railsy renderują widok +new+ lub +edit+, umieszczą go w szablonie +_form+ we wskazanym punkcie. Zwróć uwagę na nazewnictwo dla szablonów: jeśli odnosisz się do szablonu o nazwie +form+ wewnątrz widoku, to +_form.html.erb+ jest odpowiadającym mu plikiem (z podkreśleniem ' _ ' na początku).
 
-FWięcej informacji na temat szablonów uzyskasz w przewodniku link:../layouts_and_rendering.html[Layouts and Rending in Rails].
+Więcej informacji na temat szablonów uzyskasz w przewodniku link:../layouts_and_rendering.html[Layouts and Rending in Rails].
 
 === Używanie filtrów do eliminacji powtórzeń w kontrolerze
 
-W tym miejscu, jeśli popatrzysz na kontroler pod kątem postów, zobaczysz parę duplikatów:
+Teraz, gdy popatrzysz na kontroler pod kątem postów, zobaczysz parę duplikatów:
 
 [source, ruby]
 -------------------------------------------------------
@@ -854,7 +854,7 @@ class PostsController < ApplicationController
 end
 -------------------------------------------------------
 
-Cztery wystąpienia tej samej linii kodu są niezgodne z zasadą DRY. Railsy zapewniają filtry (_filters_) jako sposób na tego typu powtarzający się kod. W tym przypadku możesz poprawić pewne części używając +before_filter+:
+Cztery wystąpienia tej samej linii kodu są niezgodne z zasadą DRY. Railsy zapewniają _filtry_ jako sposób na tego typu powtarzający się kod. W tym przypadku możesz poprawić pewne części używając +before_filter+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -883,17 +883,17 @@ class PostsController < ApplicationController
 end
 -------------------------------------------------------
 
-Railsy uruchamiają _before filters_  przed każdą akcją w kontrolerze. Możesz użyć polecenia +:only+ do nałożenia ograniczenia przed filtrem, lub polecenia +:except+ , by dokonać szczególnego pominięcia akcji tylko dla niektórych z nich. Railsy pozwalają Ci także definiować _after filters_ , które uruchamiają się po przetworzeniu akcji, analogicznie jak otaczają ją _around filters_ w trakcie jej przetwarzania. Do tego filtry mogą być także definiowane jako zewnętrzne klasy, by ułatwić przenoszenie ich pomiędzy kontrolerami.
+Railsy uruchamiają _before filters_  przed każdą akcją w kontrolerze. Możesz użyć polecenia +:only+ by ograniczyć działanie _before filters_ tylko do określonych akcji, lub polecenia +:except+, by wyłączyć działanie _before filters_ dla niektórych z nich. Railsy dają Ci też możliwośc skorzystania z _after filters_, które uruchamiają się po przetworzeniu akcji, analogicznie jak _around filters_ otaczają akcje w trakcie jej przetwarzania. Do tego filtry mogą być także definiowane jako zewnętrzne klasy, by ułatwić przenoszenie ich pomiędzy kontrolerami.
 
 Więcej informacji o filtrach znajdziesz w przewodniku:link:actioncontroller_basics.html[Action Controller Basics].
 
-== Dodawanie drugiego modelu
+== Dodawanie kolejnego modelu
 
-Skoro widziałeś już jak buduje się model przy użyciu rusztowania, nadszedł czas by dodać do tego programu drugi model. Na nim opierać się będą komentarze w postach na blogu.
+Skoro widziałeś już, jak wygląda model zbudowany za pomocą rusztowania, nadszedł czas by dodać do tego programu kolejny. Na nim opierać się będą komentarze w postach na blogu.
 
 === Tworzenie modelu 
 
-Modele w Rails używają nazw w liczbie pojedynczej, a do komunikowania się z bazą danych nazw w liczbie mnogiej. Przyjęło się, że dla modelu, w którym znajdują się komentarze używamy nazwy danego komentarza. Nawet jeśli nie chcesz używać całej aparatury opartej na rusztowaniach, pamiętaj, że większość programistów piszących w Railsach dalej używa generatorów, by stworzyć takie rzeczy jak modele czy kontrolery. Aby stworzyć nowy model, wprowadź do terminalu następującą komendę: 
+Modele w Rails używają nazw w liczbie pojedynczej, a do komunikowania się z bazą danych nazw w liczbie mnogiej. Przyjęło się, że dla modelu, w którym znajdują się komentarze używamy nazwy Komentarz (_Comment_). Nawet jeśli nie hcesz używać całej aparatury opartej na rusztowaniu, pamiętaj, że większość programistów piszących w Railsach by stworzyć takie rzeczy jak modele czy kontrolery dalej używa generatorów. Aby stworzyć nowy model, wprowadź do terminalu następującą komendę: 
 
 [source, shell]
 -------------------------------------------------------
@@ -902,11 +902,11 @@ $ script/generate model Comment commenter:string body:text post:references
 
 Wygeneruje ona 4 pliki:
 
-* +app/models/comment.rb+ - The model
-* +db/migrate/20081013214407_create_comments.rb - The migration
-* +test/unit/comment_test.rb+ and +test/fixtures/comments.yml+ - The test harness.
+* +app/models/comment.rb+ - Model
+* +db/migrate/20081013214407_create_comments.rb+ - Migracje
+* +test/unit/comment_test.rb+ i +test/fixtures/comments.yml+ - Test.
 
-Przyjrzyjmy się:
+Przyjrzyjmy się
  +comment.rb+:
 
 [source, ruby]
@@ -916,9 +916,9 @@ class Comment < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-To model bardzo podobny do +post.rb+ , który widziałeś już wcześniej. Różnica znajduję się w lini  +belongs_to :post+ , która uruchamia Active Record _association_. Nauczysz się więcej na temat powiązań w następnej części niniejszego poradnika.
+To model bardzo podobny do +post.rb+, który widziałeś już wcześniej. Różnica znajduję się w lini  +belongs_to :post+ , która uruchamia asocjacje Active Record. Nauczysz się więcej na temat asocjacji w następnej części niniejszego poradnika.
 
-Dodatkowo do tego modelu Railsów tworzą migrację (migration), by stworzyć zgodną tabele bazy danych:
+Dodatkowo do tego modelu Railsy tworzą tabele bazy danych za pomocą migracji:
 
 [source, ruby]
 -------------------------------------------------------
@@ -939,7 +939,7 @@ class CreateComments < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-Linijka +t.references+ tworzy zewnętrzny klucz kolumn dla połączeń pomiędzy dwoma modelami. Możesz spróbować uruchomić migracje:
+Linijka +t.references+ tworzy zewnętrzny klucz kolumn dla asocjacji pomiędzy dwoma modelami. Możesz spróbować uruchomić migracje:
 
 [source, shell]
 -------------------------------------------------------
@@ -948,14 +948,14 @@ $ rake db:migrate
 
 Railsy są na tyle sprytne, że wykonują tylko te migracje, które nie są sprzeczne z działającą bazą danych.
 
-=== Łączenie modeli
+=== Asocjacja modeli
 
 Asocjacja Active Record pozwala Ci łatwo zdefiniować związek (asocjacje) pomiędzy dwoma modelami. W przypadku komentarzy oraz postów możesz go zapisać w ten sposób:
 
 * Każdy komentarz należy do jednego postu
 * Jeden post może mieć wiele komentarzy
 
-Tak naprawdę jest to bardzo podobne do składni jaką Railsy używają do deklarowania tych połączeń (asocjacji). Widziałeś już linie kodu umieszczoną w modelu komentarza, która przypisuje każdy komentarz do postu:
+Składnia jest bardzo podobna do tej, jaką Railsy używają do deklarowania asocjacji. Widziałeś już linie kodu umieszczoną w modelu komentarza, która przypisuje każdy komentarz do postu:
 
 [source, ruby]
 -------------------------------------------------------
@@ -975,13 +975,13 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Dzięki tym dwóm deklaracjom w znaczny sposób automatyzujemy sposób zachowania się naszego programu. Praktycznie wygląda to tak: jeśli masz przykładową zmienną +@post+ zawierającą post, możesz otrzymać wszystkie komentarze, które do niego należą, używając tablicy +@post.comments+.
+Dzięki tym dwóm deklaracjom w znaczny sposób automatyzujemy sposób zachowania się naszego programu. Praktycznie wygląda to tak: jeśli masz przykładową zmienną +@post+ zawierającą post, możesz otrzymać wszystkie komentarze, które do niego należą jako tablicę +@post.comments+.
 
 TIP: Po więcej informacji na temat asocjacji Active Record zajrzyj do przewodnika: link:../association_basics.html[Active Record Associations].
 
 === Dodawanie Ścieżek
 
-Ścieżki (_Routes_) to wpisy do pliku +config/routes.rb+ , które informują Railsy, jak interpretować nadchodzące żądania http, w celu wykonania danych akcji. Otwieranie określonego pliku oraz szukanie istniejącej linii odwołuje się do +posts+ (znajduję się on w prawym górnym rogu pliku). Edytujemy go następująco:
+Ścieżki (_Routes_) to wpisy w pliku +config/routes.rb+, które informują Railsy jak interpretować nadchodzące żądania HTTP, w celu wykonania danych akcji. Otwórz ten pliku i znajdź w nim linię kodu odwołującą się do +posts+ (znajduje się ona na samym początku pliku), a następnie edytuj ją następująco:
 
 [source, ruby]
 -------------------------------------------------------
@@ -990,7 +990,7 @@ map.resources :posts do |post|
 end
 -------------------------------------------------------
 
-Tworzy to +comments+ jako sposób zagnieżdżenia (_nested resource_) wewnątrz +posts+. Jest to kolejna część przechwytywania hierarchicznych zależności pomiędzy istniejącymi postami i komentarzami.
+Tworzy to +comments+ jako zagnieżdżony zasób (_nested resource_) wewnątrz +posts+. W ten sposób jesteśmy coraz bliżej zrozumienia hierarchicznych zależności pomiędzy istniejącymi postami i komentarzami.
 
 TIP: Po więcej informacji na temat tworzenia ścieżek sięgnij do poradnika: link:../routing_outside_in.html[Rails Routing from the Outside In].
 
@@ -1005,15 +1005,15 @@ $ script/generate controller Comments index show new edit
 
 Tworzy to siedem plików:
 
-* +app/controllers/comments_controller.rb+ - The controller
-* +app/helpers/comments_helper.rb+ - A view helper file
-* +app/views/comments/index.html.erb+ - The view for the index action
-* +app/views/comments/show.html.erb+ - The view for the show action
-* +app/views/comments/new.html.erb+ - The view for the new action
-* +app/views/comments/edit.html.erb+ - The view for the edit action
-* +test/functional/comments_controller_test.rb+ - The functional tests for the controller
+* +app/controllers/comments_controller.rb+ - Kontroler
+* +app/helpers/comments_helper.rb+ - Widok pliku helpera
+* +app/views/comments/index.html.erb+ - Widok akcji _Index_
+* +app/views/comments/show.html.erb+ - Widok akcji _Show_
+* +app/views/comments/new.html.erb+ - Widok nowej akcji
+* +app/views/comments/edit.html.erb+ - Widok akcji _Edit_
+* +test/functional/comments_controller_test.rb+ - Testy funkcjonalności kontrolera
 
-Kontroler zostanie wygenerowany z pustymi metodami oraz widokami dla każdej akcji, którą wywołasz poleceniem: +script/generate controller+:
+Kontroler zostanie wygenerowany z pustymi metodami oraz widokami dla każdej akcji, które zdefiniowałeś w zawołaniu +script/generate controller+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1081,23 +1081,23 @@ class CommentsController < ApplicationController
 end
 -------------------------------------------------------
 
-Jak widzisz, jest to trochę bardziej skomplikowane niż wcześniejsze operacje w kontrolerze dla postów. Jest to uboczny efekt zagnieżdżania które tworzyłeś; każde żądanie komentarza musi pamiętać , z którym postem ten komentarz jest związany (do którego posta jest dołączony). 
+Jak widzisz, jest to trochę bardziej skomplikowane niż wcześniejsze operacje w kontrolerze dla postów. Jest to uboczny efekt zagnieżdżania które tworzyłeś; każde żądanie komentarza musi pilnować do którego posta jest dołączony. 
 
-Dodatkowo, kod posiada przewagę w niektórych rodzajach metod do asocjacji. Przykładowo - w metodzie +new+ wywołuję się to tak:
+Dodatkowo, kod posiada przewagę w niektórych rodzajach metod dostępnych dla asocjacji. Przykładowo - w metodzie +new+ wywołuję się to tak:
 
 [source, ruby]
 -------------------------------------------------------
 @comment = @post.comments.build
 -------------------------------------------------------
 
-Tworzy to nowy obiekt: +Comment+ i ustanawia pole: +post_id+ , które przyjmuje formę +id+ zależną od obiektu +Post+ w pojedynczej operacji.
+Tworzy to jedną operacją nowy obiekt: +Comment+ i ustanawia pole: +post_id+, które przyjmuje +id+ z określonego obiektu +Post+.
 
 
 === Budowanie Widoków
 
-Ponieważ opuściłeś rusztowanie, konieczne będzie ręczne zbudowanie widoków dla komentarzy. Przywoływanie +script/generate controller+ da ci szkielet widoków, które jednak będą pozbawione aktualnej zawartości. Oto pierwszy krok do uszczegółowienia widoków komentarza.
+Ponieważ przestałeś korzystać z rusztowania, konieczne będzie ręczne zbudowanie widoków dla komentarzy. Przywołanie +script/generate controller+ da ci szkielet widoków, które jednak będą pozbawione aktualnej zawartości. Oto pierwszy krok do uszczegółowienia widoków komentarza.
 
-Widok +index.html.erb+ :
+Widok +index.html.erb+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1197,11 +1197,11 @@ Widok +edit.html.erb+ :
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Obecna, coraz większa komplikacja (w porównaniu do widoków dla zarządzania postami, które do tej pory widziałeś) ponownie pochodzi z konieczności żonglowania postami i ich komentarzami w tym samym czasie.
+Obecna, coraz większa komplikacja (w porównaniu do widoków dla zarządzania postami, które do tej pory widziałeś) ponownie bierze się z konieczności żonglowania postami i ich komentarzami w tym samym czasie.
 
 === Przyłączanie komentarzy do postów
 
-Jako następny krok, zmodyfikuje widok: +show.html.erb+ , by pokazać komentarze do tego postu oraz umożliwić zarządzanie nimi: 
+W następnym kroku zmodyfikuje widok: +show.html.erb+, by pokazać komentarze oraz umożliwić zarządzanie nimi dla tego postu: 
 
 [source, ruby]
 -------------------------------------------------------
@@ -1238,16 +1238,16 @@ Jako następny krok, zmodyfikuje widok: +show.html.erb+ , by pokazać komentarze
 <%= link_to 'Manage Comments', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Zapamiętaj, że każdy post ma swój osobny zbiór komentarzy, dostępny przez +@post.comments+. Wynika to z zadeklarowanych asocjacji w modelach. Ścieżka pomocnicza, taka jak +post_comments_path+ pochodzi od zagnieżdżonej ścieżki deklaracji w +config/routes.rb+ .
+Zapamiętaj, że każdy post ma swój osobny zbiór komentarzy, dostępny przez +@post.comments+. Wynika to z zadeklarowanych asocjacji w modelach. Ścieżka helperów, taka jak +post_comments_path+ pochodzi od zagnieżdżonej ścieżki deklaracji w +config/routes.rb+.
 
 == Co dalej?
 
-Teraz, gdy masz przed sobą swój pierwszy Railsowy program, możesz go uatrakcyjniać, według własnych potrzeb. Ale nie musisz do wszystkiego dochodzić samodzielnie. Jeśli potrzebujesz wsparcia przy tworzeniu i uruchamianiu aplikacji Rails, możesz swobodnie korzystać z tych zasobów:
+Teraz, gdy masz przed sobą swój pierwszy Railsowy program, możesz go uatrakcyjniać według własnych potrzeb. Ale nie musisz do wszystkich rozwiązań dochodzić samodzielnie. Jeśli potrzebujesz wsparcia przy tworzeniu i uruchamianiu aplikacji Rails skorzystaj z tych poradników:
 
-* The link:http://guides.rubyonrails.org/[Ruby On Rails guides]
-* The link:http://groups.google.com/group/rubyonrails-talk[Ruby on Rails mailing list]
-* The #rubyonrails channel on irc.freenode.net
-* The link:http://wiki.rubyonrails.org/rails[Rails wiki]
+* link:http://guides.rubyonrails.org/[Ruby On Rails guides]
+* link:http://groups.google.com/group/rubyonrails-talk[Ruby on Rails mailing list]
+* Kanał #rubyonrails na irc.freenode.net
+* link:http://wiki.rubyonrails.org/rails[Rails wiki]
 
 Railsy mają równiez wbudowaną pomoc, która możesz wywołać przy użyciu komendy rake w linii komend:
 
