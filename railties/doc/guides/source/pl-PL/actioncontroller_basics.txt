@@ -37,15 +37,15 @@ Railsy tworzą instancję klasy danego kontrolera i wywołuje publiczną metodę
 ----------------------------------------------
 class ClientsController < ApplicationController
 
-  # Actions are public methods
+  # Akcje są metodami publicznymi
   def new
   end
 
-  # Action methods are responsible for producing output
+  # Metody akcji są odpowiedzialne za produkcję danych wyjściowych
   def edit
   end
 
-# Helper methods are private and can not be used as actions
+# Helpery są metodami prywatnymi i nie mogą być użyte jako akcje
 private
 
   def foo
@@ -56,7 +56,7 @@ end
 
 Nie ma zasady mówiącej, że metoda na kontrolerze musi być akcją; równie dobrze może być użyta do innych celów, takich jak filtrowanie, które będzie omówione w dalszej części tego przewodnika.
 
-Na przykład, jeżeli użytkownik przejdzie do `/clients/new` w twojej aplikacji, aby dodać nowego klienta, Rails stworzy instancję klasy ClientsController i uruchomi metodę `new`. Zwróć uwagę, że pusta metoda z przykładu powyżej może działać dobrze, ponieważ Rails domyślnie wyrenderuje widok `new.html.erb`, chyba że akcja powie inaczej. Metoda `new` może udostępnić do widoku zmienną instancyjną `@client` poprzez stworzenie nowego klienta.
+Na przykład, jeżeli użytkownik przejdzie do `/clients/new` w twojej aplikacji, aby dodać nowego klienta, Railsy stworzą instancję klasy ClientsController i uruchomią metodę `new`. Zwróć uwagę, że pusta metoda z przykładu powyżej może działać dobrze, ponieważ Railsy domyślnie wyrenderują widok `new.html.erb`, chyba że akcja powie inaczej. Metoda `new` może udostępnić do widoku zmienną instancyjną `@client` poprzez stworzenie nowego klienta.
 
 [source, ruby]
 ----------------------------------------------
@@ -90,10 +90,10 @@ parametrami POST. Oba typy są dostępne w tablicy asocjacyjnej (ang. hash) `par
 -------------------------------------
 class ClientsController < ActionController::Base
 
-  # This action uses query string parameters because it gets run by a HTTP 
-  # GET request, but this does not make any difference to the way in which 
-  # the parameters are accessed. The URL for this action would look like this 
-  # in order to list activated clients: /clients?status=activated
+  # Ta akcja używa parametrów ciągu zapytania, ponieważ jest uruchamiana przez 
+  # żądanie HTTP GET. Ale nie ma żadnej różnicy, które parametry są dostępne.
+  # Adres URL dla tej akcji mógłby wyglądać następująco 
+  # (w celu wyświetlenia listy aktywnych klientów): /clients?status=activated
   def index
     if params[:status] = "activated"
       @clients = Client.activated
@@ -102,16 +102,16 @@ class ClientsController < ActionController::Base
     end
   end
 
-  # This action uses POST parameters. They are most likely coming from an HTML
-  # form which the user has submitted. The URL for this RESTful request will
-  # be "/clients", and the data will be sent as part of the request body.
+  # Ta akcja używa parametrów POST. Pochodzą one najczęściej z formularza HTML
+  # który został przesłany przez użytkownika. Adres URL dla żądania RESTful będzie
+  # wyglądał tak: "/clients", a dane zostaną wysłane jako część ciała żądania.
   def create
     @client = Client.new(params[:client])
     if @client.save
       redirect_to @client
     else
-      # This line overrides the default rendering behavior, which would have been
-      # to render the "create" view.
+      # Ta linia zastępuje domyślne zachowanie renderowania, które
+      # renderuje widok "create".
       render :action => "new"
     end
   end
@@ -121,7 +121,7 @@ end
 
 === Parametry tablic zwykłych (ang. array) i tablic asocjacyjnych (ang. hash) ===
 
-Tablica haszująca `params` nie musi być ograniczona do jednego wymiaru. Możemy stworzyć tablicę wielowymiarową, która zawiera w sobie zagnieżdżone tablice haszujące lub zwykłe tablice. Aby wysłać tablicę wartości, dołącz "[]" do nazwy klucza.
+Tablica asocjacyjna `params` nie musi być ograniczona do jednego wymiaru. Możemy stworzyć tablicę wielowymiarową, która zawiera w sobie zagnieżdżone tablice asocjacyjne lub zwykłe tablice. Aby wysłać tablicę wartości, dołącz "[]" do nazwy klucza.
 
 -------------------------------------
 GET /clients?ids[]=1&ids[]=2&ids[]=3
@@ -132,7 +132,7 @@ NOTE: Rzeczywisty URL w tym przykładzie byłby zakodowany jako "/clients?ids%5b
 Wartość `params[:ids]` będzie teraz wynosić `["1", "2", "3"]`. Zauważ, że
 wartości parametru są zawsze łańcuchami znaków). Railsy nie próbują odgadywać ani rzutować typu.
 
-Aby przesłać tablicę haszującą, zawrzyj nazwę klucza wewnątrz nawiasów:
+Aby przesłać tablicę asocjacyjną, zawrzyj nazwę klucza wewnątrz nawiasów:
 
 -------------------------------------
 <form action="/clients" method="post">
@@ -143,15 +143,15 @@ Aby przesłać tablicę haszującą, zawrzyj nazwę klucza wewnątrz nawiasów:
 </form>
 -------------------------------------
 
-Wartość tablicy `params[:client]` po tym, jak ten formularz zostanie przekazany, będzie wynosić `{"name" => "Acme", "phone" => "12345", "address" => {"postcode" => "12345", "city" => "Carrot City"}}`. Zwróć uwagę na zagnieżdżoną tablicę haszującą w `params[:client][:address]`.
+Wartość tablicy `params[:client]` po tym, jak ten formularz zostanie przekazany, będzie wynosić `{"name" => "Acme", "phone" => "12345", "address" => {"postcode" => "12345", "city" => "Carrot City"}}`. Zwróć uwagę na zagnieżdżoną tablicę asocjacyjną w `params[:client][:address]`.
 
-Zauważ też, że tablica haszująca params jest w rzeczywistości instancją klasy
+Zauważ też, że tablica asocjacyjna params jest w rzeczywistości instancją klasy
 `HashWithIndifferentAccess` (z modułu Active Support), która jest podklasą
 klasy Hash. Pozwala ona na stosowanie zamiennie symboli oraz łańcuchów znaków jako kluczy.
 
 === Parametry routingu ===
 
-Tablica haszująca `params` będzie zawsze zawierać klucze `:controller` i
+Tablica asocjacyjna `params` będzie zawsze zawierać klucze `:controller` i
 `:action`, ale należy używać metod `controller_name` i `action_name` zamiast
 odwoływać się do ich wartości. Wszelkie inne parametry określone przez
 routing, takie jak `:id` będą również dostepne. Jako przykład, rozważ listę
@@ -175,7 +175,7 @@ Możesz ustawić domyślne parametry globalne, które będą wykorzystywane podc
 ------------------------------------
 class ApplicationController < ActionController::Base
 
-  #The options parameter is the hash passed in to +url_for+
+  #Parametr options jest tablicą asocjacyjną przekazaną do +url_for+
   def default_url_options(options)
     {:locale => I18n.locale}
   end
@@ -293,7 +293,7 @@ Flash jest specjalną częścią sesji, która jest czyszczona przy każdym żą
 w takim sensie, że wartości tam przechowywane są dostępne tylko w następnym
 żądaniu. Jest to przydatne do przechowywania komunikatów o błędach itp. Jest
 ona dostępna w bardzo podobny sposób jak sama sesja, czyli jako tablica
-haszująca. Jako przykładu użyjmy mechanizmu wylogowywania. Kontroler może wysłać komunikat, który będzie wyświetlony użytkownikowi przy następnym żądaniu:
+asocjacyjna. Jako przykładu użyjmy mechanizmu wylogowywania. Kontroler może wysłać komunikat, który będzie wyświetlony użytkownikowi przy następnym żądaniu:
 
 [source, ruby]
 ------------------------------------------
@@ -371,14 +371,14 @@ end
 
 == Cookies ==
 
-Twoja aplikacja może przechowywać małe ilości danych po stronie klienta w postaci tzw. cookies. Mogą one trwać poprzez wiele żądań, a nawet sesji. Railsy zapewniają łatwy dostęp do cookies za pomocą metody `cookies`, która podobnie jak metoda `session`, działa jako tablica haszująca:
+Twoja aplikacja może przechowywać małe ilości danych po stronie klienta w postaci tzw. cookies. Mogą one trwać poprzez wiele żądań, a nawet sesji. Railsy zapewniają łatwy dostęp do cookies za pomocą metody `cookies`, która podobnie jak metoda `session`, działa jako tablica asocjacyjna:
 
 [source, ruby]
 -----------------------------------------
 class CommentsController < ApplicationController
 
   def new
-    #Auto-fill the commenter's name if it has been stored in a cookie
+    #Auto-uzupełnianie imienia komentatora, jeżeli jest ono przechowywane w cookie
     @comment = Comment.new(:name => cookies[:commenter_name])
   end
 
@@ -387,10 +387,10 @@ class CommentsController < ApplicationController
     if @comment.save
       flash[:notice] = "Thanks for your comment!"
       if params[:remember_name]
-        # Remember the commenter's name
+        # Pamiętaj imię komentatora
         cookies[:commenter_name] = @comment.name
       else
-        # Don't remember, and delete the name if it has been remembered before
+        # Nie pamiętaj i skasuj imię, jeśli było pamiętane wcześniej
         cookies.delete(:commenter_name)
       end
       redirect_to @comment.article
@@ -421,15 +421,15 @@ private
   def require_login
     unless logged_in?
       flash[:error] = "You must be logged in to access this section"
-      redirect_to new_login_url # Prevents the current action from running
+      redirect_to new_login_url # chroni bieżącą akcję przed uruchomieniem
     end
   end
 
-  # The logged_in? method simply returns true if the user is logged in and
-  # false otherwise. It does this by "booleanizing" the current_user method
-  # we created previously using a double ! operator. Note that this is not
-  # common in Ruby and is discouraged unless you really mean to convert something
-  # into true or false.
+  # Metoda logged_in? po prostu zwraca prawdę, jeśli uzytkownik jest zalogowany
+  # i fałsz w przeciwnym wypadku. Robi to poprzez "udwuwartościowioną" metodę current_user
+  # którą stworzyliśmy wcześniej, za pomocą operatora podwójnego !. Pamiętaj, że to nie jest
+  # powszechne w Ruby i jest odradzane, chyba że naprawdę chcesz przekonwertować coś
+  # w prawdę lub fałsz.
   def logged_in?
     !!current_user
   end
@@ -556,7 +556,7 @@ informacji na temat sposobu korzystania z filtrów].
 
 Weryfikacja to sprawdzenie czy pewne kryteria są spełnione, aby uruchomić
 kontroler lub akcję. Może określać, że pewien klucz (lub kilka kluczy w formie
-tablicy) jest obecny w tablicy haszującej `params`, `session` lub `flash` lub
+tablicy) jest obecny w tablicy asocjacyjnej `params`, `session` lub `flash` lub
 to, że jakaś metoda HTTP została użyta lub to, że żądanie zostało wykonane
 przy użyciu XMLHTTPRequest (Ajax). Gdy kryteria nie są spełnione, domyślnie
 podejmowaną akcją jest wyrenderowanie błędu 400 (Bad Request), ale możesz to
@@ -659,7 +659,7 @@ Obiekt request zawiera wiele przydatnych informacji na temat żądania przychodz
  * `format` - typ zawartości żądanej przez klienta.
  * `method` - metoda HTTP użyta do wysłania żądania.
  * `get?`, `post?`, `put?`, `delete?`, `head?` - zwraca `true` jeśli metoda HTTP to GET/POST/PUT/DELETE/HEAD.
- * `headers` - zwraca tablicę haszującą zawierającą nagłówki stowarzyszone z żądaniem.
+ * `headers` - zwraca tablicę asocjacyjną zawierającą nagłówki stowarzyszone z żądaniem.
  * `port` - numer portu (typ integer) użyty w żądaniu.
  * `protocol` - zwraca łańcuch zawierający użyty protokół plus "://", na przykład "http://"
  * `query_string` - ciąg zapytania (część adresu URL - wszystko po znaku "?").
@@ -668,7 +668,7 @@ Obiekt request zawiera wiele przydatnych informacji na temat żądania przychodz
 
 ==== +path_parameters+, +query_parameters+ i +request_parameters+ ====
 
-Railsy gromadzą wszystkie parametry przesłane wraz z żądaniem w tablicy haszującej `params`, bez względu czy zostały przesłane jako część ciągu zapytania czy jako zawartość POST. Obiekt request posiada trzy akcesory (ang. accessors) umożliwiające ci dostęp do tych parametrów w zależności od ich pochodzenia. Tablica haszująca `query_parameters` zawiera parametry, które były wysłane jako część ciągu zapytania, natomiast tablica haszująca `request_parameters` zawiera parametry wysłane jako POST. Tablica haszująca `path_parameters` zawiera parametry, które zostały rozpoznane przez routing jako część ścieżki prowadzącej do tego konkretnego kontrolera i akcji.
+Railsy gromadzą wszystkie parametry przesłane wraz z żądaniem w tablicy asocjacyjnej `params`, bez względu czy zostały przesłane jako część ciągu zapytania czy jako zawartość POST. Obiekt request posiada trzy akcesory (ang. accessors) umożliwiające ci dostęp do tych parametrów w zależności od ich pochodzenia. Tablica asocjacyjna `query_parameters` zawiera parametry, które były wysłane jako część ciągu zapytania, natomiast tablica asocjacyjna `request_parameters` zawiera parametry wysłane jako POST. Tablica asocjacyjna `path_parameters` zawiera parametry, które zostały rozpoznane przez routing jako część ścieżki prowadzącej do tego konkretnego kontrolera i akcji.
 
 === Obiekt +response+ ===
 
@@ -686,7 +686,7 @@ użytkownika. Ale czasami - jak w przypadku filtrów końcowych -  może być po
 ==== Ustawienie niestandardowych nagłówków ====
 
 Jeśli chcesz ustawić niestandardowe nagłówki dla danych zwrotnych, miejscem na
-to jest `response.headers`. Atrybut headers jest tablicą haszującą, który
+to jest `response.headers`. Atrybut headers jest tablicą asocjacyjną, który
 mapuje nazwę nagłówka na jego wartość, a Railsy ustawiają niektóre z nich -
 np. `Content-Type` - automatycznie. Jeśli chcesz dodać lub zmienić nagłówek, dopisz go do `headers` z nazwą i wartością:  
 
@@ -732,8 +732,8 @@ Aby przesłać dane do klienta, użyj `send_data`:
 require "prawn"
 class ClientsController < ApplicationController
 
-  # Generate a PDF document with information on the client and return it.
-  # The user will get the PDF as a file download.
+  # Generuj dokument PDF z informacjami na temat klienta i zwróć go.
+  # Użytkownik otrzyma PDF jako plik do pobrania.
   def download_pdf
     client = Client.find(params[:id])
     send_data(generate_pdf, :filename => "#{client.name}.pdf", :type => "application/pdf")
@@ -770,7 +770,7 @@ Jeżeli chcesz wysłać plik, który już istnieje na dysku, użyj metody `send_
 ----------------------------
 class ClientsController < ApplicationController
 
-  # Stream a file that has already been generated and stored on disk
+  # Prześlij plik, który był już wygenerowany i przechowywany na dysku
   def download_pdf
     client = Client.find(params[:id])
     send_data("#{RAILS_ROOT}/files/clients/#{client.id}.pdf", :filename => "#{client.name}.pdf", :type => "application/pdf")
@@ -805,7 +805,7 @@ dosyć gładki sposób na "RESTful downloads". Oto jak możesz przepisać wcześ
 ----------------------------
 class ClientsController < ApplicationController
 
-  # The user can request to receive this resource as HTML or PDF.
+  # Użytkownik może zażądać, aby otrzymać ten zasób jako HTML lub PDF.
   def show
     @client = Client.find(params[:id])
 
@@ -841,7 +841,7 @@ produkcji) w folderze `log`. Są one niezwykle przydatne podczas debugowania,
 działania aplikacji możesz nie chcieć, żeby każda informacja była zapisywany w
 pliku logu. Metoda `filter_parameter_logging` może być używana do
 odfiltrowywania poufnych informacji z logu. Działa ona poprzez zastępowania
-pewnych wartości z tablicy haszującej `params` przez "[FILTERED]" przy
+pewnych wartości z tablicy asocjacyjnej `params` przez "[FILTERED]" przy
 zapisywaniu do logu. Jako przykład zobaczmy, jak filtrować wszystkie parametry
 z kluczem zawierającym `password`:
 
@@ -854,7 +854,7 @@ class ApplicationController < ActionController::Base
 end
 -------------------------
 
-Metoda działa rekursywnie na wszystkich poziomach tablicy haszującej params.
+Metoda działa rekursywnie na wszystkich poziomach tablicy asocjacyjnej params.
 Może przyjmować drugi opcjonalny parametr, który jeśli występuje, jest używany
 jako tekst zastępujący. Funkcja ta może też przyjąć blok, który sprawdza warunek dla każdego klucza i zastępuje te, dla których blok zwraca ‘true’.
 
@@ -920,17 +920,17 @@ end
 
 class ClientsController < ApplicationController
 
-  # Check that the user has the right authorization to access clients.
+  # Sprawdź czy użytkownik ma prawo dostępu
   before_filter :check_authorization
 
-  # Note how the actions don't have to worry about all the auth stuff.
+  # Zwróć uwagę jak te akcje nie muszą się martwić o wszystkie szczegóły uwierzytelniania
   def edit
     @client = Client.find(params[:id])
   end
 
 private
 
-  # If the user is not authorized, just throw the exception.
+  # Jeżeli użytkownik jest nie upoważniony, po prostu rzuć wyjątkiem.
   def check_authorization
     raise User::NotAuthorized unless current_user.admin?
   end
