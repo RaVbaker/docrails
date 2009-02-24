@@ -82,7 +82,7 @@ Title: Rails debugging guide
 
 === inspect
 
-Kolejna użyteczna metoda wykorzystywana do wyświetlania wartości obiektu to `inspect`, szczególnie podczas pracy z tablicami lub tablicami haszującymi. Wyświetli to wartość obiektu jako string. Na przykład:
+Kolejna użyteczna metoda wykorzystywana do wyświetlania wartości obiektu to `inspect`, szczególnie podczas pracy z tablicami lub tablicami asocjacyjnymi. Wyświetli to wartość obiektu jako string. Na przykład:
 
 [source, html]
 ----------------------------------------------------------------------------
@@ -159,8 +159,8 @@ Dostępne poziomy logowania to: +:debug+, +:info+, +:warn+, +:error+, and +:fata
 
 [source, ruby]
 ----------------------------------------------------------------------------
-config.log_level = Logger::WARN # In any environment initializer, or
-ActiveRecord::Base.logger.level = 0 # at any time
+config.log_level = Logger::WARN # W dowolnym inicjalizatorze środowiska lub
+ActiveRecord::Base.logger.level = 0 # w dowolnej chwili
 ----------------------------------------------------------------------------
 
 Jest to użyteczne, gdy chcesz logować w środowisku programisty (development) lub
@@ -360,7 +360,7 @@ I tak dalej aż do końca pliku. Kiedy koniec pliku zostanie osiągnięty, komen
 
 Gdy rozpoczniesz debugowanie swojej aplikacji, będziesz umieszczany w różnych kontekstach w miarę przemieszczania się przez różne części stosu.
 
-ruby-debug tworzy kontekst, gdy osiąga punkt wstrzymania bądź zdarzenie. Kontekst posiada informacje o zawieszonym programie, co pozwala debuggerowi zbadać konstrukcję stosu oraz oszacować zmienne z perspektywy debugowanego programu. Posiada również informacje o miejscu, w którym debugger został zatrzymany.
+ruby-debug tworzy kontekst, gdy osiąga punkt wstrzymania bądź zdarzenie. Kontekst posiada informacje o zawieszonym programie, co pozwala debuggerowi zbadać stos oraz oszacować zmienne z perspektywy debugowanego programu. Posiada również informacje o miejscu, w którym debugger został zatrzymany.
 
 Zawszy możesz użyć komendy `backtrace` (bądź jej aliasu `where`) by wyświetlić
 wsteczny przebieg aplikacji. Może być to bardzo pomocne w przekonaniu się, jak
@@ -495,7 +495,7 @@ zmiennej (1 w poprzednim przykładzie).
 
 Teraz powinieneś wiedzieć, w którym miejscu wykonywanego programu jesteś i być w stanie wyświetlić dostępne zmienne. Idźmy więc dalej z wykonywaniem aplikacji.
 
-Użyj `step` (skrócone `s`) aby kontynuować działanie programu do następnego logicznego punktu wstrzymania i przywróć kontrolę ruby-debug.
+Użyj `step` (w skrócie `s`) aby kontynuować działanie programu do następnego logicznego punktu wstrzymania i przywróć kontrolę ruby-debug.
 
 [TIP]
 Możesz też użyć `step+ n` oraz `step- n` by poruszyć się odpowiednio naprzód lub wstecz o n kroków.
@@ -657,13 +657,13 @@ Dwie komendy pozwalają ci na otwarcie kodu z debuggera w edytorze:
 
 * `edit [file:line]`: edytuje _file_ używając edytora sprecyzowanego w
   zmiennej środowiskowej EDITOR. Można podać konkretną linię _line_ do edycji. 
-* `tmate n` (skrócone `tm`): otwiera aktualny plik w TextMate. Używa n-tej
+* `tmate n` (w skrócie `tm`): otwiera aktualny plik w TextMate. Używa n-tej
   ramki, jeśli _n_ jest podane. 
 
 
 === Wychodzenie
 
-By opuścić debugger, użyj komendy `quit` (skrócone `q`), lub jej aliasu `exit`.
+By opuścić debugger, użyj komendy `quit` (w skrócie `q`), lub jej aliasu `exit`.
 
 Zwykłe wyjście oznacza zakończenie wszystkich aktualnie działających wątków. Tym samym twój serwer zostanie wstrzymany i będziesz musiał uruchomić go ponownie.
 
