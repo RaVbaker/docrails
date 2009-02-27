@@ -117,25 +117,25 @@
             
               <li><a href="#_atak_cross_site_scripting_xss">Atak Cross-Site Scripting (XSS)</a></li>
             
-              <li><a href="#_css_injection">CSS Injection</a></li>
+              <li><a href="#_atak_typu_css_injection">Atak typu CSS Injection</a></li>
             
-              <li><a href="#_textile_injection">Textile Injection</a></li>
+              <li><a href="#_atak_typu_textile_injection">Atak typu Textile Injection</a></li>
             
-              <li><a href="#_ajax_injection">Ajax Injection</a></li>
+              <li><a href="#_atak_typu_ajax_injection">Atak typu Ajax Injection</a></li>
             
-              <li><a href="#_rjs_injection">RJS Injection</a></li>
+              <li><a href="#_atak_typu_rjs_injection">Atak typu RJS Injection</a></li>
             
-              <li><a href="#_command_line_injection">Command Line Injection</a></li>
+              <li><a href="#_atak_typu_command_line_injection">Atak typu Command Line Injection</a></li>
             
-              <li><a href="#_header_injection">Header Injection</a></li>
+              <li><a href="#_atak_typu_header_injection">Atak typu Header Injection</a></li>
             
             </ul>
           </li>
           <li>
-          <a href="#_additional_resources">Additional resources</a>
+          <a href="#_dodatkowe_informacje">Dodatkowe informacje</a>
           </li>
           <li>
-          <a href="#_changelog">Changelog</a>
+          <a href="#_dziennik_zmian">Dziennik zmian</a>
           </li>
       </ol>
     </div>
@@ -990,103 +990,103 @@ s = sanitize(user_input, :tags =&gt; tags, :attributes =&gt; %w(href title))</tt
 <div class="paragraph"><p>Kolejnym dowodem koncepcji robaka webmailowego jest Nduja, robak typu cross-domain na cztery włoskie usługi webmailowe. Więcej szczegółów i demonstracja wideo znajduje się na stronie <a href="http://rosario.valotta.googlepages.com/home">http://rosario.valotta.googlepages.com/home</a> [Rosario Valotta]. Oba webmailowe robaki mają na celu zbieranie adresów e-mail, czyli coś, za co haker może zarobić duże pieniądze.</p></div>
 <div class="paragraph"><p>W grudniu 2006 roku, 34000 rzeczywistych nazw użytkownika i haseł zostały skradzione z <a href="http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html">http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html</a> [MySpace poprzez atak typu phishing]. Ideą ataku było stworzenie strony profilu o nazwie "login_home_index_html", a więc adres wyglądał bardzo przekonująco. Specjalnie spreparowany HTML i CSS został użyty w celu ukrycia prawdziwej treści ze strony MySpace i zamiast tego wyświetlał własny formularz logowania.</p></div>
 <div class="paragraph"><p>Robak Samy z MySpace zostanie omówiony w sekcji o atakach typu CSS injection.</p></div>
-<h3 id="_css_injection">7.4. CSS Injection</h3>
-<div class="paragraph"><p>-- <em>CSS Injection is actually JavaScript injection, because some browsers (IE, some versions of Safari and others) allow JavaScript in CSS. Think twice about allowing custom CSS in your web application.</em></p></div>
-<div class="paragraph"><p>CSS Injection is explained best by a well-known worm, the <a href="http://namb.la/popular/tech.html">MySpace Samy worm</a>. This worm automatically sent a friend request to Samy (the attacker) simply by visiting his profile. Within several hours he had over 1 million friend requests, but it creates too much traffic on MySpace, so that the site goes offline. The following is a technical explanation of the worm.</p></div>
-<div class="paragraph"><p>MySpace blocks many tags, however it allows CSS. So the worm&#8217;s author put JavaScript into CSS like this:</p></div>
+<h3 id="_atak_typu_css_injection">7.4. Atak typu CSS Injection</h3>
+<div class="paragraph"><p>-- <em>Atak typu CSS injection w rzeczywistości jest atakiem typu JavaScript injection, ponieważ niektóre przeglądarki (IE, niektóre wersje Safari i inne) umożliwiają obsługę JavaScript w CSS. Dobrze się zastanów zanim umożliwisz niestandardowe CSS w twojej aplikacji internetowej.</em></p></div>
+<div class="paragraph"><p>Atak typu CSS injection można wytłumaczyć na przykładzie znanego robaka -  <a href="http://namb.la/popular/tech.html">MySpace Samy</a>. Ten robak automatycznie zaprasza do znajomych Sam’iego (atakującego), po prostu odwiedzając jego profil. W ciągu kilku godzin miał ponad 1 milion zaproszeń do znajomych, generując tak dużo ruchu na MySpace, że witryna przestała działać. Poniżej znajduje się techniczne wyjaśnienie działania robaka.</p></div>
+<div class="paragraph"><p>MySpace blokuje wiele tagów, jednak pozwala na używanie CSS. Więc autor robaka umieścił JavaScript w CSS w taki sposób:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;div style="background:url('javascript:alert(1)')"&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>So the payload is in the style attribute. But there are no quotes allowed in the payload, because single and double quotes have already been used. But JavaScript allows has a handy eval() function which executes any string as code.</p></div>
+<div class="paragraph"><p>Tak więc ładunek umieszczony jest w atrybucie style. Ale w ładunku nie można użyć cudzysłowów, ponieważ pojedyncze i podwójne cudzysłowy zostały już wykorzystane. Ale JavaScript pozwala wykorzystywać przydatną funkcję eval(), która wykonuje każdy ciąg jako kod.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;div id="mycode" expr="alert('hah!')" style="background:url('javascript:eval(document.all.mycode.expr)')"&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>The eval() function is a nightmare for blacklist input filters, as it allows the style attribute to hide the word “innerHTML”:</p></div>
+<div class="paragraph"><p>Funkcja eval() jest koszmarem dla czarnych list filtrów wejścia, gdyż pozwala atrybutowi style ukryć słowo "innerHTML":</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>alert(eval('document.body.inne' + 'rHTML'));</tt></pre>
 </div></div>
-<div class="paragraph"><p>The next problem was MySpace filtering the word “javascript”, so the author used “java&lt;NEWLINE&gt;script" to get around this:</p></div>
+<div class="paragraph"><p>Kolejnym problemem w MySpace było filtrowanie słowa "javascript", więc autor użył “java&lt;NEWLINE&gt;script” aby obejść ten problem:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&lt;div id="mycode" expr="alert('hah!')" style="background:url('java↵ script:eval(document.all.mycode.expr)')"&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>Another problem for the worm&#8217;s author were CSRF security tokens. Without them he couldn&#8217;t send a friend request over POST. He got around it by sending a GET to the page right before adding a the user and parsing the result for the CSRF token.</p></div>
-<div class="paragraph"><p>In the end, he got a 4 KB worm, which he injected into his profile page.</p></div>
-<div class="paragraph"><p>The <a href="http://www.securiteam.com/securitynews/5LP051FHPE.html">moz-binding</a> CSS property proved to be another way to introduce JavaScript in CSS in Gecko-based browsers (Firefox, for example).</p></div>
-<h4 id="_countermeasures">7.4.1. Countermeasures</h4>
-<div class="paragraph"><p>This example, again, showed that a blacklist filter is never complete. However, as custom CSS in web applications is a quite rare feature, I am not aware of a whitelist CSS filter. <span style="background-color: #fffcdb;">If you want to allow custom colours or images, you can allow the user to choose them and build the CSS in the web application</span>. Use Rails' <tt>sanitize()</tt> method as a model for a whitelist CSS filter, if you really need one.</p></div>
-<h3 id="_textile_injection">7.5. Textile Injection</h3>
-<div class="paragraph"><p>-- <em>If you want to provide text formatting other than HTML (due to security), use a mark-up language which is converted to HTML on the server-side. <a href="http://whytheluckystiff.net/ruby/redcloth/">RedCloth</a> is such a language for Ruby, but without precautions, it is also vulnerable to XSS.</em></p></div>
+<div class="paragraph"><p>Innym problemem dla autora robaka były tokeny bezpieczeństwa CSRF. Bez nich nie mógłby zapraszać znajomych przez metodę POST. Obszedł to, wysyłając żądanie GET do strony zaraz przed dodaniem użytkownika i parsując wyniki dla tokena CSRF.</p></div>
+<div class="paragraph"><p>W końcu stworzył 4 KB robaka, którego wpuścił do strony swojego profilu.</p></div>
+<div class="paragraph"><p>Wartość <a href="http://www.securiteam.com/securitynews/5LP051FHPE.html">moz-binding</a> CSS okazała się być innym sposobem na wprowadzanie JavaScript do CSS w przeglądarkach opartych na Gecko (na przykład Firefox).</p></div>
+<h4 id="_sposoby_ochrony_4">7.4.1. Sposoby ochrony</h4>
+<div class="paragraph"><p>Ten przykład, ponownie pokazał, że filtr na podstawie czarnej listy nigdy nie jest kompletny. Edytowalne CSS w aplikacjach internetowych jest dość rzadką funkcją, jednak nie obawiam się stosować białych list do filtracji CSS. <span style="background-color: #fffcdb;">Jeśli chcesz zezwolić na niestandardowe kolory lub obrazek, możesz pozwolić użytkownikowi je wybrać i tworzyć CSS w aplikacji internetowej</span>. Użyj Railsowej metody <tt>sanitize()</tt> jako modelu dla białej listy filtrowania CSS, jeśli naprawdę jej potrzebujesz.</p></div>
+<h3 id="_atak_typu_textile_injection">7.5. Atak typu Textile Injection</h3>
+<div class="paragraph"><p>-- <em>Jeśli chcesz zapewnić formatowanie tekstu inne niż HTML (ze względu na bezpieczeństwo), powinieneś użyć języka mark-up, który jest przekształcany na HTML po stronie serwera. <a href="http://whytheluckystiff.net/ruby/redcloth/">http://whytheluckystiff.net/ruby/redcloth/</a> [RedCloth] jest takim język dla Ruby, ale bez stosowania środków ostrożności, jest również podatny na XSS.</em></p></div>
 <div class="literalblock">
 <div class="content">
-<pre><tt>For example, RedCloth translates _test_ to &lt;em&gt;test&lt;em&gt;, which makes the text italic. However, up to the current version 3.0.4, it is still vulnerable to XSS. Get the http://www.redcloth.org[all-new version 4] that removed serious bugs. However, even that version has http://www.rorsecurity.info/journal/2008/10/13/new-redcloth-security.html[some security bugs], so the countermeasures still apply. Here is an example for version 3.0.4:</tt></pre>
+<pre><tt>Na przykład, RedCloth tłumaczy _test_ na &lt;em&gt;test&lt;em&gt;, co oznacza kursywę. Jednak, aż do obecnej wersji 3.0.4, jest nadal podatny na XSS. Pobierz http://www.redcloth.org [wszystkie nowe wersje 4], w których usunięto poważne błędy. Jednak nawet ta wersja http://www.rorsecurity.info/journal/2008/10/13/new-redcloth-security.html [kilka błędów bezpieczeństwa], więc sposoby ochrony nadal obowiązują. Oto przykład dla wersji 3.0.4:</tt></pre>
 </div></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&gt;&gt; RedCloth.new('&lt;script&gt;alert(1)&lt;/script&gt;').to_html
 =&gt; "&lt;script&gt;alert(1)&lt;/script&gt;"</tt></pre>
 </div></div>
-<div class="paragraph"><p>Use the :filter_html option to remove HTML which was not created by the Textile processor.</p></div>
+<div class="paragraph"><p>Użyj opcji :filter_html żeby usunąć kod HTML, który nie został stworzony przez procesor textile.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&gt;&gt; RedCloth.new('&lt;script&gt;alert(1)&lt;/script&gt;', [:filter_html]).to_html
 =&gt; "alert(1)"</tt></pre>
 </div></div>
-<div class="paragraph"><p>However, this does not filter all HTML, a few tags will be left (by design), for example &lt;a&gt;:</p></div>
+<div class="paragraph"><p>Ta metoda nie przefiltruje całego kodu HTML - kilka tagów zostanie pominiętych (ze względów konstrukcyjnych), na przykład &lt;a&gt;:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>&gt;&gt; RedCloth.new("&lt;a href='javascript:alert(1)'&gt;hello&lt;/a&gt;", [:filter_html]).to_html
 =&gt; "&lt;p&gt;&lt;a href="javascript:alert(1)"&gt;hello&lt;/a&gt;&lt;/p&gt;"</tt></pre>
 </div></div>
-<h4 id="_countermeasures_2">7.5.1. Countermeasures</h4>
-<div class="paragraph"><p>It is recommended to <span style="background-color: #fffcdb;">use RedCloth in combination with a whitelist input filter</span>, as described in the countermeasures against XSS.</p></div>
-<h3 id="_ajax_injection">7.6. Ajax Injection</h3>
-<div class="paragraph"><p>-- <em>The same security precautions have to be taken for Ajax actions as for “normal” ones. There is at least one exception, however: The output has to be escaped in the controller already, if the action doesn&#8217;t render a view.</em></p></div>
-<div class="paragraph"><p>If you use the <a href="http://dev.rubyonrails.org/browser/plugins/in_place_editing">in_place_editor plugin</a>, or actions that return a string, rather than rendering a view, <span style="background-color: #fffcdb;">you have to escape the return value in the action</span>. Otherwise, if the return value contains a XSS string, the malicious code will be executed upon return to the browser. Escape any input value using the h() method.</p></div>
-<h3 id="_rjs_injection">7.7. RJS Injection</h3>
-<div class="paragraph"><p>-- <em>Don&#8217;t forget to escape in JavaScript (RJS) templates, too.</em></p></div>
-<div class="paragraph"><p>The RJS API generates blocks of JavaScript code based on Ruby code, thus allowing you to manipulate a view or parts of a view from the server side. <span style="background-color: #fffcdb;">If you allow user input in RJS templates, do escape it using escape_javascript() within JavaScript functions, and in HTML parts using h()</span>. Otherwise an attacker could execute arbitrary JavaScript.</p></div>
-<h3 id="_command_line_injection">7.8. Command Line Injection</h3>
-<div class="paragraph"><p>-- <em>Use user-supplied command line parameters with caution.</em></p></div>
-<div class="paragraph"><p>If your application has to execute commands in the underlying operating system, there are several methods in Ruby: exec(command), syscall(command), system(command) and `command`. You will have to be especially careful with these functions if the user may enter the whole command, or a part of it. This is because in most shells, you can execute another command at the end of the first one, concatenating them with a semicolon (;) or a vertical bar (|).</p></div>
-<div class="paragraph"><p>A countermeasure is to <span style="background-color: #fffcdb;">use the <tt>system(command, parameters)</tt> method which passes command line parameters safely</span>.</p></div>
+<h4 id="_sposoby_ochrony_5">7.5.1. Sposoby ochrony</h4>
+<div class="paragraph"><p>Zaleca się <span style="background-color: #fffcdb;">korzystanie z  RedCloth w połączeniu z białą listów filtracji wejścia</span>, jak zostało to opisane w sposobach ochrony przeciwko XSS.</p></div>
+<h3 id="_atak_typu_ajax_injection">7.6. Atak typu Ajax Injection</h3>
+<div class="paragraph"><p>-- <em>Środki ostrożności, podjęte dla Ajaxa, są takie same jak te dla "normalnych" technologii. Istnieje przynajmniej jeden wyjątek: Uniknięcie wyjścia musi nastąpić już w kontrolerze, jeżeli akcja nie renderuje widoku.</em></p></div>
+<div class="paragraph"><p>Jeśli używasz <a href="http://dev.rubyonrails.org/browser/plugins/in_place_editing">http://dev.rubyonrails.org/browser/plugins/in_place_editing</a> [wtyczki in_place_editor], lub akcji, które zwracają ciąg znaków, a nie renderujesz widoku, <span style="background-color: #fffcdb;">musisz uniknąć wartości zwracanej w akcji</span>. W przeciwnym razie, jeśli zwracana wartość zawiera ciąg XSS, złośliwy kod będzie wykonywany po powrocie do przeglądarki. Unikaj wszystkich wartości wejścia używając metody h().</p></div>
+<h3 id="_atak_typu_rjs_injection">7.7. Atak typu RJS Injection</h3>
+<div class="paragraph"><p>-- <em>Nie zapomnij o unikaniu w szablonach JavaScript (RJS).</em></p></div>
+<div class="paragraph"><p>API RJS generuje bloki kodu w oparciu o kod Ruby, co pozwala manipulować widokiem lub części widok z serwera. <span style="background-color: #fffcdb;">Jeśli zezwalasz na wejście użytkownika w szablonach RJS, użyj ucieczki korzystając z escape_javascript() w funkcji JavaScript i w części HTML korzystając z h()</span>. W Przeciwnym wypadku atakujący mógłby wykonać arbitralny kod JavaScript.</p></div>
+<h3 id="_atak_typu_command_line_injection">7.8. Atak typu Command Line Injection</h3>
+<div class="paragraph"><p>-- <em>Używaj parametrów wiersza polecenia dostarczanych przez użytkownika z ostrożnością.</em></p></div>
+<div class="paragraph"><p>Jeśli twoja aplikacja musi wykonywać polecenia systemu operacyjnego, istnieje do tego kilka metod w Ruby: exec(polecenie), syscall(polecenie), system(polecenie) oraz \‘command’. Będziesz musiał być szczególnie ostrożny z tymi funkcjami, jeżeli użytkownik może wprowadzić całą komendę, lub jej część. Dzieje się tak, ponieważ w większości shelli, możesz wykonywać kolejne polecenie na końcu pierwszego łącząc je średnikiem (;) lub pionową kreska (|).</p></div>
+<div class="paragraph"><p>Jako ochrony <span style="background-color: #fffcdb;">użyj metody <tt>system(komenda, parametry)</tt>, która bezpiecznie przekazuje parametry linii poleceń</span>.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>system("/bin/echo","hello; rm *")
 # prints "hello; rm *" and does not delete files</tt></pre>
 </div></div>
-<h3 id="_header_injection">7.9. Header Injection</h3>
-<div class="paragraph"><p>-- <em>HTTP headers are dynamically generated and under certain circumstances user input may be injected. This can lead to false redirection, XSS or HTTP response splitting.</em></p></div>
-<div class="paragraph"><p>HTTP request headers have a Referer, User-Agent (client software) and Cookie field, among others. Response headers for example have a status code, Cookie and Location (redirection target URL) field. All of them are user-supplied and may be manipulated with more or less effort. <span style="background-color: #fffcdb;">Remember to escape these header fields, too.</span> For example when you display the user agent in an administration area.</p></div>
-<div class="paragraph"><p>Besides that, it is <span style="background-color: #fffcdb;">important to know what you are doing when building response headers partly based on user input.</span> For example you want to redirect the user back to a specific page. To do that you introduced a “referer“ field in a form to redirect to the given address:</p></div>
+<h3 id="_atak_typu_header_injection">7.9. Atak typu Header Injection</h3>
+<div class="paragraph"><p>-- <em>Nagłówki HTTP są generowane dynamicznie i przy pewnych okolicznościach wejście użytkownika może zostać zaatakowane. Może to prowadzić do fałszywego przekierowania, XSS lub rozszczepieniu odpowiedzi HTTP.</em></p></div>
+<div class="paragraph"><p>Nagłówki żądań HTTP mają między innymi Referer, User-Agent (oprogramowanie klienta) i pole cookie. Nagłówki odpowiedzi mają na przykład kod stanu, cookie i lokalizacje (przekierowanie docelowego adresu URL) pola. Wszystkie z nich są dostarczane przez użytkownika i mogą być zmanipulowane, z większym lub mniejszym wysiłkiem. <span style="background-color: #fffcdb;">Należy pamiętać, aby uniknać tych pól nagłówów,</span>. Na przykład, kiedy wyświetlasz agenta użytkownika w sferze administracyjnej.</p></div>
+<div class="paragraph"><p>Poza tym, <span style="background-color: #fffcdb;">warto wiedzieć, co robisz przy budowie nagłówków odpowiedzi, częściowo opartych na wejściu użytkownika</span>. Na przykład jeśli chcesz cofnąć użytkownika do określonej strony. Aby to zrobić, wprowadziłeś "referer" pola w formularzu do przekierowania na dany adres:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>redirect_to params[:referer]</tt></pre>
 </div></div>
-<div class="paragraph"><p>What happens is that Rails puts the string into the Location header field and sends a 302 (redirect) status to the browser. The first thing a malicious user would do, is this:</p></div>
+<div class="paragraph"><p>Railsy wstawiają ciąg znaków do pola nagłówka położenia i wysyłają status 302 (przekierowanie) do przeglądarki. Pierwszą rzeczą, którą może zrobić złośliwy użytkownik jest:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>http://www.yourapplication.com/controller/action?referer=http://www.malicious.tld</tt></pre>
 </div></div>
-<div class="paragraph"><p>And due to a bug in (Ruby and) Rails up to version 2.1.2 (excluding it), a hacker may inject arbitrary header fields; for example like this:</p></div>
+<div class="paragraph"><p>Oraz ze względu na błąd w (Ruby i) Railsach do wersji 2.1.2 (z wyjątkiem, tej właśnie wersji), haker może wprowadzić arbitralne pola nagłówka, na przykład takie:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>http://www.yourapplication.com/controller/action?referer=http://www.malicious.tld%0d%0aX-Header:+Hi!
 http://www.yourapplication.com/controller/action?referer=path/at/your/app%0d%0aLocation:+http://www.malicious.tld</tt></pre>
 </div></div>
-<div class="paragraph"><p>Note that "%0d%0a" is URL-encoded for "\r\n" which is a carriage-return and line-feed (CRLF) in Ruby. So the resulting HTTP header for the second example will be the following because the second Location header field overwrites the first.</p></div>
+<div class="paragraph"><p>Zwróć uwagę, że "%0d%0a" jest zakodowaną przez URL wersją "\r\n", która jest carriage-return i line-feed (CRLF) w języku Ruby. Więc wynikający nagłówek HTTP dla drugiego przykładu będzie następujący ponieważ drugie położenie pole nagłówka zastępuje pierwsze.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>HTTP/1.1 302 Moved Temporarily
 (...)
 Location: http://www.malicious.tld</tt></pre>
 </div></div>
-<div class="paragraph"><p>So <span style="background-color: #fffcdb;">attack vectors for Header Injection are based on the injection of CRLF characters in a header field.</span> And what could an attacker do with a false redirection? He could redirect to a phishing site that looks the same as yours, but asks to login again (and sends the login credentials to the attacker). Or he could install malicious software through browser security holes on that site. <span style="background-color: #fffcdb;">Rails 2.1.2 escapes these characters for the Location field in the redirect_to method. Make sure you do it yourself when you build other header fields with user input.</span></p></div>
-<h4 id="_response_splitting">7.9.1. Response Splitting</h4>
-<div class="paragraph"><p>If Header Injection was possible, Response Splitting might be, too. In HTTP, the header block is followed by two CRLFs and the actual data (usually HTML). The idea of Response Splitting is to inject two CRLFs into a header field, followed by another response with malicious HTML. The response will be:</p></div>
+<div class="paragraph"><p>Więc <span style="background-color: #fffcdb;">wektory ataku typu header injection są oparte na wstawianiu znaków CRLF do pola nagłówka</span>. A co atakujący może zrobić z fałszywymi przekierowaniami? Może przekierować je do strony, na której dokona phishingu. Strona ta wygląda tak samo jak twoja, ale prosi, aby zalogować się ponownie (i wysyła dane logowania atakującemu). Atakujący może też zainstalować złośliwe oprogramowanie za pośrednictwem luk w przeglądarce na tej stronie. <span style="background-color: #fffcdb;">Railsy 2.1.2 unikają wstawiania tych znaków w polu położenia w metodzie redirect_to. Upewnij się, że zrobisz to sam podczas budowania innych pól nagłówka z wejściem użytkownika</span>.</p></div>
+<h4 id="_rozdzielanie_odpowiedzi">7.9.1. Rozdzielanie odpowiedzi</h4>
+<div class="paragraph"><p>Jeśli atak typu Header Injection był możliwy, prawdopodobne jest, że rozdzielanie odpowiedzi również będzie możliwe. W HTTP za blokiem nagłówka  podążają dwie CRLFs i aktualne dane (zwykle HTML). Pomysł rozdzielania odpowiedzi polega na wstawianiu dwóch CRLFs w pole nagłówka, a następnie wstawianiu innej odpowiedzi ze złośliwym kodem HTML. Odpowiedź będzie wyglądała tak:</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><tt>HTTP/1.1 302 Found [First standard 302 response]
@@ -1104,40 +1104,40 @@ Connection: Keep-Alive
 Transfer-Encoding: chunked
 Content-Type: text/html</tt></pre>
 </div></div>
-<div class="paragraph"><p>Under certain circumstances this would present the malicious HTML to the victim. However, this seems to work with Keep-Alive connections, only (and many browsers are using one-time connections). But you can&#8217;t rely on this. <span style="background-color: #fffcdb;">In any case this is a serious bug, and you should update your Rails to version 2.0.5 or 2.1.2 to eliminate Header Injection (and thus response splitting) risks.</span></p></div>
+<div class="paragraph"><p>W pewnych okolicznościach złośliwy kod HTML trafi do ofiary. Jednakże, jest to praca tylko i wyłącznie z połączeniami Keep-Alive (wiele przeglądarek używa jednorazowych połączeń). Ale nie można na tym zbytnio polegać. <span style="background-color: #fffcdb;">W każdym razie jest to poważny błąd i należy zaktualizować Railsy do wersji 2.0.5 lub 2.1.2 w celu wyeliminowania ryzyka wystąpienia header ijnection (i tym samym rozdzielania odpowiedzi)</span>.</p></div>
 </div>
-<h2 id="_additional_resources">8. Additional resources</h2>
+<h2 id="_dodatkowe_informacje">8. Dodatkowe informacje</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The security landscape shifts and it is important to keep up to date, because missing a new vulnerability can be catastrophic. You can find additional resources about (Rails) security here:</p></div>
+<div class="paragraph"><p>Zakres zabezpieczeń cały czas się zmienia i ważne jest, aby być na bieżąco w temacie, ponieważ pominięcie nowej luki może mieć katastrofalne skutki. Dodatkowe informacje na temat bezpieczeństwa (w Railsach) znajdziesz tutaj:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-The Ruby on Rails security project posts security news regularly: <a href="http://www.rorsecurity.info">http://www.rorsecurity.info</a>
+Projekt bezpieczeństwa w Ruby on Rails regularnie dodaje newsy: <a href="http://www.rorsecurity.info">http://www.rorsecurity.info</a>
 </p>
 </li>
 <li>
 <p>
-Subscribe to the Rails security <a href="http://groups.google.com/group/rubyonrails-security">mailing list</a>
+Zapisz się do <a href="http://groups.google.com/group/rubyonrails-security">listy mailingowej</a> bezpieczeństwa w Railsach
 </p>
 </li>
 <li>
 <p>
-<a href="http://secunia.com/">Keep up to date on the other application layers</a> (they have a weekly newsletter, too)
+<a href="http://secunia.com/">Bądź na bieżąco z warstwami innych aplikacji</a> (mają też cotygodniowy biuletyn)
 </p>
 </li>
 <li>
 <p>
-A <a href="http://ha.ckers.org/blog/">good security blog</a> including the <a href="http://ha.ckers.org/xss.html">Cross-Site scripting Cheat Sheet</a>
+A <a href="http://ha.ckers.org/blog/">Dobry blog o bezpieczeństwie</a> zawierający <a href="http://ha.ckers.org/xss.html">ściągę z Cross-Site scripting</a>
 </p>
 </li>
 <li>
 <p>
-Another <a href="http://www.0x000000.com/">good security blog</a> with some Cheat Sheets, too
+Another <a href="http://www.0x000000.com/"> Dobry blog o bezpieczeństwie</a> również zawierający ściągawki.
 </p>
 </li>
 </ul></div>
 </div>
-<h2 id="_changelog">9. Changelog</h2>
+<h2 id="_dziennik_zmian">9. Dziennik zmian</h2>
 <div class="sectionbody">
 <div class="paragraph"><p><a href="http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/7">Lighthouse ticket</a></p></div>
 <div class="ulist"><ul>

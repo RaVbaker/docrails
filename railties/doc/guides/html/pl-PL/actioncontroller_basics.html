@@ -195,15 +195,15 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ClientsController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Actions are public methods</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Akcje są metodami publicznymi</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> new
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Action methods are responsible for producing output</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Metody akcji są odpowiedzialne za produkcję danych wyjściowych</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> edit
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
-<span style="font-style: italic"><span style="color: #9A1900"># Helper methods are private and can not be used as actions</span></span>
+<span style="font-style: italic"><span style="color: #9A1900"># Helpery są metodami prywatnymi i nie mogą być użyte jako akcje</span></span>
 private
 
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> foo
@@ -211,7 +211,7 @@ private
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <div class="paragraph"><p>Nie ma zasady mówiącej, że metoda na kontrolerze musi być akcją; równie dobrze może być użyta do innych celów, takich jak filtrowanie, które będzie omówione w dalszej części tego przewodnika.</p></div>
-<div class="paragraph"><p>Na przykład, jeżeli użytkownik przejdzie do <tt>/clients/new</tt> w twojej aplikacji, aby dodać nowego klienta, Rails stworzy instancję klasy ClientsController i uruchomi metodę <tt>new</tt>. Zwróć uwagę, że pusta metoda z przykładu powyżej może działać dobrze, ponieważ Rails domyślnie wyrenderuje widok <tt>new.html.erb</tt>, chyba że akcja powie inaczej. Metoda <tt>new</tt> może udostępnić do widoku zmienną instancyjną <tt>@client</tt> poprzez stworzenie nowego klienta.</p></div>
+<div class="paragraph"><p>Na przykład, jeżeli użytkownik przejdzie do <tt>/clients/new</tt> w twojej aplikacji, aby dodać nowego klienta, Railsy stworzą instancję klasy ClientsController i uruchomią metodę <tt>new</tt>. Zwróć uwagę, że pusta metoda z przykładu powyżej może działać dobrze, ponieważ Railsy domyślnie wyrenderują widok <tt>new.html.erb</tt>, chyba że akcja powie inaczej. Metoda <tt>new</tt> może udostępnić do widoku zmienną instancyjną <tt>@client</tt> poprzez stworzenie nowego klienta.</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -246,10 +246,10 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ClientsController <span style="color: #990000">&lt;</span> ActionController<span style="color: #990000">::</span>Base
 
-  <span style="font-style: italic"><span style="color: #9A1900"># This action uses query string parameters because it gets run by a HTTP</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># GET request, but this does not make any difference to the way in which</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># the parameters are accessed. The URL for this action would look like this</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># in order to list activated clients: /clients?status=activated</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Ta akcja używa parametrów ciągu zapytania, ponieważ jest uruchamiana przez</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># żądanie HTTP GET. Ale nie ma żadnej różnicy, które parametry są dostępne.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Adres URL dla tej akcji mógłby wyglądać następująco</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># (w celu wyświetlenia listy aktywnych klientów): /clients?status=activated</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> index
     <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> params<span style="color: #990000">[:</span>status<span style="color: #990000">]</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"activated"</span>
       <span style="color: #009900">@clients</span> <span style="color: #990000">=</span> Client<span style="color: #990000">.</span>activated
@@ -258,23 +258,23 @@ http://www.gnu.org/software/src-highlite -->
     <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
-  <span style="font-style: italic"><span style="color: #9A1900"># This action uses POST parameters. They are most likely coming from an HTML</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># form which the user has submitted. The URL for this RESTful request will</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># be "/clients", and the data will be sent as part of the request body.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Ta akcja używa parametrów POST. Pochodzą one najczęściej z formularza HTML</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># który został przesłany przez użytkownika. Adres URL dla żądania RESTful będzie</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># wyglądał tak: "/clients", a dane zostaną wysłane jako część ciała żądania.</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> create
     <span style="color: #009900">@client</span> <span style="color: #990000">=</span> Client<span style="color: #990000">.</span>new<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>client<span style="color: #990000">])</span>
     <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> <span style="color: #009900">@client</span><span style="color: #990000">.</span>save
       redirect_to <span style="color: #009900">@client</span>
     <span style="font-weight: bold"><span style="color: #0000FF">else</span></span>
-      <span style="font-style: italic"><span style="color: #9A1900"># This line overrides the default rendering behavior, which would have been</span></span>
-      <span style="font-style: italic"><span style="color: #9A1900"># to render the "create" view.</span></span>
+      <span style="font-style: italic"><span style="color: #9A1900"># Ta linia zastępuje domyślne zachowanie renderowania, które</span></span>
+      <span style="font-style: italic"><span style="color: #9A1900"># renderuje widok "create".</span></span>
       render <span style="color: #990000">:</span>action <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"new"</span>
     <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
 <h3 id="_parametry_tablic_zwyk_ych_ang_array_i_tablic_asocjacyjnych_ang_hash">3.1. Parametry tablic zwykłych (ang. array) i tablic asocjacyjnych (ang. hash)</h3>
-<div class="paragraph"><p>Tablica haszująca <tt>params</tt> nie musi być ograniczona do jednego wymiaru. Możemy stworzyć tablicę wielowymiarową, która zawiera w sobie zagnieżdżone tablice haszujące lub zwykłe tablice. Aby wysłać tablicę wartości, dołącz "[]" do nazwy klucza.</p></div>
+<div class="paragraph"><p>Tablica asocjacyjna <tt>params</tt> nie musi być ograniczona do jednego wymiaru. Możemy stworzyć tablicę wielowymiarową, która zawiera w sobie zagnieżdżone tablice asocjacyjne lub zwykłe tablice. Aby wysłać tablicę wartości, dołącz "[]" do nazwy klucza.</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>GET /clients?ids[]=1&amp;ids[]=2&amp;ids[]=3</tt></pre>
@@ -289,7 +289,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <div class="paragraph"><p>Wartość <tt>params[:ids]</tt> będzie teraz wynosić <tt>["1", "2", "3"]</tt>. Zauważ, że
 wartości parametru są zawsze łańcuchami znaków). Railsy nie próbują odgadywać ani rzutować typu.</p></div>
-<div class="paragraph"><p>Aby przesłać tablicę haszującą, zawrzyj nazwę klucza wewnątrz nawiasów:</p></div>
+<div class="paragraph"><p>Aby przesłać tablicę asocjacyjną, zawrzyj nazwę klucza wewnątrz nawiasów:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><tt>&lt;form action="/clients" method="post"&gt;
@@ -299,12 +299,12 @@ wartości parametru są zawsze łańcuchami znaków). Railsy nie próbują odgad
   &lt;input type="text" name="client[address][city]" value="Carrot City" /&gt;
 &lt;/form&gt;</tt></pre>
 </div></div>
-<div class="paragraph"><p>Wartość tablicy <tt>params[:client]</tt> po tym, jak ten formularz zostanie przekazany, będzie wynosić <tt>{"name" =&gt; "Acme", "phone" =&gt; "12345", "address" =&gt; {"postcode" =&gt; "12345", "city" =&gt; "Carrot City"}}</tt>. Zwróć uwagę na zagnieżdżoną tablicę haszującą w <tt>params[:client][:address]</tt>.</p></div>
-<div class="paragraph"><p>Zauważ też, że tablica haszująca params jest w rzeczywistości instancją klasy
+<div class="paragraph"><p>Wartość tablicy <tt>params[:client]</tt> po tym, jak ten formularz zostanie przekazany, będzie wynosić <tt>{"name" =&gt; "Acme", "phone" =&gt; "12345", "address" =&gt; {"postcode" =&gt; "12345", "city" =&gt; "Carrot City"}}</tt>. Zwróć uwagę na zagnieżdżoną tablicę asocjacyjną w <tt>params[:client][:address]</tt>.</p></div>
+<div class="paragraph"><p>Zauważ też, że tablica asocjacyjna params jest w rzeczywistości instancją klasy
 <tt>HashWithIndifferentAccess</tt> (z modułu Active Support), która jest podklasą
 klasy Hash. Pozwala ona na stosowanie zamiennie symboli oraz łańcuchów znaków jako kluczy.</p></div>
 <h3 id="_parametry_routingu">3.2. Parametry routingu</h3>
-<div class="paragraph"><p>Tablica haszująca <tt>params</tt> będzie zawsze zawierać klucze <tt>:controller</tt> i
+<div class="paragraph"><p>Tablica asocjacyjna <tt>params</tt> będzie zawsze zawierać klucze <tt>:controller</tt> i
 <tt>:action</tt>, ale należy używać metod <tt>controller_name</tt> i <tt>action_name</tt> zamiast
 odwoływać się do ich wartości. Wszelkie inne parametry określone przez
 routing, takie jak <tt>:id</tt> będą również dostepne. Jako przykład, rozważ listę
@@ -328,7 +328,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ApplicationController <span style="color: #990000">&lt;</span> ActionController<span style="color: #990000">::</span>Base
 
-  <span style="font-style: italic"><span style="color: #9A1900">#The options parameter is the hash passed in to +url_for+</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900">#Parametr options jest tablicą asocjacyjną przekazaną do +url_for+</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> default_url_options<span style="color: #990000">(</span>options<span style="color: #990000">)</span>
     <span style="color: #FF0000">{</span><span style="color: #990000">:</span>locale <span style="color: #990000">=&gt;</span> I18n<span style="color: #990000">.</span>locale<span style="color: #FF0000">}</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
@@ -459,7 +459,7 @@ http://www.gnu.org/software/src-highlite -->
 w takim sensie, że wartości tam przechowywane są dostępne tylko w następnym
 żądaniu. Jest to przydatne do przechowywania komunikatów o błędach itp. Jest
 ona dostępna w bardzo podobny sposób jak sama sesja, czyli jako tablica
-haszująca. Jako przykładu użyjmy mechanizmu wylogowywania. Kontroler może wysłać komunikat, który będzie wyświetlony użytkownikowi przy następnym żądaniu:</p></div>
+asocjacyjna. Jako przykładu użyjmy mechanizmu wylogowywania. Kontroler może wysłać komunikat, który będzie wyświetlony użytkownikowi przy następnym żądaniu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -534,7 +534,7 @@ http://www.gnu.org/software/src-highlite -->
 </div>
 <h2 id="_cookies">5. Cookies</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Twoja aplikacja może przechowywać małe ilości danych po stronie klienta w postaci tzw. cookies. Mogą one trwać poprzez wiele żądań, a nawet sesji. Railsy zapewniają łatwy dostęp do cookies za pomocą metody <tt>cookies</tt>, która podobnie jak metoda <tt>session</tt>, działa jako tablica haszująca:</p></div>
+<div class="paragraph"><p>Twoja aplikacja może przechowywać małe ilości danych po stronie klienta w postaci tzw. cookies. Mogą one trwać poprzez wiele żądań, a nawet sesji. Railsy zapewniają łatwy dostęp do cookies za pomocą metody <tt>cookies</tt>, która podobnie jak metoda <tt>session</tt>, działa jako tablica asocjacyjna:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -543,7 +543,7 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> CommentsController <span style="color: #990000">&lt;</span> ApplicationController
 
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> new
-    <span style="font-style: italic"><span style="color: #9A1900">#Auto-fill the commenter's name if it has been stored in a cookie</span></span>
+    <span style="font-style: italic"><span style="color: #9A1900">#Auto-uzupełnianie imienia komentatora, jeżeli jest ono przechowywane w cookie</span></span>
     <span style="color: #009900">@comment</span> <span style="color: #990000">=</span> Comment<span style="color: #990000">.</span>new<span style="color: #990000">(:</span>name <span style="color: #990000">=&gt;</span> cookies<span style="color: #990000">[:</span>commenter_name<span style="color: #990000">])</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
@@ -552,10 +552,10 @@ http://www.gnu.org/software/src-highlite -->
     <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> <span style="color: #009900">@comment</span><span style="color: #990000">.</span>save
       flash<span style="color: #990000">[:</span>notice<span style="color: #990000">]</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"Thanks for your comment!"</span>
       <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> params<span style="color: #990000">[:</span>remember_name<span style="color: #990000">]</span>
-        <span style="font-style: italic"><span style="color: #9A1900"># Remember the commenter's name</span></span>
+        <span style="font-style: italic"><span style="color: #9A1900"># Pamiętaj imię komentatora</span></span>
         cookies<span style="color: #990000">[:</span>commenter_name<span style="color: #990000">]</span> <span style="color: #990000">=</span> <span style="color: #009900">@comment</span><span style="color: #990000">.</span>name
       <span style="font-weight: bold"><span style="color: #0000FF">else</span></span>
-        <span style="font-style: italic"><span style="color: #9A1900"># Don't remember, and delete the name if it has been remembered before</span></span>
+        <span style="font-style: italic"><span style="color: #9A1900"># Nie pamiętaj i skasuj imię, jeśli było pamiętane wcześniej</span></span>
         cookies<span style="color: #990000">.</span>delete<span style="color: #990000">(:</span>commenter_name<span style="color: #990000">)</span>
       <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
       redirect_to <span style="color: #009900">@comment</span><span style="color: #990000">.</span>article
@@ -586,15 +586,15 @@ private
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> require_login
     <span style="font-weight: bold"><span style="color: #0000FF">unless</span></span> logged_in?
       flash<span style="color: #990000">[:</span>error<span style="color: #990000">]</span> <span style="color: #990000">=</span> <span style="color: #FF0000">"You must be logged in to access this section"</span>
-      redirect_to new_login_url <span style="font-style: italic"><span style="color: #9A1900"># Prevents the current action from running</span></span>
+      redirect_to new_login_url <span style="font-style: italic"><span style="color: #9A1900"># chroni bieżącą akcję przed uruchomieniem</span></span>
     <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
-  <span style="font-style: italic"><span style="color: #9A1900"># The logged_in? method simply returns true if the user is logged in and</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># false otherwise. It does this by "booleanizing" the current_user method</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># we created previously using a double ! operator. Note that this is not</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># common in Ruby and is discouraged unless you really mean to convert something</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># into true or false.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Metoda logged_in? po prostu zwraca prawdę, jeśli uzytkownik jest zalogowany</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># i fałsz w przeciwnym wypadku. Robi to poprzez "udwuwartościowioną" metodę current_user</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># którą stworzyliśmy wcześniej, za pomocą operatora podwójnego !. Pamiętaj, że to nie jest</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># powszechne w Ruby i jest odradzane, chyba że naprawdę chcesz przekonwertować coś</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># w prawdę lub fałsz.</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> logged_in?
     <span style="color: #990000">!!</span>current_user
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
@@ -712,7 +712,7 @@ informacji na temat sposobu korzystania z filtrów</a>.</p></div>
 <div class="sectionbody">
 <div class="paragraph"><p>Weryfikacja to sprawdzenie czy pewne kryteria są spełnione, aby uruchomić
 kontroler lub akcję. Może określać, że pewien klucz (lub kilka kluczy w formie
-tablicy) jest obecny w tablicy haszującej <tt>params</tt>, <tt>session</tt> lub <tt>flash</tt> lub
+tablicy) jest obecny w tablicy asocjacyjnej <tt>params</tt>, <tt>session</tt> lub <tt>flash</tt> lub
 to, że jakaś metoda HTTP została użyta lub to, że żądanie zostało wykonane
 przy użyciu XMLHTTPRequest (Ajax). Gdy kryteria nie są spełnione, domyślnie
 podejmowaną akcją jest wyrenderowanie błędu 400 (Bad Request), ale możesz to
@@ -833,7 +833,7 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 <li>
 <p>
-<tt>headers</tt> - zwraca tablicę haszującą zawierającą nagłówki stowarzyszone z żądaniem.
+<tt>headers</tt> - zwraca tablicę asocjacyjną zawierającą nagłówki stowarzyszone z żądaniem.
 </p>
 </li>
 <li>
@@ -863,7 +863,7 @@ http://www.gnu.org/software/src-highlite -->
 </li>
 </ul></div>
 <h4 id="_tt_path_parameters_tt_tt_query_parameters_tt_i_tt_request_parameters_tt">9.1.1. <tt>path_parameters</tt>, <tt>query_parameters</tt> i <tt>request_parameters</tt></h4>
-<div class="paragraph"><p>Railsy gromadzą wszystkie parametry przesłane wraz z żądaniem w tablicy haszującej <tt>params</tt>, bez względu czy zostały przesłane jako część ciągu zapytania czy jako zawartość POST. Obiekt request posiada trzy akcesory (ang. accessors) umożliwiające ci dostęp do tych parametrów w zależności od ich pochodzenia. Tablica haszująca <tt>query_parameters</tt> zawiera parametry, które były wysłane jako część ciągu zapytania, natomiast tablica haszująca <tt>request_parameters</tt> zawiera parametry wysłane jako POST. Tablica haszująca <tt>path_parameters</tt> zawiera parametry, które zostały rozpoznane przez routing jako część ścieżki prowadzącej do tego konkretnego kontrolera i akcji.</p></div>
+<div class="paragraph"><p>Railsy gromadzą wszystkie parametry przesłane wraz z żądaniem w tablicy asocjacyjnej <tt>params</tt>, bez względu czy zostały przesłane jako część ciągu zapytania czy jako zawartość POST. Obiekt request posiada trzy akcesory (ang. accessors) umożliwiające ci dostęp do tych parametrów w zależności od ich pochodzenia. Tablica asocjacyjna <tt>query_parameters</tt> zawiera parametry, które były wysłane jako część ciągu zapytania, natomiast tablica asocjacyjna <tt>request_parameters</tt> zawiera parametry wysłane jako POST. Tablica asocjacyjna <tt>path_parameters</tt> zawiera parametry, które zostały rozpoznane przez routing jako część ścieżki prowadzącej do tego konkretnego kontrolera i akcji.</p></div>
 <h3 id="_obiekt_tt_response_tt">9.2. Obiekt <tt>response</tt></h3>
 <div class="paragraph"><p>Obiekt <tt>response</tt> nie jest zazwyczaj stosowany od razu, ale jest tworzony w
 trakcie wykonywania akcji i renderuje dane, które są przesyłane z powrotem do
@@ -902,7 +902,7 @@ użytkownika. Ale czasami - jak w przypadku filtrów końcowych -  może być po
 </ul></div>
 <h4 id="_ustawienie_niestandardowych_nag_wk_w">9.2.1. Ustawienie niestandardowych nagłówków</h4>
 <div class="paragraph"><p>Jeśli chcesz ustawić niestandardowe nagłówki dla danych zwrotnych, miejscem na
-to jest <tt>response.headers</tt>. Atrybut headers jest tablicą haszującą, który
+to jest <tt>response.headers</tt>. Atrybut headers jest tablicą asocjacyjną, który
 mapuje nazwę nagłówka na jego wartość, a Railsy ustawiają niektóre z nich -
 np. <tt>Content-Type</tt> - automatycznie. Jeśli chcesz dodać lub zmienić nagłówek, dopisz go do <tt>headers</tt> z nazwą i wartością:</p></div>
 <div class="listingblock">
@@ -950,8 +950,8 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #000080">require</span></span> <span style="color: #FF0000">"prawn"</span>
 <span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ClientsController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Generate a PDF document with information on the client and return it.</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900"># The user will get the PDF as a file download.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Generuj dokument PDF z informacjami na temat klienta i zwróć go.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Użytkownik otrzyma PDF jako plik do pobrania.</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> download_pdf
     client <span style="color: #990000">=</span> Client<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span>
     send_data<span style="color: #990000">(</span>generate_pdf<span style="color: #990000">,</span> <span style="color: #990000">:</span>filename <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"#{client.name}.pdf"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>type <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"application/pdf"</span><span style="color: #990000">)</span>
@@ -986,7 +986,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ClientsController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Stream a file that has already been generated and stored on disk</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Prześlij plik, który był już wygenerowany i przechowywany na dysku</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> download_pdf
     client <span style="color: #990000">=</span> Client<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span>
     send_data<span style="color: #990000">(</span><span style="color: #FF0000">"#{RAILS_ROOT}/files/clients/#{client.id}.pdf"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>filename <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"#{client.name}.pdf"</span><span style="color: #990000">,</span> <span style="color: #990000">:</span>type <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"application/pdf"</span><span style="color: #990000">)</span>
@@ -1031,7 +1031,7 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ClientsController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># The user can request to receive this resource as HTML or PDF.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Użytkownik może zażądać, aby otrzymać ten zasób jako HTML lub PDF.</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> show
     <span style="color: #009900">@client</span> <span style="color: #990000">=</span> Client<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span>
 
@@ -1071,7 +1071,7 @@ produkcji) w folderze <tt>log</tt>. Są one niezwykle przydatne podczas debugowa
 działania aplikacji możesz nie chcieć, żeby każda informacja była zapisywany w
 pliku logu. Metoda <tt>filter_parameter_logging</tt> może być używana do
 odfiltrowywania poufnych informacji z logu. Działa ona poprzez zastępowania
-pewnych wartości z tablicy haszującej <tt>params</tt> przez "[FILTERED]" przy
+pewnych wartości z tablicy asocjacyjnej <tt>params</tt> przez "[FILTERED]" przy
 zapisywaniu do logu. Jako przykład zobaczmy, jak filtrować wszystkie parametry
 z kluczem zawierającym <tt>password</tt>:</p></div>
 <div class="listingblock">
@@ -1084,7 +1084,7 @@ http://www.gnu.org/software/src-highlite -->
   filter_parameter_logging <span style="color: #990000">:</span>password
 
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Metoda działa rekursywnie na wszystkich poziomach tablicy haszującej params.
+<div class="paragraph"><p>Metoda działa rekursywnie na wszystkich poziomach tablicy asocjacyjnej params.
 Może przyjmować drugi opcjonalny parametr, który jeśli występuje, jest używany
 jako tekst zastępujący. Funkcja ta może też przyjąć blok, który sprawdza warunek dla każdego klucza i zastępuje te, dla których blok zwraca ‘true’.</p></div>
 </div>
@@ -1147,17 +1147,17 @@ private
 
 <span style="font-weight: bold"><span style="color: #0000FF">class</span></span> ClientsController <span style="color: #990000">&lt;</span> ApplicationController
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Check that the user has the right authorization to access clients.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Sprawdź czy użytkownik ma prawo dostępu</span></span>
   before_filter <span style="color: #990000">:</span>check_authorization
 
-  <span style="font-style: italic"><span style="color: #9A1900"># Note how the actions don't have to worry about all the auth stuff.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Zwróć uwagę jak te akcje nie muszą się martwić o wszystkie szczegóły uwierzytelniania</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> edit
     <span style="color: #009900">@client</span> <span style="color: #990000">=</span> Client<span style="color: #990000">.</span>find<span style="color: #990000">(</span>params<span style="color: #990000">[:</span>id<span style="color: #990000">])</span>
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 
 private
 
-  <span style="font-style: italic"><span style="color: #9A1900"># If the user is not authorized, just throw the exception.</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900"># Jeżeli użytkownik jest nie upoważniony, po prostu rzuć wyjątkiem.</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">def</span></span> check_authorization
     <span style="font-weight: bold"><span style="color: #0000FF">raise</span></span> User<span style="color: #990000">::</span>NotAuthorized <span style="font-weight: bold"><span style="color: #0000FF">unless</span></span> current_user<span style="color: #990000">.</span>admin?
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
