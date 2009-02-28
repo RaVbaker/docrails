@@ -114,6 +114,7 @@ Wygląda to tak:
 Zastosowanie nonce (losowa wartość) w sesji rozwiązuje problem ataku typu replay. Nonce jest ważna tylko raz i serwer musi śledzić wszystkie ważne nonce. To staje się jeszcze bardziej skomplikowane, jeśli twoja aplikacja znajduje się na kilku serwerach (mongrels). Przechowywanie nonce w tabeli bazy danych niszczy całą ideę CookieStore (unikanie łączenia się z bazą danych).
  
 Najlepszym [,#fffcdb]#rozwiązaniem jest przechowywanie tego rodzaju danych nie w sesji, lecz w bazie danych#. W tym przypadku kredyt powinien być przechowywany w bazie danych, a id_zalogowanego_użytkownika (logged_in_user_id) w sesji.
+
 === Atak typu Session fixation
  
 -- _Oprócz kradzieży identyfikatora sesji użytkownika, atakujący może spreparować identyfikator sesji dla użytkownika. Zjawisko to jest określane mianem ataku typu session fixation.
@@ -187,7 +188,7 @@ W rozdziale o sesjach dowiedzieliśmy się, że większość aplikacji Railsowyc
  
 - Bob przegląda forum i widzi wpis (post) hakera, zawierający spreparowany element HTML typu img (obrazek). Element odnosi się raczej do komendy w aplikacji zarządzania projektem Boba, zamiast obrazka. 
 - +<img src="http://www.webapp.com/project/1/destroy">+
-- Sesja Bob na www.webapp.com jest wciąż aktywna, bo nie wylogował się kilka minut temu. 
+- Sesja Boba na www.webapp.com jest wciąż aktywna, bo nie wylogował się kilka minut temu. 
 - Poprzez oglądanie wpisu, przeglądarka znajdzie tag obrazka. Następnie spróbuje wczytać podejrzany obrazek z www.webapp.com. Zgodnie z tym, co napisałem wcześniej, przeglądarka prześle również cookie z ważnym identyfikator sesji. 
 - Aplikacja internetowa na www.webapp.com sprawdzi informacje o użytkowniku w odpowiednim hashu sesji i zniszczy projekt z ID 1. Następnie zwróci stronę, która będzie nieoczekiwanym wynikiem dla przeglądarki, więc nie wyświetli się żaden obrazek. 
 - Bob nie zauważy ataku -- ale po kilku dniach stwierdzi, że projekt numer 1 zniknał.
@@ -198,7 +199,7 @@ CSRF pojawia się bardzo rzadko w CVE (Common Vulnerabilities and Exposures) -- 
 
 === Sposoby ochrony przed atakiem typu CSRF 
 
--- _Po pierwsze, jak to jest wymagane przez W3C, używaj odpowiednio GET i POST. Po drugie, używaj tokena zabezpieczającego przy metodach non-GET, żeby chronić aplikację przed CSRF.
+-- _Po pierwsze, jak to jest wymagane przez W3C, używaj odpowiednio GET i POST. Po drugie, używaj tokena zabezpieczającego przy metodach non-GET, żeby chronić aplikację przed CSRF._
 
 Protokół HTTP przewiduje zasadniczo dwa główne rodzaje wniosków - GET i POST (i więcej, ale nie są one obsługiwane przez większość przeglądarek). World Wide Web Consortium (W3C) podaje spis sytuacji, w których stosujemy GET lub POST:
  
@@ -256,9 +257,9 @@ Inną grupą elementów podatnych na atak są przekierowania i pliki w aplikacja
  
 -- _Przekierowanie w aplikacji internetowej to niedoceniane narzędzie krakingu: Atakujący może zarówno weprowadzić użytkownika na stronę-pułapkę, jak i przygotować niezależny atak._
  
-Każdy przypadek, gdy użytkownik ma możliwość rozwinięcia linku (jego części) do przekierowania, stanowi prawdopodobne zagrożone. Najbardziej oczywisty atak to przekierowanie użytkowników do fałszywych stron, które wyglądają dokładnie jak oryginalne. Ten atak (typu phishing) działa poprzez wysłanie zwyczajnie wyglądających linków w wiadomości e-mai, injecting the link by XSS in the web application or umieszczanie linków do innych stron. It is unsuspicious, because the link starts with the URL to the web application and the URL to the malicious site is hidden in the redirection parameter: http://www.example.com/site/redirect?to= www.attacker.com. Here is an example of a legacy action:
+Każdy przypadek, gdy użytkownik ma możliwość rozwinięcia linku (jego części) do przekierowania, stanowi prawdopodobne zagrożone. Najbardziej oczywisty atak to przekierowanie użytkowników do fałszywych stron, które wyglądają dokładnie jak oryginalne. Ten atak (typu phishing) działa poprzez wysłanie zwyczajnie wyglądających linków w wiadomości e-mai, injecting the link by XSS in the web application or umieszczanie linków do innych stron. It is unsuspicious, because the link starts with the URL to the web application and the URL to the malicious site is hidden in the redirection parameter: http://www.example.com/site/redirect?to=www.attacker.com. Here is an example of a legacy action:
 
-Nie wygląda to podejrzanie, ponieważ URL zaczyna się jak link do zwyczajnej, niegroźnej strony internetowej, a URL do strony, z której płynie zagrożenie, jest ukryty w parametrze przekierowania: http://www.example.com/site/redirect?to= www.attacker.com. Oto przykład akcji dziedziczenia (legacy action):
+Nie wygląda to podejrzanie, ponieważ URL zaczyna się jak link do zwyczajnej, niegroźnej strony internetowej, a URL do strony, z której płynie zagrożenie, jest ukryty w parametrze przekierowania: http://www.example.com/site/redirect?to=www.attacker.com. Oto przykład akcji dziedziczenia (legacy action):
  
 [source, ruby]
 ----------------------------------------------------------------------------
@@ -343,33 +344,33 @@ Inny (dodatkowy) sposób to przechowywanie nazw plików w bazie danych i nazywan
   
 -- _Intranet i interfejsy administracyjne są popularnymi celami ataku, ponieważ umożliwiają one uprzywilejowany dostęp. Mimo to wymagają kilku dodatkowych środków bezpieczeństwa, odwrotnie jest w rzeczywistym świecie._
 
-W 2007 roku pojawił się pierwszy, wykonany na zamówienie http://www.symantec.com/enterprise/security_response/weblog/2007/08/a_monster_trojan.html [Trojan], który ukradł informacje z Intranetu, czyli "Potwór dla pracodawców” strony internetowej Monster.com – strony do rekrutacji online. Indywidualnie stworzone Trojany są bardzo rzadkie, jak dotąd, a ryzyko ich użycia przeciw aplikacjom jest dość niskie, ale jest taka możliwość i jest to też przykład jak bezpieczeństwo hosta klienta jest ważne. Jednak najwyższe zagrożenie dla Intranetu i panelów Administracyjnych pochodzi z XSS i CSRF.  
+W 2007 roku pojawił się pierwszy, wykonany na zamówienie http://www.symantec.com/enterprise/security_response/weblog/2007/08/a_monster_trojan.html[Trojan], który ukradł informacje z Intranetu, czyli "Potwór dla pracodawców” strony internetowej Monster.com – strony do rekrutacji online. Indywidualnie stworzone Trojany są bardzo rzadkie, jak dotąd, a ryzyko ich użycia przeciw aplikacjom jest dość niskie, ale jest taka możliwość i jest to też przykład jak bezpieczeństwo hosta klienta jest ważne. Jednak najwyższe zagrożenie dla Intranetu i panelów Administracyjnych pochodzi z XSS i CSRF.  
 
 *XSS*  Jeśli aplikacja ponownie wyświetla dane wejściowe złośliwego użytkownika z ekstranetu, aplikacja będzie podatny na XSS. Nazwy użytkowników, komentarze, spam raporty, adresy kolejności – to tylko kilka przykładów, które można zaatakować przez XSS. 
 
 Nawet jedno miejsce w interfejsie administratora lub Intranecie, w którym dane wejściowe nie zostały sprawdzone, sprawia, że cała aplikacja staje się wrażliwa na atak. Atakującemu umożliwia to kradzież uprzywilejowanych cookies administratora, wstawianie kodu IFRAME, żeby wykraść hasła administratora lub instalowanie złośliwego oprogramowania poprzez luki w zabezpieczeniach przeglądarki w celach przejęcia kontroli nad komputerem administratora. 
 
-Zapoznaj się z sekcją o atakach i ochronie przed XSS. [#,fffcdb]#Zalecane jest korzystanie z wtyczki SafeErb# również w intranecie lub interfejsie administratora. 
+Zapoznaj się z sekcją o atakach i ochronie przed XSS. [,#fffcdb]#Zalecane jest korzystanie z wtyczki SafeErb# również w intranecie lub interfejsie administratora. 
 
 *CSRF*  Cross-Site Reference Forgery (CSRF) jest bardzo groźną metodą ataku. Pozwala ona atakującemu zrobić dokładnie to samo, co administrator lub użytkownik intranetu. Wcześniej dowiedziałeś się jak działa CSRF, a teraz czas na kilka przykładów:
  
 W świecie rzeczywistym przykładem jest http://www.symantec.com/enterprise/security_response/weblog/2008/01/driveby_pharming_in_the_ wild.html[rekonfiguracja routera przez CSRF]. Atakujący rozesłał złośliwe maile z CSRF do meksykańskich użytkowników. E-mail informował o e-kartce czekającej na użytkowników, ale zawierał również Tag obrazka, które poprzez żądanie http-GET miał rekonfigurować router użytkownika (który jest popularnym modelem w Meksyku). Żądanie zmieniało ustawienia DNS w ten sposób, że żądania wysyłane do Meksykańskiego banku były mapowane do witryny atakującego. Każdy, kto odwiedził witrynę banku za pośrednictwem tego routera trafiał do fałszywej strony atakującego, a jego listy uwierzytelniające zostały skradzione. 
 
-Inny przykład zmieniał e-mail i hasło do Google Adsense przez http://www.0x000000.com/index.php?i=213&bin=11010101 [CSRF]. Jeżeli ofiara była zalogowana do programu Google Adsense, interfejsu administracyjnego kampanii reklamowych Google, atakujący mógł zmienić jego listy uwierzytelniające.  
+Inny przykład zmieniał e-mail i hasło do Google Adsense przez http://www.0x000000.com/index.php?i=213&bin=11010101[CSRF]. Jeżeli ofiara była zalogowana do programu Google Adsense, interfejsu administracyjnego kampanii reklamowych Google, atakujący mógł zmienić jego listy uwierzytelniające.  
 
 Innym popularnym atakiem jest spamowanie twojej strony, bloga lub forum, w celu rozprzestrzenienia złośliwego XSS. Oczywiście, osoba atakująca musi znać strukturę URL, ale większość tych wykorzystywanych przez Railsy jest dość prosta, lub łatwa do odgadnięcia, jeśli jest to jeden z open sourcowych interfejsów administracyjnych. Atakujący może zrobić nawet do 1000 szczęśliwych trafów zawierając złośliwe IMG-tagi które próbują każdej możliwej kombinacji.
 
-Informacje o [#,fffcdb]#ochronie przeciwko CSRF w interfejsach administracyjnych i aplikacjach intranetowych, znajdują się w dziale o ochronie przeciw CSRF#. 
+Informacje o [,#fffcdb]#ochronie przeciwko CSRF w interfejsach administracyjnych i aplikacjach intranetowych, znajdują się w dziale o ochronie przeciw CSRF#. 
   
 === Dodatkowe środki ostrożności 
 
 Przeciętny interfejs administracyjny działa tak: jest umieszczony w www.example.com/admin, może być dostępny tylko wtedy, gdy flaga administratora jest ustawiona w modelu użytkownika, ponownie wyświetla wejście użytkownika i pozwala adminowi usuwać/dodawać/edytować wszysto, na co ma ochotę. Oto kilka słów na ten temat:
  
-- Bardzo ważne jest, [#,fffcdb]#żeby myśleć o najgorszym przypadku#: Co zrobić, jeśli ktoś naprawdę przejmie moje pliki cookie lub poświadczenia użytkownika. Można [#,fffcdb]#wprowadzić role# dla interfejsu administratora, aby ograniczyć możliwości atakującego. A może [#,fffcdb]#specjalne poświadczenie logowania# do interfejsu administratora, inne niż te używane do publicznej części aplikacji. Lub [#,fffcdb]#specjalne hasło do bardzo poważnych działań#?
+- Bardzo ważne jest, [,#fffcdb]#żeby myśleć o najgorszym przypadku#: Co zrobić, jeśli ktoś naprawdę przejmie moje pliki cookie lub poświadczenia użytkownika. Można [,#fffcdb]#wprowadzić role# dla interfejsu administratora, aby ograniczyć możliwości atakującego. A może [,#fffcdb]#specjalne poświadczenie logowania# do interfejsu administratora, inne niż te używane do publicznej części aplikacji. Lub [,#fffcdb]#specjalne hasło do bardzo poważnych działań#?
 
-- Czy admin naprawdę ma dostęp do interfejsu z każdego miejsca na świecie? Pomyśl o [#,fffcdb]#ograniczeniu logowania na kilka adresów IP#. Zbadaj request.remote_ip, aby dowiedzieć się o adresach IP użytkowników. Nie gwarantuje to stu procentowej ochrony, ale na pewno stanowi dużą przeszkodę. Pamiętaj, że ktoś może używać serwera Proxy.
+- Czy admin naprawdę ma dostęp do interfejsu z każdego miejsca na świecie? Pomyśl o [,#fffcdb]#ograniczeniu logowania na kilka adresów IP#. Zbadaj request.remote_ip, aby dowiedzieć się o adresach IP użytkowników. Nie gwarantuje to stu procentowej ochrony, ale na pewno stanowi dużą przeszkodę. Pamiętaj, że ktoś może używać serwera Proxy.
  
-- [#,Fffcdb]#Umieść specjalny interfejs administracyjny w sub-domenie# takiej jak admin.application.com i stwórz z niej odrębną aplikację, z własnym zarządzaniem uzytkownikami. To sprawia, że kradzież cookie admina ze zwykłej domenie www.application.com jest niemożliwa. Wynika to z konceptu „same origin Policy” w przeglądarce: skrypt (XSS) wstawiony na stronie www.application.com nie może odczytać cookie z admin.application.com i vice versa.
+- [,#Fffcdb]#Umieść specjalny interfejs administracyjny w sub-domenie# takiej jak admin.application.com i stwórz z niej odrębną aplikację, z własnym zarządzaniem uzytkownikami. To sprawia, że kradzież cookie admina ze zwykłej domenie www.application.com jest niemożliwa. Wynika to z konceptu „same origin Policy” w przeglądarce: skrypt (XSS) wstawiony na stronie www.application.com nie może odczytać cookie z admin.application.com i vice versa.
  
 == Masowe przypisanie
 
@@ -409,7 +410,7 @@ Aby tego uniknąć, Railsy oferują dwie klasowe metody w klasie ActiveRecord do
 attr_protected :admin
 ----------------------------------------------------------------------------
  
-O wiele lepsze rozwiązanie, kierujące się zasadą białej listy to [#,fffcdb]#metoda attr_accessible#. Jest dokładne naprzeciwieństwo attr_protected, ponieważ [#,fffcdb]#dotyczy listy atrybutów, które będą dostępne#. Wszystkie inne atrybuty będą chronione. W ten sposób nigdy nie zapomnisz o ochronie atrybutów podczas ich dodawania nowych w trakcie rozwoju. Oto przykład:
+O wiele lepsze rozwiązanie, kierujące się zasadą białej listy to [,#fffcdb]#metoda attr_accessible#. Jest dokładne naprzeciwieństwo attr_protected, ponieważ [,#fffcdb]#dotyczy listy atrybutów, które będą dostępne#. Wszystkie inne atrybuty będą chronione. W ten sposób nigdy nie zapomnisz o ochronie atrybutów podczas ich dodawania nowych w trakcie rozwoju. Oto przykład:
 
 [source, ruby]
 ----------------------------------------------------------------------------
@@ -431,7 +432,7 @@ params[:user] #=> {:name => "ow3ned", :admin => true}
 
 -- _Prawie każda aplikacja internetowa ma do czynienia z uwierzytelnianiem i autoryzacją. Zamiast kroczenia własną drogą, wskazane jest stosowanie typowych wtyczek (pluginów). Ale ważne jest, aby je aktualizować. Kilka dodatkowych środków ostrożności sprawi, że twoja aplikacja będzie jeszcze bezpieczniejsza._ 
 
-Istnieje kilka wtyczek obsługujących uwierzytelnianie i autoryzację, dostępnych w Railsach. Te lepsze zapisują tylko zaszyfrowane hasła, a nie te czysto tekstowe. Najbardziej popularną wtyczką jest [#,fffcdb]#restful_authentication#, która chroni również przed atakami typu session fixation. Jednak wcześniejsze wersje dopuszczały do logowanie bez nazwy użytkownika i hasła w niektórych okolicznościach.
+Istnieje kilka wtyczek obsługujących uwierzytelnianie i autoryzację, dostępnych w Railsach. Te lepsze zapisują tylko zaszyfrowane hasła, a nie te czysto tekstowe. Najbardziej popularną wtyczką jest [,#fffcdb]#restful_authentication#, która chroni również przed atakami typu session fixation. Jednak wcześniejsze wersje dopuszczały do logowanie bez nazwy użytkownika i hasła w niektórych okolicznościach.
  
 Każdy nowy użytkownik otrzymuje kod aktywacyjny, aby aktywować swoje konto. Link do aktywacji wysyłany jest w mailu. Po aktywacji konta, kolumna activation_code w bazie danych będzie ustawiona na NULL. Jeśli ktoś wyśle żądanie o taki URL, będzie zalogowany jako pierwszy aktywowany użytkownika, jakiego można znaleźć w bazie danych (i są szanse, że będzie to administrator):
  
@@ -453,7 +454,7 @@ Jeśli parametr miałby wartość nil, wynikające zapytanie SQL będzie takie:
 SELECT * FROM users WHERE (users.`activation_code` IS NULL) LIMIT 1
 ..........
  
-I tak wyszukiwarka znalazła pierwszego użytkownika w bazie danych, zwróciła go i został zalogowany. Więcej możesz przeczytać na http://www.rorsecurity.info/2007/10/28/restful_authentication-login-security/[moim blogu]. [#,fffcdb]#Od czasu do czasu Powinieneś aktualizować swoje wtyczki#. Ponadto możesz przeglądnąć swoją aplikację, żeby znaleźć więcej takich wad.
+I tak wyszukiwarka znalazła pierwszego użytkownika w bazie danych, zwróciła go i został zalogowany. Więcej możesz przeczytać na http://www.rorsecurity.info/2007/10/28/restful_authentication-login-security/[moim blogu]. [,#fffcdb]#Od czasu do czasu Powinieneś aktualizować swoje wtyczki#. Ponadto możesz przeglądnąć swoją aplikację, żeby znaleźć więcej takich wad.
 
 === Ataki typu brute-force na konta użytkowników
  
@@ -465,7 +466,7 @@ Z tego powodu, większość aplikacji internetowych wyświetli ogólny komunikat
  
 Jednak tym, co najczęściej zaniedbują projektanci aplikacji internetowych, są strony z zapomnianymi hasłami . Strony te często przyznają, że wpisana nazwa użytkownika lub adres e-mail (nie) została znaleziona. To pozwala atakującemu na skompilowanie listy nazw użytkowników i atak typu brute-force na ich konta.
  
-W celu złagodzenia takich ataków, [#,fffcdb]#wyświetlaj ogólne komunikat o błędzie, również na stronach z zapomnianymi hasłami#. Ponadto, możesz [#,fffcdb]#wymagać, aby wprowadzić CAPTCHA po kilku błędów logowania z pewnego adresu IP#. Należy jednak pamiętać, że nie jest to stu procentowa ochrona przed automatycznymi programami, ponieważ te programy mogą bardzo często zmieniać adres IP. Jednakże zwiększa do poziom ochrony przed atakiem.
+W celu złagodzenia takich ataków, [,#fffcdb]#wyświetlaj ogólne komunikat o błędzie, również na stronach z zapomnianymi hasłami#. Ponadto, możesz [,#fffcdb]#wymagać, aby wprowadzić CAPTCHA po kilku błędów logowania z pewnego adresu IP#. Należy jednak pamiętać, że nie jest to stu procentowa ochrona przed automatycznymi programami, ponieważ te programy mogą bardzo często zmieniać adres IP. Jednakże zwiększa do poziom ochrony przed atakiem.
  
 === Przejęcie konta użytkownika
 
@@ -473,15 +474,15 @@ W celu złagodzenia takich ataków, [#,fffcdb]#wyświetlaj ogólne komunikat o b
 
 ==== Hasła
  
-Pomyśl o sytuacji, gdy atakujący posiada skradzione cookie sesji użytkownika, a zatem może wspólnie z użytkownikiem używać aplikacji. Jeżeli zmiana hasła jest łatwa, atakujący będzie mógł przejąć konto w kilku kliknięciach. Lub jeżeli formularz zmiany hasła jest podatny na atak CSRF, atakujący będzie mógł zmienić hasło ofiary wabiąc ją do strony internetowej, gdzie jest spreparowany IMG-tag, który odpala CSRF. Można temu zaradzić i [#,fffcdb]#stworzyć formularz zmiany hasła odporny na CSRF#. I [#,fffcdb]#wymagać od użytkownika, aby wprowadzał stare hasło przy jego zmianie#.
+Pomyśl o sytuacji, gdy atakujący posiada skradzione cookie sesji użytkownika, a zatem może wspólnie z użytkownikiem używać aplikacji. Jeżeli zmiana hasła jest łatwa, atakujący będzie mógł przejąć konto w kilku kliknięciach. Lub jeżeli formularz zmiany hasła jest podatny na atak CSRF, atakujący będzie mógł zmienić hasło ofiary wabiąc ją do strony internetowej, gdzie jest spreparowany IMG-tag, który odpala CSRF. Można temu zaradzić i [,#fffcdb]#stworzyć formularz zmiany hasła odporny na CSRF#. I [,#fffcdb]#wymagać od użytkownika, aby wprowadzał stare hasło przy jego zmianie#.
  
 ==== Maile
  
-Jednakże, atakujący może również przejąć konto zmieniając adres e-mail. Po jego zmianie, przejdzie na stronę z zapomnianym hasłem i (prawdopodobnie nowy) hasło zostanie wysłane na adres e-mail atakującej osoby. Żeby temu zaradzić, można[#,fffcdb]#wymagać od użytkownika, aby wprowadził hasło przy zmianie adresu e-mail#. 
+Jednakże, atakujący może również przejąć konto zmieniając adres e-mail. Po jego zmianie, przejdzie na stronę z zapomnianym hasłem i (prawdopodobnie nowy) hasło zostanie wysłane na adres e-mail atakującej osoby. Żeby temu zaradzić, można[,#fffcdb]#wymagać od użytkownika, aby wprowadził hasło przy zmianie adresu e-mail#. 
 
 ==== Inne
 
-W zależności od Twojej aplikacji internetowej, może być więcej sposobów na przejęcie konta użytkownika. W wielu przypadkach można to zrobić za pomocą XSS i CSRF. Na przykład, podatność na CSRF w http://www.gnucitizen.org/blog/google-gmail-e-mail-hijack-technique/ [Google Mail]. W dowodzie koncepcji (proof-of-concept) tego ataku, ofiara miała być zwabiona do witryny internetowej kontrolowanej przez atakującego. Na tej stronie jest spreparowany IMG-tag, którego skutkiem jest żądanie HTTP GET,  zmieniające ustawienia filtru w Google Mail. Jeżeli ofiara byłaby zalogowana na Google Mail, atakujący zmieniłby filtry i ustawił przekazywanie wszystkich wiadomości e-mail na jego adres e-mail. Jest to prawie tak szkodliwe, jak przejęcie całego konta. Można temu zaradzić [#,fffcdb]#przeglądając logikę aplikacji i eliminując wszystkie luki wrażliwe na XSS i CSRF#.
+W zależności od Twojej aplikacji internetowej, może być więcej sposobów na przejęcie konta użytkownika. W wielu przypadkach można to zrobić za pomocą XSS i CSRF. Na przykład, podatność na CSRF w http://www.gnucitizen.org/blog/google-gmail-e-mail-hijack-technique/[Google Mail]. W dowodzie koncepcji (proof-of-concept) tego ataku, ofiara miała być zwabiona do witryny internetowej kontrolowanej przez atakującego. Na tej stronie jest spreparowany IMG-tag, którego skutkiem jest żądanie HTTP GET,  zmieniające ustawienia filtru w Google Mail. Jeżeli ofiara byłaby zalogowana na Google Mail, atakujący zmieniłby filtry i ustawił przekazywanie wszystkich wiadomości e-mail na jego adres e-mail. Jest to prawie tak szkodliwe, jak przejęcie całego konta. Można temu zaradzić [,#fffcdb]#przeglądając logikę aplikacji i eliminując wszystkie luki wrażliwe na XSS i CSRF#.
  
 === CAPTCHA
   
@@ -502,7 +503,7 @@ Oto kilka pomysłów, jak ukryć pola honeypot przez JavaScript i/lub CSS:
 
 Najprostsze negatywne CAPTCHA to te, ukryte w polach honeypot. Po stronie serwera, sprawdzana jest wartość pola: Jeśli zawiera tekst, to musi być bot. Następnie można zignorować dodany post, lub zwrócić pozytywny wynik, ale nie zapisywać posta w bazie danych. W ten sposób bot będzie zadowolony i przejdzie dalej. Można to również zrobić z irytującymi użytkownikami. 
 
-Bardziej wyrafinowane negatywne CAPTCHA możesz znaleźć na http://nedbatchelder.com/text/stopbots.html [blogu Batchelder Ned’a]: 
+Bardziej wyrafinowane negatywne CAPTCHA możesz znaleźć na http://nedbatchelder.com/text/stopbots.html[blogu Batchelder Ned’a]: 
  
 - Dołącz pole z aktualnym znacznikiem czasowym UTC i sprawdź go na serwerze. Jeżeli jest on zbyt daleko w przeszłości, lub w przyszłości, formularz jest nieprawidłowy. 
 - Nazwy pól dobieraj losowo 
@@ -514,7 +515,7 @@ Zauważ, że to chroni Cię jedynie przed automatycznymi botami, specjalnie wyko
  
 -- _Postaraj się, żeby Railsy nie wpisywały haseł w rejestrze._
 
-Domyślnie Railsy rejestrują wszystkie żądania do strony internetowej. Ale rejestry mogą stanowić ogromny problem związany z zabezpieczeniami, ponieważ mogą one zawierać dane logowania, numery kart kredytowych itp. Podczas projektowania konceptu bezpieczeństwa aplikacji internetowej, należy pomyśleć o tym, co się stanie, gdy atakujący będzie miał (pełny) dostęp do serwera WWW. Szyfrowanie klucze i hasła w bazie danych będą bezużyteczne, jeżeli rejestr wylistuje je jako zwykły tekst. Możesz [#,fffcdb]#filtrować niektóre parametry żądań z rejestru# dzięki metodzie w kontrolerze filter_parameter_logging. Parametry te będą oznaczone [filtrowane] w rejestrze.
+Domyślnie Railsy rejestrują wszystkie żądania do strony internetowej. Ale rejestry mogą stanowić ogromny problem związany z zabezpieczeniami, ponieważ mogą one zawierać dane logowania, numery kart kredytowych itp. Podczas projektowania konceptu bezpieczeństwa aplikacji internetowej, należy pomyśleć o tym, co się stanie, gdy atakujący będzie miał (pełny) dostęp do serwera WWW. Szyfrowanie klucze i hasła w bazie danych będą bezużyteczne, jeżeli rejestr wylistuje je jako zwykły tekst. Możesz [,#fffcdb]#filtrować niektóre parametry żądań z rejestru# dzięki metodzie w kontrolerze filter_parameter_logging. Parametry te będą oznaczone [filtrowane] w rejestrze.
  
 [source, ruby]
 ----------------------------------------------------------------------------
@@ -525,13 +526,13 @@ filter_parameter_logging :password
  
 -- _Czy ciężko Ci zapamiętać wszystkie hasła? Nie zapisuj ich, lecz korzystaj z pierwszych liter wyrazów w łatwym do zapamiętania zdaniu._
 
-Bruce Schneier, technolog zabezpieczeń, http://www.schneier.com/blog/archives/2006/12/realworld_passw.html [przeanalizował] 34000 występujących w świecie rzeczywistym nazw użytkowników i haseł ze wspomnianej wcześniej próby wyłudzenia danych z MySpace. Okazuje się, że większość haseł jest dość łatwa do złamania. Oto 20 najpopularniejszych haseł: 
+Bruce Schneier, technolog zabezpieczeń, http://www.schneier.com/blog/archives/2006/12/realworld_passw.html[przeanalizował] 34000 występujących w świecie rzeczywistym nazw użytkowników i haseł ze wspomnianej wcześniej próby wyłudzenia danych z MySpace. Okazuje się, że większość haseł jest dość łatwa do złamania. Oto 20 najpopularniejszych: 
 
 password1, abc123, myspace1, password, blink182, qwerty1, ****you, 123abc, baseball1, football1, 123456, soccer, monkey1, liverpool1, princess1, jordan23, slipknot1, superman1, iloveyou1 and monkey.
 
 Interesujący jest fakt, że tylko 4% tych haseł to słownikowe wyrazy i większość to hasła alfanumeryczne. Jednak słowniki crackerów haseł zawierają wiele dzisiejszych haseł i próbują wszystkich (alfanumerycznych) kombinacji. Jeśli atakujący zna nazwę użytkownika, który używa słabego hasła, w łatwy sposób można dokonać włamania. 
 
-Dobrym hasłem jest długa mieszanka alfanumerycznych kombinacji różnego rodziaju. Ponieważ jest to dość trudne do zapamiętania, jest wskazane, aby zapisać tylko [#,fffcdb]#pierwsze litery zdania, która można łatwo zapamiętać#. Na przykład "Szybki brązowy lis przeskoczył nad leniwym psem" będzie "Sblpnlp". Zauważ, że jest to tylko przykład, nie należy używać znanego wyrażenia, które może pojawić się w słowniki crackera.
+Dobrym hasłem jest długa mieszanka alfanumerycznych kombinacji różnego rodziaju. Ponieważ jest to dość trudne do zapamiętania, jest wskazane, aby zapisać tylko [,#fffcdb]#pierwsze litery zdania, która można łatwo zapamiętać#. Na przykład "Szybki brązowy lis przeskoczył nad leniwym psem" będzie "Sblpnlp". Zauważ, że jest to tylko przykład, nie należy używać znanego wyrażenia, które może pojawić się w słowniki crackera.
  
 === Wyrażenia regularne
  
@@ -571,16 +572,16 @@ Najpopularniejszym parametrem, który użytkownik może modyfikować, jest param
 @project = Project.find(params[:id])
 ----------------------------------------------------------------------------
 
-Jest to w porządku dla niektórych aplikacji internetowych, ale z pewnością nie w przypadku, gdy użytkownik nie ma uprawnień, aby zobaczyć wszystkie projekty. Jeśli użytkownik zmienia id na 42 i nie jest uprawniony do przeglądania informacji, to i tak będzie miał do nich dostęp. Zamiast tego[#,fffcdb]#pytaj również o prawa dostępu użytkownika#: 
+Jest to w porządku dla niektórych aplikacji internetowych, ale z pewnością nie w przypadku, gdy użytkownik nie ma uprawnień, aby zobaczyć wszystkie projekty. Jeśli użytkownik zmienia id na 42 i nie jest uprawniony do przeglądania informacji, to i tak będzie miał do nich dostęp. Zamiast tego[,#fffcdb]#pytaj również o prawa dostępu użytkownika#: 
 
 [source, ruby]
 ----------------------------------------------------------------------------
 @project = @current_user.projects.find(params[:id])
 ----------------------------------------------------------------------------
 
-W zależności od twojej aplikacji internetowej, może być o wiele więcej parametrów, które użytkownik może modyfikować. Przyjmij zasadę, że [#,fffcdb]#żadne dane wejściowe użytkownika nie są bezpieczne, dopóki nie zostanie udowodnione, że jest inaczej. Użytkownik może manipulować każdym parametrem#. 
+W zależności od twojej aplikacji internetowej, może być o wiele więcej parametrów, które użytkownik może modyfikować. Przyjmij zasadę, że [,#fffcdb]#żadne dane wejściowe użytkownika nie są bezpieczne, dopóki nie zostanie udowodnione, że jest inaczej. Użytkownik może manipulować każdym parametrem#. 
  
-Nie daj się nabrać na ściemnione bezpieczeństwo i bezpieczeństwo JavaScript. Toolbar progamisty dla przeglądarki Mozilla Firefox pozwala przejrzeć i zmienić każde ukryte pole formularza. [#,fffcdb]#JavaScript może być wykorzystywany w celu weryfikacji danych użytkownika, ale z pewnością nie po to, by zapobiec wysyłaniu złośliwych żądań z nieoczekiwanymi wartościami#. Wtyczka Live Http Headers do przeglądarki Mozilla Firefox rejestruje każde żądanie, może go powtarzać i zmieniać. Jest to prosty sposób na ominięcie wszelkich walidacji przez JavaScript. Są też nawet proxy po stronie klienta, które pozwalają na przechwytywanie wszelkich żądań i odpowiedzi z i do Internetu. 
+Nie daj się nabrać na ściemnione bezpieczeństwo i bezpieczeństwo JavaScript. Toolbar progamisty dla przeglądarki Mozilla Firefox pozwala przejrzeć i zmienić każde ukryte pole formularza. [,#fffcdb]#JavaScript może być wykorzystywany w celu weryfikacji danych użytkownika, ale z pewnością nie po to, by zapobiec wysyłaniu złośliwych żądań z nieoczekiwanymi wartościami#. Wtyczka Live Http Headers do przeglądarki Mozilla Firefox rejestruje każde żądanie, może go powtarzać i zmieniać. Jest to prosty sposób na ominięcie wszelkich walidacji przez JavaScript. Są też nawet proxy po stronie klienta, które pozwalają na przechwytywanie wszelkich żądań i odpowiedzi z i do Internetu. 
  
 == Atak typu Injection
   
@@ -701,7 +702,7 @@ Najczęstszymi punktami wejścia są posty, komentarze użytkowników i księgi 
 
 Ataki XSS działają w taki sposób: Atakujący wprowadza jakiś kod, aplikacja internetowa zapisuje go i wyświetla na stronie, a później przedstawia ofiarze. Większość przykładów XSS prostu wyświetla okno ostrzegawcze (alert box), ale jest to dużo bardziej groźne. XSS może wykraść cookies, przechwytywać sesje; przekierowywać ofiary do fałszywej strony internetowej, wyświetlać reklamy na korzyść atakującego, zmieniać elementy na stronie internetowej, aby uzyskać poufne informacje lub instalować złośliwe oprogramowanie poprzez luki w przeglądarce internetowej. 
 
-W drugiej połowie 2007 r. było 88 zgłoszonych usterek w Mozilli, 22 w Safari, 18 w IE, a 12 w Operze. W http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf[sprawozdaniu Symantec Internet Security Globalne] także udokumentowano 239 usterek we wtyczkach do przeglądarek w ciągu ostatnich sześciu miesięcy 2007 roku. http://pandalabs.pandasecurity.com/archive/MPack-uncovered_2100_.aspx [MPack] jest bardzo aktywnym i aktualnym frameworkiem ataku , który wykorzystuje te luki. Dla hakerów, wizja wykorzystania luk podatnych na ataki typu SQL Injection we frameworkach aplikacji internetowych i wprowadzenie złośliwego kodu w każdej kolumnie tabel tekstowych jest bardzo kuszące. W kwietniu 2008 ponad 510.000 stron http://www.0x000000.com/?i=556 [były zhakowane] jak tak. Wśród nich znalazły się strony brytyjskiego rządu, ONZ i wiele innych poważnych celów. 
+W drugiej połowie 2007 r. było 88 zgłoszonych usterek w Mozilli, 22 w Safari, 18 w IE, a 12 w Operze. W http://eval.symantec.com/mktginfo/enterprise/white_papers/b-whitepaper_internet_security_threat_report_xiii_04-2008.en-us.pdf[sprawozdaniu Symantec Internet Security Globalne] także udokumentowano 239 usterek we wtyczkach do przeglądarek w ciągu ostatnich sześciu miesięcy 2007 roku. http://pandalabs.pandasecurity.com/archive/MPack-uncovered_2100_.aspx[MPack] jest bardzo aktywnym i aktualnym frameworkiem ataku , który wykorzystuje te luki. Dla hakerów, wizja wykorzystania luk podatnych na ataki typu SQL Injection we frameworkach aplikacji internetowych i wprowadzenie złośliwego kodu w każdej kolumnie tabel tekstowych jest bardzo kuszące. W kwietniu 2008 ponad 510.000 stron http://www.0x000000.com/?i=556[były zhakowane] jak tak. Wśród nich znalazły się strony brytyjskiego rządu, ONZ i wiele innych poważnych celów. 
  
 Stosunkowo nowymi i niecodziennymi formami punktów wejścia są banery reklamowe. We wcześniejszych miesiącach 2008 roku, złośliwy kod ukazał się w reklamach w formie baneru na popularnych witrynach, takich jak MySpace i Excite, zgodnie z http://blog.trendmicro.com/myspace-excite-and-blick-serve-up-malicious-banner-ads/[Trend Micro]. 
 
@@ -742,7 +743,7 @@ Raprt na www.attacker.com będzie wyglądać tak:
 GET http://www.attacker.com/_app_session=836c1c25278e5b321d6bea4f19cb57e2
 ..........
 
-Możesz zmniejszyć te ataki (w sposób oczywisty) poprzez dodanie flagi http://dev.rubyonrails.org/ticket/8895 [httpOnly] cookies, żeby document.cookie nie mógł być odczytany przez JavaScript. Cookies httpOnly mogą być używane pod IE v6.SP1, Firefoxoxem v2.0.0.5 i Operą 9.5. Safari nadal ignoruje tą opcję. Ale w innych, starszych przeglądarkach (np. WebTV i IE 5.5 na Macu) może to powodować problemy z ładowaniem się stron. Ostrzegamy, że pliki cookie http://ha.ckers.org/blog/20070719/firefox-implements-httponly-and-is-vulnerable-to-xmlhttprequest/[nadal będą widoczne przy użyciu technologii Ajax].
+Możesz zmniejszyć te ataki (w sposób oczywisty) poprzez dodanie flagi http://dev.rubyonrails.org/ticket/8895[httpOnly] cookies, żeby document.cookie nie mógł być odczytany przez JavaScript. Cookies httpOnly mogą być używane pod IE v6.SP1, Firefoxoxem v2.0.0.5 i Operą 9.5. Safari nadal ignoruje tą opcję. Ale w innych, starszych przeglądarkach (np. WebTV i IE 5.5 na Macu) może to powodować problemy z ładowaniem się stron. Ostrzegamy, że pliki cookie http://ha.ckers.org/blog/20070719/firefox-implements-httponly-and-is-vulnerable-to-xmlhttprequest/[nadal będą widoczne przy użyciu technologii Ajax].
  
 ===== Atak typu Defacement
 
@@ -795,7 +796,7 @@ Ruch w sieci opiera się głównie na ograniczonym zachodnim alfabecie, więc no
   &#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>
 ............
 
-Działaniem tego przykładu jest wyskakujące okno komunikatu. Będzie to rozpoznawane przez wyżej wspomniany filtr sanitize(). Świetnym narzędziem do zaciemniania i kodowania ciągów znaków, a tym samym "do poznania swjego wroga", jest http://www.businessinfo.co.uk/labs/hackvertor/hackvertor.php [Hackvertor]. Railsowa metoda sanitize() odwala dobrą robotę odpierając ataki z wykorzystaniem kodowania znaków. 
+Działaniem tego przykładu jest wyskakujące okno komunikatu. Będzie to rozpoznawane przez wyżej wspomniany filtr sanitize(). Świetnym narzędziem do zaciemniania i kodowania ciągów znaków, a tym samym "do poznania swjego wroga", jest http://www.businessinfo.co.uk/labs/hackvertor/hackvertor.php[Hackvertor]. Railsowa metoda sanitize() odwala dobrą robotę odpierając ataki z wykorzystaniem kodowania znaków. 
 
  
 ==== Podziemne przykłady
@@ -812,9 +813,9 @@ Poniżej znajduje się wyciąg z http://www.symantec.com/security_response/write
 
 Robak wykorzystuje dziurę w filtrze HTML/JavaScript Yahoo. Zazwyczaj filtruje on wszystkie cele i atrybuty onload z tagów (ponieważ nie można używać JavaScriptu). Filtr jest stosowany tylko raz, jednak w taki sposób, że atrybuty onload z zainfekowanym kodem pozostają w miejscu. Jest to dobry przykład tego, że filtry tworzone za pomocą czarnych list nigdy nie są kompletne i dlaczego trudno jest pozwolić na HTML/JavaScript w aplikacji internetowej. 
 
-Kolejnym dowodem koncepcji robaka webmailowego jest Nduja, robak typu cross-domain na cztery włoskie usługi webmailowe. Więcej szczegółów i demonstracja wideo znajduje się na stronie http://rosario.valotta.googlepages.com/home [Rosario Valotta]. Oba webmailowe robaki mają na celu zbieranie adresów e-mail, czyli coś, za co haker może zarobić duże pieniądze. 
+Kolejnym dowodem koncepcji robaka webmailowego jest Nduja, robak typu cross-domain na cztery włoskie usługi webmailowe. Więcej szczegółów i demonstracja wideo znajduje się na stronie http://rosario.valotta.googlepages.com/home[Rosario Valotta]. Oba webmailowe robaki mają na celu zbieranie adresów e-mail, czyli coś, za co haker może zarobić duże pieniądze. 
 
-W grudniu 2006 roku, 34000 rzeczywistych nazw użytkownika i haseł zostały skradzione z http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html [MySpace poprzez atak typu phishing]. Ideą ataku było stworzenie strony profilu o nazwie "login_home_index_html", a więc adres wyglądał bardzo przekonująco. Specjalnie spreparowany HTML i CSS został użyty w celu ukrycia prawdziwej treści ze strony MySpace i zamiast tego wyświetlał własny formularz logowania. 
+W grudniu 2006 roku, 34000 rzeczywistych nazw użytkownika i haseł zostały skradzione z http://news.netcraft.com/archives/2006/10/27/myspace_accounts_compromised_by_phishers.html[MySpace poprzez atak typu phishing]. Ideą ataku było stworzenie strony profilu o nazwie "login_home_index_html", a więc adres wyglądał bardzo przekonująco. Specjalnie spreparowany HTML i CSS został użyty w celu ukrycia prawdziwej treści ze strony MySpace i zamiast tego wyświetlał własny formularz logowania. 
  
 Robak Samy z MySpace zostanie omówiony w sekcji o atakach typu CSS injection. 
 
@@ -860,9 +861,9 @@ Ten przykład, ponownie pokazał, że filtr na podstawie czarnej listy nigdy nie
  
 === Atak typu Textile Injection
   
--- _Jeśli chcesz zapewnić formatowanie tekstu inne niż HTML (ze względu na bezpieczeństwo), powinieneś użyć języka mark-up, który jest przekształcany na HTML po stronie serwera. http://whytheluckystiff.net/ruby/redcloth/ [RedCloth] jest takim język dla Ruby, ale bez stosowania środków ostrożności, jest również podatny na XSS._ 
+-- _Jeśli chcesz zapewnić formatowanie tekstu inne niż HTML (ze względu na bezpieczeństwo), powinieneś użyć języka mark-up, który jest przekształcany na HTML po stronie serwera. http://whytheluckystiff.net/ruby/redcloth/[RedCloth] jest takim język dla Ruby, ale bez stosowania środków ostrożności, jest również podatny na XSS._ 
 
-  Na przykład, RedCloth tłumaczy _test_ na <em>test<em>, co oznacza kursywę. Jednak, aż do obecnej wersji 3.0.4, jest nadal podatny na XSS. Pobierz http://www.redcloth.org [wszystkie nowe wersje 4], w których usunięto poważne błędy. Jednak nawet ta wersja http://www.rorsecurity.info/journal/2008/10/13/new-redcloth-security.html [kilka błędów bezpieczeństwa], więc sposoby ochrony nadal obowiązują. Oto przykład dla wersji 3.0.4: 
+  Na przykład, RedCloth tłumaczy _test_ na <em>test<em>, co oznacza kursywę. Jednak, aż do obecnej wersji 3.0.4, jest nadal podatny na XSS. Pobierz http://www.redcloth.org[wszystkie nowe wersje 4], w których usunięto poważne błędy. Jednak nawet ta wersja http://www.rorsecurity.info/journal/2008/10/13/new-redcloth-security.html[kilka błędów bezpieczeństwa], więc sposoby ochrony nadal obowiązują. Oto przykład dla wersji 3.0.4: 
 
 ...........
 >> RedCloth.new('<script>alert(1)</script>').to_html
@@ -891,7 +892,7 @@ Zaleca się [,#fffcdb]#korzystanie z  RedCloth w połączeniu z białą listów 
  
 -- _Środki ostrożności, podjęte dla Ajaxa, są takie same jak te dla "normalnych" technologii. Istnieje przynajmniej jeden wyjątek: Uniknięcie wyjścia musi nastąpić już w kontrolerze, jeżeli akcja nie renderuje widoku._ 
 
-Jeśli używasz http://dev.rubyonrails.org/browser/plugins/in_place_editing [wtyczki in_place_editor], lub akcji, które zwracają ciąg znaków, a nie renderujesz widoku, [,#fffcdb]#musisz uniknąć wartości zwracanej w akcji#. W przeciwnym razie, jeśli zwracana wartość zawiera ciąg XSS, złośliwy kod będzie wykonywany po powrocie do przeglądarki. Unikaj wszystkich wartości wejścia używając metody h(). 
+Jeśli używasz http://dev.rubyonrails.org/browser/plugins/in_place_editing[wtyczki in_place_editor], lub akcji, które zwracają ciąg znaków, a nie renderujesz widoku, [,#fffcdb]#musisz uniknąć wartości zwracanej w akcji#. W przeciwnym razie, jeśli zwracana wartość zawiera ciąg XSS, złośliwy kod będzie wykonywany po powrocie do przeglądarki. Unikaj wszystkich wartości wejścia używając metody h(). 
  
 === Atak typu RJS Injection
  
