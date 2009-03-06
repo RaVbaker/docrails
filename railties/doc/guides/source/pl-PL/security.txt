@@ -578,7 +578,6 @@ strukturę URL, ale większość tych wykorzystywanych przez Railsy jest dość
 prosta lub łatwa do odgadnięcia, jeśli jest to jeden z open sourcowych
 interfejsów administracyjnych. Atakujący może próbować nawet 1000
 kombinacji (składników URLa - przyp. red.) poprzez złośliwe tagi IMG.
-
 Informacje o [,#fffcdb]#ochronie przeciwko CSRF w interfejsach administracyjnych i aplikacjach intranetowych, znajdują się w dziale o ochronie przeciw CSRF#. 
   
 === Dodatkowe środki ostrożności 
