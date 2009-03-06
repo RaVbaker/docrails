@@ -6,11 +6,11 @@ pracować z platformą Ruby on Rails oraz by pomóc Ci zrozumieć jak poszczegó
 tworzą spójną całość. Strona ta dostępna jest w kilku wersjach:
 
 * http://guides.rubyonrails.org/[angielska wersja stabilna] - opisuje Railsy w
-  wersji stabilnej 2.2
+  wersji (prawie) stabilnej 2.3
 * http://guides.rails.info/[angielska wersja rozwojowa] - opisuje Railsy w
-  wersji rozwojowej 2.3
+  wersji rozwojowej 
 * http://apohllo.pl/guides/index.html[polska wersja rozwojowa] - powstaje na podstawie
-  angielskiej wersji rozwojowej 
+  angielskiej wersji stabilnej (2.3) 
 
 Docelowo polskie tłumaczenie pojawi się na
 http://www.rubyonrails.pl[oficjalnej stronie frameworku]. 
