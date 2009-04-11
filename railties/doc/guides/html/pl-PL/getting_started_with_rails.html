@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Zaczynamy z Rails</title>
+  <title>Zaczynamy z Ruby on Rails</title>
   <!--[if lt IE 8]>
   <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE8.js" type="text/javascript"></script>
   <![endif]-->
@@ -58,7 +58,7 @@
             </ul>
           </li>
           <li>
-          <a href="#_witaj_rails">Witaj Rails!</a>
+          <a href="#_witajcie_railsy">Witajcie Railsy!</a>
             <ul>
             
               <li><a href="#_uruchamianie_serwera_www">Uruchamianie serwera WWW.</a></li>
@@ -71,12 +71,12 @@
           <a href="#_szybki_start_dzi_ki_rusztowaniu">Szybki start dzięki rusztowaniu.</a>
           </li>
           <li>
-          <a href="#_tworzenie_obiektu">Tworzenie obiektu</a>
+          <a href="#_tworzenie_zasobu">Tworzenie zasobu</a>
             <ul>
             
               <li><a href="#_uruchamianie_migracji">Uruchamianie Migracji</a></li>
             
-              <li><a href="#_dodawanie_hiper_cza">Dodawanie hiperłącza.</a></li>
+              <li><a href="#_dodawanie_hiper_cza">Dodawanie hiperłącza</a></li>
             
               <li><a href="#_praca_z_postami_w_przegl_darce">Praca z postami w przeglądarce</a></li>
             
@@ -138,7 +138,7 @@
     </div>
     
     <div id="content">
-        <h1>Zaczynamy z Rails</h1>
+        <h1>Zaczynamy z Ruby on Rails</h1>
       <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph"><p>Ten przewodnik jest wprowadzeniem do Ruby on Rails. Po jego przeczytaniu będziesz zaznajomiony z:</p></div>
@@ -155,7 +155,7 @@ ogólnym układem aplikacji
 </li>
 <li>
 <p>
-podstawami modelu MVC (Model, View, Controller) oraz architektury RESTful
+podstawami wzorca MVC (Model, View, Controller) oraz architektury RESTful
 </p>
 </li>
 <li>
@@ -170,7 +170,7 @@ szybkim generowaniem podstawowych elementów aplikacji
 <div class="sectionbody">
 <div class="paragraph"><p>Ten przewodnik jest przeznaczony dla początkujących, którzy chcą rozpocząć
 tworzenie aplikacji opartych na Railsach. Nie zakłada, że masz wcześniejsze
-doświadczenia z Railsami. Niemniej jednak, do jak najlepszego wykorzystania
+doświadczenia z Railsami. Niemniej jednak, do najlepszego wykorzystania
 tego przewodnika, konieczna jest instalacja:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -215,28 +215,46 @@ systemu zarządzania bazą danych <a href="http://www.sqlite.org/">SQLite</a> (p
 </div>
 <h2 id="_co_to_s_railsy">2. Co to są Railsy?</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Railsy są internetowo rozwijanym frameworkiem napisanym w języku Ruby. Zostały one tak zaprojektowane, aby ułatwić programowanie aplikacji internetowych, dostarczając zbiór wytycznych, od których każdy deweloper musi zacząć. Pozwalają one na pisanie krótszego kodu, niż jest to możliwe podczas używania większości innych języków i frameworków. Poza tym, projektanci uważają, że wykorzystanie Railsów przy tworzeniu aplikacjach internetowych sprawia przyjemność.</p></div>
-<div class="paragraph"><p>Railsy są "upartym" oprogramowaniem. Oznacza to, że są stworzone, aby zachęcić do wyboru najlepszej drogi, a w niektórych przypadkach -  by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy nawykach charakterystycznych dla programowania w innych językach lub będziesz wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne.</p></div>
-<div class="paragraph"><p>Filozofia Railsów zawiera kilka zasad:</p></div>
+<div class="paragraph"><p>Railsy są frameworkiem służącym do tworzenia aplikacji internetowych napisanym w języku
+Ruby. Zostały one tak zaprojektowane, aby ułatwić programowanie aplikacji internetowych,
+poprzez przyjęcie kilku założeń, dotyczących tego czego potrzebuje każdy
+programista aby rozpocząć pracę. Pozwalają one na
+pisanie krótszego kodu, jednocześnie umożliwiając osiąganie lepszych rezultatów niż
+ma to miejsce w większości innych języków i
+frameworków. Poza tym, programiści którzy od dawna używają Railsów uważają, że
+pisanie aplikacji z ich użyciem sprawia przyjemność.</p></div>
+<div class="paragraph"><p>Railsy są "upartym" oprogramowaniem. Oznacza to, że były tworzone z
+przekonaniem, że istnieje najlepszy sposób rozwiązywania pewnych problemów i
+zostały zaprojektowane tak, by zachęcać do wyboru tego sposobu, a w niektórych przypadkach -
+by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz
+ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy
+nawykach charakterystycznych dla programowania w innych językach lub będziesz
+wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne.</p></div>
+<div class="paragraph"><p>Filozofia Railsów obejmuje kilka zasad:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-DRY - "Don&#8217;t Repeat Yourself" (Nie powtarzaj się) - sugeruje, że pisanie tego samego kodu przez cały czas jest złe.
+DRY - "Don&#8217;t Repeat Yourself" (Nie powtarzaj się) - sugeruje, że pisanie w
+  kółko tego samego kodu jest złe.
 </p>
 </li>
 <li>
 <p>
-Konwencja Ponad Konfiguracją - Railsy wychodzą z założenia, że wiesz co chcesz zrobić i w jaki sposób, dlatego nie zmuszają Cię do samodzielnego ustawiania każdego najdrobniejszego szczegółu
+Konwencja Ponad Konfiguracją - Railsy przyjmują pewne założenia, odnośnie tego,
+  co i jak zamierzasz zrobić, dlatego nie zmuszają Cię do samodzielnego ustawiania
+  każdej najdrobniejszej opcji w plikach konfiguracyjnych.
 </p>
 </li>
 <li>
 <p>
-REST jest najlepszym wzorem dla aplikacji internetowych - organizowanie aplikacji wokół zasobów i standardowych zapytań HTTP jest najszybszym możliwym rozwiązaniem
+REST jest najlepszym wzorcem dla aplikacji internetowych - organizowanie aplikacji wokół zasobów i
+  standardowych zapytań HTTP pozwala szybko kroczyć do przodu.
 </p>
 </li>
 </ul></div>
 <h3 id="_architektura_mvc">2.1. Architektura MVC</h3>
-<div class="paragraph"><p>Railsy są zorganizowane wokół trzech komponentów aplikacji: modelu (model), widoku (view), kontrolera (controller), co w skrócie nazywany MVC. Wzorzec MVC obejmuje:</p></div>
+<div class="paragraph"><p>Railsy są zorganizowane wokół trzech warstw aplikacji:
+modelu (<em>model</em>), widoku (<em>view</em>) oraz kontrolera (<em>controller</em>), co w skrócie nazywamy MVC. Wzorzec MVC obejmuje:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -250,18 +268,28 @@ odizolowanie logiki biznesowej od interfejsu użytkownika
 </li>
 <li>
 <p>
-wyraźne zaznaczenie, gdzie powinny się znajdować różne elementy kodu, co ułatwia zarządzenie tym kodem
+wyraźne wskazanie, gdzie powinny znajdować się różne elementy kodu, co
+  ułatwia zarządzenie nim
 </p>
 </li>
 </ul></div>
 <h4 id="_modele">2.1.1. Modele</h4>
-<div class="paragraph"><p>Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych odpowiada jeden model w Twojej aplikacji. Większość Twoich aplikacji realizujących logikę biznesową będzie skoncentrowana w modelach.</p></div>
+<div class="paragraph"><p>Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku
+Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z
+odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych
+odpowiada jeden model w Twojej aplikacji. Większość logiki biznesowej Twoich aplikacji
+będzie skoncentrowana w modelach.</p></div>
 <h4 id="_widoki">2.1.2. Widoki</h4>
-<div class="paragraph"><p>Widoki tworzą interfejs użytkownika aplikacji. W Railsach, widoki są często plikami HTML zawierającymi kod w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją danych. Przede wszystkim są odpowiedzialne za dostarczanie danych do przeglądarki internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.</p></div>
+<div class="paragraph"><p>Widoki tworzą interfejs użytkownika aplikacji. W Railsach, widoki są często plikami HTML
+zawierającymi kod w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją
+danych. Przede wszystkim są one odpowiedzialne za dostarczanie danych do przeglądarki
+internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.</p></div>
 <h4 id="_kontrolery">2.1.3. Kontrolery</h4>
-<div class="paragraph"><p>Kontrolery "sklejają" modele i widoki. W Railsach odpowiadają za przetwarzanie żądań przychodzących z przeglądarki internetowej, pozyskiwanie danych z modeli i przekazywanie ich do widoków w celu prezentacji.</p></div>
+<div class="paragraph"><p>Kontrolery "sklejają" modele i widoki. W Railsach odpowiadają za przetwarzanie żądań
+przychodzących z przeglądarki internetowej, pozyskiwanie danych z modeli i przekazywanie
+ich do widoków w celu prezentacji.</p></div>
 <h3 id="_sk_adniki_rails_w">2.2. Składniki Railsów</h3>
-<div class="paragraph"><p>Railsy dostarczają wszystkich potrzebnych komponentów do tworzenia aplikacji internetowych. Są to:</p></div>
+<div class="paragraph"><p>Railsy dostarczają pełny zestaw komponentów do tworzenia aplikacji internetowych. Są to:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -300,37 +328,62 @@ Active Support
 </li>
 </ul></div>
 <h4 id="_action_controller">2.2.1. Action Controller</h4>
-<div class="paragraph"><p>Action Controller jest komponentem zarządzającym kontrolerami w Railsowej aplikacji. Framework kontrolera Action Controller przetwarza przychodzące zapytania, wydobywa z nich parametry i wysyła je do odpowiedniej akcji. Usługi świadczone przez Action Controller obejmują zarządzanie sesją (session), szablon renderowania (template rendering) i przekierowanie zarządzania.</p></div>
+<div class="paragraph"><p>Moduł Action Controller jest komponentem zarządzającym kontrolerami w Railsowej aplikacji.
+Action Controller przetwarza przychodzące zapytania, wydobywa z
+nich parametry i wysyła je do odpowiedniej akcji. Usługi świadczone przez Action
+Controller obejmują zarządzanie sesją, renderowanie szablonów i zarządzanie
+przekierowaniami.</p></div>
 <h4 id="_action_view">2.2.2. Action View</h4>
-<div class="paragraph"><p>Action View zarządza widokami Twojej Railsowej aplikacji. Może domyślnie tworzyć zarówno widok HTML jak i XML. Action View zarządza szablonami renderowania (w tym szablonami zagnieżdżonymi oraz podszablonami) i wykorzystuje wbudowane wsparcie AJAX.</p></div>
+<div class="paragraph"><p>Moduł Action View zarządza widokami Twojej Railsowej aplikacji. Może domyślnie tworzyć zarówno
+widok HTML jak i XML. Action View zarządza renderowaniem szablonów (w tym szablonami
+zagnieżdżonymi oraz podszablonami) i dostarcza wsparcie dla AJAXa.</p></div>
 <h4 id="_active_record">2.2.3. Active Record</h4>
-<div class="paragraph"><p>Active Record jest podstawą dla modeli w Railsowej aplikacji. Dostarcza on niezależną bazę danych, podstawowe funkcje aplikacji - CRUD (create, read, update and delete - utwórz, odczytaj, aktualizuj, usuń), zaawansowane znajdywanie możliwości i zdolność do wiązania modeli ze sobą pomiędzy różnymi usługami.</p></div>
+<div class="paragraph"><p>Moduł Active Record jest podstawą dla modeli w Railsowej aplikacji. Zapewnia
+niezależność od bazy danych, dostarcza podstawowe funkcjonalności CRUD (create, read, update and
+delete - utwórz, odczytaj, aktualizuj, usuń), zaawansowane możliwości
+wyszukiwania i zdolność do wiązania modeli oraz wiele innych usług.</p></div>
 <h4 id="_action_mailer">2.2.4. Action Mailer</h4>
-<div class="paragraph"><p>Action Mailer to framework dla tworzenia usług e-mail. Action Mailer może być uzywany do wysyłania e-maili w oparciu o elastyczne szablony lub do odbioru i przetwarzania przychodzących wiadomości.</p></div>
+<div class="paragraph"><p>Moduł Action Mailer służ do tworzenia usług e-mail. Action Mailer może być używany do
+wysyłania e-maili w oparciu o elastyczne szablony lub do odbioru i przetwarzania przychodzących wiadomości.</p></div>
 <h4 id="_active_resource">2.2.5. Active Resource</h4>
-<div class="paragraph"><p>Active Resource dostarcza framework dla zarządzania połączeniami pomiędzy obiektami biznesowymi internetowych serwisów RESTful. Implementuje sposób mapowania obiektów internetowych na lokalne obiekty w oparciu o semantykę CRUD.</p></div>
+<div class="paragraph"><p>Moduł Active Resource pozwala na zarządzanie powiązaniami pomiędzy obiektami
+biznesowymi oraz internetowymi serwisami RESTful. Implementuje mapowanie
+zasobów internetowych na obiekty lokalne w oparciu o semantykę CRUD.</p></div>
 <h4 id="_railties">2.2.6. Railties</h4>
-<div class="paragraph"><p>Railties jest rdzeniem kodu Rails, który buduje nowe aplikacje Railsowe i skleja w nich ze sobą różne frameworki.</p></div>
+<div class="paragraph"><p>Moduł Railties jest rdzeniem kodu Rails, służącym do tworzenia nowych aplikacje i
+łączenia w nich poszczególnych elementów frameworku.</p></div>
 <h4 id="_active_support">2.2.7. Active Support</h4>
-<div class="paragraph"><p>Active Support jest obszernym zbiorem użytecznych klas oraz standardowych bibliotek rozszerzeń dla Ruby, które są wykorzystywane w Railsach, zarówno przez rdzeń kodu, jak i Twoje aplikacje.</p></div>
+<div class="paragraph"><p>Moduł Active Support jest obszernym zbiorem użytecznych klas oraz rozszerzeń
+standardowych bibliotek języka Ruby, które są wykorzystywane w Railsach,
+zarówno przez rdzeń kodu, jak i Twoją aplikację.</p></div>
 <h3 id="_rest">2.3. REST</h3>
-<div class="paragraph"><p>Praca doktorska Roya Fieldinga <a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm">Architectural Styles and the Design of Network-based Software Architectures</a> jest powszechnie uznawana za podstawę działania architektury RESTful. Na szczęście, nie musisz czytać tego całego dokumentu, aby zrozumieć, jak działa REST w Rails. REST (Representational State Transfer) jest stylem architektury oprogramowania sprowadzającym się do dwóch podstawowych zasad:</p></div>
+<div class="paragraph"><p>Praca doktorska Roya Fieldinga
+<a href="http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm">Architectural Styles and the Design of Network-based Software Architectures</a>
+jest powszechnie uznawana za fundament architektury RESTful. Na
+szczęście, nie musisz czytać tego dokumentu w całości, aby zrozumieć, jak działa REST w Rails.
+REST (Representational State Transfer) jest stylem architektury oprogramowania
+sprowadzającym się do dwóch podstawowych zasad:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Korzystanie z zasobów identyfikatorów (które na potrzeby tego przewodnika możesz traktować jako adresy URL) by je przedstawić.
+Korzystanie z identyfikatorów zasobów (które na potrzeby tego przewodnika
+  możesz traktować jako adresy URL) do reprezentowania zasobów.
 </p>
 </li>
 <li>
 <p>
-Przesyłanie przedstawień stanów tego zasobu pomiędzy elementami systemu.
+Przesyłanie reprezentacji stanu zasobów pomiędzy elementami systemu.
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Na przykład, dla aplikacja Railsowej takie zapytanie:</p></div>
+<div class="paragraph"><p>Na przykład, dla aplikacja Railsowej następujące żądanie:</p></div>
 <div class="paragraph"><p><tt>DELETE /photos/17</tt></p></div>
-<div class="paragraph"><p>będzie rozumiane jako odniesienie się do źródła zdjęcia o ID 17, oraz wskazanie żądanego działania - usunięcie tego źródła. REST to intuicyjny styl architektury aplikacji internetowych, które Railsy czynią jeszcze bardziej naturalnym, poprzez korzystanie z konwencji, które pozwalają na nie przejmowanie się złożnością RESTful oraz różnicami pomiędzy przeglądarkami.</p></div>
-<div class="paragraph"><p>Jeśli chciałbyś dowiedzieć się czegoś więcej na temat REST jako styl architektonicznego, polecam bardziej przystępne źródła od tezy Fieldinga:</p></div>
+<div class="paragraph"><p>będzie rozumiane jako odnoszące się do zdjęcia o ID 17 oraz jako wskazanie żądanego
+działania - usunięcie tego zasoby. REST jest naturalnym stylem architektury aplikacji
+internetowych, które Railsy czynią jeszcze bardziej intuicyjnym, poprzez korzystanie z
+konwencji, które pozwalają na nieprzejmowanie się jego złożonością oraz różnicami pomiędzy przeglądarkami.</p></div>
+<div class="paragraph"><p>Jeśli chciałbyś dowiedzieć się czegoś więcej na temat REST jako stylu architektonicznego,
+polecam bardziej przystępne źródła od tezy Fieldinga:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -339,7 +392,7 @@ Przesyłanie przedstawień stanów tego zasobu pomiędzy elementami systemu.
 </li>
 <li>
 <p>
-<a href="http://bitworking.org/news/373/An-Introduction-to-REST">Wprowadzenie do REST - Joe Gregorio</a> (video tutorial)
+<a href="http://bitworking.org/news/373/An-Introduction-to-REST">Wprowadzenie do REST - Joe Gregorio</a> (video)
 </p>
 </li>
 <li>
@@ -351,7 +404,8 @@ Przesyłanie przedstawień stanów tego zasobu pomiędzy elementami systemu.
 </div>
 <h2 id="_tworzenie_nowego_projektu_w_railsach">3. Tworzenie nowego projektu w Railsach</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Z pomocą tego przewodnika, będziesz mógł utworzyć projekt prostego bloga w Railsach. Zanim przystąpisz do tworzenia aplikacji, upewnij się, że masz zainstalowane Railsy.</p></div>
+<div class="paragraph"><p>Z pomocą tego przewodnika, będziesz mógł utworzyć projekt prostego bloga w
+Railsach. Zanim przystąpisz do tworzenia aplikacji, upewnij się jednak, że masz zainstalowane Railsy.</p></div>
 <h3 id="_instalacja_rodowiska_rails">3.1. Instalacja środowiska Rails</h3>
 <div class="paragraph"><p>W większości przypadków, najprostszym sposobem zainstalowania Railsów jest skorzystania z RubyGems:</p></div>
 <div class="listingblock">
@@ -371,7 +425,11 @@ http://www.gnu.org/software/src-highlite -->
 <div class="ulist"><ul>
 <li>
 <p>
-Jeśli pracujesz w systemie Windows, będzie Ci łatwiej zainstalować <a href="http://instantrails.rubyforge.org/wiki/wiki.pl">Instant Rails</a>. Pamiętaj jednak, że Instant Rails rzadko są aktualną wersją Railsów. Ponadto, Windowsowa wersja Railsów jest ogólnie mniej przyjazna w użytowaniu niż na innych systemach operacyjnych. Jeśli to możliwe, polecamy korzystanie z Linuksowej maszyny wirtualnej.
+Jeśli pracujesz w systemie Windows, będzie Ci łatwiej zainstalować
+  <a href="http://instantrails.rubyforge.org/wiki/wiki.pl">Instant Rails</a>. Pamiętaj jednak, że
+  Instant Rails rzadko zawierają aktualną wersją Railsów. Ponadto, Windowsowa wersja Railsów
+  jest ogólnie mniej przyjazna w użytkowaniu niż te przeznaczone dla innych
+  systemów operacyjnych. Jeśli to możliwe, polecamy korzystanie z Linuksowej maszyny wirtualnej.
 </p>
 </li>
 <li>
@@ -407,7 +465,7 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Uruchamiając raili -h możesz zobaczyć wszystkie akceptowane przez aplikację Railsową przełączniki.</td>
+<td class="content">Uruchamiając <tt>railis -h</tt> możesz zobaczyć wszystkie akceptowane przez aplikację Railsową przełączniki.</td>
 </tr></table>
 </div>
 <div class="paragraph"><p>Po utworzeniu aplikacji, przejdź do odpowiedniego folderu, aby móc kontynuować swoją pracę:</p></div>
@@ -417,7 +475,10 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ cd blog</tt></pre></div></div>
-<div class="paragraph"><p>Railsy utworzy folder o nazwie <tt>blog</tt> w Twoim roboczym katalogu. Otwórz ten folder i przyjrzyj się jego zawartości. Podczas pracy z tym przewodnikiem, w większości będziemy korzystać z folderu <tt>app/</tt>, ale poniżej możesz zapoznać się z podstawowymi funkcjami, które domyślnie utworzą Railsy.</p></div>
+<div class="paragraph"><p>Railsy utworzy folder o nazwie <tt>blog</tt> w Twoim roboczym katalogu. Otwórz ten
+folder i przyjrzyj się jego zawartości. Podczas pracy z tym przewodnikiem, w
+większości będziemy korzystać z folderu <tt>app/</tt>, ale poniżej możesz zapoznać
+się z podstawowymi funkcjami katalogów i plików, które domyślnie utworzą Railsy.</p></div>
 <div class="tableblock">
 <table rules="all"
 width="100%"
@@ -438,7 +499,7 @@ cellspacing="0" cellpadding="4">
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>Rakefile</tt></p></td>
-<td align="left"><p class="table">Plik ten zawiera listę działań aplikacji, które można uruchomić poprzez terminal.</p></td>
+<td align="left"><p class="table">Plik ten zawiera listę zadań, które można uruchomić poprzez terminal.</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>app/</tt></p></td>
@@ -446,11 +507,11 @@ cellspacing="0" cellpadding="4">
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>config/</tt></p></td>
-<td align="left"><p class="table">Folder zawierający pliki konfiguracyjne dla aplikacji, odpowiadające za sposoby jej uruchamiania, bazę danych, ścieżki dostępu etc.</p></td>
+<td align="left"><p class="table">Folder zawierający pliki konfiguracyjne aplikacji, obejmujące zmienne czasu uruchomienia, konfigurację bazę danych, ścieżki dostępu etc.</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>db/</tt></p></td>
-<td align="left"><p class="table">Pokazuje aktualny schemat bazy danych, jak również ich migracje (o których niedługo będziemy się uczyć).</p></td>
+<td align="left"><p class="table">Pokazuje aktualny schemat bazy danych, jak również jego migracje (o których niedługo będziemy się uczyć).</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>doc/</tt></p></td>
@@ -458,23 +519,23 @@ cellspacing="0" cellpadding="4">
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>lib/</tt></p></td>
-<td align="left"><p class="table">Dodatkowe moduły dla Twojej aplikacji, których nie uwzględniono w tym przewodniku</p></td>
+<td align="left"><p class="table">Dodatkowe moduły dla Twojej aplikacji (nieuwzględnione w tym przewodniku).</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>log/</tt></p></td>
-<td align="left"><p class="table">Archiwum plików</p></td>
+<td align="left"><p class="table">Logi aplikacji.</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>public/</tt></p></td>
-<td align="left"><p class="table">Jedyny całkowicie dostępny publicznie folder. Są to wszelkie zdjęcia, JavaScript, arkusze stylów (CSS) i inne statyczne pliki wyjściowe</p></td>
+<td align="left"><p class="table">Jedyny całkowicie dostępny publicznie folder. Zawiera wszelkie zdjęcia, JavaScript, arkusze stylów (CSS) i inne statyczne pliki.</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>script/</tt></p></td>
-<td align="left"><p class="table">Skrypty dostarczone przez Rails w celu wykonywania powtarzających się zadań, takich jak analiza porównawcza, instalowanie wtyczek (plugin) i uruchamianiu konsoli lub serwera WWW</p></td>
+<td align="left"><p class="table">Skrypty dostarczone przez Rails w celu wykonywania powtarzających się zadań, takich jak benchmarking, instalowanie wtyczek (plugin) i uruchamianiu konsoli lub serwera WWW</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>test/</tt></p></td>
-<td align="left"><p class="table">Testy jednostkowe, tak zwane "fixtures" oraz inne narzędzia służące do przeprowadzania testów.  Są one opisane w: <a href="../testing_rails_applications.html">Testowanie aplikacji Rails</a></p></td>
+<td align="left"><p class="table">Testy jednostkowe, tak zwane "fixtures" oraz inne narzędzia służące do przeprowadzania testów.  Są one opisane w: <a href="/testing_rails_applications.html">Testowanie aplikacji Rails</a></p></td>
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>tmp/</tt></p></td>
@@ -482,33 +543,41 @@ cellspacing="0" cellpadding="4">
 </tr>
 <tr>
 <td align="left"><p class="table"><tt>vendor/</tt></p></td>
-<td align="left"><p class="table">Miejsce na kod, którego sami nie napisaliśmy, ale chcemy wykorzystać (tak zwani "trzeci dostawcy"). W standardowej aplikacji środowiska Rails zawiera Ruby Gems, kod źródłowy Rubiego (jeśli zastosujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.</p></td>
+<td align="left"><p class="table">Miejsce na kod, którego sami nie napisaliśmy, ale chcemy wykorzystać. W standardowej aplikacji Rails zawiera Ruby Gems, kod źródłowy Railsów (jeśli zainstalujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="_konfiguracja_bazy_danych">3.3. Konfiguracja bazy danych</h3>
 <div class="paragraph"><p>Prawie każda aplikacja Railsowa korzysta z bazy danych. Rodzaj baza danych, której używamy, jest określony w pliku konfiguracyjnym <tt>config/database.yml</tt>.
-Jeśli otworzysz ten plik w nowej aplikacji Railsowej, zostanie wyświetlona domyślna konfiguracja bazy danych SQLite. Plik zawiera części dla trzech różnych środowisk, w których Rails może być uruchomiony domyślnie:</p></div>
+Jeśli otworzysz ten plik w nowej aplikacji Railsowej, zostanie wyświetlona
+domyślna konfiguracja bazy danych SQLite. Plik zawiera części dla trzech
+różnych środowisk, w których Railsy mogą być domyślnie uruchomione:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-środowisko <tt>rozwojowe</tt> jest używane na komputerze programisty jako interfejs użytkownika
+środowisko <tt>development</tt> (rozwojowe) jest używane na komputerze programisty, aby mógł
+  oglądać bezpośrednio rezultaty wprowadzanych zmian
 </p>
 </li>
 <li>
 <p>
-środowisko <tt>badawcze</tt> służy do uruchamiania automatycznych testów
+środowisko <tt>test</tt> (testowe) służy do uruchamiania automatycznych testów
 </p>
 </li>
 <li>
 <p>
-środowisko <tt>produkcyjne</tt> jest używane podczas przystosowywania aplikacji dla zwykłych użytkowników
+środowisko <tt>production</tt> (produkcyjne) jest używane kiedy aplikacja uruchomiona jest na
+  serwerze produkcyjnym
 </p>
 </li>
 </ul></div>
 <h4 id="_konfiguracja_bazy_danych_sqlite">3.3.1. Konfiguracja bazy danych SQLite</h4>
-<div class="paragraph"><p>Railsy mają wbudowaną obsługę <a href="http://www.sqlite.org/">SQLite</a>, który jest lekką, nie obciążającą serwera aplikacją bazy danych. Mimo przeciążenia SQLite przez środowisko produkcyjne, wciąż dobrze działa on podczas dalszego pisania programu oraz testów. Railsy domyślnie używają SQLite tworząc nowy projekt, ale zawsze można to później zmienić.</p></div>
+<div class="paragraph"><p>Railsy mają wbudowaną obsługę <a href="http://www.sqlite.org/">SQLite</a>, który jest
+lekkim, pozbawionym serwera systemem zarządzania bazą danych.
+Mimo możliwości przeciążenia SQLite&#8217;a w środowisku produkcyjne, działa on
+zadowalająco podczas pisania programu oraz testów. Railsy domyślnie używają SQLite
+przy tworzeniu nowego projektu, ale zawsze można to zmienić.</p></div>
 <div class="paragraph"><p>Poniżej znajduje się część domyślnej konfiguracji pliku z informacją dla środowiska rozwojowego:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
@@ -519,7 +588,9 @@ http://www.gnu.org/software/src-highlite -->
   adapter<span style="color: #990000">:</span> sqlite3
   database<span style="color: #990000">:</span> db<span style="color: #990000">/</span>development<span style="color: #990000">.</span>sqlite3
   timeout<span style="color: #990000">:</span> <span style="color: #993399">5000</span></tt></pre></div></div>
-<div class="paragraph"><p>Jeśli nie masz żadnej zainstalowanej bazy danych, najłatwiej będzie Ci skorzystać z SQLite, w czym może być pomocny Ruby Gems (posiadacze Maca z OS X 10.5 lub nowszym mają to zainstalowane domyślnie):</p></div>
+<div class="paragraph"><p>Jeśli nie masz żadnej zainstalowanej bazy danych, najłatwiej będzie Ci
+skorzystać z SQLite&#8217;a, w czym może być pomocny Ruby Gems (posiadacze Maca z OS
+X w wersji 10.5 lub nowszej mają go zainstalowanego domyślnie):</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -542,7 +613,7 @@ http://www.gnu.org/software/src-highlite -->
   socket<span style="color: #990000">:</span> <span style="color: #FF6600">/tmp/</span>mysql<span style="color: #990000">.</span>sock</tt></pre></div></div>
 <div class="paragraph"><p>Ta konfiguracja powinna działac bez problemu, jeśli Twoja instalacja MySQLa nie ma wprowadzonego hasła dla super-uzytkownika (root user). Jeśli jednak jest inaczej, koniecznie zmień nazwę użytkownika oraz hasło w powyższym kodzie.</p></div>
 <h4 id="_konfiguracja_bazy_danych_postgresql">3.3.3. Konfiguracja Bazy Danych PostgreSQL</h4>
-<div class="paragraph"><p>Używając PostgreSQL Twój <tt>config/database.yml</tt> zostanie zmodyfikowany do pracy z tą bazą danych:</p></div>
+<div class="paragraph"><p>Używając PostgreSQL Twój plik <tt>config/database.yml</tt> powinien zostać zmodyfikowany do pracy z tą bazą danych:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -554,9 +625,10 @@ http://www.gnu.org/software/src-highlite -->
   database<span style="color: #990000">:</span> blog_development
   username<span style="color: #990000">:</span> blog
   password<span style="color: #990000">:</span></tt></pre></div></div>
-<div class="paragraph"><p>Konieczna jest zmiana nazwy użytkownika oraz hasła w kodzie dla części projektowej,</p></div>
+<div class="paragraph"><p>Konieczna jest zmiana nazwy użytkownika oraz hasła w konfiguracji środowiska
+rozwojowego.</p></div>
 <h4 id="_tworzenie_bazy_danych">3.3.4. Tworzenie Bazy Danych</h4>
-<div class="paragraph"><p>Teraz, gdy masz już skonfigurowaną bazę danych, czas by Railsy stworzyły dla ciebie pustą bazę danych. Możesz to zrobić uruchamiając komendę "rake":</p></div>
+<div class="paragraph"><p>Teraz, gdy masz już skonfigurowaną bazę danych, czas by Railsy stworzyły dla ciebie pustą bazę danych. Możesz to zrobić uruchamiając komendę <tt>rake</tt>:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -568,11 +640,12 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">"Rake" jest poleceniem startującym ogólnego zastosowania, które Railsy używają do wielu rzeczy. By zobaczyć dostępne dla nich komendy uruchom "rake -T".</td>
+<td class="content">Rake jest poleceniem startującym ogólnego zastosowania, które Railsy
+używają do wielu rzeczy. By zobaczyć listę dostępnych komend uruchom <tt>rake -T</tt>.</td>
 </tr></table>
 </div>
 </div>
-<h2 id="_witaj_rails">4. Witaj Rails!</h2>
+<h2 id="_witajcie_railsy">4. Witajcie Railsy!</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Jednym z tradycyjnych sposobów uczenia się nowego języka jest pobieżne przeglądnięcie jego tekstu. By tak zrobić w Railsach, konieczne jest stworzenie przynajmniej kontrolera oraz widoku. Na szczęście możesz to zrobić używając pojedynczej komendy, wpisując ją do terminala:</p></div>
 <div class="listingblock">
@@ -586,10 +659,15 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">Jeżeli używasz Windowsa, lub gdy twój Ruby jest skonfigurowany w niestandardowy sposób, możliwe że będziesz potrzebował przekazać komendy <tt>script</tt> Railsów bezpośrednio do Ruby&#8217;ego: <tt>ruby script/generate controller home index</tt>.</td>
+<td class="content">Jeżeli używasz systemu Windows lub gdy twój Ruby jest skonfigurowany w
+niestandardowy sposób, możliwe że będziesz musiał przekazać komendę <tt>script</tt>
+bezpośrednio do Ruby&#8217;ego: <tt>ruby script/generate controller home index</tt>.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Railsy stworzyły dla Ciebie parę plików, włączając w to <tt>app/views/home/index.html.erb</tt> - czyli szablon, który będzie używany do pokazywania efektów <tt>index</tt> action (method) w kontrolerze <tt>home</tt>. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego tę pojedynczą linijkę kodu:</p></div>
+<div class="paragraph"><p>Railsy stworzyły dla Ciebie parę plików, włączając w to <tt>app/views/home/index.html.erb</tt>
+- czyli szablon, który będzie używany do pokazywania efektów akcji (metody) <tt>index</tt> w
+kontrolerze <tt>home</tt>. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego tę
+pojedynczą linijkę kodu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -597,14 +675,19 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">&lt;h1&gt;</span></span>Hello, Rails!<span style="font-weight: bold"><span style="color: #0000FF">&lt;/h1&gt;</span></span></tt></pre></div></div>
 <h3 id="_uruchamianie_serwera_www">4.1. Uruchamianie serwera WWW.</h3>
-<div class="paragraph"><p>Teraz, za pomocą jedynie dwóch komend, masz gotowy i działający Railsowy program! Będziesz mógł go zobaczyć uruchamiając przeglądarkę na swoim komputerze, za pomocą kolejnej komendy startowej:</p></div>
+<div class="paragraph"><p>Teraz, za pomocą jedynie dwóch komend, masz gotowy i działający Railsowy program!
+Będziesz mógł go zobaczyć uruchamiając przeglądarkę na swoim komputerze, za pomocą
+kolejnej komendy startowej:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ script/server</tt></pre></div></div>
-<div class="paragraph"><p>Domyślnie spowoduje to odpalenie instancji serwera aplikacyjnego Mongrel. By zobaczyć jak działa Twój program, otwórz okno przeglądarki i przejdź do <tt>http://localhost:3000</tt>. Powinieneś zobaczyć Railsową, domyślną stronę informacyjną:</p></div>
+<div class="paragraph"><p>Domyślnie spowoduje to odpalenie instancji serwera aplikacyjnego Mongrel
+(Railsy mogą wykorzystywać kilka innych serwerów aplikacji). By zobaczyć jak działa Twój
+program, otwórz okno przeglądarki i przejdź pod adres <tt>http://localhost:3000</tt>. Powinieneś
+zobaczyć Railsową, domyślną stronę informacyjną:</p></div>
 <div class="paragraph"><p><span class="image">
 <img src="images/rails_welcome.png" alt="Welcome Aboard screenshot" title="Welcome Aboard screenshot" />
 </span></p></div>
@@ -613,19 +696,29 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">By zatrzymać serwer WWW naciśnij Ctrl+C w oknie terminalu podczas jego działania. Generalnie, Railsy w "trybie tworzenia" (development mode) nie wymagają zatrzymywania serwera, by wprowadzić Twoje zmiany w plikach - zostaną one automatycznie wprowadzone na serwer.</td>
+<td class="content">By zatrzymać serwer WWW naciśnij Ctrl+C w oknie terminala podczas jego działania.
+Generalnie, Railsy w trybie rozwojowym nie wymagają zatrzymywania
+serwera, po wprowadzeniu zmian w Twoich plikach - zostaną one automatycznie
+zauważone przez serwer.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Ekran powitalny jest pierwszą próbą dla nowego programu napisanego w Railsach - upewnia nas, że oprogramowanie którym dysponujemy jest poprawnie skonfigurowana do działania strony. Aby ją zobaczyć, przejdź do <tt>http://localhost:3000/home/index</tt>.</p></div>
+<div class="paragraph"><p>Ekran powitalny jest pierwszym testem dla nowego programu napisanego w Railsach - upewnia
+nas, że oprogramowanie którym dysponujemy jest poprawnie skonfigurowane do działania
+naszej aplikacji. Aby zobaczyć nowoutworzoną stronę, przejdź pod adres <tt>http://localhost:3000/home/index</tt>.</p></div>
 <h3 id="_konfiguracja_strony_domowej_programu">4.2. Konfiguracja Strony Domowej Programu.</h3>
-<div class="paragraph"><p>Prawdopodobnie chcesz zamienić domyślną stronę startową ze stroną Twojego programu. Pierwszym krokiem jest wykasowanie z niego strony domyślnej:</p></div>
+<div class="paragraph"><p>Prawdopodobnie chcesz zamienić domyślną stronę startową ze stroną Twojego programu.
+Pierwszym krokiem jest wykasowanie z katalogu <tt>public</tt> strony domyślnej:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>$ rm public/index<span style="color: #990000">.</span>html</tt></pre></div></div>
-<div class="paragraph"><p>Powinieneś teraz wskazać Railsowi gdzie Twoja strona domowa jest zlokalizowana. Otwórz plik <tt>config/routes.rb</tt> w swoim edytorze -  jest on plikiem routingowy (<em>routing file</em>) Twojego programu. Zawiera wpisy w specjalnym DSL (specyficzny język domeny) które pokazują Railsowi w jaki sposób połączyć żądania kontrolerów oraz akcji. Na dole tego pliku znajdują się domyślne ścieżki (<em>default routes</em>):</p></div>
+<div class="paragraph"><p>Powinieneś teraz wskazać Railsom gdzie jest zlokalizowana Twoja strona domowa.
+Otwórz plik <tt>config/routes.rb</tt> w swoim edytorze -  jest on plikiem routingu Twojego
+programu. Zawiera wpisy w specjalnym DSLu (specyficzny język domeny), które pokazują
+Railsom w jaki sposób połączyć żądania kontrolerów oraz akcji. Na dole tego pliku
+znajdują się domyślne drogi:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -633,32 +726,41 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>connect <span style="color: #FF0000">':controller/:action/:id'</span>
 map<span style="color: #990000">.</span>connect <span style="color: #FF0000">':controller/:action/:id.:format'</span></tt></pre></div></div>
-<div class="paragraph"><p>Domyślne ścieżki przenoszą proste żądania, takie jak <tt>/home/index</tt>: Railsy tłumaczą je w postaci prośby do akcji <tt>index</tt> w kontrolerze <tt>home</tt>. Kolejny przykład, <tt>/posts/edit/1</tt> uruchomi akcję <tt>edit</tt> w kontrolerze <tt>posts</tt> z <tt>id</tt> 1.</p></div>
-<div class="paragraph"><p>By połączyć Twoją stronę domową, będziesz potrzebować kolejnej linii do pliku routingu, powyżej domyślnej ścieżki:</p></div>
+<div class="paragraph"><p>Domyślne drogi obsługują proste żądania, takie jak <tt>/home/index</tt>: Railsy
+tłumaczą je na wywołanie akcji <tt>index</tt> w kontrolerze <tt>home</tt>. Kolejny przykład,
+<tt>/posts/edit/1</tt> uruchomi akcję <tt>edit</tt> w kontrolerze <tt>posts</tt> z <tt>id</tt> równym 1.</p></div>
+<div class="paragraph"><p>By połączyć Twoją stronę domową, musisz dodać jeden wpis do pliku routingu,
+powyżej drogi domyślnej:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt>map<span style="color: #990000">.</span>root <span style="color: #990000">:</span>controller <span style="color: #990000">=&gt;</span> <span style="color: #FF0000">"home"</span></tt></pre></div></div>
-<div class="paragraph"><p>Ta linijka ilustruje jeden mały kawałek podejścia zwanego „konwencja ponad konfiguracją” ("convention over configuration"): jeżeli nie podasz żadnej akcji, Railsy założą domyślnie akcję <tt>index</tt>.</p></div>
+<div class="paragraph"><p>Ta linijka ilustruje jeden mały kawałek podejścia "konwencja ponad
+konfiguracją": jeżeli nie podasz żadnej akcji, Railsy uruchomią domyślnie akcję <tt>index</tt>.</p></div>
 <div class="paragraph"><p>Po przejściu do strony <tt>http://localhost:3000</tt> , zobaczysz widok <tt>home/index</tt> .</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Więcej informacji na temat routingu znajdziesz w <a href="../routing_outside_in.html">Rails Routing from the Outside In</a>.</td>
+<td class="content">Więcej informacji na temat routingu znajdziesz w przewodniku
+<a href="routing_outside_in.html">Routing w Railsach</a>.</td>
 </tr></table>
 </div>
 </div>
 <h2 id="_szybki_start_dzi_ki_rusztowaniu">5. Szybki start dzięki rusztowaniu.</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Railsowe rusztowanie (<em>scaffolding</em>) jest szybkim sposobem na napisanie znacznej części programu. Jeśli chcesz stworzyć modele, widoki i kontrolery dla nowych zasobów w pojedynczej operacji, to jest to odpowiednie narzędzie dla Ciebie.</p></div>
+<div class="paragraph"><p>Railsowe rusztowanie (<em>scaffolding</em>) jest szybkim sposobem na napisanie znacznej części
+programu. Jeśli chcesz stworzyć modele, widoki i kontrolery dla nowych zasobów w
+pojedynczej operacji, to jest to odpowiednie narzędzie dla Ciebie.</p></div>
 </div>
-<h2 id="_tworzenie_obiektu">6. Tworzenie obiektu</h2>
+<h2 id="_tworzenie_zasobu">6. Tworzenie zasobu</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>W przypadku programów takich jak blog, możesz zacząć od stworzenia obiektu typu Post („Post resource”), który odpowiada za pojedynczy post blogu, w oparciu o rusztowania. By to zrobić, wprowadź następującą komendę do terminalu:</p></div>
+<div class="paragraph"><p>W przypadku programów takich jak blog, możesz zacząć od stworzenia zasobu
+<tt>Post</tt> z rusztowaniem, który będzie reprezentował pojedynczy wpis w blogu. Aby to zrobić,
+wprowadź następującą komendę w terminalu:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -670,10 +772,16 @@ http://www.gnu.org/software/src-highlite -->
 <td class="icon">
 <img src="./images/icons/note.png" alt="Note" />
 </td>
-<td class="content">Chociaż rusztowanie pozwoli Ci szybko rozpocząć pisanie programu, ten uniwersalny, działający wszędzie kod raczej nie będzie idealnie pasować do Twojej aplikacji. W większości przypadków będziesz musiał samodzielnie dokonać w nim zmian. Wielu doświadczonych programistów Rails unika używania rusztowań na rzecz pisania większości kodu źródłowego od podstaw, bez używania gotowych wzorców.</td>
+<td class="content">Chociaż rusztowanie pozwoli Ci szybko rozpocząć pisanie programu, ten uniwersalny
+kod raczej nie będzie idealnie pasować do Twojej aplikacji. W większości przypadków
+będziesz musiał samodzielnie dokonać w nim zmian. Wielu doświadczonych programistów
+Rails unika używania rusztowań na rzecz pisania większości kodu źródłowego od podstaw,
+bez używania gotowych wzorców.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Generator rusztowania zbuduje w Twoim programie 14 plików, wspólnie z paroma folderami, i jeden dodatkowo edytuje. Oto krótki przegląd tego co tworzy:</p></div>
+<div class="paragraph"><p>Generator rusztowania utworzy w Twoim programie 14 plików, wspólnie z paroma folderami,
+i jeden dodatkowo zmodyfikuje. Oto krótki przegląd tego co tworzy powyższa
+komenda:</p></div>
 <div class="tableblock">
 <table rules="all"
 width="100%"
@@ -690,35 +798,35 @@ cellspacing="0" cellpadding="4">
 <tbody valign="top">
 <tr>
 <td align="left"><p class="table">app/models/post.rb</p></td>
-<td align="left"><p class="table">Model Postu</p></td>
+<td align="left"><p class="table">Model dla posta</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">db/migrate/20081013124235_create_posts.rb</p></td>
-<td align="left"><p class="table">Migracja do tworzenia tabel postów w Twojej bazie danych (nazwa którą wpiszesz będzie zawierać rózne znaczniki czasowe)</p></td>
+<td align="left"><p class="table">Migracja do tworzenia tabeli postów w Twojej bazie danych (nazwa która pojawi się u Ciebie będzie zawierała inny znacznik czasowy)</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">app/views/posts/index.html.erb</p></td>
-<td align="left"><p class="table">Widok dla indeksu wszystkich postów</p></td>
+<td align="left"><p class="table">Widok indeksu wszystkich postów</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">app/views/posts/show.html.erb</p></td>
-<td align="left"><p class="table">Widok dla pojedynczego postu</p></td>
+<td align="left"><p class="table">Widok pojedynczego posta</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">app/views/posts/new.html.erb</p></td>
-<td align="left"><p class="table">Widok dla tworzenia nowego postu</p></td>
+<td align="left"><p class="table">Widok tworzenia nowego posta</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">app/views/posts/edit.html.erb</p></td>
-<td align="left"><p class="table">Widok dla edycji postu</p></td>
+<td align="left"><p class="table">Widok edycji posta</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">app/views/layouts/posts.html.erb</p></td>
-<td align="left"><p class="table">Widok określający całościowy wygląd i działanie innych widoków dla postów.</p></td>
+<td align="left"><p class="table">Widok określający całościowy wygląd i działanie innych widoków dla postów</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">public/stylesheets/scaffold.css</p></td>
-<td align="left"><p class="table">Poprawianie wyglądu przy użyciu szablonu stylów CSS</p></td>
+<td align="left"><p class="table">Arkusz stylów poprawiający wygląd widoków w rusztowaniu</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">app/controllers/posts_controller.rb</p></td>
@@ -726,15 +834,15 @@ cellspacing="0" cellpadding="4">
 </tr>
 <tr>
 <td align="left"><p class="table">test/functional/posts_controller_test.rb</p></td>
-<td align="left"><p class="table">Testy funkcjonalności dla kontrolerów postów</p></td>
+<td align="left"><p class="table">Testy funkcjonalności dla kontrolera postów</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">app/helpers/posts_helper.rb</p></td>
-<td align="left"><p class="table">Helpery (helper functions) używane przy widokach postów</p></td>
+<td align="left"><p class="table">Helpery używane w widokach postów</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">config/routes.rb</p></td>
-<td align="left"><p class="table">Plik zawierający informacje routingowe dla postów</p></td>
+<td align="left"><p class="table">Modyfikacja polegająca na uwzględnieniu postów w routingu</p></td>
 </tr>
 <tr>
 <td align="left"><p class="table">test/fixtures/posts.yml</p></td>
@@ -742,14 +850,23 @@ cellspacing="0" cellpadding="4">
 </tr>
 <tr>
 <td align="left"><p class="table">test/unit/post_test.rb</p></td>
-<td align="left"><p class="table">Testy funkcjonalności dla modeli postów</p></td>
+<td align="left"><p class="table">Testy jednostkowe dla modelu postów</p></td>
+</tr>
+<tr>
+<td align="left"><p class="table">test/unit/helpers/posts_helper_test.rb</p></td>
+<td align="left"><p class="table">Testy jednostkowe dla helpera dla postów</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="_uruchamianie_migracji">6.1. Uruchamianie Migracji</h3>
-<div class="paragraph"><p>Jednym z produktów komendy: <tt>script/generate scaffold</tt> jest baza danych migracji. Migracje są jedną z klas Ruby, które upraszczają tworzenie i modyfikowanie baz danych tabel. Railsy używają komendy „rake” by uruchamiać migracje, ale możliwe jest jej wycofanie po tym jak, została dodana do Twojej bazy danych. Nazwy plików migracji uwzględniają znaczniki czasowe by zapewnić ich przetwarzanie w porządku, w jakim zostały stworzone.</p></div>
-<div class="paragraph"><p>Oto co znajdziesz, gdy zajrzysz do pliku <tt>db/migrate/20090113124235_create_posts.rb</tt> (jego nazwa u Ciebie może się trochę różnić):</p></div>
+<div class="paragraph"><p>Jednym z produktów komendy: <tt>script/generate scaffold</tt> jest migracja bazy danych.
+Migracje są klasami Rubiego, które upraszczają tworzenie i modyfikowanie tabel baz danych.
+Railsy używają komend rake&#8217;a do uruchamiania migracji i pozwalają na
+wycofywanie ich po tym, jak zostały zaaplikowane w Twojej bazie danych. Nazwy plików migracji
+zawierają znaczniki czasowe by zapewnić ich przetwarzanie w porządku, w jakim zostały stworzone.</p></div>
+<div class="paragraph"><p>Gdy zajrzysz do pliku <tt>db/migrate/20090113124235_create_posts.rb</tt> (jego nazwa
+może się u Ciebie trochę różnić), zobaczysz następującą zawartość:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -770,8 +887,13 @@ http://www.gnu.org/software/src-highlite -->
     drop_table <span style="color: #990000">:</span>posts
   <span style="font-weight: bold"><span style="color: #0000FF">end</span></span>
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Gdybyś chciał zawrzeć ten kod w słowach, brzmiałby on mniej więcej tak: gdy migracja jest uruchomiona, tworzy tabelę o nazwie <tt>posts</tt> z dwoma szeregami kolumn (<tt>name</tt> i <tt>title</tt>) i tekst kolumny (<tt>content</tt>), a wraz z nią pola znaczników czasu by śledzić jej tworzenie oraz aktualizowanie. Więcej szczegółów na temat sposobu pisania migracji znajdziesz w przewodniku <a href="../migrations.html">Rails Database Migrations</a>.</p></div>
-<div class="paragraph"><p>Teraz możesz użyć komendy „rake” by uruchomić migracje:</p></div>
+<div class="paragraph"><p>Gdybyś chciał ująć ten kod w słowa, brzmiałby on mniej więcej tak: gdy migracja
+jest uruchomiona, tworzy tabelę o nazwie <tt>posts</tt> z dwoma kolumnami
+łańcuchowymi (<tt>name</tt> i <tt>title</tt>) i jedną kolumną tekstową (<tt>content</tt>), a wraz z nimi
+kolumny znaczników czasu by śledzić czas jej utworzenia oraz ostatniej
+aktualizacji. Więcej szczegółów na temat sposobu pisania migracji
+znajdziesz w przewodniku <a href="migrations.html">Migracje</a>.</p></div>
+<div class="paragraph"><p>Teraz możesz użyć komendy <tt>rake</tt> by uruchomić migracje:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -787,9 +909,9 @@ $ rake db<span style="color: #990000">:</span>migrate</tt></pre></div></div>
 <td class="content">Ponieważ domyślnie pracujesz w środowisku rozwojowym, ta komenda wykona się na bazie danych zdefiniowanej w sekcji <tt>development</tt> pliku: <tt>config/database.yml</tt>.</td>
 </tr></table>
 </div>
-<h3 id="_dodawanie_hiper_cza">6.2. Dodawanie hiperłącza.</h3>
+<h3 id="_dodawanie_hiper_cza">6.2. Dodawanie hiperłącza</h3>
 <div class="paragraph"><p>By połączyć posty ze stroną domową, którą już stworzyłeś, możesz dodać do niej hiperłącze.
-Otwórz <tt>/app/views/home/index.html.erb</tt> i dopisz do niego:</p></div>
+Otwórz plik <tt>/app/views/home/index.html.erb</tt> i dopisz do niego:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -798,24 +920,32 @@ http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="color: #FF0000">&lt;h1&gt;</span>Hello<span style="color: #990000">,</span> Rails!<span style="color: #FF0000">&lt;/h1&gt;</span>
 
 <span style="color: #FF0000">&lt;%= link_to "My Blog", posts_path %&gt;</span></tt></pre></div></div>
-<div class="paragraph"><p>Metoda <tt>link_to</tt> jest jednym z helperów pomagających kreować widoki w Railsach. Tworzy ona hiperłącze z tekstem do wyświetlenia oraz informacją, gdzie prowadzi – w tym wypadku ze ścieżką do postu.</p></div>
+<div class="paragraph"><p>Metoda <tt>link_to</tt> jest jednym z wbudowanych helperów dla widoków. Tworzy
+ona link z tekstem do wyświetlenia oraz informacją, gdzie prowadzi – w tym wypadku
+ze ścieżką do postu.</p></div>
 <h3 id="_praca_z_postami_w_przegl_darce">6.3. Praca z postami w przeglądarce</h3>
-<div class="paragraph"><p>Teraz jesteś już gotowy do pracy z postami. Na początek przejdź do: <tt>http://localhost:3000</tt> i kliknij w link „Mój blog”.</p></div>
+<div class="paragraph"><p>Teraz jesteś już gotowy do pracy z postami. Na początek przejdź do:
+<tt>http://localhost:3000</tt> i kliknij w link <tt>My Blog</tt>.</p></div>
 <div class="paragraph"><p><span class="image">
 <img src="images/posts_index.png" alt="Posts Index screenshot" title="Posts Index screenshot" />
 </span></p></div>
-<div class="paragraph"><p>Jest to rezultat renderingu widoku <tt>index</tt> Twoich postów. Aktualnie nie ma żadnych wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link <tt>nowa wiadomoś</tt>. Możesz również przeglądać i edytować posty, a nawet je wykasować. Cały układ logiczny i HTML obsługuje pojedyncze polecenie <tt>script/generał scaffold</tt>.</p></div>
+<div class="paragraph"><p>Jest to rezultat renderowania  Twoich postów z użyciem widoku <tt>index</tt>. Aktualnie nie ma żadnych
+wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link <tt>New Post</tt>.
+Możesz również przeglądać i edytować posty, a nawet je wykasować. Cały logika i
+HTML stworzone były za pomocą pojedynczego polecenia <tt>script/generate scaffold</tt>.</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
 <img src="./images/icons/tip.png" alt="Tip" />
 </td>
-<td class="content">W  środowisku rozwojowym (na nim domyślnie pracujesz) z każdym żądaniem przeglądarki Railsy wgrywają od nowa program, dzięki czemu nie jest konieczne wyłączanie serwera WWW.</td>
+<td class="content">W  środowisku rozwojowym (na nim domyślnie pracujesz) z każdym żądaniem
+przeglądarki Railsy wgrywają od nowa program, dzięki czemu nie jest konieczne
+restartowanie serwera WWW.</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>Gratulację! Wykonałeś swoją pierwszą aplikację w Railsach! Nadszedł czas, aby przyjrzeć się efektom pracy.</p></div>
+<div class="paragraph"><p>Gratulację! Napisałeś swoją pierwszą aplikację w Railsach! Nadszedł czas, aby przyjrzeć się efektom pracy.</p></div>
 <h3 id="_model">6.4. Model</h3>
-<div class="paragraph"><p>Plik modelu <tt>app/models/post.rb</tt> jest tak samo prosty w obsłudze jak jego tworzenie:</p></div>
+<div class="paragraph"><p>Plik modelu <tt>app/models/post.rb</tt> jest niemal tak samo prosty jak jego tworzenie:</p></div>
 <div class="listingblock">
 <div class="content"><!-- Generator: GNU source-highlight 2.11
 by Lorenzo Bettini
@@ -823,7 +953,12 @@ http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-weight: bold"><span style="color: #0000FF">class</span></span> Post <span style="color: #990000">&lt;</span> ActiveRecord<span style="color: #990000">::</span>Base
 <span style="font-weight: bold"><span style="color: #0000FF">end</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Możliwości zmian tego pliku nie jest dużo – nie wolno jednak zapomnieć, że klasa <tt>Post</tt> dziedziczy z <tt>ActiveRecord::Base</tt>. Active Rekord za darmo dostarcza wielu funkcji dla Twoich Railsów, włączając w to podstawową baze danych operacji CRUD (create, read, update and delete - utwórz, odczytaj, aktualizuj, usuń) czy uwierzytelnianie danych – podobnie jak wsparcie zaawansowanego wyszukiwania i zdolność do wiązania wielu różnych modeli jeden z drugim.</p></div>
+<div class="paragraph"><p>Nie zawiera on zbyt wiele treści – zauważ jednak że klasa <tt>Post</tt>
+dziedziczy z <tt>ActiveRecord::Base</tt>. Moduł Active Record za darmo dostarcza wielu funkcji dla
+Twoich modeli, włączając w to podstawowe operacje na danych CRUD (create, read,
+update, delete) czy weryfikowanie danych, jak również wsparcie dla
+zaawansowanego wyszukiwania i zdolność do wiązania wielu różnych
+modeli ze sobą.</p></div>
 <h3 id="_sprawdzanie_poprawno_ci_danych">6.5. Sprawdzanie poprawności danych</h3>
 <div class="paragraph"><p>Railsy są wyposażone w metodę, która pomoże Ci sprawdzić poprawność danych wysyłanych do modeli. Wprowadź poniższe zmiany do pliku: <tt>app/models/post.rb</tt></p></div>
 <div class="listingblock">
