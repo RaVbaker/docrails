@@ -1,7 +1,8 @@
 Zaczynamy z Ruby on Rails
 =========================
 
-Ten przewodnik jest wprowadzeniem do Ruby on Rails. Po jego przeczytaniu będziesz zaznajomiony z:
+Ten przewodnik jest wprowadzeniem do Ruby on Rails. Po jego przeczytaniu
+będziesz zaznajomiony z następującymi zagadnieniami:
 
 * instalowaniem Railsów, tworzeniem nowej aplikacji oraz zestawianiem połączenia z bazę danych
 * ogólnym układem aplikacji
@@ -19,7 +20,11 @@ tego przewodnika, konieczna jest instalacja:
 * link:http://rubyforge.org/frs/?group_id=126[RubyGems] - narzędzie do dystrybuowania i instalowania paczek zawierających moduły i rozszerzenia języka Ruby
 * systemu zarządzania bazą danych link:http://www.sqlite.org/[SQLite] (preferowane), link:http://www.mysql.com/[MySQL] lub link:http://www.postgresql.org/[PostgreSQL]
 
-Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygody z Railsami. Znacznie łatwiej jest śledzić, co się dzieje w Railsach, rozumiejąc podstawowy składni Ruby. Railsy nie będą w stanie w magiczny sposób zrewolucjonizować sztuki pisania aplikacji internetowych, jeżeli nie masz doświadczenia w używaniu języka. W Internecie istnieje kilka dobrych darmowych źródeł pomocnych w nauce języka Ruby, w tym:
+Zdecydowanie zaleca się zapoznanie z językiem Ruby przed rozpoczęciem przygody z
+Railsami. Znacznie łatwiej jest śledzić, co się dzieje w Railsach, rozumiejąc podstawowy
+składni języka Ruby. Railsy nie będą w stanie w magiczny sposób zrewolucjonizować sztuki
+pisania aplikacji internetowych, jeżeli nie masz doświadczenia w używaniu tego języka. 
+W Internecie istnieje kilka dobrych darmowych źródeł pomocnych w nauce języka Ruby, w tym:
 
 * link:http://www.humblelittlerubybook.com/[Mr. Neigborly's Humble Little Ruby Book]
 * link:http://www.rubycentral.com/book/[Programming Ruby]
@@ -34,31 +39,33 @@ poprzez przyjęcie kilku założeń, dotyczących tego czego potrzebuje każdy
 programista aby rozpocząć pracę. Pozwalają one na
 pisanie krótszego kodu, jednocześnie umożliwiając osiąganie lepszych rezultatów niż 
 ma to miejsce w większości innych języków i
-frameworków. Poza tym, programiści którzy od dawna używają Railsów uważają, że
-pisanie aplikacji z ich użyciem sprawia przyjemność.
+frameworków. Poza tym programiści, którzy od dawna używają Railsów, uważają, że
+pisanie aplikacji z ich użyciem sprawia prawdziwą przyjemność.
 
 Railsy są "upartym" oprogramowaniem. Oznacza to, że były tworzone z
 przekonaniem, że istnieje najlepszy sposób rozwiązywania pewnych problemów i
 zostały zaprojektowane tak, by zachęcać do wyboru tego sposobu, a w niektórych przypadkach -  
 by zniechęcić do wyboru alternatywy. Jeśli nauczysz się "The Rails Way", odkryjesz
-ogromny wzrost produktywności. Jednak jeżeli podczas pracy z Railsami pozostaniesz przy
+ogromny wzrost produktywności. Jeżeli jednak podczas pracy z Railsami pozostaniesz przy
 nawykach charakterystycznych dla programowania w innych językach lub będziesz
 wykorzystywać wzorce, których już kiedyś się nauczyłeś, efekty mogą nie być aż tak pomyślne. 
 
 Filozofia Railsów obejmuje kilka zasad:
 
 * DRY - "Don't Repeat Yourself" (Nie powtarzaj się) - sugeruje, że pisanie w
-  kółko tego samego kodu jest złe.
-* Konwencja Ponad Konfiguracją - Railsy przyjmują pewne założenia, odnośnie tego,
+  kółko tego samego kodu jest po prostu złe.
+* "Convention over Configuration" (Konwencja Ponad Konfiguracją) - Railsy przyjmują pewne założenia, odnośnie tego,
   co i jak zamierzasz zrobić, dlatego nie zmuszają Cię do samodzielnego ustawiania 
   każdej najdrobniejszej opcji w plikach konfiguracyjnych.
-* REST jest najlepszym wzorcem dla aplikacji internetowych - organizowanie aplikacji wokół zasobów i 
+* REST (Representational State Transfer) jest najlepszym wzorcem dla 
+  aplikacji internetowych - organizowanie aplikacji wokół zasobów i 
   standardowych zapytań HTTP pozwala szybko kroczyć do przodu.
 
 === Architektura MVC 
 
-Railsy są zorganizowane wokół trzech warstw aplikacji: 
-modelu (_model_), widoku (_view_) oraz kontrolera (_controller_), co w skrócie nazywamy MVC. Wzorzec MVC obejmuje: 
+Railsy zorganizowane są wokół trzech warstw aplikacji: 
+modelu (_model_), widoku (_view_) oraz kontrolera (_controller_), 
+w skrócie nazywanych MVC. Wzorzec MVC obejmuje: 
 
 * odizolowanie logiki biznesowej od interfejsu użytkownika 
 * łatwość utrzymania kodu zgodnie z zasadą DRY 
@@ -70,25 +77,25 @@ modelu (_model_), widoku (_view_) oraz kontrolera (_controller_), co w skrócie 
 Model reprezentuje dane aplikacji i reguły do manipulowania tymi danymi. W przypadku
 Railsów, modele są głównie wykorzystywane do zarządzania zasadami interakcji z
 odpowiednią tabelą bazy danych. W większości przypadków jednej tabeli bazy danych
-odpowiada jeden model w Twojej aplikacji. Większość logiki biznesowej Twoich aplikacji 
+odpowiada jeden model. Większość logiki biznesowej aplikacji 
 będzie skoncentrowana w modelach.
 
 ==== Widoki
 
-Widoki tworzą interfejs użytkownika aplikacji. W Railsach, widoki są często plikami HTML
+Widoki tworzą interfejs użytkownika aplikacji. W Railsach widoki są często plikami HTML
 zawierającymi kod w języku Ruby, wykonujący zadania związane wyłącznie z prezentacją
 danych. Przede wszystkim są one odpowiedzialne za dostarczanie danych do przeglądarki
-internetowej lub innego narzędzia, które jest używane do oglądania efektów działania Twojej aplikacji.
+internetowej lub innego narzędzia, które jest używane do oglądania efektów działania aplikacji.
 
 ==== Kontrolery 
 
 Kontrolery "sklejają" modele i widoki. W Railsach odpowiadają za przetwarzanie żądań
 przychodzących z przeglądarki internetowej, pozyskiwanie danych z modeli i przekazywanie
-ich do widoków w celu prezentacji.
+ich do widoków w celu ich prezentacji.
 
 === Składniki Railsów
 
-Railsy dostarczają pełny zestaw komponentów do tworzenia aplikacji internetowych. Są to: 
+Railsy dostarczają zestaw komponentów do tworzenia aplikacji internetowych. Są to: 
 
 * Action Controller
 * Action View
@@ -100,24 +107,24 @@ Railsy dostarczają pełny zestaw komponentów do tworzenia aplikacji internetow
 
 ==== Action Controller
 
-Moduł Action Controller jest komponentem zarządzającym kontrolerami w Railsowej aplikacji.
+Moduł Action Controller jest komponentem zarządzającym kontrolerami.
 Action Controller przetwarza przychodzące zapytania, wydobywa z
 nich parametry i wysyła je do odpowiedniej akcji. Usługi świadczone przez Action
-Controller obejmują zarządzanie sesją, renderowanie szablonów i zarządzanie
+Controller obejmują zarządzanie sesją, renderowanie widoków i zarządzanie
 przekierowaniami.
 
 ==== Action View
 
-Moduł Action View zarządza widokami Twojej Railsowej aplikacji. Może domyślnie tworzyć zarówno
+Moduł Action View zarządza widokami. Może domyślnie tworzyć zarówno
 widok HTML jak i XML. Action View zarządza renderowaniem szablonów (w tym szablonami
 zagnieżdżonymi oraz podszablonami) i dostarcza wsparcie dla AJAXa.
 
 ==== Active Record
 
-Moduł Active Record jest podstawą dla modeli w Railsowej aplikacji. Zapewnia
+Moduł Active Record jest podstawowym elementem warstwy modelu. Zapewnia
 niezależność od bazy danych, dostarcza podstawowe funkcjonalności CRUD (create, read, update and
 delete - utwórz, odczytaj, aktualizuj, usuń), zaawansowane możliwości
-wyszukiwania i zdolność do wiązania modeli oraz wiele innych usług.
+wyszukiwania i zdolność do wiązania modeli a także wiele innych usług.
 
 ==== Action Mailer
 
@@ -160,11 +167,11 @@ Na przykład, dla aplikacja Railsowej następujące żądanie:
 
 będzie rozumiane jako odnoszące się do zdjęcia o ID 17 oraz jako wskazanie żądanego
 działania - usunięcie tego zasoby. REST jest naturalnym stylem architektury aplikacji
-internetowych, które Railsy czynią jeszcze bardziej intuicyjnym, poprzez korzystanie z
-konwencji, które pozwalają na nieprzejmowanie się jego złożonością oraz różnicami pomiędzy przeglądarkami.
+internetowych, który Railsy czynią jeszcze bardziej intuicyjnym, poprzez korzystanie z
+konwencji, pozwalających na nieprzejmowanie się jego złożonością oraz różnicami pomiędzy przeglądarkami.
 
 Jeśli chciałbyś dowiedzieć się czegoś więcej na temat REST jako stylu architektonicznego,
-polecam bardziej przystępne źródła od tezy Fieldinga: 
+polecam bardziej przystępne źródła od pracy Fieldinga: 
 
 * link:http://www.infoq.com/articles/rest-introduction[Krótkie wprowadzenie do REST Stefana Tilkov] 
 * link:http://bitworking.org/news/373/An-Introduction-to-REST[Wprowadzenie do REST - Joe Gregorio] (video)
@@ -192,18 +199,23 @@ NOTE: Istnieją pewne szczególne okoliczności, w których można zastosować a
   jest ogólnie mniej przyjazna w użytkowaniu niż te przeznaczone dla innych
   systemów operacyjnych. Jeśli to możliwe, polecamy korzystanie z Linuksowej maszyny wirtualnej. 
 
-* Jeżeli chcesz być na bieżąco z najnowszymi zmianami w środowisku Rails, proponujemy skopiowanie kodu źródłowego z  link:http://github.com/rails/rails/tree/master[githuba], aczkolwiek nie jest to opcja zalecana dla początkujących
+* Jeżeli chcesz być na bieżąco z najnowszymi zmianami w środowisku Rails,
+  proponujemy skopiowanie kodu źródłowego z  
+  link:http://github.com/rails/rails/tree/master[githuba], aczkolwiek nie jest
+  to opcja zalecana dla początkujących.
 
 === Tworzenie bloga 
 
-Otwórz terminal i przejdź do folderu, w którym posiadasz odpowiednie uprawnienia do tworzenia plików, a następnie wpisz polecenie:
+Otwórz terminal i przejdź do folderu, w którym posiadasz odpowiednie uprawnienia do
+tworzenia plików, a następnie wpisz polecenie:
 
 [source, shell]
 -------------------------------------------------------
 $ rails blog
 -------------------------------------------------------
 
-To stworzy Railsową aplikację, która korzysta z bazy danych SQLite. Jeśli wolisz korzystać z MySQL, uruchom zamiast tego polecenie:
+To stworzy Railsową aplikację, która korzysta z bazy danych SQLite. Jeśli wolisz
+korzystać z MySQL, wywołaj zamiast niego polecenie:
 
 [source, shell]
 -------------------------------------------------------
@@ -217,16 +229,16 @@ A jeśli używasz PostgreSQL do przechowywania danych, zastosuj polecenie:
 $ rails blog -d postgresql
 -------------------------------------------------------
 
-NOTE: Uruchamiając +railis -h+ możesz zobaczyć wszystkie akceptowane przez aplikację Railsową przełączniki.
+NOTE: Uruchamiając +rails -h+ możesz zobaczyć wszystkie akceptowane opcje.
 
-Po utworzeniu aplikacji, przejdź do odpowiedniego folderu, aby móc kontynuować swoją pracę:
+Po utworzeniu aplikacji, aby móc kontynuować pracę, przejdź do odpowiedniego folderu:
 
 [source, shell]
 -------------------------------------------------------
 $ cd blog
 -------------------------------------------------------
 
-Railsy utworzy folder o nazwie +blog+ w Twoim roboczym katalogu. Otwórz ten
+Railsy utworzą folder o nazwie +blog+ w katalogu roboczym. Otwórz ten
 folder i przyjrzyj się jego zawartości. Podczas pracy z tym przewodnikiem, w
 większości będziemy korzystać z folderu +app/+, ale poniżej możesz zapoznać
 się z podstawowymi funkcjami katalogów i plików, które domyślnie utworzą Railsy.
@@ -234,26 +246,27 @@ się z podstawowymi funkcjami katalogów i plików, które domyślnie utworzą R
 [options="header"]
 |==========================================================================================================
 |File/Folder |Purpose
-|+README+		|Jest to krótka instrukcja dla danej aplikacji. Za jej pomocą możesz poinformować innych na przykład o tym, jak działa Twoja aplikacja i jak ją można uruchomić.
-|+Rakefile+	|Plik ten zawiera listę zadań, które można uruchomić poprzez terminal.
+|+README+		|Jest to krótka instrukcja dla danej aplikacji. Za jej pomocą możesz poinformować innych o tym, jak działa Twoja aplikacja i jak ją można uruchomić.
+|+Rakefile+	|Plik ten zawiera listę zadań, które można uruchomić w linii poleceń.
 |+app/+		|Folder zawiera kontrolery, modele i widoki dla danej aplikacji. Na tym folderze będziemy koncentrować się w dalszej części tego przewodnika.
 |+config/+		|Folder zawierający pliki konfiguracyjne aplikacji, obejmujące zmienne czasu uruchomienia, konfigurację bazę danych, ścieżki dostępu etc.
-|+db/+			|Pokazuje aktualny schemat bazy danych, jak również jego migracje (o których niedługo będziemy się uczyć). 
-|+doc/+		|Pełna dokumentacja Twojej aplikacji.
-|+lib/+		|Dodatkowe moduły dla Twojej aplikacji (nieuwzględnione w tym przewodniku).
+|+db/+			|Pokazuje aktualny schemat bazy danych, jak również jego migracje (o których niedługo będziesz się uczyć). 
+|+doc/+		|Dokumentacja aplikacji.
+|+lib/+		|Dodatkowe moduły aplikacji (nieuwzględnione w tym przewodniku).
 |+log/+		|Logi aplikacji.
 |+public/+		|Jedyny całkowicie dostępny publicznie folder. Zawiera wszelkie zdjęcia, JavaScript, arkusze stylów (CSS) i inne statyczne pliki.
-|+script/+		|Skrypty dostarczone przez Rails w celu wykonywania powtarzających się zadań, takich jak benchmarking, instalowanie wtyczek (plugin) i uruchamianiu konsoli lub serwera WWW
+|+script/+		|Skrypty dostarczone przez Rails w celu uproszczenia powtarzających się zadań, takich jak benchmarking, instalowanie wtyczek (plugin) i uruchamianiu konsoli lub serwera WWW
 |+test/+		|Testy jednostkowe, tak zwane "fixtures" oraz inne narzędzia służące do przeprowadzania testów.  Są one opisane w: link:/testing_rails_applications.html[Testowanie aplikacji Rails]
 |+tmp/+		|Pliki tymczasowe
-|+vendor/+		|Miejsce na kod, którego sami nie napisaliśmy, ale chcemy wykorzystać. W standardowej aplikacji Rails zawiera Ruby Gems, kod źródłowy Railsów (jeśli zainstalujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
+|+vendor/+		|Miejsce na kod, którego sami nie napisaliśmy, ale chcemy wykorzystać. W standardowej aplikacji Rails mogą znaleźć się tutaj Ruby Gems, kod źródłowy Railsów (jeśli zainstalujesz go w swoim projekcie) i wszystkie dodatkowe wtyczki z gotowym kodem.
 |==========================================================================================================
 
 === Konfiguracja bazy danych
 
-Prawie każda aplikacja Railsowa korzysta z bazy danych. Rodzaj baza danych, której używamy, jest określony w pliku konfiguracyjnym +config/database.yml+.
+Prawie każda aplikacja Railsowa korzysta z bazy danych. Rodzaj baza danych, której
+używamy, jest określony w pliku konfiguracyjnym +config/database.yml+.
 Jeśli otworzysz ten plik w nowej aplikacji Railsowej, zostanie wyświetlona
-domyślna konfiguracja bazy danych SQLite. Plik zawiera części dla trzech
+domyślna konfiguracja bazy danych SQLite. Plik zawiera sekcje dla trzech
 różnych środowisk, w których Railsy mogą być domyślnie uruchomione: 
 
 * środowisko +development+ (rozwojowe) jest używane na komputerze programisty, aby mógł
@@ -270,7 +283,7 @@ Mimo możliwości przeciążenia SQLite'a w środowisku produkcyjne, działa on
 zadowalająco podczas pisania programu oraz testów. Railsy domyślnie używają SQLite 
 przy tworzeniu nowego projektu, ale zawsze można to zmienić.
 
-Poniżej znajduje się część domyślnej konfiguracji pliku z informacją dla środowiska rozwojowego:
+Poniżej znajduje się część domyślnej konfiguracji pliku z ustawieniami dla środowiska rozwojowego:
 
 [source, ruby]
 -------------------------------------------------------
@@ -281,7 +294,7 @@ development:
 -------------------------------------------------------
 
 Jeśli nie masz żadnej zainstalowanej bazy danych, najłatwiej będzie Ci
-skorzystać z SQLite'a, w czym może być pomocny Ruby Gems (posiadacze Maca z OS
+skorzystać z SQLite'a, w czym mogą być pomocne Ruby Gems (posiadacze Maca z OS
 X w wersji 10.5 lub nowszej mają go zainstalowanego domyślnie):
 
 [source, shell]
@@ -303,7 +316,7 @@ development:
   password:
   socket: /tmp/mysql.sock
 -------------------------------------------------------
-Ta konfiguracja powinna działac bez problemu, jeśli Twoja instalacja MySQLa nie ma wprowadzonego hasła dla super-uzytkownika (root user). Jeśli jednak jest inaczej, koniecznie zmień nazwę użytkownika oraz hasło w powyższym kodzie.
+Ta konfiguracja powinna działać bez problemu, jeśli Twoja instalacja MySQLa nie ma wprowadzonego hasła dla super-użytkownika (root user). Jeśli jednak jest inaczej, koniecznie zmień nazwę użytkownika oraz hasło w powyższym kodzie.
 
 ==== Konfiguracja Bazy Danych PostgreSQL
 
@@ -330,7 +343,7 @@ Teraz, gdy masz już skonfigurowaną bazę danych, czas by Railsy stworzyły dla
 -------------------------------------------------------
 $ rake db:create
 -------------------------------------------------------
-NOTE: Rake jest poleceniem startującym ogólnego zastosowania, które Railsy
+NOTE: Rake jest poleceniem ogólnego zastosowania, które Railsy
 używają do wielu rzeczy. By zobaczyć listę dostępnych komend uruchom +rake -T+.
 
 == Witajcie Railsy!
@@ -346,22 +359,20 @@ TIP: Jeżeli używasz systemu Windows lub gdy twój Ruby jest skonfigurowany w
 niestandardowy sposób, możliwe że będziesz musiał przekazać komendę +script+
 bezpośrednio do Ruby'ego: +ruby script/generate controller home index+.
 
-Railsy stworzyły dla Ciebie parę plików, włączając w to +app/views/home/index.html.erb+
-- czyli szablon, który będzie używany do pokazywania efektów akcji (metody) +index+ w
-kontrolerze +home+. Otwórz ten plik w Twoim edytorze tekstów i dopisz do niego tę
+Railsy stworzyły dla Ciebie kilka plików, włączając w to +app/views/home/index.html.erb+
+- szablon, który będzie używany do pokazywania efektów akcji +index+ w
+kontrolerze +home+. Otwórz ten plik w edytorze tekstów i dopisz do niego tę
 pojedynczą linijkę kodu:
-
 
 [source, html]
 -------------------------------------------------------
 <h1>Hello, Rails!</h1>
 -------------------------------------------------------
 
-=== Uruchamianie serwera WWW.
+=== Uruchamianie serwera WWW
 
 Teraz, za pomocą jedynie dwóch komend, masz gotowy i działający Railsowy program!
-Będziesz mógł go zobaczyć uruchamiając przeglądarkę na swoim komputerze, za pomocą
-kolejnej komendy startowej:
+Będziesz mógł go zobaczyć w przeglądarce uruchamiając go za pomocą komendy:
 
 [source, shell]
 -------------------------------------------------------
@@ -371,20 +382,20 @@ $ script/server
 Domyślnie spowoduje to odpalenie instancji serwera aplikacyjnego Mongrel
 (Railsy mogą wykorzystywać kilka innych serwerów aplikacji). By zobaczyć jak działa Twój
 program, otwórz okno przeglądarki i przejdź pod adres +http://localhost:3000+. Powinieneś
-zobaczyć Railsową, domyślną stronę informacyjną:
+zobaczyć domyślną stronę informacyjną:
 
-image:images/rails_welcome.png[Welcome Aboard screenshot]
+image:./images/rails_welcome.png[Welcome Aboard screenshot]
 
 TIP: By zatrzymać serwer WWW naciśnij Ctrl+C w oknie terminala podczas jego działania.
-Generalnie, Railsy w trybie rozwojowym nie wymagają zatrzymywania
-serwera, po wprowadzeniu zmian w Twoich plikach - zostaną one automatycznie
+Generalnie Railsy działające w trybie rozwojowym, po wprowadzeniu zmian w
+Twoich plikach, nie wymagają zatrzymywania serwera - zostaną one automatycznie
 zauważone przez serwer.
 
 Ekran powitalny jest pierwszym testem dla nowego programu napisanego w Railsach - upewnia
-nas, że oprogramowanie którym dysponujemy jest poprawnie skonfigurowane do działania 
-naszej aplikacji. Aby zobaczyć nowoutworzoną stronę, przejdź pod adres +http://localhost:3000/home/index+.
+nas, że oprogramowanie którym dysponujemy, jest poprawnie skonfigurowane. 
+Aby zobaczyć nowoutworzoną stronę, przejdź pod adres +http://localhost:3000/home/index+.
 
-=== Konfiguracja Strony Domowej Programu.
+=== Konfiguracja strony domowej programu
 
 Prawdopodobnie chcesz zamienić domyślną stronę startową ze stroną Twojego programu.
 Pierwszym krokiem jest wykasowanie z katalogu +public+ strony domyślnej:
@@ -395,10 +406,11 @@ $ rm public/index.html
 -------------------------------------------------------
 
 Powinieneś teraz wskazać Railsom gdzie jest zlokalizowana Twoja strona domowa.
-Otwórz plik +config/routes.rb+ w swoim edytorze -  jest on plikiem routingu Twojego
-programu. Zawiera wpisy w specjalnym DSLu (specyficzny język domeny), które pokazują
-Railsom w jaki sposób połączyć żądania kontrolerów oraz akcji. Na dole tego pliku
-znajdują się domyślne drogi:
+Otwórz plik +config/routes.rb+ w edytorze -  jest to plik _routingu_. 
+Zawiera wpisy w specjalnym DSLu (Domain Specific Language - specyficzny język
+domenowy), które pokazują Railsom w jaki sposób przekształcić adres
+wprowadzony w przeglądarce na odpowiednie akcje kontrolerów. Na dole tego pliku
+znajdują się dwie domyślne _drogi_:
 
 [source, ruby]
 -------------------------------------------------------
@@ -408,7 +420,7 @@ map.connect ':controller/:action/:id.:format'
 
 Domyślne drogi obsługują proste żądania, takie jak +/home/index+: Railsy
 tłumaczą je na wywołanie akcji +index+ w kontrolerze +home+. Kolejny przykład,
-+/posts/edit/1+ uruchomi akcję +edit+ w kontrolerze +posts+ z +id+ równym 1.
++/posts/edit/1+ uruchomi akcję +edit+ w kontrolerze +posts+ z parametrem +id+ równym 1.
 
 By połączyć Twoją stronę domową, musisz dodać jeden wpis do pliku routingu, 
 powyżej drogi domyślnej:
@@ -449,7 +461,7 @@ będziesz musiał samodzielnie dokonać w nim zmian. Wielu doświadczonych progr
 Rails unika używania rusztowań na rzecz pisania większości kodu źródłowego od podstaw,
 bez używania gotowych wzorców.
 
-Generator rusztowania utworzy w Twoim programie 14 plików, wspólnie z paroma folderami,
+Generator rusztowania utworzy w Twoim programie 14 plików, wspólnie z paroma folderami
 i jeden dodatkowo zmodyfikuje. Oto krótki przegląd tego co tworzy powyższa
 komenda:
 
@@ -457,7 +469,7 @@ komenda:
 |==========================================================================================================
 |File                                          |Purpose
 |app/models/post.rb                            |Model dla posta
-|db/migrate/20081013124235_create_posts.rb     |Migracja do tworzenia tabeli postów w Twojej bazie danych (nazwa która pojawi się u Ciebie będzie zawierała inny znacznik czasowy)
+|db/migrate/20081013124235_create_posts.rb     |Migracja do tworzenia tabeli postów w bazie danych (nazwa która pojawi się u Ciebie będzie zawierała inny znacznik czasowy)
 |app/views/posts/index.html.erb                |Widok indeksu wszystkich postów 
 |app/views/posts/show.html.erb                 |Widok pojedynczego posta
 |app/views/posts/new.html.erb                  |Widok tworzenia nowego posta
@@ -478,8 +490,8 @@ komenda:
 Jednym z produktów komendy: +script/generate scaffold+ jest migracja bazy danych.
 Migracje są klasami Rubiego, które upraszczają tworzenie i modyfikowanie tabel baz danych. 
 Railsy używają komend rake'a do uruchamiania migracji i pozwalają na
-wycofywanie ich po tym, jak zostały zaaplikowane w Twojej bazie danych. Nazwy plików migracji
-zawierają znaczniki czasowe by zapewnić ich przetwarzanie w porządku, w jakim zostały stworzone.
+wycofywanie ich po tym, jak zostały zaaplikowane w bazie danych. Nazwy plików migracji
+zawierają znaczniki czasowe, by zapewnić ich przetwarzanie w porządku, w jakim zostały utworzone.
 
 Gdy zajrzysz do pliku +db/migrate/20090113124235_create_posts.rb+ (jego nazwa
 może się u Ciebie trochę różnić), zobaczysz następującą zawartość:
@@ -505,12 +517,12 @@ end
 
 Gdybyś chciał ująć ten kod w słowa, brzmiałby on mniej więcej tak: gdy migracja
 jest uruchomiona, tworzy tabelę o nazwie +posts+ z dwoma kolumnami
-łańcuchowymi (+name+ i +title+) i jedną kolumną tekstową (+content+), a wraz z nimi
-kolumny znaczników czasu by śledzić czas jej utworzenia oraz ostatniej
+zawierającymi łańcuchy znaków (+name+ i +title+) i jedną kolumną tekstową (+content+), a wraz z nimi
+kolumny znaczników czasu, by śledzić czas jej utworzenia oraz ostatniej
 aktualizacji. Więcej szczegółów na temat sposobu pisania migracji
 znajdziesz w przewodniku link:migrations.html[Migracje].
 
-Teraz możesz użyć komendy +rake+ by uruchomić migracje:
+Teraz możesz użyć komendy +rake+ by wprowadzić migracje do bazy danych:
 
 [source, shell]
 -------------------------------------------------------
@@ -534,14 +546,14 @@ Otwórz plik +/app/views/home/index.html.erb+ i dopisz do niego:
 
 Metoda +link_to+ jest jednym z wbudowanych helperów dla widoków. Tworzy
 ona link z tekstem do wyświetlenia oraz informacją, gdzie prowadzi – w tym wypadku
-ze ścieżką do postu.
+ze ścieżką do posta.
 
 === Praca z postami w przeglądarce
 
 Teraz jesteś już gotowy do pracy z postami. Na początek przejdź do:
 +http://localhost:3000+ i kliknij w link +My Blog+.
 
-image:images/posts_index.png[Posts Index screenshot]
+image:./images/posts_index.png[Posts Index screenshot]
 
 Jest to rezultat renderowania  Twoich postów z użyciem widoku +index+. Aktualnie nie ma żadnych
 wpisów w bazie danych, ale zawsze możesz je utworzyć klikając w link +New Post+.
@@ -552,11 +564,12 @@ TIP: W  środowisku rozwojowym (na nim domyślnie pracujesz) z każdym żądanie
 przeglądarki Railsy wgrywają od nowa program, dzięki czemu nie jest konieczne
 restartowanie serwera WWW.
 
-Gratulację! Napisałeś swoją pierwszą aplikację w Railsach! Nadszedł czas, aby przyjrzeć się efektom pracy.
+Gratulacje! Napisałeś swoją pierwszą aplikację w Railsach! Nadszedł czas, aby przyjrzeć się efektom pracy.
 
 === Model
 
-Plik modelu +app/models/post.rb+ jest niemal tak samo prosty jak jego tworzenie:
+Zawartość pliku modelu +app/models/post.rb+ jest niemal tak samo prosta jak
+jego utworzenie:
 
 [source, ruby]
 -------------------------------------------------------
@@ -573,7 +586,8 @@ modeli.
 
 === Sprawdzanie poprawności danych
 
-Railsy są wyposażone w metody, które pomogą Ci sprawdzić poprawność danych wysyłanych do modeli. Wprowadź poniższe zmiany do pliku: +app/models/post.rb+
+Railsy są wyposażone w metody, które pomogą Ci sprawdzić poprawność danych wysyłanych do
+modeli. Wprowadź poniższe zmiany do pliku: +app/models/post.rb+
 
 [source, ruby]
 -------------------------------------------------------
@@ -583,20 +597,22 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Dzięki nim mamy pewność, że każdy post będzie mieć nazwę oraz tytuł, a ten ostatni nie będzie miał mniej niż 5 znaków. Railsy mogą sprawdzać różne warunki w modelu, włączając w to obecność lub unikalność kolumn, ich format i istnienie związanych z nimi obiektów.
+Dzięki nim mamy pewność, że każdy post będzie mieć nazwę oraz tytuł, a ten ostatni nie
+będzie miał mniej niż 5 znaków. Railsy mogą sprawdzać różne warunki w modelu, włączając
+w to obecność lub unikalność kolumn, ich format i istnienie związanych z nimi obiektów.
 
 === Używanie konsoli
 
 By zobaczyć, jak sprawdzanie poprawności danych działa w praktyce, użyjemy konsoli.
 Konsola, będąca narzędziem linii poleceń, umożliwia Ci wykonywanie kodu
-Ruby’ego w kontekście Twojej aplikacji:
+Rubiego w kontekście Twojej aplikacji:
 
 [source, shell]
 -------------------------------------------------------
 $ script/console
 -------------------------------------------------------
 
-Możesz jej użyć do pracy z modelami Twojego programu::
+Możesz jej użyć do pracy z modelami:
 
 [source, shell]
 -------------------------------------------------------
@@ -612,13 +628,20 @@ title: nil, content: "A new post", created_at: nil, updated_at: nil>,
 "is too short (minimum is 5 characters)"]}>
 -------------------------------------------------------
 
-Powyższy kod przedstawia informację, jaką otrzymasz, gdy chcesz stworzyć nowy, ale błędny +Post+. Mechanizm jest następujący: przy próbie zapisania pojawia się wartość zwrotna +false+ (oznaczającą, że zapisanie się nie powiodło), a kod wyszczególnia nam wszystkie znalezione błędy w postaci +errors+.
+Powyższy kod przedstawia informację, jaką otrzymasz, gdy chcesz utworzyć nowy, ale
+błędny +Post+. Mechanizm jest następujący: przy próbie zapisania pojawia się wartość
+zwrotna +false+ (oznaczającą, że zapisanie się nie powiodło), a kod wyszczególnia nam
+wszystkie znalezione błędy w postaci +errors+.
 
-TIP: W przeciwieństwie do serwerów WWW, konsola nie wprowadza automatycznie Twojego kodu na nowo z każdą linią. By dokonać zmian w Twoim modelu za pomocą konsoli, musisz użyć komendy +reload!+
+TIP: W przeciwieństwie do serwera WWW, konsola nie wczytuje automatycznie
+zmian w Twoim kodzie. By wczytać wprowadzone zmiany z
+poziomu konsoli, musisz użyć komendy +reload!+
 
-=== Listowanie postów
+=== Wyświetlanie postów
 
-Najłatwiejszym sposobem na zapoznanie się z możliwościami programu jest kod, który listuje wszystkie posty. Otwórz plik: +app/controllers/posts_controller.rb+ i przyjrzy się akcji +index+
+Najłatwiejszym sposobem na zapoznanie się z funkcjonalnościami programu jest
+przyjrzenie się kodowi, który wyświetla wszystkie posty. Otwórz plik:
++app/controllers/posts_controller.rb+ i przyjrzyj się akcji +index+
 
 [source, ruby]
 -------------------------------------------------------
@@ -632,13 +655,22 @@ def index
 end
 -------------------------------------------------------
 
-Powyższy kod przypisuje przykładowa zmienną +@posts+ do tablicy wszystkich postów w bazie danych. +Post.find(:all)+ lub +Post.all+ tworzy zawołanie dla modelu +Post+, który bezwarunkowo zwraca wszystkie posty z bazy danych.
+Powyższy kod przypisuje do zmiennej instancyjnej +@posts+ tablicę wszystkich
+postów z bazy danych. +Post.find(:all)+ lub +Post.all+ wywołuje metodę klasową
+w modelu +Post+, która zwraca wszystkie posty z bazy danych, bez nakładania
+żadnych warunków.
 
-TIP: Więcej informacji na temat znajdowania rekordów za pomocą Active Record znajdziesz w link:../finders.html[Active Record Finders]
+TIP: Więcej informacji na temat znajdowania rekordów za pomocą Active Record znajdziesz
+w przewodniku link:finders.html[Zapytania w module Active Record]
 
-Blok +respond_to+ obsługuje obydwa zawołania dla tej akcji - zarówno HTML jak i XML. Jeśli przejdziesz do +http://localhost:3000/posts.xml+, to zobaczysz wszystkie posty w formacie XML. Natomiast format HTML znajduję się w widoku +app/views/posts+, nazwanym tak samo jak odpowiadająca mu akcja. Railsy same przenoszą wszystkie przykładowe zmienne z dostępnych akcji do widoku. Oto +app/view/posts/index.html.erb+:
+Blok +respond_to+ obsługuje obydwa typy wywołań tej akcji - zarówno HTML jak i XML.
+Jeśli przejdziesz pod adres +http://localhost:3000/posts.xml+, to zobaczysz wszystkie posty w
+formacie XML. Natomiast format HTML poszukuje widoku w +app/views/posts+,
+nazwanego tak samo jak odpowiadająca mu akcja. Railsy zaś przenoszą
+wszystkie zmienne instancyjne (zaczynające się od znaku @) zainicjowane w akcji do widoku. 
+Oto zawartość +app/view/posts/index.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>Listing posts</h1>
 
@@ -666,19 +698,29 @@ Blok +respond_to+ obsługuje obydwa zawołania dla tej akcji - zarówno HTML jak
 <%= link_to 'New post', new_post_path %>
 -------------------------------------------------------
 
-Widok wyświetla treść tablicy +@posts+, by pokazać zawartość oraz linki. Przyjrzymy się uważnie paru jego aspektom:
+Widok iteruje po zawartości tablicy +@posts+, pokazując treść postów oraz
+linki. Zwróć uwagę na następujące elementy:
 
-* +h+ to helper metody który ujednolica wyświetlane danych, zapobiegający atakom „cross-site scripting”
-* +link_to+ buduje hiperłącze dla określonej lokalizacji
-* +edit_post_path+ jest helperem, który Railsy udostępniają w ramach routingu RESTful. Zobaczysz jeszcze sporo różnych rodzajów takich helperów dla wielu, znajdujących się w kontrolerze, akcji.
+* +h+ to helper, który oczyszcza wyświetlane dane, zapobiegający atakom typu "cross-site scripting"
+* +link_to+ buduje link do określonej lokalizacji
+* +edit_post_path+ jest helperem, który Railsy udostępniają w ramach routingu RESTful.
+  Zobaczysz jeszcze sporo różnych rodzajów takich helperów dla wielu akcji z
+  kontrolerów.
 
-TIP: Więcej szczegółów na temat procesu renderingu znajdziesz w link:../layouts_and_rendering.html[Layouts and Rendering in Rails].
+TIP: Więcej szczegółów na temat procesu renderowania znajdziesz w przewodniku
+link:layouts_and_rendering.html[Layouty oraz renderowanie].
 
-=== Personalizacja Layoutu
+=== Dostosowanie layoutu
 
-Widok stanowi tylko część całego procesu przedstawiania przez HTML Twojej strony www. Railsy posiadają też różne gotowe layouty +layouts+, w których trzymane są widoki. Renderowanie widoku dla przeglądarki odbywa się poprzez umieszczanie widoku HTML wewnątrz layoutu HTML. Komenda +script/generate scaffold+ automatycznie tworzy dla postu domyślny layout: +app/views/layouts/posts.html.erb+. Używając edytora zmodyfikuj go w następujący sposób:
+Przetwarzanie widoku stanowi tylko część złożonego procesu, którego efektem jest 
+utworzenie wynikowej strony HTML.
+Railsy wyposażone są również w layouty, które stanowią pojemniki na widoki.
+Renderowanie widoku odbywa się poprzez umieszczanie kodu HTML widoku
+wewnątrz kodu HTML layoutu. Komenda +script/generate scaffold+ automatycznie
+utworzyła domyślny layout  dla postów: +app/views/layouts/posts.html.erb+. 
+Otwórz go w swoim edytorze i zmodyfikuj tag +body+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -699,11 +741,13 @@ Widok stanowi tylko część całego procesu przedstawiania przez HTML Twojej st
 </html>
 -------------------------------------------------------
 
-Gdy teraz odświeżysz stronę +/posts+, zobaczysz szare tło. Takie samo będzie używane dla wszystkich widoków postów.
+Gdy teraz odświeżysz stronę +/posts+, zobaczysz szare tło. 
+Takie samo będzie używane dla wszystkich widoków postów.
 
-=== Tworzenie nowego postu.
+=== Tworzenie nowego posta
 
-Nowy post kreuje się za pomocą dwóch akcji. Pierwszą jest +new+, która tworzy nowy, pusty obiekt +Post+:
+Nowy post tworzony jest za pomocą dwóch akcji. Pierwszą jest +new+, 
+która tworzy nowy, pusty obiekt +Post+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -717,9 +761,9 @@ def new
 end
 -------------------------------------------------------
 
-Widok +new.html.erb+ wyświetli dla użytkownika pusty Post:
+Widok +new.html.erb+ wyświetli dla użytkownika pusty +Post+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>New post</h1>
 
@@ -746,11 +790,23 @@ Widok +new.html.erb+ wyświetli dla użytkownika pusty Post:
 <%= link_to 'Back', posts_path %>
 -------------------------------------------------------
 
-Blok +form_for+ jest używany do tworzenia formy HTML. Wewnątrz niego masz dostęp do metod, które umożliwiają zbudowanie różnorodnych sposobów kontroli form. Przykładowo: +f.text_field :name+ prosi Railsy, by stworzyły w danej formie pole do wprowadzania tekstu i połączyły go z nazwą przykładowo wyświetlanego atrybutu. Możesz użyć tej metody tylko z takimi atrybutami modelu, które są podstawą formy (w tym wypadku +name+, +title+, i +content+). Rails preferencyjnie uzywa +form_for+ do stworzenia surowego kodu HTML. Dzięki temu jest on bardziej zwięzły i wyraźnie widać związek formy z konkretnym modelem.
+Blok +form_for+ jest używany do tworzenia formularzy HTML. Wewnątrz niego masz dostęp do
+metod, które umożliwiają tworzenie różnorodnych kontrolek. Przykładowo:
++f.text_field :name+ powoduje utworzenie w danym formularzu pola do wprowadzania
+tekstu i wiąże je z atrybutem +name+ wyświetlanego obiektu. Możesz użyć tej metody
+tylko z atrybutami modelu, na podstawie którego tworzony jest formularz (w tym wypadku +name+,
++title+ i +content+). Railsy wykorzystują helper +form_for+ zamiast surowego kodu
+HTML, ponieważ dzięki temu jest on bardziej zwięzły i bezpośrednio widać
+związek między instancją modelu a formularzem.
 
-TIP: Jeśli potrzebujesz stworzyć formę HTML, która pokazuje dowolne pole, niezwiązane z modelem, powinieneś użyć metody +form_tag+. Umożliwia ona szybkie zbudowanie form, których nie trzeba łączyć z konkretnym modelem.
+TIP: Jeśli potrzebujesz stworzyć formularz HTML, który pokazuje dowolne pole niezwiązane z
+modelem, powinieneś użyć metody +form_tag+. Umożliwia ona szybkie zbudowanie
+formularzy, których nie trzeba łączyć z konkretnym modelem.
 
-Gdy użytkownik kliknie na przycisk +create+, przeglądarka wyśle informacje zwrotną do metody kontrolera +create+ (Railsy wiedzą, że mają posłużyć się metodą +create+, ponieważ forma jest wysyłana za pomocą żądania HTTP POST – jest to jedna z tych umownych rzeczy, o których wspomniałem wcześniej):
+Gdy użytkownik kliknie przycisk +create+, przeglądarka wyśle informację zwrotną do
+akcji +create+ (Railsy wiedzą, że mają posłużyć się metodą +create+,
+ponieważ formularz jest wysyłana za pomocą żądania HTTP POST – jest to jedna z
+konwencji, o których wspomniałem wcześniej):
 
 [source, ruby]
 -------------------------------------------------------
@@ -770,13 +826,27 @@ def create
 end
 -------------------------------------------------------
 
-Akcja +create+ tworzy nowy obiekt Post z danych przekazanymi przez użytkownika w formie, który Railsy udostępnią w +params+. Po zapisaniu nowego postu, używają one +flash[:notice]+ do stworzenia wiadomości informacyjnej dla użytkownika oraz przekierowują do wyświetlanej akcji. Jeśli napotka jakiś problem, akcja +create+ pokaże po prostu widok +new+ drugi raz, wraz z wiadomością o błędzie.
+Akcja +create+ tworzy nowy obiekt +Post+ z danych przekazanych przez użytkownika
+w formularzu, które Railsy udostępnią w tablicy asocjacyjnej +params+. Po
+zapisaniu nowego posta w bazie danych, używają one
++flash[:notice]+ do stworzenia komunikatu informacyjnego oraz
+przekierowują do akcji +show+. Jeśli pojawi się jakiś problem, akcja +create+ pokaże
+po prostu widok +new+ po raz drugi, uzupełniając go wiadomością o błędzie.
 
-Railsy zapewniają hash: +flash+ (zwyczajowo nazywany Flashem), przez co wiadomość może być przeniesiona do nastepnej akcji, dając użytkownikowi przydatne informacje o statusie jego żądania. W przypadku +create+ użytkownik nigdy nie widzi strony renderowanej podczas procesu tworzenia postu, ponieważ jest przekierowywany do nowego postu dopiero po zapisaniu rekordu. Flash przenosi informacje do następnej akcji, zatem gdy użytkownik jest przekierowywany ponownie do akcji +show+, ukazuje mu się informacja „Post został stworzony”.
+Railsy dostarczają tablicę asocjacyjną +flash+ (zwyczajowo nazywany flashem), przez co wiadomość może
+być przeniesiona do następnej akcji, dając użytkownikowi przydatne informacje o statusie
+jego żądania. W przypadku +create+ użytkownik nigdy nie widzi strony renderowanej
+w trakcie tworzenia posta, ponieważ jest przekierowywany do nowego posta zaraz
+po zapisaniu rekordu. Flash przechowuje informacje do następnej akcji, zatem gdy użytkownik
+jest przekierowywany z powrotem do akcji +show+, pokazuje mu się informacja
+"Post was successfully created.".
 
-=== Prezentacja pojedynczego postu
+=== Wyświetlanie pojedynczego posta
 
-Gdy klikniesz w link +show+ dla postu na stronie głównej, przeniesie Cię ona do adresu +http://localhost:3000/posts/1+ (lub podobnego). Railsy traktują to jako prośbę o zasoby skierowaną do akcji +show+ i przechodzącą w +1+ z parametrem +:id+. Akcja +show+ wygląda tak:
+Gdy klikniesz link +show+ dla posta na stronie głównej, przeniesie Cię on pod
+adres typu +http://localhost:3000/posts/1+. Railsy traktują to jako wywołanie
+akcji +show+ na wybranym zasobie i przekazują +1+ jako wartość parametru +:id+. 
+Akcja +show+ wygląda następująco:
 
 [source, ruby]
 -------------------------------------------------------
@@ -790,10 +860,10 @@ def show
 end
 -------------------------------------------------------
 
-Akcja +show+ używa +Post.find+, by znaleźć w bazie danych pojedynczy rekord z jej wartością id.
-Railsy wyświetlają go używając +show.html.erb+:
+Akcja +show+ używa metody +Post.find+, by znaleźć w bazie danych pojedynczy
+rekord poprzez jego atrybut +id+.  Railsy wyświetlają go używając widoku +show.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <p>
   <b>Name:</b>
@@ -817,7 +887,9 @@ Railsy wyświetlają go używając +show.html.erb+:
 
 === Edytowanie postów
 
-Edytowanie postu, podobnie jak tworzenie nowego, odbywa się dwustopniowo. Pierwszym krokiem jest żadanie +edit_post_path(@post)+ odnoszące się do konkretnego postu. To wywołuje nam akcję +edit+ w kontrolerze:
+Edytowanie posta, podobnie jak tworzenie nowego, odbywa się dwustopniowo. Pierwszym
+krokiem jest żądanie do +edit_post_path(@post)+, do którego przekazany jest
+edytowany post. To żądanie wywołuje akcję +edit+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -826,9 +898,9 @@ def edit
 end
 -------------------------------------------------------
 
-Railsy do wyświetlenia znalezionego postu używają +edit.html.erb+ :
+Do wyświetlenia znalezionego posta Railsy używają widoku +edit.html.erb+ :
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>Editing post</h1>
 
@@ -855,7 +927,8 @@ Railsy do wyświetlenia znalezionego postu używają +edit.html.erb+ :
 <%= link_to 'Show', @post %> |
 <%= link_to 'Back', posts_path %>
 -------------------------------------------------------
-Składając stworzoną przez ten widok formę, odwołujemy się do akcji +update+ wewnątrz kontrolera:
+Wysłanie formularza utworzonego przez ten widok powoduje 
+wywołanie akcji +update+ w kontrolerze:
 
 [source, ruby]
 -------------------------------------------------------
@@ -875,13 +948,26 @@ def update
 end
 -------------------------------------------------------
 
-Railsy, by móc zlokalizować edytowany rekord bazy danych, wykorzystują znajdujący się w widoku edycji parametr +:id+ na samym początku akcji +update+. +Update_attributes+ wywołuje, a następnie wykorzystuje pozostałe parametry, które zażądaliśmy i dołącza je do tego rekordu. Gdy wszystko pójdzie dobrze użytkownik jest przekierowywany do widoku +show+ postu. Jeśli jednak wystąpią jakieś problemy, Railsy skierują go spowrotem do +edit+, aby umożliwić mu poprawienie błędów.
+W akcji +update+ Railsy wykorzystują parametr +:id+ przekazany z widoku
+edycji, aby móc zlokalizować edytowany rekord w bazie danych. Wywołanie +update_attributes+
+wykorzystuje zaś pozostałe parametry żądania i aplikuje je do tego rekordu. 
+Jeśli nie pojawi się żaden błąd, użytkownik zostanie przekierowywany do
+akcji +show+. Jeśli jednak wystąpią jakieś problemy, Railsy skierują go z powrotem do
+akcji +edit+, aby umożliwić mu poprawienie błędów.
 
-NOTE: Uważni czytelnicy zapewne zauważyli, że deklaracja +form_for+ jest taka sama dla widoków +new+ i +edit+. Railsy generują inny kod dla każdego z formularzy, ponieważ są na tyle bystre, żeby zauważyć, że w jednym przypadku otrzymują nowy rekord, który jeszcze nie był zapisany, natomiast w drugim istniejący rekord, który już został zapisany w bazie danych. Podczas pisania programu w Railsach normalnie wyeliminowałbyś tę duplikację poprzez przeniesienie powtarzającego się kodu do podszablonu, który następnie byłby włączany w oba nadrzędne szablony. Jednakże generator rusztowań próbuje nie tworzyć zbyt wielu założeń i generuje kod, który łatwo modyfikować, gdy chcesz mieć różne formularze do akcji +create+ i +edit+.
+NOTE: Uważni czytelnicy zapewne zauważyli, że deklaracja +form_for+ jest taka sama dla
+widoków +new+ i +edit+. Railsy generują inny kod dla każdego z formularzy, ponieważ są
+na tyle bystre, żeby zauważyć, że w jednym przypadku otrzymują nowy rekord, który
+jeszcze nie był zapisany, natomiast w drugim - istniejący rekord, który już został
+zapisany w bazie danych. Podczas pisania programu w Railsach zazwyczaj wyeliminowałbyś
+tę duplikację poprzez przeniesienie powtarzającego się kodu do podszablonu, który
+następnie byłby włączany w oba nadrzędne szablony. Jednakże generator rusztowań próbuje
+nie przyjmować zbyt wielu założeń i generuje kod, który łatwo jest zmodyfikować, gdy chcesz mieć
+różne formularze do akcji +create+ oraz +edit+.
 
-=== Kasowanie Postu
+=== Usuwanie posta
 
-Wreszcie, kliknięcie na jednym z linków kategorii +destroy+ wysyła powiązane id do akcji +destroy+:
+Wreszcie, kliknięcie jednego z linków +destroy+ wysyła powiązany identyfikator do akcji +destroy+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -896,19 +982,30 @@ def destroy
 end
 -------------------------------------------------------
 
-Metoda +destroy+ modelu Active Record natychmiast usuwa odpowiadający mu rekord z bazy danych. Po tej operacji nie ma już żadnego rekordu do wyświetlenia, dlatego Railsy przekierowują przeglądarkę użytkownika prosto do widoku index tego modelu.
+Metoda +destroy+ modelu Active Record natychmiast usuwa odpowiadający mu rekord z bazy
+danych. Po tej operacji nie ma już żadnego rekordu do wyświetlenia, dlatego Railsy
+przekierowują przeglądarkę użytkownika prosto do widoku +index+ tego modelu.
 
 == Wykorzystanie zasady DRY
 
-W tym miejscu warto przyjrzeć się paru narzędziom, które Railsy oferują do usuwania duplikatów w Twoim kodzie. Szczególnie zwrócimy uwagę na _partials_, które możesz używać do eliminacji duplikatów z widoków oraz filtrach (_filters_), które pomagają się z nimi uporać w kontrolerach.
+W tym miejscu warto przyjrzeć się paru narzędziom, które Railsy oferują do usuwania
+powtórzeń w Twoim kodzie. Zwrócimy szczególną uwagę na podszablony
+(_partials_), których możesz używać do eliminacji powtórzeń z widoków 
+oraz filtry (_filters_), które pomagają się z nimi uporać w kontrolerach.
 
-=== Używanie podszablonów do eliminacji duplikatów w widokach.
+=== Używanie podszablonów do eliminowania powtórzeń w widokach
 
-Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i +edit+ jest bardzo podobny. Możesz przenieść dzielony kod prosto do podszablonu. Wymaga to edytowania widoków +new+ i +edit+ oraz dodania nowego szablonu. Nowy +_form.html.erb+ szablon powinien być zapisany w tym samym folderze +app/views/posts+ co plik, z którego został on wyprowadzony. Zauważ, że nazwa tego pliku zaczyna się od podkreślenia ' _ ' - jest to przyjęte przez Rails nazewnictwo dla podszablonów.
+Jak już widziałeś wcześniej, widok wygenerowany dla akcji +new+ i +edit+ jest
+bardzo podobny. Dzięki temu możesz przenieść wspólny kod prosto do podszablonu. Wymaga to
+edytowania widoków +new+ i +edit+ oraz dodania nowego podszablonu. Nowy
+podszablon +_form.html.erb+ powinien być zapisany w tym samym folderze +app/views/posts+ 
+co plik, z którego został on wyekstrahowany. Zauważ, że nazwa tego pliku 
+zaczyna się od znaku podkreślenia ' _ ' - jest to przyjęta przez Railsy
+konwencja dotycząca podszablonów.
 
 +new.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>New post</h1>
 
@@ -919,7 +1016,7 @@ Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i 
 
 +edit.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>Editing post</h1>
 
@@ -931,7 +1028,7 @@ Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i 
 
 +_form.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <% form_for(@post) do |f| %>
   <%= f.error_messages %>
@@ -954,13 +1051,17 @@ Jak już widziałeś wcześniej, widok generatora rusztowania dla akcji +new+ i 
 <% end %>
 -------------------------------------------------------
 
-Teraz, gdy Railsy renderują widok +new+ lub +edit+, umieszczą go w szablonie +_form+ we wskazanym punkcie. Zwróć uwagę na nazewnictwo dla szablonów: jeśli odnosisz się do szablonu o nazwie +form+ wewnątrz widoku, to +_form.html.erb+ jest odpowiadającym mu plikiem (z podkreśleniem ' _ ' na początku).
+Teraz, gdy Railsy renderują widok +new+ lub +edit+, 
+umieszczają w nich podszablon +_form+. Zwróć uwagę na nazewnictwo dla szablonów: jeśli
+wewnątrz widoku odnosisz się do szablonu o nazwie +form+, to odpowiadającym mu
+plikiem jest +_form.html.erb+ (z podkreśleniem na początku).
 
-Więcej informacji na temat szablonów uzyskasz w przewodniku link:../layouts_and_rendering.html[Layouts and Rending in Rails].
+Więcej informacji na temat szablonów uzyskasz w przewodniku
+link:layouts_and_rendering.html[Layouty oraz renderowanie].
 
-=== Używanie filtrów do eliminacji powtórzeń w kontrolerze
+=== Używanie filtrów do eliminowania powtórzeń w kontrolerach
 
-Teraz, gdy popatrzysz na kontroler pod kątem postów, zobaczysz parę duplikatów:
+Gdy teraz popatrzysz na kontroler postów, również zobaczysz kilka powtórzeń:
 
 [source, ruby]
 -------------------------------------------------------
@@ -968,7 +1069,7 @@ class PostsController < ApplicationController
   # ...
   def show
     @post = Post.find(params[:id])
-	# ... 
+    # ... 
   end
 
   def edit
@@ -987,7 +1088,10 @@ class PostsController < ApplicationController
 end
 -------------------------------------------------------
 
-Cztery wystąpienia tej samej linii kodu są niezgodne z zasadą DRY. Railsy zapewniają _filtry_ jako sposób na tego typu powtarzający się kod. W tym przypadku możesz poprawić pewne części używając +before_filter+:
+Cztery wystąpienia tej samej linii kodu są bez wątpienia niezgodne z zasadą
+DRY. Railsy dostarczają mechanizm _filtrów_ jako sposób na pozbycie się tego
+rodzaju powtórzeń. W tym przypadku możesz poprawić kod używając filtru
+czołowego +before_filter+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -995,7 +1099,7 @@ class PostsController < ApplicationController
   before_filter :find_post, :only => [:show, :edit, :update, :destroy]
   # ...
   def show
-	# ... 
+    # ... 
   end
 
   def edit
@@ -1016,17 +1120,31 @@ class PostsController < ApplicationController
 end
 -------------------------------------------------------
 
-Railsy uruchamiają _before filters_  przed każdą akcją w kontrolerze. Możesz użyć polecenia +:only+ by ograniczyć działanie _before filters_ tylko do określonych akcji, lub polecenia +:except+, by wyłączyć działanie _before filters_ dla niektórych z nich. Railsy dają Ci też możliwośc skorzystania z _after filters_, które uruchamiają się po przetworzeniu akcji, analogicznie jak _around filters_ otaczają akcje w trakcie jej przetwarzania. Do tego filtry mogą być także definiowane jako zewnętrzne klasy, by ułatwić przenoszenie ich pomiędzy kontrolerami.
+Railsy uruchamiają filtry czołowe _przed_ każdą akcją w kontrolerze. Możesz użyć
+polecenia +:only+ by ograniczyć działanie filtrów czołowych tylko do określonych akcji,
+lub polecenia +:except+, by wyłączyć ich działanie dla niektórych z nich.
+Railsy dają Ci też możliwość skorzystania z filtrów końcowych (_after
+filters_), które uruchamiają się po przetworzeniu akcji oraz filtrów
+okalającyh (_around filters_) otaczających akcje w trakcie ich
+przetwarzania. Do tego filtry mogą być także definiowane jako zewnętrzne klasy, by
+ułatwić wykorzystanie ich w wielu kontrolerach.
 
-Więcej informacji o filtrach znajdziesz w przewodniku:link:actioncontroller_basics.html[Action Controller Basics].
+Więcej informacji o filtrach znajdziesz w przewodniku 
+link:actioncontroller_basics.html[Podstawowe informacje o module Action Controller].
 
 == Dodawanie kolejnego modelu
 
-Skoro widziałeś już, jak wygląda model zbudowany za pomocą rusztowania, nadszedł czas by dodać do tego programu kolejny. Na nim opierać się będą komentarze w postach na blogu.
+Skoro widziałeś już, jak wygląda model zbudowany za pomocą rusztowania, nadszedł czas by
+dodać do aplikacji kolejny model. Będzie on odpowiedzialny za obsługę komentarzy.
 
 === Tworzenie modelu 
 
-Modele w Rails używają nazw w liczbie pojedynczej, a do komunikowania się z bazą danych nazw w liczbie mnogiej. Przyjęło się, że dla modelu, w którym znajdują się komentarze używamy nazwy Komentarz (_Comment_). Nawet jeśli nie hcesz używać całej aparatury opartej na rusztowaniu, pamiętaj, że większość programistów piszących w Railsach by stworzyć takie rzeczy jak modele czy kontrolery dalej używa generatorów. Aby stworzyć nowy model, wprowadź do terminalu następującą komendę: 
+Nazwy modeli w Railsach pisane są w liczbie pojedynczej, a odpowiadające im
+tabele w bazie danych - w liczbie mnogiej. Przyjęło się, że dla modelu, w którym znajdują się 
+komentarze używamy nazwy _Comment_ (komentarz). Nawet jeśli nie chcesz używać całej aparatury
+opartej na rusztowaniu, pamiętaj, że większość programistów piszących w
+Railsach, by stworzyć takie rzeczy jak modele czy kontrolery dalej używa 
+generatorów. Aby stworzyć nowy model, wprowadź do terminalu następującą komendę: 
 
 [source, shell]
 -------------------------------------------------------
@@ -1035,12 +1153,11 @@ $ script/generate model Comment commenter:string body:text post:references
 
 Wygeneruje ona 4 pliki:
 
-* +app/models/comment.rb+ - Model
-* +db/migrate/20081013214407_create_comments.rb+ - Migracje
-* +test/unit/comment_test.rb+ i +test/fixtures/comments.yml+ - Test.
+* +app/models/comment.rb+ - model
+* +db/migrate/20081013214407_create_comments.rb+ - migrację
+* +test/unit/comment_test.rb+ i +test/fixtures/comments.yml+ - testy
 
-Przyjrzyjmy się
- +comment.rb+:
+Przyjrzyjmy się +comment.rb+ (drugą linijkę musisz dopisać sam):
 
 [source, ruby]
 -------------------------------------------------------
@@ -1049,9 +1166,11 @@ class Comment < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-To model bardzo podobny do +post.rb+, który widziałeś już wcześniej. Różnica znajduję się w lini  +belongs_to :post+ , która uruchamia asocjacje Active Record. Nauczysz się więcej na temat asocjacji w następnej części niniejszego poradnika.
+Ten model jest bardzo podobny do +post.rb+, który widziałeś już wcześniej. Różnica znajduję
+się w lini  +belongs_to :post+, która ustanawia asocjację Active Record. Nauczysz się
+więcej na temat asocjacji w następnej części niniejszego przewodnika.
 
-Dodatkowo do tego modelu Railsy tworzą tabele bazy danych za pomocą migracji:
+Za pomocą migracji tworzona jest tabela w bazie danych:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1072,23 +1191,28 @@ class CreateComments < ActiveRecord::Migration
 end
 -------------------------------------------------------
 
-Linijka +t.references+ tworzy zewnętrzny klucz kolumn dla asocjacji pomiędzy dwoma modelami. Możesz spróbować uruchomić migracje:
+Linijka +t.references+ tworzy kolumnę z kluczem obcym, łączącym oba modele. 
+Wprowadź migrację do bazy danych za pomocą komendy:
 
 [source, shell]
 -------------------------------------------------------
 $ rake db:migrate
 -------------------------------------------------------
 
-Railsy są na tyle sprytne, że wykonują tylko te migracje, które nie są sprzeczne z działającą bazą danych.
+Railsy są na tyle sprytne, że wykonują tylko te migracje, 
+które nie zostały jeszcze wprowadzone do aktualnej wersji bazy danych.
 
-=== Asocjacja modeli
+=== Asocjacje modeli
 
-Asocjacja Active Record pozwala Ci łatwo zdefiniować związek (asocjacje) pomiędzy dwoma modelami. W przypadku komentarzy oraz postów możesz go zapisać w ten sposób:
+Asocjacje modułu Active Record pozwalają Ci łatwo zdefiniować związek pomiędzy dwoma
+modelami. W przypadku komentarzy oraz postów możesz go opisać w ten sposób:
 
-* Każdy komentarz należy do jednego postu
-* Jeden post może mieć wiele komentarzy
+* każdy komentarz należy do jednego posta
+* jeden post może mieć wiele komentarzy
 
-Składnia jest bardzo podobna do tej, jaką Railsy używają do deklarowania asocjacji. Widziałeś już linie kodu umieszczoną w modelu komentarza, która przypisuje każdy komentarz do postu:
+W istocie te określenia są bardzo podobne do składni, jakiej Railsy używają do deklarowania asocjacji.
+Widziałeś już linię kodu umieszczoną w modelu komentarza, która wiąże każdy
+komentarz z postem:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1108,45 +1232,55 @@ class Post < ActiveRecord::Base
 end
 -------------------------------------------------------
 
-Dzięki tym dwóm deklaracjom w znaczny sposób automatyzujemy sposób zachowania się naszego programu. Praktycznie wygląda to tak: jeśli masz przykładową zmienną +@post+ zawierającą post, możesz otrzymać wszystkie komentarze, które do niego należą jako tablicę +@post.comments+.
+Dzięki tym dwóm deklaracjom w znaczny sposób automatyzujemy sposób zachowania się
+naszych modeli. Praktycznie wygląda to tak: jeśli masz przykładową zmienną +@post+
+zawierającą post, możesz otrzymać wszystkie komentarze, które do niego należą 
+przez wywołanie +@post.comments+.
 
-TIP: Po więcej informacji na temat asocjacji Active Record zajrzyj do przewodnika: link:../association_basics.html[Active Record Associations].
+TIP: Po więcej informacji na temat asocjacji Active Record zajrzyj do przewodnika:
+link:association_basics.html[Asocjacje modułu Active Record].
 
-=== Dodawanie Ścieżek
+=== Dodawanie dróg
 
-Ścieżki (_Routes_) to wpisy w pliku +config/routes.rb+, które informują Railsy jak interpretować nadchodzące żądania HTTP, w celu wykonania danych akcji. Otwórz ten pliku i znajdź w nim linię kodu odwołującą się do +posts+ (znajduje się ona na samym początku pliku), a następnie edytuj ją następująco:
+Drogi (_Routes_) to wpisy w pliku +config/routes.rb+, które informują Railsy jak
+interpretować nadchodzące żądania HTTP, w celu wykonania odpowiednich akcji. Otwórz ten pliku
+i znajdź w nim linię kodu odwołującą się do +posts+ (znajduje się ona na samym początku
+pliku), a następnie edytuj ją następująco:
 
 [source, ruby]
 -------------------------------------------------------
-map.resources :posts do |post|
-  post.resources :comments
-end
+map.resources :posts, :has_many => :comments
 -------------------------------------------------------
 
-Tworzy to +comments+ jako zagnieżdżony zasób (_nested resource_) wewnątrz +posts+. W ten sposób jesteśmy coraz bliżej zrozumienia hierarchicznych zależności pomiędzy istniejącymi postami i komentarzami.
+Ten wpis tworzy +comments+ jako zagnieżdżony zasób (_nested resource_) wewnątrz +posts+. W ten
+sposób jesteśmy coraz bliżej uchwycenia hierarchicznych zależności, które
+występują między postami i komentarzami.
 
-TIP: Po więcej informacji na temat tworzenia ścieżek sięgnij do poradnika: link:../routing_outside_in.html[Rails Routing from the Outside In].
+TIP: Po więcej informacji na temat routingu sięgnij do przewodnika:
+link:routing_outside_in.html[Routing w Ruby on Rails].
 
-=== Tworzenie Kontrolera
+=== Generowanie kontrolera
 
-Mając już przygotowany  model, czas zacząć tworzyć pasujący do niego kontroler. I znów posłużymy się generatorem:
+Mając już przygotowany  model, czas zacząć tworzyć pasujący do niego kontroler. I znów
+posłużymy się generatorem:
 
 [source, shell]
 -------------------------------------------------------
 $ script/generate controller Comments index show new edit
 -------------------------------------------------------
 
-Tworzy to siedem plików:
+Wywołanie to tworzy siedem plików:
 
-* +app/controllers/comments_controller.rb+ - Kontroler
-* +app/helpers/comments_helper.rb+ - Widok pliku helpera
-* +app/views/comments/index.html.erb+ - Widok akcji _Index_
-* +app/views/comments/show.html.erb+ - Widok akcji _Show_
-* +app/views/comments/new.html.erb+ - Widok nowej akcji
-* +app/views/comments/edit.html.erb+ - Widok akcji _Edit_
-* +test/functional/comments_controller_test.rb+ - Testy funkcjonalności kontrolera
+* +app/controllers/comments_controller.rb+ - kontroler
+* +app/helpers/comments_helper.rb+ - helper dla widoku
+* +app/views/comments/index.html.erb+ - widok dla akcji +index+
+* +app/views/comments/show.html.erb+ - widok dla akcji +show+
+* +app/views/comments/new.html.erb+ - widok dla  akcji +new+
+* +app/views/comments/edit.html.erb+ - widok dla akcji +edit+
+* +test/functional/comments_controller_test.rb+ - testy funkcjonalne kontrolera
 
-Kontroler zostanie wygenerowany z pustymi metodami oraz widokami dla każdej akcji, które zdefiniowałeś w zawołaniu +script/generate controller+:
+Kontroler zostanie wygenerowany z pustymi metodami oraz widokami dla każdej akcji, które
+zdefiniowałeś w wywołaniu +script/generate controller+:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1166,7 +1300,9 @@ class CommentsController < ApplicationController
 end
 -------------------------------------------------------
 
-Należy to rozwinąć za pomocą kodu do aktualnego procesu żądania stosownie do każdej metody. By to rozjaśnić, poniżej znajduje się uproszczony przykład, który odpowiada jedynie na żądania wymagane przez HTML:
+Kod ten należy oczywiście uzupełnić tak, by właściwie obsłużyć nadchodzące
+żądania. Poniżej (ze względu na prostotę rozwiązania) przedstawiona jest
+wersja, która odpowiada tylko na żądania HTML:
 
 [source, ruby]
 -------------------------------------------------------
@@ -1210,29 +1346,45 @@ class CommentsController < ApplicationController
       render :action => "edit"
     end
   end
+
+  def destroy 
+    @post = Post.find(params[:post_id])  
+    @comment = Comment.find(params[:id])  
+    @comment.destroy 
+    redirect_to post_comments_path(@post)
+  end  
   
 end
 -------------------------------------------------------
 
-Jak widzisz, jest to trochę bardziej skomplikowane niż wcześniejsze operacje w kontrolerze dla postów. Jest to uboczny efekt zagnieżdżania które tworzyłeś; każde żądanie komentarza musi pilnować do którego posta jest dołączony. 
+Jak widzisz, jest to trochę bardziej skomplikowane niż wcześniejsze operacje w
+kontrolerze dla postów. Jest to uboczny efekt powiązania które utworzyłeś; każda
+akcja wykonywana na komentarzu musi brać pod uwagę post, dla którego został
+on utworzony. 
 
-Dodatkowo, kod posiada przewagę w niektórych rodzajach metod dostępnych dla asocjacji. Przykładowo - w metodzie +new+ wywołuję się to tak:
+Dodatkowo, kod ten korzysta z niektórych metod dostępnych dzięki asocjacjom.
+Przykładowo - w metodzie +new+ pojawia się wywołanie:
 
 [source, ruby]
 -------------------------------------------------------
 @comment = @post.comments.build
 -------------------------------------------------------
 
-Tworzy to jedną operacją nowy obiekt: +Comment+ i ustanawia pole: +post_id+, które przyjmuje +id+ z określonego obiektu +Post+.
+Ten kod powoduje utworzenie w ramach jednej operacji nowego obiektu klasy +Comment+ 
+_oraz_ ustawienie jego pola +post_id+ na wartość równą atrybutowi +id+
+powiązanego obiektu klasy +Post+. 
 
 
-=== Budowanie Widoków
+=== Tworzenie widoków
 
-Ponieważ przestałeś korzystać z rusztowania, konieczne będzie ręczne zbudowanie widoków dla komentarzy. Przywołanie +script/generate controller+ da ci szkielet widoków, które jednak będą pozbawione aktualnej zawartości. Oto pierwszy krok do uszczegółowienia widoków komentarza.
+Ponieważ przestałeś korzystać z rusztowania, konieczne będzie ręczne zbudowanie widoków
+dla komentarzy. Wywołanie +script/generate controller+ utworzy szkielet widoków, które
+jednak będą pozbawione faktycznej zawartości. Oto pierwszy krok do
+uzupełnienia widoków komentarzy.
 
-Widok +index.html.erb+:
+Widok +app/views/comments/index.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>Comments for <%= @post.title %></h1>
 
@@ -1259,9 +1411,10 @@ Widok +index.html.erb+:
 <%= link_to 'Back to Post', @post %>
 -------------------------------------------------------
 
-Widok +new.html.erb+ :
+Widok +app/views/comments/new.html.erb+ (zwróć uwagę na tablicę przekazaną do
+wywołania +form_for+):
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>New comment</h1>
 
@@ -1284,9 +1437,9 @@ Widok +new.html.erb+ :
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Widok +show.html.erb+ :
+Widok +app/views/comments/show.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>Comment on <%= @post.title %></h1>
 
@@ -1304,9 +1457,9 @@ Widok +show.html.erb+ :
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Widok +edit.html.erb+ :
+Widok +app/views/comments/edit.html.erb+:
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <h1>Editing comment</h1>
 
@@ -1330,13 +1483,16 @@ Widok +edit.html.erb+ :
 <%= link_to 'Back', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Obecna, coraz większa komplikacja (w porównaniu do widoków dla zarządzania postami, które do tej pory widziałeś) ponownie bierze się z konieczności żonglowania postami i ich komentarzami w tym samym czasie.
+Ponownie ta większa komplikacja (w porównaniu do widoków do zarządzania postami,
+które widziałeś wcześniej) bierze się z konieczności żonglowania postami i
+ich komentarzami w tym samym czasie.
 
-=== Przyłączanie komentarzy do postów
+=== Dodawanie komentarzy do postów
 
-W następnym kroku zmodyfikuje widok: +show.html.erb+, by pokazać komentarze oraz umożliwić zarządzanie nimi dla tego postu: 
+W następnym kroku zmodyfikuje widok +app/views/posts/show.html.erb+, 
+by pokazać jego komentarze oraz umożliwić zarządzanie nimi: 
 
-[source, ruby]
+[source, html]
 -------------------------------------------------------
 <p>
   <b>Name:</b>
@@ -1366,36 +1522,46 @@ W następnym kroku zmodyfikuje widok: +show.html.erb+, by pokazać komentarze or
 	</p>
 <% end %>
 
-<%= link_to 'Edit', edit_post_path(@post) %> |
-<%= link_to 'Back', posts_path %>
+<%= link_to 'Edit Post', edit_post_path(@post) %> |
+<%= link_to 'Back to Posts', posts_path %>
 <%= link_to 'Manage Comments', post_comments_path(@post) %>
 -------------------------------------------------------
 
-Zapamiętaj, że każdy post ma swój osobny zbiór komentarzy, dostępny przez +@post.comments+. Wynika to z zadeklarowanych asocjacji w modelach. Ścieżka helperów, taka jak +post_comments_path+ pochodzi od zagnieżdżonej ścieżki deklaracji w +config/routes.rb+.
+Zapamiętaj, że każdy post ma swój osobny zbiór komentarzy, dostępny przez
++@post.comments+. Wynika to z asocjacji zadeklarowanych w modelach. Natomiast
+helper taki jak +post_comments_path+ pochodzi od definicji zagnieżdżonej drogi z
+pliku +config/routes.rb+.
 
 == Co dalej?
 
-Teraz, gdy masz przed sobą swój pierwszy Railsowy program, możesz go uatrakcyjniać według własnych potrzeb. Ale nie musisz do wszystkich rozwiązań dochodzić samodzielnie. Jeśli potrzebujesz wsparcia przy tworzeniu i uruchamianiu aplikacji Rails skorzystaj z tych poradników:
+Teraz, gdy masz przed sobą swój pierwszy program napisany w Railsach, możesz go uatrakcyjniać
+według własnych potrzeb. Ale nie musisz do wszystkich rozwiązań dochodzić samodzielnie.
+Jeśli potrzebujesz wsparcia przy tworzeniu i uruchamianiu aplikacji możesz
+skorzystać z tych zasobów:
 
-* link:http://guides.rubyonrails.org/[Ruby On Rails guides]
-* link:http://groups.google.com/group/rubyonrails-talk[Ruby on Rails mailing list]
+* link:./index.html[Przewodniki po Ruby On Rails]
+* link:http://groups.google.com/group/rubyonrails-talk[Lista mejlingowa Ruby on Rails]
 * Kanał #rubyonrails na irc.freenode.net
 * link:http://wiki.rubyonrails.org/rails[Rails wiki]
 
-Railsy mają równiez wbudowaną pomoc, która możesz wywołać przy użyciu komendy rake w linii komend:
+Railsy mają równiez wbudowaną pomoc, którą możesz wywołać w linii poleceń przy użyciu komendy
++rake+:
 
-* Uruchomienie +rake doc:guides+ umieści kopię Rails Guides (przewodnik Rails) w folderze +/doc/guides+ Twojego programu. Znajdujący się tam plik +/doc/guides/index.html+ możesz przeglądać używając Twojej przeglądarki.
+* Uruchomienie +rake doc:guides+ umieści kopię przewodników Rails w
+  folderze +/doc/guides+. Znajdujący się tam plik
+  +/doc/guides/index.html+ możesz przeglądać używając przeglądarki.
+* Uruchomienie +rake doc:rails+ umieści kopię dokumentacji API dla Rails w folderze
+  +/doc/api+. Znajdujący się tam plik +/doc/api/index.html+ możesz
+  przeglądać używając przeglądarki.
 
-* Uruchomienie +rake doc:rails+ umieści kopię dokumentacji API dla Rails w folderze +/doc/api+ Twojej aplikacji. Znajdujący się tam plik +/doc/api/index.html+ możesz przeglądać używając Twojej przeglądarki.
 
-
-== Zmiany ==
+== Changelog ==
 
 http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/2[Lighthouse ticket]
 
 * November 3, 2008: Formatting patch from Dave Rothlisberger
-* November 1, 2008: First approved version by link:../authors.html#mgunderloy[Mike Gunderloy]
+* November 1, 2008: First approved version by link:authors.html#mgunderloy[Mike Gunderloy]
 * October 16, 2008: Revised based on feedback from Pratik Naik by link:../authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
-* October 13, 2008: First complete draft by link:../authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
-* October 12, 2008: More detail, rearrangement, editing by link:../authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
+* October 13, 2008: First complete draft by link:authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
+* October 12, 2008: More detail, rearrangement, editing by link:authors.html#mgunderloy[Mike Gunderloy] (not yet approved for publication)
 * September 8, 2008: initial version by James Miller (not yet approved for publication)
