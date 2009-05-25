@@ -1543,6 +1543,7 @@ skorzystać z tych zasobów:
 * link:http://groups.google.com/group/rubyonrails-talk[Lista mejlingowa Ruby on Rails]
 * Kanał #rubyonrails na irc.freenode.net
 * link:http://wiki.rubyonrails.org/rails[Rails wiki]
+* link:http://rubyonrails.pl/forum[polskie forum Ruby on Rails]
 
 Railsy mają równiez wbudowaną pomoc, którą możesz wywołać w linii poleceń przy użyciu komendy
 +rake+:
