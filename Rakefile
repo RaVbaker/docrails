@@ -1,27 +1,52 @@
 require 'rake'
 require 'rake/rdoctask'
-require 'rake/contrib/sshpublisher'
+require 'rake/gempackagetask'
 
 env = %(PKG_BUILD="#{ENV['PKG_BUILD']}") if ENV['PKG_BUILD']
 
-PROJECTS = %w(activesupport actionpack actionmailer activeresource activerecord railties)
+PROJECTS = %w(activesupport activemodel actionpack actionmailer activeresource activerecord railties)
 
 Dir["#{File.dirname(__FILE__)}/*/lib/*/version.rb"].each do |version_path|
   require version_path
 end
 
 desc 'Run all tests by default'
-task :default => :test
+task :default => %w(test test:isolated)
 
-%w(test rdoc pgem package release).each do |task_name|
+%w(test test:isolated rdoc pgem package release gem gemspec).each do |task_name|
   desc "Run #{task_name} task for all projects"
   task task_name do
+    errors = []
     PROJECTS.each do |project|
-      system %(cd #{project} && #{env} #{$0} #{task_name})
+      system(%(cd #{project} && #{env} #{$0} #{task_name})) || errors << project
     end
+    fail("Errors in #{errors.join(', ')}") unless errors.empty?
   end
 end
 
+desc "Smoke-test all projects"
+task :smoke do
+  (PROJECTS - %w(activerecord)).each do |project|
+    system %(cd #{project} && #{env} #{$0} test:isolated)
+  end
+  system %(cd activerecord && #{env} #{$0} sqlite3:isolated_test)
+end
+
+spec = eval(File.read('rails.gemspec'))
+Rake::GemPackageTask.new(spec) do |pkg|
+  pkg.gem_spec = spec
+end
+
+task :install => :gem do
+  system %(cd arel && gem build arel.gemspec && gem install arel-0.2.pre.gem --no-ri --no-rdoc --ignore-dependencies)
+  system %(cd rack && rake gem VERSION=1.0.2.pre && gem install rack-1.0.2.pre.gem --no-ri --no-rdoc --ignore-dependencies)
+  (PROJECTS - ["railties"]).each do |project|
+    puts "INSTALLING #{project}"
+    system("gem install #{project}/pkg/#{project}-#{ActionPack::VERSION::STRING}.gem --no-ri --no-rdoc")
+  end
+  system("gem install railties/pkg/railties-#{ActionPack::VERSION::STRING}.gem --no-ri --no-rdoc")
+  system("gem install pkg/rails-#{ActionPack::VERSION::STRING}.gem --no-ri --no-rdoc")
+end
 
 desc "Generate documentation for the Rails framework"
 Rake::RDocTask.new do |rdoc|
@@ -37,7 +62,8 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('railties/CHANGELOG')
   rdoc.rdoc_files.include('railties/MIT-LICENSE')
   rdoc.rdoc_files.include('railties/README')
-  rdoc.rdoc_files.include('railties/lib/{*.rb,commands/*.rb,rails/*.rb,rails_generator/*.rb}')
+  rdoc.rdoc_files.include('railties/lib/{*.rb,commands/*.rb,rails/*.rb,generators/*.rb}')
+  rdoc.rdoc_files.exclude('railties/lib/vendor/*')
 
   rdoc.rdoc_files.include('activerecord/README')
   rdoc.rdoc_files.include('activerecord/CHANGELOG')
@@ -74,6 +100,7 @@ end
 
 desc "Publish API docs for Rails as a whole and for each component"
 task :pdoc => :rdoc do
+  require 'rake/contrib/sshpublisher'
   Rake::SshDirPublisher.new("wrath.rubyonrails.org", "public_html/api", "doc/rdoc").upload
   PROJECTS.each do |project|
     system %(cd #{project} && #{env} #{$0} pdoc)

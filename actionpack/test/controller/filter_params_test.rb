@@ -1,29 +1,31 @@
 require 'abstract_unit'
 
 class FilterParamController < ActionController::Base
+  def payment
+    head :ok
+  end
 end
 
-class FilterParamTest < Test::Unit::TestCase
-  def setup
-    @controller = FilterParamController.new
+class FilterParamTest < ActionController::TestCase
+  tests FilterParamController
+
+  def test_filter_parameters_must_have_one_word
+    assert_raises RuntimeError do
+      FilterParamController.filter_parameter_logging
+    end
   end
 
   def test_filter_parameters
     assert FilterParamController.respond_to?(:filter_parameter_logging)
-    assert !@controller.respond_to?(:filter_parameters)
 
-    FilterParamController.filter_parameter_logging
-    assert @controller.respond_to?(:filter_parameters)
-
-    test_hashes = [[{},{},[]],
-    [{'foo'=>nil},{'foo'=>nil},[]],
-    [{'foo'=>'bar'},{'foo'=>'bar'},[]],
+    test_hashes = [
     [{'foo'=>'bar'},{'foo'=>'bar'},%w'food'],
     [{'foo'=>'bar'},{'foo'=>'[FILTERED]'},%w'foo'],
     [{'foo'=>'bar', 'bar'=>'foo'},{'foo'=>'[FILTERED]', 'bar'=>'foo'},%w'foo baz'],
     [{'foo'=>'bar', 'baz'=>'foo'},{'foo'=>'[FILTERED]', 'baz'=>'[FILTERED]'},%w'foo baz'],
     [{'bar'=>{'foo'=>'bar','bar'=>'foo'}},{'bar'=>{'foo'=>'[FILTERED]','bar'=>'foo'}},%w'fo'],
-    [{'foo'=>{'foo'=>'bar','bar'=>'foo'}},{'foo'=>'[FILTERED]'},%w'f banana']]
+    [{'foo'=>{'foo'=>'bar','bar'=>'foo'}},{'foo'=>'[FILTERED]'},%w'f banana'],
+    [{'baz'=>[{'foo'=>'baz'}]}, {'baz'=>[{'foo'=>'[FILTERED]'}]}, %w(foo)]]
 
     test_hashes.each do |before_filter, after_filter, filter_words|
       FilterParamController.filter_parameter_logging(*filter_words)

@@ -4,21 +4,23 @@ class TestHelperMailer < ActionMailer::Base
   def test
     recipients "test@example.com"
     from       "tester@example.com"
-    body       render(:inline => "Hello, <%= @world %>", :body => { :world => "Earth" })
+
+    @world = "Earth"
+    render(:inline => "Hello, <%= @world %>")
   end
 end
 
 class TestHelperMailerTest < ActionMailer::TestCase
   def test_setup_sets_right_action_mailer_options
-    assert_equal :test, ActionMailer::Base.delivery_method
+    assert_instance_of ActionMailer::DeliveryMethod::Test, ActionMailer::Base.delivery_method
     assert ActionMailer::Base.perform_deliveries
     assert_equal [], ActionMailer::Base.deliveries
   end
 
   def test_setup_creates_the_expected_mailer
-    assert @expected.is_a?(TMail::Mail)
+    assert @expected.is_a?(Mail::Message)
     assert_equal "1.0", @expected.mime_version
-    assert_equal "text/plain", @expected.content_type
+    assert_equal "text/plain", @expected.mime_type
   end
 
   def test_mailer_class_is_correctly_inferred
@@ -26,7 +28,7 @@ class TestHelperMailerTest < ActionMailer::TestCase
   end
 
   def test_determine_default_mailer_raises_correct_error
-    assert_raises(ActionMailer::NonInferrableMailerError) do
+    assert_raise(ActionMailer::NonInferrableMailerError) do
       self.class.determine_default_mailer("NotAMailerTest")
     end
   end
@@ -84,34 +86,34 @@ class TestHelperMailerTest < ActionMailer::TestCase
   end
   
   def test_assert_emails_too_few_sent
-    error = assert_raises ActiveSupport::TestCase::Assertion do
+    error = assert_raise ActiveSupport::TestCase::Assertion do
       assert_emails 2 do
         TestHelperMailer.deliver_test
       end
     end
     
-    assert_match /2 .* but 1/, error.message
+    assert_match(/2 .* but 1/, error.message)
   end
   
   def test_assert_emails_too_many_sent
-    error = assert_raises ActiveSupport::TestCase::Assertion do
+    error = assert_raise ActiveSupport::TestCase::Assertion do
       assert_emails 1 do
         TestHelperMailer.deliver_test
         TestHelperMailer.deliver_test
       end
     end
     
-    assert_match /1 .* but 2/, error.message
+    assert_match(/1 .* but 2/, error.message)
   end
   
   def test_assert_no_emails_failure
-    error = assert_raises ActiveSupport::TestCase::Assertion do
+    error = assert_raise ActiveSupport::TestCase::Assertion do
       assert_no_emails do
         TestHelperMailer.deliver_test
       end
     end
     
-    assert_match /0 .* but 1/, error.message
+    assert_match(/0 .* but 1/, error.message)
   end
 end
 
@@ -123,7 +125,7 @@ class AnotherTestHelperMailerTest < ActionMailer::TestCase
   end
 
   def test_setup_shouldnt_conflict_with_mailer_setup
-    assert @expected.is_a?(TMail::Mail)
+    assert @expected.is_a?(Mail::Message)
     assert_equal 'a value', @test_var
   end
 end

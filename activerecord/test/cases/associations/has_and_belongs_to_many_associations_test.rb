@@ -24,6 +24,7 @@ require 'models/club'
 require 'models/member'
 require 'models/membership'
 require 'models/sponsor'
+require 'active_support/core_ext/string/conversions'
 
 class ProjectWithAfterCreateHook < ActiveRecord::Base
   set_table_name 'projects'
@@ -283,12 +284,14 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
   end
 
   def test_creation_respects_hash_condition
-    post = categories(:general).post_with_conditions.build(:body => '')
+    # in Oracle '' is saved as null therefore need to save ' ' in not null column
+    post = categories(:general).post_with_conditions.build(:body => ' ')
 
     assert        post.save
     assert_equal  'Yet Another Testing Title', post.title
 
-    another_post = categories(:general).post_with_conditions.create(:body => '')
+    # in Oracle '' is saved as null therefore need to save ' ' in not null column
+    another_post = categories(:general).post_with_conditions.create(:body => ' ')
 
     assert        !another_post.new_record?
     assert_equal  'Yet Another Testing Title', another_post.title
@@ -379,6 +382,33 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
 
   def test_additional_columns_from_join_table
     assert_date_from_db Date.new(2004, 10, 10), Developer.find(1).projects.first.joined_on.to_date
+  end
+
+  def test_destroying
+    david = Developer.find(1)
+    active_record = Project.find(1)
+    david.projects.reload
+    assert_equal 2, david.projects.size
+    assert_equal 3, active_record.developers.size
+
+    assert_difference "Project.count", -1 do
+      david.projects.destroy(active_record)
+    end
+
+    assert_equal 1, david.reload.projects.size
+    assert_equal 1, david.projects(true).size
+  end
+
+  def test_destroying_array
+    david = Developer.find(1)
+    david.projects.reload
+
+    assert_difference "Project.count", -Project.count do
+      david.projects.destroy(Project.find(:all))
+    end
+
+    assert_equal 0, david.reload.projects.size
+    assert_equal 0, david.projects(true).size
   end
 
   def test_destroy_all
@@ -616,7 +646,7 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
   def test_updating_attributes_on_rich_associations
     david = projects(:action_controller).developers.first
     david.name = "DHH"
-    assert_raises(ActiveRecord::ReadOnlyRecord) { david.save! }
+    assert_raise(ActiveRecord::ReadOnlyRecord) { david.save! }
   end
 
   def test_updating_attributes_on_rich_associations_with_limited_find_from_reflection
@@ -702,7 +732,7 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
     assert_equal [projects(:active_record), projects(:action_controller)].map(&:id).sort, developer.project_ids.sort
   end
 
-  def test_select_limited_ids_list
+  def test_select_limited_ids_array
     # Set timestamps
     Developer.transaction do
       Developer.find(:all, :order => 'id').each_with_index do |record, i|
@@ -712,9 +742,9 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
 
     join_base = ActiveRecord::Associations::ClassMethods::JoinDependency::JoinBase.new(Project)
     join_dep  = ActiveRecord::Associations::ClassMethods::JoinDependency.new(join_base, :developers, nil)
-    projects  = Project.send(:select_limited_ids_list, {:order => 'developers.created_at'}, join_dep)
+    projects  = Project.send(:select_limited_ids_array, {:order => 'developers.created_at'}, join_dep)
     assert !projects.include?("'"), projects
-    assert_equal %w(1 2), projects.scan(/\d/).sort
+    assert_equal ["1", "2"], projects.sort
   end
 
   def test_scoped_find_on_through_association_doesnt_return_read_only_records
@@ -739,6 +769,14 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
     assert_equal 1, developer.projects.size
     assert_equal developer, project.developers.find(:first)
     assert_equal project, developer.projects.find(:first)
+  end
+
+  def test_self_referential_habtm_without_foreign_key_set_should_raise_exception
+    assert_raise(ActiveRecord::HasAndBelongsToManyAssociationForeignKeyNeeded) {
+      Member.class_eval do
+        has_and_belongs_to_many :friends, :class_name => "Member", :join_table => "member_friends"
+      end
+    }
   end
 
   def test_dynamic_find_should_respect_association_include
@@ -767,12 +805,17 @@ class HasAndBelongsToManyAssociationsTest < ActiveRecord::TestCase
     assert_equal 1, developer.projects.count
   end
 
-  uses_mocha 'mocking Post.transaction' do
-    def test_association_proxy_transaction_method_starts_transaction_in_association_class
-      Post.expects(:transaction)
-      Category.find(:first).posts.transaction do
-        # nothing
-      end
+  unless current_adapter?(:PostgreSQLAdapter)
+    def test_count_with_finder_sql
+      assert_equal 3, projects(:active_record).developers_with_finder_sql.count
+      assert_equal 3, projects(:active_record).developers_with_multiline_finder_sql.count
+    end
+  end
+
+  def test_association_proxy_transaction_method_starts_transaction_in_association_class
+    Post.expects(:transaction)
+    Category.find(:first).posts.transaction do
+      # nothing
     end
   end
 

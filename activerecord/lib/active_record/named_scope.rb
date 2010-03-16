@@ -1,19 +1,35 @@
+require 'active_support/core_ext/array'
+require 'active_support/core_ext/hash/except'
+require 'active_support/core_ext/object/metaclass'
+
 module ActiveRecord
   module NamedScope
-    # All subclasses of ActiveRecord::Base have two named \scopes:
-    # * <tt>all</tt> - which is similar to a <tt>find(:all)</tt> query, and
-    # * <tt>scoped</tt> - which allows for the creation of anonymous \scopes, on the fly: <tt>Shirt.scoped(:conditions => {:color => 'red'}).scoped(:include => :washing_instructions)</tt>
-    #
-    # These anonymous \scopes tend to be useful when procedurally generating complex queries, where passing
-    # intermediate values (scopes) around as first-class objects is convenient.
-    def self.included(base)
-      base.class_eval do
-        extend ClassMethods
-        named_scope :scoped, lambda { |scope| scope }
-      end
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
+      # Returns a relation if invoked without any arguments.
+      #
+      #   posts = Post.scoped
+      #   posts.size # Fires "select count(*) from  posts" and returns the count
+      #   posts.each {|p| puts p.name } # Fires "select * from posts" and loads post objects
+      #
+      # Returns an anonymous named scope if any options are supplied.
+      #
+      #   shirts = Shirt.scoped(:conditions => {:color => 'red'})
+      #   shirts = shirts.scoped(:include => :washing_instructions)
+      #
+      # Anonymous \scopes tend to be useful when procedurally generating complex queries, where passing
+      # intermediate values (scopes) around as first-class objects is convenient.
+      #
+      # You can define a scope that applies to all finders using ActiveRecord::Base.default_scope.
+      def scoped(options = {}, &block)
+        if options.present?
+          Scope.init(self, options, &block)
+        else
+          current_scoped_methods ? unscoped.merge(current_scoped_methods) : unscoped.spawn
+        end
+      end
+
       def scopes
         read_inheritable_attribute(:scopes) || write_inheritable_attribute(:scopes, {})
       end
@@ -22,11 +38,11 @@ module ActiveRecord
       # such as <tt>:conditions => {:color => :red}, :select => 'shirts.*', :include => :washing_instructions</tt>.
       #
       #   class Shirt < ActiveRecord::Base
-      #     named_scope :red, :conditions => {:color => 'red'}
-      #     named_scope :dry_clean_only, :joins => :washing_instructions, :conditions => ['washing_instructions.dry_clean_only = ?', true]
+      #     scope :red, :conditions => {:color => 'red'}
+      #     scope :dry_clean_only, :joins => :washing_instructions, :conditions => ['washing_instructions.dry_clean_only = ?', true]
       #   end
-      # 
-      # The above calls to <tt>named_scope</tt> define class methods Shirt.red and Shirt.dry_clean_only. Shirt.red, 
+      #
+      # The above calls to <tt>scope</tt> define class methods Shirt.red and Shirt.dry_clean_only. Shirt.red,
       # in effect, represents the query <tt>Shirt.find(:all, :conditions => {:color => 'red'})</tt>.
       #
       # Unlike <tt>Shirt.find(...)</tt>, however, the object returned by Shirt.red is not an Array; it resembles the association object
@@ -52,7 +68,7 @@ module ActiveRecord
       # Named \scopes can also be procedural:
       #
       #   class Shirt < ActiveRecord::Base
-      #     named_scope :colored, lambda { |color|
+      #     scope :colored, lambda { |color|
       #       { :conditions => { :color => color } }
       #     }
       #   end
@@ -62,7 +78,7 @@ module ActiveRecord
       # Named \scopes can also have extensions, just as with <tt>has_many</tt> declarations:
       #
       #   class Shirt < ActiveRecord::Base
-      #     named_scope :red, :conditions => {:color => 'red'} do
+      #     scope :red, :conditions => {:color => 'red'} do
       #       def dom_id
       #         'red_shirts'
       #       end
@@ -74,108 +90,118 @@ module ActiveRecord
       # <tt>proxy_options</tt> method on the proxy itself.
       #
       #   class Shirt < ActiveRecord::Base
-      #     named_scope :colored, lambda { |color|
+      #     scope :colored, lambda { |color|
       #       { :conditions => { :color => color } }
       #     }
       #   end
       #
       #   expected_options = { :conditions => { :colored => 'red' } }
       #   assert_equal expected_options, Shirt.colored('red').proxy_options
-      def named_scope(name, options = {}, &block)
+      def scope(name, options = {}, &block)
         name = name.to_sym
+
+        if !scopes[name] && respond_to?(name, true)
+          raise ArgumentError, "Cannot define scope :#{name} because #{self.name}.#{name} method already exists."
+        end
+
         scopes[name] = lambda do |parent_scope, *args|
-          Scope.new(parent_scope, case options
-            when Hash
+          Scope.init(parent_scope, case options
+            when Hash, Relation
               options
             when Proc
               options.call(*args)
           end, &block)
         end
-        (class << self; self end).instance_eval do
+        metaclass.instance_eval do
           define_method name do |*args|
             scopes[name].call(self, *args)
           end
         end
       end
+
+      def named_scope(*args, &block)
+        ActiveSupport::Deprecation.warn("Base.named_scope has been deprecated, please use Base.scope instead", caller)
+        scope(*args, &block)
+      end
     end
-    
-    class Scope
-      attr_reader :proxy_scope, :proxy_options
-      NON_DELEGATE_METHODS = %w(nil? send object_id class extend find size count sum average maximum minimum paginate first last empty? any? respond_to?).to_set
-      [].methods.each do |m|
-        unless m =~ /^__/ || NON_DELEGATE_METHODS.include?(m.to_s)
-          delegate m, :to => :proxy_found
+
+    class Scope < Relation
+      attr_accessor :current_scoped_methods_when_defined
+
+      delegate :scopes, :with_scope, :with_exclusive_scope, :scoped_methods, :scoped, :to => :klass
+
+      def self.init(klass, options, &block)
+        relation = new(klass, klass.arel_table)
+
+        scope = if options.is_a?(Hash)
+          klass.scoped.apply_finder_options(options.except(:extend))
+        else
+          options ? klass.scoped.merge(options) : klass.scoped
+        end
+
+        relation = relation.merge(scope)
+
+        Array.wrap(options[:extend]).each {|extension| relation.send(:extend, extension) } if options.is_a?(Hash)
+        relation.send(:extend, Module.new(&block)) if block_given?
+
+        relation.current_scoped_methods_when_defined = klass.send(:current_scoped_methods)
+        relation
+      end
+
+      def find(*args)
+        options = args.extract_options!
+        relation = options.present? ? apply_finder_options(options) : self
+
+        case args.first
+        when :first, :last, :all
+          relation.send(args.first)
+        else
+          options.present? ? relation.find(*args) : super
         end
       end
 
-      delegate :scopes, :with_scope, :to => :proxy_scope
-
-      def initialize(proxy_scope, options, &block)
-        [options[:extend]].flatten.each { |extension| extend extension } if options[:extend]
-        extend Module.new(&block) if block_given?
-        @proxy_scope, @proxy_options = proxy_scope, options.except(:extend)
-      end
-
-      def reload
-        load_found; self
-      end
-
       def first(*args)
-        if args.first.kind_of?(Integer) || (@found && !args.first.kind_of?(Hash))
-          proxy_found.first(*args)
+        if args.first.kind_of?(Integer) || (loaded? && !args.first.kind_of?(Hash))
+          to_a.first(*args)
         else
-          find(:first, *args)
+          args.first.present? ? apply_finder_options(args.first).first : super
         end
       end
 
       def last(*args)
-        if args.first.kind_of?(Integer) || (@found && !args.first.kind_of?(Hash))
-          proxy_found.last(*args)
+        if args.first.kind_of?(Integer) || (loaded? && !args.first.kind_of?(Hash))
+          to_a.last(*args)
         else
-          find(:last, *args)
+          args.first.present? ? apply_finder_options(args.first).last : super
         end
       end
 
-      def size
-        @found ? @found.length : count
+      def count(*args)
+        options = args.extract_options!
+        options.present? ? apply_finder_options(options).count(*args) : super
       end
 
-      def empty?
-        @found ? @found.empty? : count.zero?
-      end
-
-      def respond_to?(method, include_private = false)
-        super || @proxy_scope.respond_to?(method, include_private)
-      end
-
-      def any?
-        if block_given?
-          proxy_found.any? { |*block_args| yield(*block_args) }
-        else
-          !empty?
-        end
-      end
-
-      protected
-      def proxy_found
-        @found || load_found
+      def ==(other)
+        to_a == other.to_a
       end
 
       private
+
       def method_missing(method, *args, &block)
-        if scopes.include?(method)
-          scopes[method].call(self, *args)
-        else
-          with_scope :find => proxy_options, :create => proxy_options[:conditions].is_a?(Hash) ?  proxy_options[:conditions] : {} do
-            method = :new if method == :build
-            proxy_scope.send(method, *args, &block)
+        if klass.respond_to?(method)
+          with_scope(self) do
+            if current_scoped_methods_when_defined && !scoped_methods.include?(current_scoped_methods_when_defined) && !scopes.include?(method)
+              with_scope(current_scoped_methods_when_defined) { klass.send(method, *args, &block) }
+            else
+              klass.send(method, *args, &block)
+            end
           end
+        else
+          super
         end
       end
 
-      def load_found
-        @found = find(:all)
-      end
     end
+
   end
 end

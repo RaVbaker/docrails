@@ -1,9 +1,13 @@
+require "active_support/core_ext/object/misc"
+require "cgi"
+require "active_support/core_ext/cgi"
+
 module Rails
   module Info
     mattr_accessor :properties
     class << (@@properties = [])
       def names
-        map &:first
+        map {|val| val.first }
       end
 
       def value_for(property_name)
@@ -25,8 +29,10 @@ module Rails
       end
 
       def framework_version(framework)
-        require "#{framework}/version"
-        "#{framework.classify}::VERSION::STRING".constantize
+        if Object.const_defined?(framework.classify)
+          require "#{framework}/version"
+          "#{framework.classify}::VERSION::STRING".constantize
+        end
       end
 
       def edge_rails_revision(info = git_info)
@@ -53,10 +59,15 @@ module Rails
       alias inspect to_s
 
       def to_html
-        returning table = '<table>' do
+        (table = '<table>').tap do
           properties.each do |(name, value)|
             table << %(<tr><td class="name">#{CGI.escapeHTML(name.to_s)}</td>)
-            table << %(<td class="value">#{CGI.escapeHTML(value.to_s)}</td></tr>)
+            formatted_value = if value.kind_of?(Array)
+                  "<ul>" + value.map { |v| "<li>#{CGI.escapeHTML(v.to_s)}</li>" }.join + "</ul>"
+                else
+                  CGI.escapeHTML(value.to_s)
+                end
+            table << %(<td class="value">#{formatted_value}</td></tr>)
           end
           table << '</table>'
         end
@@ -64,7 +75,7 @@ module Rails
 
       protected
         def rails_vendor_root
-          @rails_vendor_root ||= "#{RAILS_ROOT}/vendor/rails"
+          @rails_vendor_root ||= "#{Rails.root}/vendor/rails"
         end
 
         def git_info
@@ -85,6 +96,10 @@ module Rails
       Gem::RubyGemsVersion
     end
 
+    property 'Rack version' do
+      ::Rack.release
+    end
+
     # The Rails version.
     property 'Rails version' do
       Rails::VERSION::STRING
@@ -98,6 +113,10 @@ module Rails
       end
     end
 
+    property 'Middleware' do
+      Rails.configuration.middleware.active.map { |middle| middle.inspect }
+    end
+
     # The Rails Git revision, if it's checked out into vendor/rails.
     property 'Edge Rails revision' do
       edge_rails_revision
@@ -105,17 +124,17 @@ module Rails
 
     # The application's location on the filesystem.
     property 'Application root' do
-      File.expand_path(RAILS_ROOT)
+      File.expand_path(Rails.root)
     end
 
     # The current Rails environment (development, test, or production).
     property 'Environment' do
-      RAILS_ENV
+      Rails.env
     end
 
     # The name of the database adapter for the current environment.
     property 'Database adapter' do
-      ActiveRecord::Base.configurations[RAILS_ENV]['adapter']
+      ActiveRecord::Base.configurations[Rails.env]['adapter']
     end
 
     property 'Database schema version' do

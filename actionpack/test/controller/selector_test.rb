@@ -5,6 +5,7 @@
 
 require 'abstract_unit'
 require 'controller/fake_controllers'
+require 'action_controller/vendor/html-scanner'
 
 class SelectorTest < Test::Unit::TestCase
   #
@@ -303,7 +304,7 @@ class SelectorTest < Test::Unit::TestCase
     assert_equal 1, @matches.size
     assert_equal "2", @matches[0].attributes["id"]
     # Before first and past last returns nothing.:
-    assert_raises(ArgumentError) { select("tr:nth-child(-1)") }
+    assert_raise(ArgumentError) { select("tr:nth-child(-1)") }
     select("tr:nth-child(0)")
     assert_equal 0, @matches.size
     select("tr:nth-child(5)")
@@ -597,8 +598,8 @@ class SelectorTest < Test::Unit::TestCase
 
   def test_negation_details
     parse(%Q{<p id="1"></p><p id="2"></p><p id="3"></p>})
-    assert_raises(ArgumentError) { select(":not(") }
-    assert_raises(ArgumentError) { select(":not(:not())") }
+    assert_raise(ArgumentError) { select(":not(") }
+    assert_raise(ArgumentError) { select(":not(:not())") }
     select("p:not(#1):not(#3)")
     assert_equal 1, @matches.size
     assert_equal "2", @matches[0].attributes["id"]

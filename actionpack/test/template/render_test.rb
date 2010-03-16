@@ -1,10 +1,23 @@
+# encoding: utf-8
 require 'abstract_unit'
 require 'controller/fake_models'
+
+class TestController < ActionController::Base
+end
 
 module RenderTestCases
   def setup_view(paths)
     @assigns = { :secret => 'in the sauce' }
     @view = ActionView::Base.new(paths, @assigns)
+    @controller_view = ActionView::Base.for_controller(TestController.new)
+
+    # Reload and register danish language for testing
+    I18n.reload!
+    I18n.backend.store_translations 'da', {}
+    I18n.backend.store_translations 'pt-BR', {}
+
+    # Ensure original are still the same since we are reindexing view paths
+    assert_equal ORIGINAL_LOCALES, I18n.available_locales.map {|l| l.to_s }.sort
   end
 
   def test_render_file
@@ -17,6 +30,20 @@ module RenderTestCases
 
   def test_render_file_without_specific_extension
     assert_equal "Hello world!", @view.render(:file => "test/hello_world")
+  end
+
+  def test_render_file_with_localization
+    old_locale, I18n.locale = I18n.locale, :da
+    assert_equal "Hey verden", @view.render(:file => "test/hello_world")
+  ensure
+    I18n.locale = old_locale
+  end
+
+  def test_render_file_with_dashed_locale
+    old_locale, I18n.locale = I18n.locale, :"pt-BR"
+    assert_equal "Ola mundo", @view.render(:file => "test/hello_world")
+  ensure
+    I18n.locale = old_locale
   end
 
   def test_render_file_at_top_level
@@ -39,10 +66,6 @@ module RenderTestCases
 
   def test_render_file_not_using_full_path_with_dot_in_path
     assert_equal "The secret is in the sauce\n", @view.render(:file => "test/dot.directory/render_file_with_ivar")
-  end
-
-  def test_render_has_access_current_template
-    assert_equal "test/template.erb", @view.render(:file => "test/template.erb")
   end
 
   def test_render_update
@@ -83,8 +106,8 @@ module RenderTestCases
 
   def test_render_partial_with_errors
     @view.render(:partial => "test/raise")
-    flunk "Render did not raise TemplateError"
-  rescue ActionView::TemplateError => e
+    flunk "Render did not raise Template::Error"
+  rescue ActionView::Template::Error => e
     assert_match "undefined local variable or method `doesnt_exist'", e.message
     assert_equal "", e.sub_template_message
     assert_equal "1", e.line_number
@@ -93,12 +116,16 @@ module RenderTestCases
 
   def test_render_sub_template_with_errors
     @view.render(:file => "test/sub_template_raise")
-    flunk "Render did not raise TemplateError"
-  rescue ActionView::TemplateError => e
+    flunk "Render did not raise Template::Error"
+  rescue ActionView::Template::Error => e
     assert_match "undefined local variable or method `doesnt_exist'", e.message
     assert_equal "Trace of template inclusion: #{File.expand_path("#{FIXTURE_LOAD_PATH}/test/sub_template_raise.html.erb")}", e.sub_template_message
     assert_equal "1", e.line_number
     assert_equal File.expand_path("#{FIXTURE_LOAD_PATH}/test/_raise.html.erb"), e.file_name
+  end
+
+  def test_render_object
+    assert_equal "Hello: david", @view.render(:partial => "test/customer", :object => Customer.new("david"))
   end
 
   def test_render_partial_collection
@@ -111,7 +138,7 @@ module RenderTestCases
   end
 
   def test_render_partial_collection_without_as
-    assert_equal "local_inspector,local_inspector_counter,object",
+    assert_equal "local_inspector,local_inspector_counter",
       @view.render(:partial => "test/local_inspector", :collection => [ Customer.new("mary") ])
   end
 
@@ -131,6 +158,25 @@ module RenderTestCases
     assert_nil @view.render(:partial => [])
   end
 
+  def test_render_partial_using_string
+    assert_equal "Hello: Anonymous", @controller_view.render('customer')
+  end
+
+  def test_render_partial_with_locals_using_string
+    assert_equal "Hola: david", @controller_view.render('customer_greeting', :greeting => 'Hola', :customer_greeting => Customer.new("david"))
+  end
+
+  def test_render_partial_using_object
+    assert_equal "Hello: lifo",
+      @controller_view.render(Customer.new("lifo"), :greeting => "Hello")
+  end
+
+  def test_render_partial_using_collection
+    customers = [ Customer.new("Amazon"), Customer.new("Yahoo") ]
+    assert_equal "Hello: AmazonHello: Yahoo",
+      @controller_view.render(customers, :greeting => "Hello")
+  end
+
   # TODO: The reason for this test is unclear, improve documentation
   def test_render_partial_and_fallback_to_layout
     assert_equal "Before (Josh)\n\nAfter", @view.render(:partial => "test/layout_for_partial", :locals => { :name => "Josh" })
@@ -138,8 +184,10 @@ module RenderTestCases
 
   # TODO: The reason for this test is unclear, improve documentation
   def test_render_missing_xml_partial_and_raise_missing_template
-    @view.template_format = :xml
+    @view.formats = [:xml]
     assert_raise(ActionView::MissingTemplate) { @view.render(:partial => "test/layout_for_partial") }
+  ensure
+    @view.formats = nil
   end
 
   def test_render_inline
@@ -169,15 +217,10 @@ module RenderTestCases
     assert_equal 'source: "Hello, <%= name %>!"', @view.render(:inline => "Hello, <%= name %>!", :locals => { :name => "Josh" }, :type => :foo)
   end
 
-  class LegacyHandler < ActionView::TemplateHandler
-    def render(template, local_assigns)
-      "source: #{template.source}; locals: #{local_assigns.inspect}"
+  def test_render_ignores_templates_with_malformed_template_handlers
+    %w(malformed malformed.erb malformed.html.erb malformed.en.html.erb).each do |name|
+      assert_raise(ActionView::MissingTemplate) { @view.render(:file => "test/malformed/#{name}") }
     end
-  end
-
-  def test_render_legacy_handler_with_custom_type
-    ActionView::Template.register_template_handler :foo, LegacyHandler
-    assert_equal 'source: Hello, <%= name %>!; locals: {:name=>"Josh"}', @view.render(:inline => "Hello, <%= name %>!", :locals => { :name => "Josh" }, :type => :foo)
   end
 
   def test_render_with_layout
@@ -186,31 +229,56 @@ module RenderTestCases
   end
 
   def test_render_with_nested_layout
-    assert_equal %(<title>title</title>\n<div id="column">column</div>\n<div id="content">content</div>\n),
+    assert_equal %(<title>title</title>\n\n\n<div id="column">column</div>\n<div id="content">content</div>\n),
       @view.render(:file => "test/nested_layout.erb", :layout => "layouts/yield")
+  end
+
+  if '1.9'.respond_to?(:force_encoding)
+    def test_render_utf8_template_with_magic_comment
+      with_external_encoding Encoding::ASCII_8BIT do
+        result = @view.render(:file => "test/utf8_magic.html.erb", :layouts => "layouts/yield")
+        assert_equal "Русский текст\nUTF-8\nUTF-8\nUTF-8\n", result
+        assert_equal Encoding::UTF_8, result.encoding
+      end
+    end
+
+    def test_render_utf8_template_with_default_external_encoding
+      with_external_encoding Encoding::UTF_8 do
+        result = @view.render(:file => "test/utf8.html.erb", :layouts => "layouts/yield")
+        assert_equal "Русский текст\nUTF-8\nUTF-8\nUTF-8\n", result
+        assert_equal Encoding::UTF_8, result.encoding
+      end
+    end
+
+    def with_external_encoding(encoding)
+      old, Encoding.default_external = Encoding.default_external, encoding
+      yield
+    ensure
+      Encoding.default_external = old
+    end
   end
 end
 
-class CachedViewRenderTest < Test::Unit::TestCase
+class CachedViewRenderTest < ActiveSupport::TestCase
   include RenderTestCases
 
   # Ensure view path cache is primed
   def setup
     view_paths = ActionController::Base.view_paths
-    assert_equal ActionView::Template::EagerPath, view_paths.first.class
+    assert_equal ActionView::FileSystemResolverWithFallback, view_paths.first.class
     setup_view(view_paths)
   end
 end
 
-class LazyViewRenderTest < Test::Unit::TestCase
+class LazyViewRenderTest < ActiveSupport::TestCase
   include RenderTestCases
 
   # Test the same thing as above, but make sure the view path
   # is not eager loaded
   def setup
-    path = ActionView::Template::Path.new(FIXTURE_LOAD_PATH)
+    path = ActionView::FileSystemResolverWithFallback.new(FIXTURE_LOAD_PATH)
     view_paths = ActionView::Base.process_view_paths(path)
-    assert_equal ActionView::Template::Path, view_paths.first.class
+    assert_equal ActionView::FileSystemResolverWithFallback, view_paths.first.class
     setup_view(view_paths)
   end
 end

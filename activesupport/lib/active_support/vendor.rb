@@ -1,29 +1,19 @@
-# Prefer gems to the bundled libs.
-require 'rubygems'
+require 'pathname'
 
-begin
-  gem 'builder', '~> 2.1.2'
-rescue Gem::LoadError
-  $:.unshift "#{File.dirname(__FILE__)}/vendor/builder-2.1.2"
-end
-require 'builder'
-
-begin
-  gem 'memcache-client', '~> 1.5.0.5'
-rescue Gem::LoadError
-  $:.unshift "#{File.dirname(__FILE__)}/vendor/memcache-client-1.5.0.5"
+def ActiveSupport.requirable?(file)
+  $LOAD_PATH.any? { |p| Dir.glob("#{p}/#{file}.*").any? }
 end
 
-begin
-  gem 'tzinfo', '~> 0.3.12'
-rescue Gem::LoadError
-  $:.unshift "#{File.dirname(__FILE__)}/vendor/tzinfo-0.3.12"
+[%w(builder 2.1.2), %w(memcache-client 1.7.5), %w(tzinfo 0.3.15)].each do |lib, version|
+  # If the lib is not already requirable
+  unless ActiveSupport.requirable? lib
+    # Try to activate a gem ~> satisfying the requested version first.
+    begin
+      gem lib, ">= #{version}"
+      # Use the vendored lib if the gem's missing or we aren't using RubyGems.
+    rescue LoadError, NoMethodError
+      # There could be symlinks
+      $LOAD_PATH.unshift Pathname.new(__FILE__).dirname.join("vendor/#{lib}-#{version}/lib").realpath.to_s
+    end
+  end
 end
-
-# TODO I18n gem has not been released yet
-# begin
-#   gem 'i18n', '~> 0.1.1'
-# rescue Gem::LoadError
-  $:.unshift "#{File.dirname(__FILE__)}/vendor/i18n-0.1.1/lib"
-  require 'i18n'
-# end

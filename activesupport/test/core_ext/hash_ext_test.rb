@@ -1,5 +1,7 @@
 require 'abstract_unit'
-require 'builder'
+require 'active_support/core_ext/hash'
+require 'bigdecimal'
+require 'active_support/core_ext/string/access'
 
 class HashExtTest < Test::Unit::TestCase
   def setup
@@ -174,6 +176,13 @@ class HashExtTest < Test::Unit::TestCase
     assert_equal 2, hash['b']
   end
 
+  def test_indifferent_reverse_merging
+    hash = HashWithIndifferentAccess.new('some' => 'value', 'other' => 'value')
+    hash.reverse_merge!(:some => 'noclobber', :another => 'clobber')
+    assert_equal 'value', hash[:some]
+    assert_equal 'clobber', hash[:another]
+  end
+
   def test_indifferent_deleting
     get_hash = proc{ { :a => 'foo' }.with_indifferent_access }
     hash = get_hash.call
@@ -234,7 +243,7 @@ class HashExtTest < Test::Unit::TestCase
       { :failure => "stuff", :funny => "business" }.assert_valid_keys(:failure, :funny)
     end
 
-    assert_raises(ArgumentError, "Unknown key(s): failore") do
+    assert_raise(ArgumentError, "Unknown key(s): failore") do
       { :failore => "stuff", :funny => "business" }.assert_valid_keys([ :failure, :funny ])
       { :failore => "stuff", :funny => "business" }.assert_valid_keys(:failure, :funny)
     end
@@ -251,6 +260,18 @@ class HashExtTest < Test::Unit::TestCase
     hash_2 = { :a => 1, :c => { :c1 => 2, :c3 => { :d2 => "d2" } } }
     expected = { :a => 1, :b => "b", :c => { :c1 => 2, :c2 => "c2", :c3 => { :d1 => "d1", :d2 => "d2" } } }
     assert_equal expected, hash_1.deep_merge(hash_2)
+
+    hash_1.deep_merge!(hash_2)
+    assert_equal expected, hash_1
+  end
+
+  def test_deep_merge_on_indifferent_access
+    hash_1 = HashWithIndifferentAccess.new({ :a => "a", :b => "b", :c => { :c1 => "c1", :c2 => "c2", :c3 => { :d1 => "d1" } } })
+    hash_2 = HashWithIndifferentAccess.new({ :a => 1, :c => { :c1 => 2, :c3 => { :d2 => "d2" } } })
+    hash_3 = { :a => 1, :c => { :c1 => 2, :c3 => { :d2 => "d2" } } }
+    expected = { "a" => 1, "b" => "b", "c" => { "c1" => 2, "c2" => "c2", "c3" => { "d1" => "d1", "d2" => "d2" } } }
+    assert_equal expected, hash_1.deep_merge(hash_2)
+    assert_equal expected, hash_1.deep_merge(hash_3)
 
     hash_1.deep_merge!(hash_2)
     assert_equal expected, hash_1
@@ -490,6 +511,15 @@ class HashToXmlTest < Test::Unit::TestCase
     assert xml.include?(%(<addresses type="array"><address><streets type="array"><street><name>))
   end
 
+  def test_timezoned_attributes
+    xml = {
+      :created_at => Time.utc(1999,2,2),
+      :local_created_at => Time.utc(1999,2,2).in_time_zone('Eastern Time (US & Canada)')
+    }.to_xml(@xml_options)
+    assert_match %r{<created-at type=\"datetime\">1999-02-02T00:00:00Z</created-at>}, xml
+    assert_match %r{<local-created-at type=\"datetime\">1999-02-01T19:00:00-05:00</local-created-at>}, xml
+  end
+
   def test_single_record_from_xml
     topic_xml = <<-EOT
       <topic>
@@ -628,6 +658,22 @@ class HashToXmlTest < Test::Unit::TestCase
     assert_equal expected_topic_hash, Hash.from_xml(topic_xml)["rsp"]["photos"]["photo"]
   end
   
+  def test_all_caps_key_from_xml
+    test_xml = <<-EOT
+      <ABC3XYZ>
+        <TEST>Lorem Ipsum</TEST>
+      </ABC3XYZ>
+    EOT
+
+    expected_hash = {
+      "ABC3XYZ" => {
+        "TEST" => "Lorem Ipsum"
+      }
+    }
+
+    assert_equal expected_hash, Hash.from_xml(test_xml)
+  end
+
   def test_empty_array_from_xml
     blog_xml = <<-XML
       <blog>
@@ -846,45 +892,24 @@ class HashToXmlTest < Test::Unit::TestCase
     assert_equal 30,    alert_at.min
     assert_equal 45,    alert_at.sec
   end
-end
 
-class QueryTest < Test::Unit::TestCase
-  def test_simple_conversion
-    assert_query_equal 'a=10', :a => 10
-  end
-
-  def test_cgi_escaping
-    assert_query_equal 'a%3Ab=c+d', 'a:b' => 'c d'
-  end
-
-  def test_nil_parameter_value
-    empty = Object.new
-    def empty.to_param; nil end
-    assert_query_equal 'a=', 'a' => empty
-  end
-
-  def test_nested_conversion
-    assert_query_equal 'person%5Blogin%5D=seckar&person%5Bname%5D=Nicholas',
-      :person => {:name => 'Nicholas', :login => 'seckar'}
-  end
-
-  def test_multiple_nested
-    assert_query_equal 'account%5Bperson%5D%5Bid%5D=20&person%5Bid%5D=10',
-      :person => {:id => 10}, :account => {:person => {:id => 20}}
-  end
-
-  def test_array_values
-    assert_query_equal 'person%5Bid%5D%5B%5D=10&person%5Bid%5D%5B%5D=20',
-      :person => {:id => [10, 20]}
-  end
-
-  def test_array_values_are_not_sorted
-    assert_query_equal 'person%5Bid%5D%5B%5D=20&person%5Bid%5D%5B%5D=10',
-      :person => {:id => [20, 10]}
+  def test_to_xml_dups_options
+    options = {:skip_instruct => true}
+    {}.to_xml(options)
+    # :builder, etc, shouldn't be added to options
+    assert_equal({:skip_instruct => true}, options)
   end
 
   def test_expansion_count_is_limited
-    assert_raises RuntimeError do
+    expected = {
+      'ActiveSupport::XmlMini_REXML'       => 'RuntimeError',
+      'ActiveSupport::XmlMini_Nokogiri'    => 'Nokogiri::XML::SyntaxError',
+      'ActiveSupport::XmlMini_NokogiriSAX' => 'RuntimeError',
+      'ActiveSupport::XmlMini_LibXML'      => 'LibXML::XML::Error',
+      'ActiveSupport::XmlMini_LibXMLSAX'   => 'LibXML::XML::Error',
+    }[ActiveSupport::XmlMini.backend.name].constantize
+
+    assert_raise expected do
       attack_xml = <<-EOT
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE member [
@@ -903,9 +928,4 @@ class QueryTest < Test::Unit::TestCase
       Hash.from_xml(attack_xml)
     end
   end
-
-  private
-    def assert_query_equal(expected, actual, message = nil)
-      assert_equal expected.split('&'), actual.to_query.split('&')
-    end
 end

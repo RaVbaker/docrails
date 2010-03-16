@@ -1,7 +1,7 @@
-require 'benchmark'
 require 'date'
 require 'bigdecimal'
 require 'bigdecimal/util'
+require 'active_support/core_ext/benchmark'
 
 # TODO: Autoload these files
 require 'active_record/connection_adapters/abstract/schema_definitions'
@@ -31,6 +31,7 @@ module ActiveRecord
       include Quoting, DatabaseStatements, SchemaStatements
       include QueryCache
       include ActiveSupport::Callbacks
+
       define_callbacks :checkout, :checkin
 
       @@row_even = true
@@ -38,7 +39,6 @@ module ActiveRecord
       def initialize(connection, logger = nil) #:nodoc:
         @connection, @logger = connection, logger
         @runtime = 0
-        @last_verification = 0
         @query_cache_enabled = false
       end
 
@@ -54,6 +54,13 @@ module ActiveRecord
         false
       end
 
+      # Can this adapter determine the primary key for tables not attached
+      # to an ActiveRecord class, such as join tables?  Backend specific, as
+      # the abstract adapter always returns +false+.
+      def supports_primary_key?
+        false
+      end
+
       # Does this adapter support using DISTINCT within COUNT?  This is +true+
       # for all adapters except sqlite.
       def supports_count_distinct?
@@ -66,7 +73,7 @@ module ActiveRecord
       def supports_ddl_transactions?
         false
       end
-      
+
       # Does this adapter support savepoints? PostgreSQL and MySQL do, SQLite
       # does not.
       def supports_savepoints?
@@ -183,52 +190,27 @@ module ActiveRecord
         "active_record_#{open_transactions}"
       end
 
-      def log_info(sql, name, ms)
-        if @logger && @logger.debug?
-          name = '%s (%.1fms)' % [name || 'SQL', ms]
-          @logger.debug(format_log_entry(name, sql.squeeze(' ')))
-        end
-      end
-
       protected
+
         def log(sql, name)
-          if block_given?
-            result = nil
-            ms = Benchmark.ms { result = yield }
-            @runtime += ms
-            log_info(sql, name, ms)
-            result
-          else
-            log_info(sql, name, 0)
-            nil
+          name ||= "SQL"
+          result = nil
+          ActiveSupport::Notifications.instrument("active_record.sql",
+            :sql => sql, :name => name, :connection_id => self.object_id) do
+            @runtime += Benchmark.ms { result = yield }
           end
+          result
         rescue Exception => e
-          # Log message and raise exception.
-          # Set last_verification to 0, so that connection gets verified
-          # upon reentering the request loop
-          @last_verification = 0
           message = "#{e.class.name}: #{e.message}: #{sql}"
-          log_info(message, name, 0)
-          raise ActiveRecord::StatementInvalid, message
+          @logger.debug message if @logger
+          raise translate_exception(e, message)
         end
 
-        def format_log_entry(message, dump = nil)
-          if ActiveRecord::Base.colorize_logging
-            if @@row_even
-              @@row_even = false
-              message_color, dump_color = "4;36;1", "0;1"
-            else
-              @@row_even = true
-              message_color, dump_color = "4;35;1", "0"
-            end
-
-            log_entry = "  \e[#{message_color}m#{message}\e[0m   "
-            log_entry << "\e[#{dump_color}m%#{String === dump ? 's' : 'p'}\e[0m" % dump if dump
-            log_entry
-          else
-            "%s  %s" % [message, dump]
-          end
+        def translate_exception(e, message)
+          # override in derived class
+          ActiveRecord::StatementInvalid.new(message)
         end
+
     end
   end
 end

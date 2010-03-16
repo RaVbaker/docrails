@@ -1,22 +1,28 @@
-$:.unshift File.dirname(__FILE__) + "/../../activesupport/lib"
-$:.unshift File.dirname(__FILE__) + "/../../actionpack/lib"
-$:.unshift File.dirname(__FILE__) + "/../lib"
-$:.unshift File.dirname(__FILE__) + "/../builtin/rails_info"
+ORIG_ARGV = ARGV.dup
 
-require 'rubygems'
-require 'test/unit'
-gem 'mocha', '>= 0.9.3'
-require 'mocha'
+root = File.expand_path('../../..', __FILE__)
+begin
+  require "#{root}/vendor/gems/environment"
+rescue LoadError
+  %w(activesupport activemodel activerecord actionpack actionmailer activeresource railties).each do |lib|
+    $:.unshift "#{root}/#{lib}/lib"
+  end
+end
+
+$:.unshift "#{root}/railties/builtin/rails_info"
+
 require 'stringio'
+require 'test/unit'
+require 'fileutils'
+
 require 'active_support'
-require 'active_support/test_case'
+require 'active_support/core_ext/logger'
 
-def uses_mocha(test_name)
-  yield
-end
+require 'action_controller'
+require 'rails/all'
 
-if defined?(RAILS_ROOT)
-  RAILS_ROOT.replace File.dirname(__FILE__)
-else
-  RAILS_ROOT = File.dirname(__FILE__)
+# TODO: Remove these hacks
+class TestApp < Rails::Application
+  config.root = File.dirname(__FILE__)
 end
+Rails.application = TestApp

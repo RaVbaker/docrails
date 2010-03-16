@@ -1,100 +1,58 @@
-require 'active_support/json'
-
 module ActiveRecord #:nodoc:
   module Serialization
-    class Serializer #:nodoc:
-      attr_reader :options
+    extend ActiveSupport::Concern
+    include ActiveModel::Serializers::JSON
 
-      def initialize(record, options = {})
-        @record, @options = record, options.dup
+    def serializable_hash(options = nil)
+      options ||= {}
+
+      options[:except] = Array.wrap(options[:except]).map { |n| n.to_s }
+      options[:except] |= Array.wrap(self.class.inheritance_column)
+
+      hash = super(options)
+
+      serializable_add_includes(options) do |association, records, opts|
+        hash[association] = records.is_a?(Enumerable) ?
+          records.map { |r| r.serializable_hash(opts) } :
+          records.serializable_hash(opts)
       end
 
-      # To replicate the behavior in ActiveRecord#attributes,
-      # <tt>:except</tt> takes precedence over <tt>:only</tt>.  If <tt>:only</tt> is not set
-      # for a N level model but is set for the N+1 level models,
-      # then because <tt>:except</tt> is set to a default value, the second
-      # level model can have both <tt>:except</tt> and <tt>:only</tt> set.  So if
-      # <tt>:only</tt> is set, always delete <tt>:except</tt>.
-      def serializable_attribute_names
-        attribute_names = @record.attribute_names
+      hash
+    end
 
-        if options[:only]
-          options.delete(:except)
-          attribute_names = attribute_names & Array(options[:only]).collect { |n| n.to_s }
-        else
-          options[:except] = Array(options[:except]) | Array(@record.class.inheritance_column)
-          attribute_names = attribute_names - options[:except].collect { |n| n.to_s }
-        end
-
-        attribute_names
-      end
-
-      def serializable_method_names
-        Array(options[:methods]).inject([]) do |method_attributes, name|
-          method_attributes << name if @record.respond_to?(name.to_s)
-          method_attributes
-        end
-      end
-
-      def serializable_names
-        serializable_attribute_names + serializable_method_names
-      end
-
+    private
       # Add associations specified via the <tt>:includes</tt> option.
       # Expects a block that takes as arguments:
       #   +association+ - name of the association
       #   +records+     - the association record(s) to be serialized
       #   +opts+        - options for the association records
-      def add_includes(&block)
-        if include_associations = options.delete(:include)
-          base_only_or_except = { :except => options[:except],
-                                  :only => options[:only] }
+      def serializable_add_includes(options = {})
+        return unless include_associations = options.delete(:include)
 
-          include_has_options = include_associations.is_a?(Hash)
-          associations = include_has_options ? include_associations.keys : Array(include_associations)
+        base_only_or_except = { :except => options[:except],
+                                :only => options[:only] }
 
-          for association in associations
-            records = case @record.class.reflect_on_association(association).macro
-            when :has_many, :has_and_belongs_to_many
-              @record.send(association).to_a
-            when :has_one, :belongs_to
-              @record.send(association)
-            end
+        include_has_options = include_associations.is_a?(Hash)
+        associations = include_has_options ? include_associations.keys : Array.wrap(include_associations)
 
-            unless records.nil?
-              association_options = include_has_options ? include_associations[association] : base_only_or_except
-              opts = options.merge(association_options)
-              yield(association, records, opts)
-            end
+        for association in associations
+          records = case self.class.reflect_on_association(association).macro
+          when :has_many, :has_and_belongs_to_many
+            send(association).to_a
+          when :has_one, :belongs_to
+            send(association)
           end
 
-          options[:include] = include_associations
-        end
-      end
-
-      def serializable_record
-        returning(serializable_record = {}) do
-          serializable_names.each { |name| serializable_record[name] = @record.send(name) }
-          add_includes do |association, records, opts|
-            if records.is_a?(Enumerable)
-              serializable_record[association] = records.collect { |r| self.class.new(r, opts).serializable_record }
-            else
-              serializable_record[association] = self.class.new(records, opts).serializable_record
-            end
+          unless records.nil?
+            association_options = include_has_options ? include_associations[association] : base_only_or_except
+            opts = options.merge(association_options)
+            yield(association, records, opts)
           end
         end
-      end
 
-      def serialize
-        # overwrite to implement
+        options[:include] = include_associations
       end
-
-      def to_s(&block)
-        serialize(&block)
-      end
-    end
   end
 end
 
 require 'active_record/serializers/xml_serializer'
-require 'active_record/serializers/json_serializer'

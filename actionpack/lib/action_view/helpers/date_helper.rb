@@ -26,8 +26,10 @@ module ActionView
       #   47 hrs, 59 mins, 29 secs <-> 29 days, 23 hrs, 59 mins, 29 secs            # => [2..29] days
       #   29 days, 23 hrs, 59 mins, 30 secs <-> 59 days, 23 hrs, 59 mins, 29 secs   # => about 1 month
       #   59 days, 23 hrs, 59 mins, 30 secs <-> 1 yr minus 1 sec                    # => [2..12] months
-      #   1 yr <-> 2 yrs minus 1 secs                                               # => about 1 year
-      #   2 yrs <-> max time or date                                                # => over [2..X] years
+      #   1 yr <-> 1 yr, 3 months                                                   # => about 1 year
+      #   1 yr, 3 months <-> 1 yr, 9 months                                         # => over 1 year
+      #   1 yr, 9 months <-> 2 yr minus 1 sec                                       # => almost 2 years
+      #   2 yrs <-> max time or date                                                # => (same rules as 1 yr)
       #
       # With <tt>include_seconds</tt> = true and the difference < 1 minute 29 seconds:
       #   0-4   secs      # => less than 5 seconds
@@ -43,17 +45,18 @@ module ActionView
       #   distance_of_time_in_words(from_time, 50.minutes.from_now)           # => about 1 hour
       #   distance_of_time_in_words(from_time, from_time + 15.seconds)        # => less than a minute
       #   distance_of_time_in_words(from_time, from_time + 15.seconds, true)  # => less than 20 seconds
-      #   distance_of_time_in_words(from_time, 3.years.from_now)              # => over 3 years
+      #   distance_of_time_in_words(from_time, 3.years.from_now)              # => about 3 years
       #   distance_of_time_in_words(from_time, from_time + 60.hours)          # => about 3 days
       #   distance_of_time_in_words(from_time, from_time + 45.seconds, true)  # => less than a minute
       #   distance_of_time_in_words(from_time, from_time - 45.seconds, true)  # => less than a minute
       #   distance_of_time_in_words(from_time, 76.seconds.from_now)           # => 1 minute
       #   distance_of_time_in_words(from_time, from_time + 1.year + 3.days)   # => about 1 year
-      #   distance_of_time_in_words(from_time, from_time + 4.years + 9.days + 30.minutes + 5.seconds) # => over 4 years
+      #   distance_of_time_in_words(from_time, from_time + 3.years + 6.months) # => over 3 years
+      #   distance_of_time_in_words(from_time, from_time + 4.years + 9.days + 30.minutes + 5.seconds) # => about 4 years
       #
       #   to_time = Time.now + 6.years + 19.days
-      #   distance_of_time_in_words(from_time, to_time, true)     # => over 6 years
-      #   distance_of_time_in_words(to_time, from_time, true)     # => over 6 years
+      #   distance_of_time_in_words(from_time, to_time, true)     # => about 6 years
+      #   distance_of_time_in_words(to_time, from_time, true)     # => about 6 years
       #   distance_of_time_in_words(Time.now, Time.now)           # => less than a minute
       #
       def distance_of_time_in_words(from_time, to_time = 0, include_seconds = false, options = {})
@@ -81,12 +84,21 @@ module ActionView
             when 2..44           then locale.t :x_minutes,      :count => distance_in_minutes
             when 45..89          then locale.t :about_x_hours,  :count => 1
             when 90..1439        then locale.t :about_x_hours,  :count => (distance_in_minutes.to_f / 60.0).round
-            when 1440..2879      then locale.t :x_days,         :count => 1
-            when 2880..43199     then locale.t :x_days,         :count => (distance_in_minutes / 1440).round
+            when 1440..2529      then locale.t :x_days,         :count => 1
+            when 2530..43199     then locale.t :x_days,         :count => (distance_in_minutes.to_f / 1440.0).round
             when 43200..86399    then locale.t :about_x_months, :count => 1
-            when 86400..525599   then locale.t :x_months,       :count => (distance_in_minutes / 43200).round
-            when 525600..1051199 then locale.t :about_x_years,  :count => 1
-            else                      locale.t :over_x_years,   :count => (distance_in_minutes / 525600).round
+            when 86400..525599   then locale.t :x_months,       :count => (distance_in_minutes.to_f / 43200.0).round
+            else
+              distance_in_years           = distance_in_minutes / 525600
+              minute_offset_for_leap_year = (distance_in_years / 4) * 1440
+              remainder                   = ((distance_in_minutes - minute_offset_for_leap_year) % 525600)
+              if remainder < 131400
+                locale.t(:about_x_years,  :count => distance_in_years)
+              elsif remainder < 394200
+                locale.t(:over_x_years,   :count => distance_in_years)
+              else
+                locale.t(:almost_x_years, :count => distance_in_years + 1)
+              end
           end
         end
       end
@@ -106,18 +118,18 @@ module ActionView
       alias_method :distance_of_time_in_words_to_now, :time_ago_in_words
 
       # Returns a set of select tags (one for year, month, and day) pre-selected for accessing a specified date-based
-      # attribute (identified by +method+) on an object assigned to the template (identified by +object+). You can
-      # the output in the +options+ hash.
+      # attribute (identified by +method+) on an object assigned to the template (identified by +object+).
+      #
       #
       # ==== Options
       # * <tt>:use_month_numbers</tt> - Set to true if you want to use month numbers rather than month names (e.g.
       #   "2" instead of "February").
-      # * <tt>:use_short_month</tt>   - Set to true if you want to use the abbreviated month name instead of the full
-      #   name (e.g. "Feb" instead of "February").
-      # * <tt>:add_month_number</tt>  - Set to true if you want to show both, the month's number and name (e.g.
+      # * <tt>:use_short_month</tt>   - Set to true if you want to use abbreviated month names instead of full
+      #   month names (e.g. "Feb" instead of "February").
+      # * <tt>:add_month_numbers</tt>  - Set to true if you want to use both month numbers and month names (e.g.
       #   "2 - February" instead of "February").
       # * <tt>:use_month_names</tt>   - Set to an array with 12 month names if you want to customize month names.
-      #   Note: You can also use Rails' new i18n functionality for this.
+      #   Note: You can also use Rails' i18n functionality for this.
       # * <tt>:date_separator</tt>    - Specifies a string to separate the date fields. Default is "" (i.e. nothing).
       # * <tt>:start_year</tt>        - Set the start year for the year select. Default is <tt>Time.now.year - 5</tt>.
       # * <tt>:end_year</tt>          - Set the end year for the year select. Default is <tt>Time.now.year + 5</tt>.
@@ -128,7 +140,7 @@ module ActionView
       #   as a hidden field instead of showing a select field. Also note that this implicitly sets :discard_day to true.
       # * <tt>:discard_year</tt>      - Set to true if you don't want to show a year select. This includes the year
       #   as a hidden field instead of showing a select field.
-      # * <tt>:order</tt>             - Set to an array containing <tt>:day</tt>, <tt>:month</tt> and <tt>:year</tt> do
+      # * <tt>:order</tt>             - Set to an array containing <tt>:day</tt>, <tt>:month</tt> and <tt>:year</tt> to
       #   customize the order in which the select fields are shown. If you leave out any of the symbols, the respective
       #   select will not be shown (like when you set <tt>:discard_xxx => true</tt>. Defaults to the order defined in
       #   the respective locale (e.g. [:year, :month, :day] in the en locale that ships with Rails).
@@ -232,7 +244,7 @@ module ActionView
 
       # Returns a set of select tags (one for year, month, day, hour, and minute) pre-selected for accessing a
       # specified datetime-based attribute (identified by +method+) on an object assigned to the template (identified
-      # by +object+). Examples:
+      # by +object+).
       #
       # If anything is passed in the html_options hash it will be applied to every select tag in the set.
       #
@@ -604,7 +616,7 @@ module ActionView
 
           build_selects_from_types(order)
         else
-          "#{select_date}#{@options[:datetime_separator]}#{select_time}"
+          "#{select_date}#{@options[:datetime_separator]}#{select_time}".html_safe!
         end
       end
 
@@ -823,7 +835,7 @@ module ActionView
           select_html << prompt_option_tag(type, @options[:prompt]) + "\n" if @options[:prompt]
           select_html << select_options_as_html.to_s
 
-          content_tag(:select, select_html, select_options) + "\n"
+          (content_tag(:select, select_html, select_options) + "\n").html_safe!
         end
 
         # Builds a prompt option tag with supplied options or from default options
@@ -848,12 +860,12 @@ module ActionView
         #  build_hidden(:year, 2008)
         #  => "<input id="post_written_on_1i" name="post[written_on(1i)]" type="hidden" value="2008" />"
         def build_hidden(type, value)
-          tag(:input, {
+          (tag(:input, {
             :type => "hidden",
             :id => input_id_from_type(type),
             :name => input_name_from_type(type),
             :value => value
-          }) + "\n"
+          }) + "\n").html_safe!
         end
 
         # Returns the name attribute for the input tag
@@ -876,15 +888,15 @@ module ActionView
           input_name_from_type(type).gsub(/([\[\(])|(\]\[)/, '_').gsub(/[\]\)]/, '')
         end
 
-        # Given an ordering of datetime components, create the selection html
-        # and join them with their appropriate seperators
+        # Given an ordering of datetime components, create the selection HTML
+        # and join them with their appropriate separators.
         def build_selects_from_types(order)
           select = ''
           order.reverse.each do |type|
             separator = separator(type) unless type == order.first # don't add on last field
             select.insert(0, separator.to_s + send("select_#{type}").to_s)
           end
-          select
+          select.html_safe!
         end
 
         # Returns the separator for a given datetime component
@@ -904,15 +916,15 @@ module ActionView
 
     class InstanceTag #:nodoc:
       def to_date_select_tag(options = {}, html_options = {})
-        datetime_selector(options, html_options).select_date
+        datetime_selector(options, html_options).select_date.html_safe!
       end
 
       def to_time_select_tag(options = {}, html_options = {})
-        datetime_selector(options, html_options).select_time
+        datetime_selector(options, html_options).select_time.html_safe!
       end
 
       def to_datetime_select_tag(options = {}, html_options = {})
-        datetime_selector(options, html_options).select_datetime
+        datetime_selector(options, html_options).select_datetime.html_safe!
       end
 
       private
@@ -931,7 +943,7 @@ module ActionView
         end
 
         def default_datetime(options)
-          return if options[:include_blank]
+          return if options[:include_blank] || options[:prompt]
 
           case options[:default]
             when nil

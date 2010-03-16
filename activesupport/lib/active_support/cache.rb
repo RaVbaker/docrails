@@ -1,4 +1,10 @@
 require 'benchmark'
+require 'active_support/core_ext/array/wrap'
+require 'active_support/core_ext/benchmark'
+require 'active_support/core_ext/exception'
+require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext/object/to_param'
+require 'active_support/core_ext/string/inflections'
 
 module ActiveSupport
   # See ActiveSupport::Cache::Store for documentation.
@@ -6,7 +12,6 @@ module ActiveSupport
     autoload :FileStore, 'active_support/cache/file_store'
     autoload :MemoryStore, 'active_support/cache/memory_store'
     autoload :SynchronizedMemoryStore, 'active_support/cache/synchronized_memory_store'
-    autoload :DRbStore, 'active_support/cache/drb_store'
     autoload :MemCacheStore, 'active_support/cache/mem_cache_store'
     autoload :CompressedMemCacheStore, 'active_support/cache/compressed_mem_cache_store'
 
@@ -25,9 +30,9 @@ module ActiveSupport
     #
     #   ActiveSupport::Cache.lookup_store(:memory_store)
     #   # => returns a new ActiveSupport::Cache::MemoryStore object
-    #   
-    #   ActiveSupport::Cache.lookup_store(:drb_store)
-    #   # => returns a new ActiveSupport::Cache::DRbStore object
+    #
+    #   ActiveSupport::Cache.lookup_store(:mem_cache_store)
+    #   # => returns a new ActiveSupport::Cache::MemCacheStore object
     #
     # Any additional arguments will be passed to the corresponding cache store
     # class's constructor:
@@ -40,11 +45,11 @@ module ActiveSupport
     #   ActiveSupport::Cache.lookup_store(MyOwnCacheStore.new)
     #   # => returns MyOwnCacheStore.new
     def self.lookup_store(*store_option)
-      store, *parameters = *([ store_option ].flatten)
+      store, *parameters = *Array.wrap(store_option).flatten
 
       case store
       when Symbol
-        store_class_name = (store == :drb_store ? "DRbStore" : store.to_s.camelize)
+        store_class_name = store.to_s.camelize
         store_class = ActiveSupport::Cache.const_get(store_class_name)
         store_class.new(*parameters)
       when nil
@@ -54,19 +59,27 @@ module ActiveSupport
       end
     end
 
+    RAILS_CACHE_ID   = ENV["RAILS_CACHE_ID"]
+    RAILS_APP_VERION = ENV["RAILS_APP_VERION"]
+    EXPANDED_CACHE   = RAILS_CACHE_ID || RAILS_APP_VERION
+
     def self.expand_cache_key(key, namespace = nil)
       expanded_cache_key = namespace ? "#{namespace}/" : ""
 
-      if ENV["RAILS_CACHE_ID"] || ENV["RAILS_APP_VERSION"]
-        expanded_cache_key << "#{ENV["RAILS_CACHE_ID"] || ENV["RAILS_APP_VERSION"]}/"
+      if EXPANDED_CACHE
+        expanded_cache_key << "#{RAILS_CACHE_ID || RAILS_APP_VERION}/"
       end
 
-      expanded_cache_key << case
-        when key.respond_to?(:cache_key)
+      expanded_cache_key <<
+        if key.respond_to?(:cache_key)
           key.cache_key
-        when key.is_a?(Array)
-          key.collect { |element| expand_cache_key(element) }.to_param
-        when key
+        elsif key.is_a?(Array)
+          if key.size > 1
+            key.collect { |element| expand_cache_key(element) }.to_param
+          else
+            key.first.to_param
+          end
+        elsif key
           key.to_param
         end.to_s
 
@@ -84,16 +97,35 @@ module ActiveSupport
     # Ruby objects, but don't count on every cache store to be able to do that.
     #
     #   cache = ActiveSupport::Cache::MemoryStore.new
-    #   
+    #
     #   cache.read("city")   # => nil
     #   cache.write("city", "Duckburgh")
     #   cache.read("city")   # => "Duckburgh"
     class Store
-      cattr_accessor :logger
+      cattr_accessor :logger, :instance_writter => false
+
+      attr_reader :silence
+      alias :silence? :silence
 
       def silence!
         @silence = true
         self
+      end
+
+      def mute
+        previous_silence, @silence = defined?(@silence) && @silence, true
+        yield
+      ensure
+        @silence = previous_silence
+      end
+
+      # Set to true if cache stores should be instrumented. By default is false.
+      def self.instrument=(boolean)
+        Thread.current[:instrument_cache_store] = boolean
+      end
+
+      def self.instrument
+        Thread.current[:instrument_cache_store] || false
       end
 
       # Fetches data from the cache, using the given key. If there is data in
@@ -107,7 +139,7 @@ module ActiveSupport
       #
       #   cache.write("today", "Monday")
       #   cache.fetch("today")  # => "Monday"
-      #   
+      #
       #   cache.fetch("city")   # => nil
       #   cache.fetch("city") do
       #     "Duckburgh"
@@ -126,8 +158,8 @@ module ActiveSupport
       #
       # For example, MemCacheStore's #write method supports the +:expires_in+
       # option, which tells the memcached server to automatically expire the
-      # cache item after a certain period. We can use this option with #fetch
-      # too:
+      # cache item after a certain period. This options is also supported by
+      # FileStore's #read method. We can use this option with #fetch too:
       #
       #   cache = ActiveSupport::Cache::MemCacheStore.new
       #   cache.fetch("foo", :force => true, :expires_in => 5.seconds) do
@@ -136,26 +168,13 @@ module ActiveSupport
       #   cache.fetch("foo")  # => "bar"
       #   sleep(6)
       #   cache.fetch("foo")  # => nil
-      def fetch(key, options = {})
-        @logger_off = true
+      def fetch(key, options = {}, &block)
         if !options[:force] && value = read(key, options)
-          @logger_off = false
-          log("hit", key, options)
           value
         elsif block_given?
-          @logger_off = false
-          log("miss", key, options)
-
-          value = nil
-          ms = Benchmark.ms { value = yield }
-
-          @logger_off = true
-          write(key, value, options)
-          @logger_off = false
-
-          log('write (will save %.2fms)' % ms, key, nil)
-
-          value
+          result = instrument(:generate, key, options, &block)
+          write(key, result, options)
+          result
         end
       end
 
@@ -166,8 +185,12 @@ module ActiveSupport
       # You may also specify additional options via the +options+ argument.
       # The specific cache store implementation will decide what to do with
       # +options+.
-      def read(key, options = nil)
-        log("read", key, options)
+      #
+      # For example, FileStore supports the +:expires_in+ option, which
+      # makes the method return nil for cache items older than the specified
+      # period.
+      def read(key, options = nil, &block)
+        instrument(:read, key, options, &block)
       end
 
       # Writes the given value to the cache, with the given key.
@@ -175,7 +198,7 @@ module ActiveSupport
       # You may also specify additional options via the +options+ argument.
       # The specific cache store implementation will decide what to do with
       # +options+.
-      # 
+      #
       # For example, MemCacheStore supports the +:expires_in+ option, which
       # tells the memcached server to automatically expire the cache item after
       # a certain period:
@@ -185,24 +208,23 @@ module ActiveSupport
       #   cache.read("foo")  # => "bar"
       #   sleep(6)
       #   cache.read("foo")  # => nil
-      def write(key, value, options = nil)
-        log("write", key, options)
+      def write(key, value, options = nil, &block)
+        instrument(:write, key, options, &block)
       end
 
-      def delete(key, options = nil)
-        log("delete", key, options)
+      def delete(key, options = nil, &block)
+        instrument(:delete, key, options, &block)
       end
 
-      def delete_matched(matcher, options = nil)
-        log("delete matched", matcher.inspect, options)
+      def delete_matched(matcher, options = nil, &block)
+        instrument(:delete_matched, matcher.inspect, options, &block)
       end
 
-      def exist?(key, options = nil)
-        log("exist?", key, options)
+      def exist?(key, options = nil, &block)
+        instrument(:exist?, key, options, &block)
       end
 
       def increment(key, amount = 1)
-        log("incrementing", key, amount)
         if num = read(key)
           write(key, num + amount)
         else
@@ -211,7 +233,6 @@ module ActiveSupport
       end
 
       def decrement(key, amount = 1)
-        log("decrementing", key, amount)
         if num = read(key)
           write(key, num - amount)
         else
@@ -220,8 +241,27 @@ module ActiveSupport
       end
 
       private
+        def expires_in(options)
+          expires_in = options && options[:expires_in]
+          raise ":expires_in must be a number" if expires_in && !expires_in.is_a?(Numeric)
+          expires_in || 0
+        end
+
+        def instrument(operation, key, options)
+          log(operation, key, options)
+
+          if self.class.instrument
+            payload = { :key => key }
+            payload.merge!(options) if options.is_a?(Hash)
+            ActiveSupport::Notifications.instrument("active_support.cache_#{operation}", payload){ yield }
+          else
+            yield
+          end
+        end
+
         def log(operation, key, options)
-          logger.debug("Cache #{operation}: #{key}#{options ? " (#{options.inspect})" : ""}") if logger && !@silence && !@logger_off
+          return unless logger && !silence?
+          logger.debug("Cache #{operation}: #{key}#{options ? " (#{options.inspect})" : ""}")
         end
     end
   end

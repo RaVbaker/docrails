@@ -1,18 +1,30 @@
-require 'rubygems'
+ORIG_ARGV = ARGV.dup
+
+begin
+  require File.expand_path('../../../vendor/gems/environment', __FILE__)
+rescue LoadError
+end
+
+lib = File.expand_path("#{File.dirname(__FILE__)}/../lib")
+$:.unshift(lib) unless $:.include?('lib') || $:.include?(lib)
+
 require 'test/unit'
-gem 'mocha', '>= 0.9.3'
 require 'mocha'
 
-$:.unshift "#{File.dirname(__FILE__)}/../lib"
+ENV['NO_RELOAD'] = '1'
 require 'active_support'
-require 'active_support/test_case'
+
+# Include shims until we get off 1.8.6
+require 'active_support/ruby/shim'
 
 def uses_memcached(test_name)
   require 'memcache'
-  MemCache.new('localhost').stats
-  yield
-rescue MemCache::MemCacheError
-  $stderr.puts "Skipping #{test_name} tests. Start memcached and try again."
+  begin
+    MemCache.new('localhost').stats
+    yield
+  rescue MemCache::MemCacheError
+    $stderr.puts "Skipping #{test_name} tests. Start memcached and try again."
+  end
 end
 
 def with_kcode(code)

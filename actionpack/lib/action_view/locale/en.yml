@@ -9,7 +9,7 @@
       delimiter: ","
       # Number of decimals, behind the separator (the number 1 with a precision of 2 gives: 1.00)
       precision: 3
-      
+
     # Used in number_to_currency()
     currency:
       format:
@@ -20,15 +20,15 @@
         separator: "."
         delimiter: ","
         precision: 2
-        
+
     # Used in number_to_percentage()
     percentage:
       format:
         # These three are to override number.format and are optional
-        # separator: 
+        # separator:
         delimiter: ""
-        # precision: 
-        
+        # precision:
+
     # Used in number_to_precision()
     precision:
       format:
@@ -36,15 +36,26 @@
         # separator:
         delimiter: ""
         # precision:
-        
+
     # Used in number_to_human_size()
     human:
       format:
         # These three are to override number.format and are optional
-        # separator: 
+        # separator:
         delimiter: ""
         precision: 1
-      storage_units: [Bytes, KB, MB, GB, TB]
+      storage_units:
+        # Storage units output formatting.
+        # %u is the storage unit, %n is the number (default: 2 MB)
+        format: "%n %u"
+        units:
+          byte:
+            one:   "Byte"
+            other: "Bytes"
+          kb: "KB"
+          mb: "MB"
+          gb: "GB"
+          tb: "TB"
 
   # Used in distance_of_time_in_words(), distance_of_time_in_words_to_now(), time_ago_in_words()
   datetime:
@@ -80,6 +91,9 @@
       over_x_years:
         one:   "over 1 year"
         other: "over {{count}} years"
+      almost_x_years:
+        one:   "almost 1 year"
+        other: "almost {{count}} years"
     prompts:
       year:   "Year"
       month:  "Month"
@@ -88,12 +102,22 @@
       minute: "Minute"
       second: "Seconds"
 
-  activerecord:
-    errors:
-      template:
-        header:
-          one:    "1 error prohibited this {{model}} from being saved"
-          other:  "{{count}} errors prohibited this {{model}} from being saved"
-        # The variable :count is also available
-        body: "There were problems with the following fields:"
+  errors:
+    template:
+      header:
+        one:    "1 error prohibited this {{model}} from being saved"
+        other:  "{{count}} errors prohibited this {{model}} from being saved"
+      # The variable :count is also available
+      body: "There were problems with the following fields:"
+
+  helpers:
+    select:
+      # Default value for :prompt => true in FormOptionsHelper
+      prompt: "Please select"
+
+    # Default translation keys for submit FormHelper
+    submit:
+      create: 'Create {{model}}'
+      update: 'Update {{model}}'
+      submit: 'Save {{model}}'
 

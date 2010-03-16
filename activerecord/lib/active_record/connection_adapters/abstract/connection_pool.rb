@@ -1,5 +1,6 @@
 require 'monitor'
 require 'set'
+require 'active_support/core_ext/module/synchronization'
 
 module ActiveRecord
   # Raised when a connection could not be obtained within the connection
@@ -55,7 +56,7 @@ module ActiveRecord
     # * +wait_timeout+: number of seconds to block and wait for a connection
     #   before giving up and raising a timeout error (default 5 seconds).
     class ConnectionPool
-      attr_reader :spec
+      attr_reader :spec, :connections
 
       # Creates a new ConnectionPool object. +spec+ is a ConnectionSpecification
       # object which describes database connection information (e.g. adapter,
@@ -107,13 +108,14 @@ module ActiveRecord
         checkin conn if conn
       end
 
-      # Reserve a connection, and yield it to a block. Ensure the connection is
-      # checked back in when finished.
+      # If a connection already exists yield it to the block.  If no connection
+      # exists checkout a connection, yield it to the block, and checkin the 
+      # connection when finished.
       def with_connection
-        conn = checkout
-        yield conn
+        fresh_connection = true unless @reserved_connections[current_connection_id]
+        yield connection
       ensure
-        checkin conn
+        release_connection if fresh_connection
       end
 
       # Returns true if a connection has already been opened.
@@ -209,9 +211,10 @@ module ActiveRecord
       # calling +checkout+ on this pool.
       def checkin(conn)
         @connection_mutex.synchronize do
-          conn.run_callbacks :checkin
-          @checked_out.delete conn
-          @queue.signal
+          conn.run_callbacks :checkin do
+            @checked_out.delete conn
+            @queue.signal
+          end
         end
       end
 
@@ -253,9 +256,10 @@ module ActiveRecord
       end
 
       def checkout_and_verify(c)
-        c.verify!
-        c.run_callbacks :checkout
-        @checked_out << c
+        c.run_callbacks :checkout do
+          c.verify!
+          @checked_out << c
+        end
         c
       end
     end
@@ -349,6 +353,22 @@ module ActiveRecord
         return pool if pool
         return nil if ActiveRecord::Base == klass
         retrieve_connection_pool klass.superclass
+      end
+    end
+
+    class ConnectionManagement
+      def initialize(app)
+        @app = app
+      end
+
+      def call(env)
+        @app.call(env)
+      ensure
+        # Don't return connection (and perform implicit rollback) if
+        # this request is a part of integration test
+        unless env.key?("rack.test")
+          ActiveRecord::Base.clear_active_connections!
+        end
       end
     end
   end

@@ -1,3 +1,6 @@
+require 'active_support/base64'
+require 'active_support/core_ext/object/blank'
+
 module ActiveSupport
   # MessageVerifier makes it easy to generate and verify messages which are signed
   # to prevent tampering.
@@ -24,11 +27,13 @@ module ActiveSupport
     end
     
     def verify(signed_message)
+      raise InvalidSignature if signed_message.blank?
+
       data, digest = signed_message.split("--")
-      if digest != generate_digest(data)
-        raise InvalidSignature
-      else
+      if data.present? && digest.present? && secure_compare(digest, generate_digest(data))
         Marshal.load(ActiveSupport::Base64.decode64(data))
+      else
+        raise InvalidSignature
       end
     end
     
@@ -38,9 +43,20 @@ module ActiveSupport
     end
     
     private
+      # constant-time comparison algorithm to prevent timing attacks
+      def secure_compare(a, b)
+        return false unless a.bytesize == b.bytesize
+
+        l = a.unpack "C#{a.bytesize}"
+
+        res = 0
+        b.each_byte { |byte| res |= byte ^ l.shift }
+        res == 0
+      end
+
       def generate_digest(data)
         require 'openssl' unless defined?(OpenSSL)
-        OpenSSL::HMAC.hexdigest(OpenSSL::Digest::Digest.new(@digest), @secret, data)
+        OpenSSL::HMAC.hexdigest(OpenSSL::Digest.const_get(@digest).new, @secret, data)
       end
   end
 end

@@ -1,6 +1,6 @@
 module ActiveRecord
   module Associations
-    class HasOneAssociation < BelongsToAssociation #:nodoc:
+    class HasOneAssociation < AssociationProxy #:nodoc:
       def initialize(owner, reflection)
         super
         construct_sql
@@ -8,18 +8,21 @@ module ActiveRecord
 
       def create(attrs = {}, replace_existing = true)
         new_record(replace_existing) do |reflection|
+          attrs = merge_with_conditions(attrs)
           reflection.create_association(attrs)
         end
       end
 
       def create!(attrs = {}, replace_existing = true)
         new_record(replace_existing) do |reflection|
+          attrs = merge_with_conditions(attrs)
           reflection.create_association!(attrs)
         end
       end
 
       def build(attrs = {}, replace_existing = true)
         new_record(replace_existing) do |reflection|
+          attrs = merge_with_conditions(attrs)
           reflection.build_association(attrs)
         end
       end
@@ -29,8 +32,17 @@ module ActiveRecord
 
         unless @target.nil? || @target == obj
           if dependent? && !dont_save
-            @target.destroy unless @target.new_record?
-            @owner.clear_association_cache
+            case @reflection.options[:dependent]
+            when :delete
+              @target.delete unless @target.new_record?
+              @owner.clear_association_cache
+            when :destroy
+              @target.destroy unless @target.new_record?
+              @owner.clear_association_cache
+            when :nullify
+              @target[@reflection.primary_key_name] = nil
+              @target.save unless @owner.new_record? || @target.new_record?
+            end
           else
             @target[@reflection.primary_key_name] = nil
             @target.save unless @owner.new_record? || @target.new_record?
@@ -45,6 +57,7 @@ module ActiveRecord
           @target = (AssociationProxy === obj ? obj.target : obj)
         end
 
+        set_inverse_instance(obj, @owner)
         @loaded = true
 
         unless @owner.new_record? or obj.nil? or dont_save
@@ -65,19 +78,21 @@ module ActiveRecord
 
       private
         def find_target
-          @reflection.klass.find(:first, 
+          the_target = @reflection.klass.find(:first,
             :conditions => @finder_sql,
             :select     => @reflection.options[:select],
-            :order      => @reflection.options[:order], 
+            :order      => @reflection.options[:order],
             :include    => @reflection.options[:include],
             :readonly   => @reflection.options[:readonly]
           )
+          set_inverse_instance(the_target, @owner)
+          the_target
         end
 
         def construct_sql
           case
             when @reflection.options[:as]
-              @finder_sql = 
+              @finder_sql =
                 "#{@reflection.quoted_table_name}.#{@reflection.options[:as]}_id = #{owner_quoted_id} AND " +
                 "#{@reflection.quoted_table_name}.#{@reflection.options[:as]}_type = #{@owner.class.quote_value(@owner.class.base_class.name.to_s)}"
             else
@@ -85,7 +100,7 @@ module ActiveRecord
           end
           @finder_sql << " AND (#{conditions})" if conditions
         end
-        
+
         def construct_scope
           create_scoping = {}
           set_belongs_to_association_for(create_scoping)
@@ -102,13 +117,25 @@ module ActiveRecord
           end
 
           if replace_existing
-            replace(record, true) 
+            replace(record, true)
           else
             record[@reflection.primary_key_name] = @owner.id unless @owner.new_record?
             self.target = record
+            set_inverse_instance(record, @owner)
           end
 
           record
+        end
+
+        def we_can_set_the_inverse_on_this?(record)
+          inverse = @reflection.inverse_of
+          return !inverse.nil?
+        end
+
+        def merge_with_conditions(attrs={})
+          attrs ||= {}
+          attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
+          attrs
         end
     end
   end

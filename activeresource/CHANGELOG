@@ -1,3 +1,19 @@
+*Edge*
+
+* Add support for errors in JSON format.  #1956 [Fabien Jakimowicz]
+
+* Recognizes 410 as Resource Gone. #2316 [Jordan Brough, Jatinder Singh]
+
+* More thorough SSL support.  #2370 [Roy Nicholson]
+
+* HTTP proxy support.  #2133 [Marshall Huss, Sébastien Dabet]
+
+
+*2.3.2 [Final] (March 15, 2009)*
+
+* Nothing new, just included in 2.3.2
+
+
 *2.2.1 [RC2] (November 14th, 2008)*
 
 * Fixed that ActiveResource#post would post an empty string when it shouldn't be posting anything #525 [Paolo Angelini]

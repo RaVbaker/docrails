@@ -1,11 +1,14 @@
 require 'abstract_unit'
+require 'controller/fake_models'
 
 class Post
+  extend ActiveModel::Naming
+  include ActiveModel::Conversion
   def id
      45
   end
   def body
-    "What a wonderful world!"
+    super || "What a wonderful world!"
   end
 end
 
@@ -13,6 +16,7 @@ class RecordTagHelperTest < ActionView::TestCase
   tests ActionView::Helpers::RecordTagHelper
 
   def setup
+    super
     @post = Post.new
   end
 
@@ -23,7 +27,7 @@ class RecordTagHelperTest < ActionView::TestCase
   end
 
   def test_content_tag_for_prefix
-    expected = %(<ul class="post" id="archived_post_45"></ul>)
+    expected = %(<ul class="archived_post" id="archived_post_45"></ul>)
     actual = content_tag_for(:ul, @post, :archived) { }
     assert_dom_equal expected, actual
   end

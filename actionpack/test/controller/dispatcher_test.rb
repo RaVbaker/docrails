@@ -1,104 +1,59 @@
 require 'abstract_unit'
 
-uses_mocha 'dispatcher tests' do
-
-class DispatcherTest < Test::Unit::TestCase
-  Dispatcher = ActionController::Dispatcher
+# Ensure deprecated dispatcher works
+class DeprecatedDispatcherTest < ActiveSupport::TestCase
+  class DummyApp
+    def call(env)
+      [200, {}, 'response']
+    end
+  end 
 
   def setup
-    ENV['REQUEST_METHOD'] = 'GET'
-
-    # Clear callbacks as they are redefined by Dispatcher#define_dispatcher_callbacks
-    Dispatcher.instance_variable_set("@prepare_dispatch_callbacks", ActiveSupport::Callbacks::CallbackChain.new)
-    Dispatcher.instance_variable_set("@before_dispatch_callbacks", ActiveSupport::Callbacks::CallbackChain.new)
-    Dispatcher.instance_variable_set("@after_dispatch_callbacks", ActiveSupport::Callbacks::CallbackChain.new)
-
-    Dispatcher.stubs(:require_dependency)
-
-    @dispatcher = Dispatcher.new
+    ActionDispatch::Callbacks.reset_callbacks(:prepare)
+    ActionDispatch::Callbacks.reset_callbacks(:call)
   end
 
-  def teardown
-    ENV.delete 'REQUEST_METHOD'
-  end
+  def test_assert_deprecated_to_prepare
+    a = nil
 
-  def test_clears_dependencies_after_dispatch_if_in_loading_mode
-    ActiveSupport::Dependencies.expects(:clear).once
-    dispatch(false)
-  end
-
-  def test_reloads_routes_before_dispatch_if_in_loading_mode
-    ActionController::Routing::Routes.expects(:reload).once
-    dispatch(false)
-  end
-
-  def test_leaves_dependencies_after_dispatch_if_not_in_loading_mode
-    ActionController::Routing::Routes.expects(:reload).never
-    ActiveSupport::Dependencies.expects(:clear).never
-
-    dispatch
-  end
-
-  # Stub out dispatch error logger
-  class << Dispatcher
-    def log_failsafe_exception(status, exception); end
-  end
-
-  def test_failsafe_response
-    Dispatcher.any_instance.expects(:dispatch).raises('b00m')
-    ActionController::Failsafe.any_instance.expects(:log_failsafe_exception)
-
-    assert_nothing_raised do
-      assert_equal [
-        500,
-        {"Content-Type" => "text/html"},
-        "<html><body><h1>500 Internal Server Error</h1></body></html>"
-      ], dispatch
+    assert_deprecated do
+      ActionController::Dispatcher.to_prepare { a = 1 }
     end
-  end
 
-  def test_prepare_callbacks
-    a = b = c = nil
-    Dispatcher.to_prepare { |*args| a = b = c = 1 }
-    Dispatcher.to_prepare { |*args| b = c = 2 }
-    Dispatcher.to_prepare { |*args| c = 3 }
-
-    # Ensure to_prepare callbacks are not run when defined
-    assert_nil a || b || c
-
-    # Run callbacks
-    @dispatcher.send :run_callbacks, :prepare_dispatch
-
-    assert_equal 1, a
-    assert_equal 2, b
-    assert_equal 3, c
-
-    # Make sure they are only run once
-    a = b = c = nil
+    assert_nil a
     dispatch
-    assert_nil a || b || c
+    assert_equal 1, a
   end
 
-  def test_to_prepare_with_identifier_replaces
-    a = b = nil
-    Dispatcher.to_prepare(:unique_id) { |*args| a = b = 1 }
-    Dispatcher.to_prepare(:unique_id) { |*args| a = 2 }
+  def test_assert_deprecated_before_dispatch
+    a = nil
 
-    @dispatcher.send :run_callbacks, :prepare_dispatch
-    assert_equal 2, a
-    assert_equal nil, b
+    assert_deprecated do
+      ActionController::Dispatcher.before_dispatch { a = 1 }
+    end
+
+    assert_nil a
+    dispatch
+    assert_equal 1, a
+  end
+
+  def test_assert_deprecated_after_dispatch
+    a = nil
+
+    assert_deprecated do
+      ActionController::Dispatcher.after_dispatch { a = 1 }
+    end
+
+    assert_nil a
+    dispatch
+    assert_equal 1, a
   end
 
   private
-    def dispatch(cache_classes = true)
-      ActionController::Routing::RouteSet.any_instance.stubs(:call).returns([200, {}, 'response'])
-      Dispatcher.define_dispatcher_callbacks(cache_classes)
-      @dispatcher.call({})
-    end
 
-    def assert_subclasses(howmany, klass, message = klass.subclasses.inspect)
-      assert_equal howmany, klass.subclasses.size, message
+    def dispatch(cache_classes = true)
+      @dispatcher ||= ActionDispatch::Callbacks.new(DummyApp.new, !cache_classes)
+      @dispatcher.call({'rack.input' => StringIO.new('')})
     end
-end
 
 end

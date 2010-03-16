@@ -99,7 +99,8 @@ module InflectorTestCases
     "prize"       => "prizes",
     "edge"        => "edges",
 
-    "cow"         => "kine"
+    "cow"         => "kine",
+    "database"    => "databases"
   }
 
   CamelToUnderscore = {
@@ -114,6 +115,13 @@ module InflectorTestCases
     "special_guest"          => "specialGuest",
     "application_controller" => "applicationController",
     "area51_controller"      => "area51Controller"
+  }
+
+  SymbolToLowerCamel = {
+    :product                => 'product',
+    :special_guest          => 'specialGuest',
+    :application_controller => 'applicationController',
+    :area51_controller      => 'area51Controller'
   }
 
   CamelToUnderscoreWithoutReverse = {
@@ -151,6 +159,22 @@ module InflectorTestCases
     "Trailing bad characters!@#"          => "trailing-bad-characters",
     "!@#Leading bad characters"           => "leading-bad-characters",
     "Squeeze   separators"                => "squeeze-separators"
+  }
+
+  StringToParameterizeWithNoSeparator = {
+    "Donald E. Knuth"                     => "donaldeknuth",
+    "Random text with *(bad)* characters" => "randomtextwithbadcharacters",
+    "Trailing bad characters!@#"          => "trailingbadcharacters",
+    "!@#Leading bad characters"           => "leadingbadcharacters",
+    "Squeeze   separators"                => "squeezeseparators"
+  }
+
+  StringToParameterizeWithUnderscore = {
+    "Donald E. Knuth"                     => "donald_e_knuth",
+    "Random text with *(bad)* characters" => "random_text_with_bad_characters",
+    "Trailing bad characters!@#"          => "trailing_bad_characters",
+    "!@#Leading bad characters"           => "leading_bad_characters",
+    "Squeeze   separators"                => "squeeze_separators"
   }
 
   # Ruby 1.9 doesn't do Unicode normalization yet.

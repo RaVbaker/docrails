@@ -1,4 +1,6 @@
 require 'active_support/basic_object'
+require 'active_support/core_ext/array/conversions'
+require 'active_support/core_ext/object/acts_like'
 
 module ActiveSupport
   # Provides accurate date and time measurements using Date#advance and 
@@ -34,7 +36,7 @@ module ActiveSupport
     end
 
     def is_a?(klass) #:nodoc:
-      klass == Duration || super
+      Duration == klass || value.is_a?(klass)
     end
 
     # Returns true if <tt>other</tt> is also a Duration instance with the
@@ -48,7 +50,9 @@ module ActiveSupport
     end
 
     def self.===(other) #:nodoc:
-      other.is_a?(Duration) rescue super
+      other.is_a?(Duration)
+    rescue ::NoMethodError
+      false
     end
 
     # Calculates a new Time or Date that is as far in the future
@@ -67,10 +71,12 @@ module ActiveSupport
 
     def inspect #:nodoc:
       consolidated = parts.inject(::Hash.new(0)) { |h,part| h[part.first] += part.last; h }
-      [:years, :months, :days, :minutes, :seconds].map do |length|
+      parts = [:years, :months, :days, :minutes, :seconds].map do |length|
         n = consolidated[length]
         "#{n} #{n == 1 ? length.to_s.singularize : length.to_s}" if n.nonzero?
-      end.compact.to_sentence
+      end.compact
+      parts = ["0 seconds"] if parts.empty?
+      parts.to_sentence(:locale => :en)
     end
 
     protected

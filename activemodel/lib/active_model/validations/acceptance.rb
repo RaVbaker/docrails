@@ -1,5 +1,24 @@
 module ActiveModel
   module Validations
+    class AcceptanceValidator < EachValidator
+      def initialize(options)
+        super(options.reverse_merge(:allow_nil => true, :accept => "1"))
+      end
+
+      def validate_each(record, attribute, value)
+        unless value == options[:accept]
+          record.errors.add(attribute, :accepted, :default => options[:message])
+        end
+      end
+      
+      def setup(klass)
+        # Note: instance_methods.map(&:to_s) is important for 1.9 compatibility
+        # as instance_methods returns symbols unlike 1.8 which returns strings.
+        new_attributes = attributes.reject { |name| klass.instance_methods.map(&:to_s).include?("#{name}=") }
+        klass.send(:attr_accessor, *new_attributes)        
+      end
+    end
+
     module ClassMethods
       # Encapsulates the pattern of wanting to validate the acceptance of a terms of service check box (or similar agreement). Example:
       #
@@ -8,16 +27,16 @@ module ActiveModel
       #     validates_acceptance_of :eula, :message => "must be abided"
       #   end
       #
-      # If the database column does not exist, the <tt>:terms_of_service</tt> attribute is entirely virtual. This check is
-      # performed only if <tt>:terms_of_service</tt> is not +nil+ and by default on save.
+      # If the database column does not exist, the +terms_of_service+ attribute is entirely virtual. This check is
+      # performed only if +terms_of_service+ is not +nil+ and by default on save.
       #
       # Configuration options:
-      # * <tt>:message</tt> - A custom error message (default is: "must be accepted")
-      # * <tt>:on</tt> - Specifies when this validation is active (default is <tt>:save</tt>, other options <tt>:create</tt>, <tt>:update</tt>)
-      # * <tt>:allow_nil</tt> - Skip validation if attribute is +nil+. (default is +true+)
+      # * <tt>:message</tt> - A custom error message (default is: "must be accepted").
+      # * <tt>:on</tt> - Specifies when this validation is active (default is <tt>:save</tt>, other options <tt>:create</tt>, <tt>:update</tt>).
+      # * <tt>:allow_nil</tt> - Skip validation if attribute is +nil+ (default is true).
       # * <tt>:accept</tt> - Specifies value that is considered accepted.  The default value is a string "1", which
       #   makes it easy to relate to an HTML checkbox. This should be set to +true+ if you are validating a database
-      #   column, since the attribute is typecasted from "1" to +true+ before validation.
+      #   column, since the attribute is typecast from "1" to +true+ before validation.
       # * <tt>:if</tt> - Specifies a method, proc or string to call to determine if the validation should
       #   occur (e.g. <tt>:if => :allow_validation</tt>, or <tt>:if => Proc.new { |user| user.signup_step > 2 }</tt>).  The
       #   method, proc or string should return or evaluate to a true or false value.
@@ -25,20 +44,7 @@ module ActiveModel
       #   not occur (e.g. <tt>:unless => :skip_validation</tt>, or <tt>:unless => Proc.new { |user| user.signup_step <= 2 }</tt>).  The
       #   method, proc or string should return or evaluate to a true or false value.
       def validates_acceptance_of(*attr_names)
-        configuration = { :message => ActiveRecord::Errors.default_error_messages[:accepted], :on => :save, :allow_nil => true, :accept => "1" }
-        configuration.update(attr_names.extract_options!)
-
-        db_cols = begin
-          column_names
-        rescue ActiveRecord::StatementInvalid
-          []
-        end
-        names = attr_names.reject { |name| db_cols.include?(name.to_s) }
-        attr_accessor(*names)
-
-        validates_each(attr_names,configuration) do |record, attr_name, value|
-          record.errors.add(attr_name, configuration[:message]) unless value == configuration[:accept]
-        end
+        validates_with AcceptanceValidator, _merge_attributes(attr_names)
       end
     end
   end

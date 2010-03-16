@@ -41,8 +41,16 @@ module ActiveRecord
       #  # create_table() passes a TableDefinition object to the block.
       #  # This form will not only create the table, but also columns for the
       #  # table.
+      #
       #  create_table(:suppliers) do |t|
       #    t.column :name, :string, :limit => 60
+      #    # Other fields here
+      #  end
+      #
+      # === Block form, with shorthand
+      #  # You can also use the column types as method calls, rather than calling the column method.
+      #  create_table(:suppliers) do |t|
+      #    t.string :name, :limit => 60
       #    # Other fields here
       #  end
       #
@@ -99,9 +107,9 @@ module ActiveRecord
       # See also TableDefinition#column for details on how to create columns.
       def create_table(table_name, options = {})
         table_definition = TableDefinition.new(self)
-        table_definition.primary_key(options[:primary_key] || Base.get_primary_key(table_name)) unless options[:id] == false
+        table_definition.primary_key(options[:primary_key] || Base.get_primary_key(table_name.to_s.singularize)) unless options[:id] == false
 
-        yield table_definition
+        yield table_definition if block_given?
 
         if options[:force] && table_exists?(table_name)
           drop_table(table_name, options)
@@ -316,18 +324,18 @@ module ActiveRecord
       def initialize_schema_migrations_table
         sm_table = ActiveRecord::Migrator.schema_migrations_table_name
 
-        unless tables.detect { |t| t == sm_table }
+        unless table_exists?(sm_table)
           create_table(sm_table, :id => false) do |schema_migrations_table|
             schema_migrations_table.column :version, :string, :null => false
           end
           add_index sm_table, :version, :unique => true,
-            :name => 'unique_schema_migrations'
+            :name => "#{Base.table_name_prefix}unique_schema_migrations#{Base.table_name_suffix}"
 
           # Backwards-compatibility: if we find schema_info, assume we've
           # migrated up to that point:
           si_table = Base.table_name_prefix + 'schema_info' + Base.table_name_suffix
 
-          if tables.detect { |t| t == si_table }
+          if table_exists?(si_table)
 
             old_version = select_value("SELECT version FROM #{quote_table_name(si_table)}").to_i
             assume_migrated_upto_version(old_version)
@@ -336,12 +344,12 @@ module ActiveRecord
         end
       end
 
-      def assume_migrated_upto_version(version)
+      def assume_migrated_upto_version(version, migrations_path = ActiveRecord::Migrator.migrations_path)
         version = version.to_i
         sm_table = quote_table_name(ActiveRecord::Migrator.schema_migrations_table_name)
 
         migrated = select_values("SELECT version FROM #{sm_table}").map(&:to_i)
-        versions = Dir['db/migrate/[0-9]*_*.rb'].map do |filename|
+        versions = Dir["#{migrations_path}/[0-9]*_*.rb"].map do |filename|
           filename.split('/').last.split('_').first.to_i
         end
 
@@ -401,12 +409,6 @@ module ActiveRecord
       #   distinct("posts.id", "posts.created_at desc")
       def distinct(columns, order_by)
         "DISTINCT #{columns}"
-      end
-
-      # ORDER BY clause for the passed order option.
-      # PostgreSQL overrides this due to its stricter standards compliance.
-      def add_order_by_for_association_limiting!(sql, options)
-        sql << " ORDER BY #{options[:order]}"
       end
 
       # Adds timestamps (created_at and updated_at) columns to the named table.

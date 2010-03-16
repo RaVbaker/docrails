@@ -1,3 +1,6 @@
+require 'active_support/core_ext/module/aliasing'
+require 'active_support/core_ext/array/extract_options'
+
 class Module
   # Synchronize access around a method, delegating synchronization to a
   # particular mutex. A mutex (either a Mutex, or any object that responds to 

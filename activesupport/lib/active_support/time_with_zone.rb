@@ -1,4 +1,5 @@
-require 'tzinfo'
+require "active_support/values/time_zone"
+require 'active_support/core_ext/object/acts_like'
 
 module ActiveSupport
   # A Time-like class that can represent a time in any time zone. Necessary because standard Ruby Time instances are
@@ -15,7 +16,7 @@ module ActiveSupport
   #   Time.zone.now                                   # => Sun, 18 May 2008 13:07:55 EDT -04:00
   #   Time.utc(2007, 2, 10, 20, 30, 45).in_time_zone  # => Sat, 10 Feb 2007 15:30:45 EST -05:00
   #
-  # See TimeZone and ActiveSupport::CoreExtensions::Time::Zones for further documentation for these methods.
+  # See Time and TimeZone for further documentation of these methods.
   #
   # TimeWithZone instances implement the same API as Ruby Time instances, so that Time and TimeWithZone instances are interchangable. Examples:
   #
@@ -31,6 +32,10 @@ module ActiveSupport
   #   t.is_a?(Time)                         # => true
   #   t.is_a?(ActiveSupport::TimeWithZone)  # => true
   class TimeWithZone
+    def self.name
+      'Time' # Report class name as 'Time' to thwart type checking
+    end
+    
     include Comparable
     attr_reader :time_zone
 
@@ -87,7 +92,7 @@ module ActiveSupport
     alias_method :gmtoff, :utc_offset
 
     def formatted_offset(colon = true, alternate_utc_string = nil)
-      utc? && alternate_utc_string || utc_offset.to_utc_offset_s(colon)
+      utc? && alternate_utc_string || TimeZone.seconds_to_utc_offset(utc_offset, colon)
     end
 
     # Time uses +zone+ to display the time zone abbreviation, so we're duck-typing it.
@@ -108,23 +113,24 @@ module ActiveSupport
     end
     alias_method :iso8601, :xmlschema
 
-    # Returns a JSON string representing the TimeWithZone. If ActiveSupport.use_standard_json_time_format is set to
-    # true, the ISO 8601 format is used.
+    # Coerces the date to a string for JSON encoding. The default format is ISO 8601. You can get
+    # %Y/%m/%d %H:%M:%S +offset style by setting ActiveSupport::JSON::Encoding.use_standard_json_time_format
+    # to false.
     #
     # ==== Examples
     #
-    #   # With ActiveSupport.use_standard_json_time_format = true
+    #   # With ActiveSupport::JSON::Encoding.use_standard_json_time_format = true
     #   Time.utc(2005,2,1,15,15,10).in_time_zone.to_json
     #   # => "2005-02-01T15:15:10Z"
     #
-    #   # With ActiveSupport.use_standard_json_time_format = false
+    #   # With ActiveSupport::JSON::Encoding.use_standard_json_time_format = false
     #   Time.utc(2005,2,1,15,15,10).in_time_zone.to_json
     #   # => "2005/02/01 15:15:10 +0000"
-    def to_json(options = nil)
-      if ActiveSupport.use_standard_json_time_format
-        xmlschema.inspect
+    def as_json(options = nil)
+      if ActiveSupport::JSON::Encoding.use_standard_json_time_format
+        xmlschema
       else
-        %("#{time.strftime("%Y/%m/%d %H:%M:%S")} #{formatted_offset(false)}")
+        %(#{time.strftime("%Y/%m/%d %H:%M:%S")} #{formatted_offset(false)})
       end
     end
 
@@ -148,13 +154,15 @@ module ActiveSupport
     # <tt>:db</tt> format outputs time in UTC; all others output time in local.
     # Uses TimeWithZone's +strftime+, so <tt>%Z</tt> and <tt>%z</tt> work correctly.
     def to_s(format = :default)
-      return utc.to_s(format) if format == :db
-      if formatter = ::Time::DATE_FORMATS[format]
+      if format == :db
+        utc.to_s(format)
+      elsif formatter = ::Time::DATE_FORMATS[format]
         formatter.respond_to?(:call) ? formatter.call(self).to_s : strftime(formatter)
       else
         "#{time.strftime("%Y-%m-%d %H:%M:%S")} #{formatted_offset(false, 'UTC')}" # mimicking Ruby 1.9 Time#to_s format
       end
     end
+    alias_method :to_formatted_s, :to_s
 
     # Replaces <tt>%Z</tt> and <tt>%z</tt> directives with +zone+ and +formatted_offset+, respectively, before passing to
     # Time#strftime, so that zone information is correct
@@ -229,7 +237,7 @@ module ActiveSupport
     def advance(options)
       # If we're advancing a value of variable length (i.e., years, weeks, months, days), advance from #time,
       # otherwise advance from #utc, for accuracy when moving across DST boundaries
-      if options.detect {|k,v| [:years, :weeks, :months, :days].include? k}
+      if options.values_at(:years, :weeks, :months, :days).any?
         method_missing(:advance, options)
       else
         utc.advance(options).in_time_zone(time_zone)
@@ -237,10 +245,10 @@ module ActiveSupport
     end
 
     %w(year mon month day mday wday yday hour min sec to_date).each do |method_name|
-      class_eval <<-EOV
-        def #{method_name}     # def year
-          time.#{method_name}  #   time.year
-        end                    # end
+      class_eval <<-EOV, __FILE__, __LINE__ + 1
+        def #{method_name}    # def month
+          time.#{method_name} #   time.month
+        end                   # end
       EOV
     end
 
@@ -327,7 +335,7 @@ module ActiveSupport
       end
 
       def duration_of_variable_length?(obj)
-        ActiveSupport::Duration === obj && obj.parts.flatten.detect {|p| [:years, :months, :days].include? p }
+        ActiveSupport::Duration === obj && obj.parts.any? {|p| [:years, :months, :days].include? p[0] }
       end
   end
 end

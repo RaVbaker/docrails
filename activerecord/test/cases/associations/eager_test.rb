@@ -61,14 +61,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
   end
 
   def test_with_two_tables_in_from_without_getting_double_quoted
-    posts = Post.find(:all,
-      :select     => "posts.*",
-      :from       => "authors, posts",
-      :include    => :comments,
-      :conditions => "posts.author_id = authors.id",
-      :order      => "posts.id"
-    )
-
+    posts = Post.select("posts.*").from("authors, posts").eager_load(:comments).where("posts.author_id = authors.id").order("posts.id").to_a
     assert_equal 2, posts.first.comments.size
   end
 
@@ -223,6 +216,18 @@ class EagerAssociationTest < ActiveRecord::TestCase
     end
   end
 
+  def test_eager_association_loading_with_belongs_to_and_conditions_hash
+    comments = []
+    assert_nothing_raised do
+      comments = Comment.find(:all, :include => :post, :conditions => {:posts => {:id => 4}}, :limit => 3, :order => 'comments.id')
+    end
+    assert_equal 3, comments.length
+    assert_equal [5,6,7], comments.collect { |c| c.id }
+    assert_no_queries do
+      comments.first.post
+    end
+  end
+
   def test_eager_association_loading_with_belongs_to_and_conditions_string_with_quoted_table_name
     quoted_posts_id= Comment.connection.quote_table_name('posts') + '.' + Comment.connection.quote_column_name('id')
     assert_nothing_raised do
@@ -289,13 +294,13 @@ class EagerAssociationTest < ActiveRecord::TestCase
     subscriber =Subscriber.find(subscribers(:second).id, :include => :subscriptions)
     assert_equal subscriptions, subscriber.subscriptions.sort_by(&:id)
   end
-  
+
   def test_eager_load_has_many_through_with_string_keys
     books = books(:awdr, :rfr)
     subscriber = Subscriber.find(subscribers(:second).id, :include => :books)
     assert_equal books, subscriber.books.sort_by(&:id)
   end
-  
+
   def test_eager_load_belongs_to_with_string_keys
     subscriber = subscribers(:second)
     subscription = Subscription.find(subscriptions(:webster_awdr).id, :include => :subscriber)
@@ -422,7 +427,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
     author_posts_without_comments = author.posts.select { |post| post.comments.blank? }
     assert_equal author_posts_without_comments.size, author.posts.count(:all, :include => :comments, :conditions => 'comments.id is null')
   end
-  
+
   def test_eager_count_performed_on_a_has_many_through_association_with_multi_table_conditional
     person = people(:michael)
     person_posts_without_comments = person.posts.select { |post| post.comments.blank? }
@@ -457,7 +462,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
 
   def test_eager_with_has_many_and_limit_and_scoped_conditions_on_the_eagers
     posts = nil
-    Post.with_scope(:find => {
+    Post.send(:with_scope, :find => {
       :include    => :comments,
       :conditions => "comments.body like 'Normal%' OR comments.#{QUOTED_TYPE}= 'SpecialComment'"
     }) do
@@ -465,7 +470,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
       assert_equal 2, posts.size
     end
 
-    Post.with_scope(:find => {
+    Post.send(:with_scope, :find => {
       :include    => [ :comments, :author ],
       :conditions => "authors.name = 'David' AND (comments.body like 'Normal%' OR comments.#{QUOTED_TYPE}= 'SpecialComment')"
     }) do
@@ -475,7 +480,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
   end
 
   def test_eager_with_has_many_and_limit_and_scoped_and_explicit_conditions_on_the_eagers
-    Post.with_scope(:find => { :conditions => "1=1" }) do
+    Post.send(:with_scope, :find => { :conditions => "1=1" }) do
       posts = authors(:david).posts.find(:all,
         :include    => :comments,
         :conditions => "comments.body like 'Normal%' OR comments.#{QUOTED_TYPE}= 'SpecialComment'",
@@ -494,7 +499,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
 
   def test_eager_with_scoped_order_using_association_limiting_without_explicit_scope
     posts_with_explicit_order = Post.find(:all, :conditions => 'comments.id is not null', :include => :comments, :order => 'posts.id DESC', :limit => 2)
-    posts_with_scoped_order = Post.with_scope(:find => {:order => 'posts.id DESC'}) do
+    posts_with_scoped_order = Post.send(:with_scope, :find => {:order => 'posts.id DESC'}) do
       Post.find(:all, :conditions => 'comments.id is not null', :include => :comments, :limit => 2)
     end
     assert_equal posts_with_explicit_order, posts_with_scoped_order
@@ -549,16 +554,16 @@ class EagerAssociationTest < ActiveRecord::TestCase
   end
 
   def test_eager_with_invalid_association_reference
-    assert_raises(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys") {
+    assert_raise(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys") {
       post = Post.find(6, :include=> :monkeys )
     }
-    assert_raises(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys") {
+    assert_raise(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys") {
       post = Post.find(6, :include=>[ :monkeys ])
     }
-    assert_raises(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys") {
+    assert_raise(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys") {
       post = Post.find(6, :include=>[ 'monkeys' ])
     }
-    assert_raises(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys, :elephants") {
+    assert_raise(ActiveRecord::ConfigurationError, "Association was not found; perhaps you misspelled it?  You specified :include => :monkeys, :elephants") {
       post = Post.find(6, :include=>[ :monkeys, :elephants ])
     }
   end
@@ -575,6 +580,10 @@ class EagerAssociationTest < ActiveRecord::TestCase
   def test_limited_eager_with_multiple_order_columns
     assert_equal posts(:thinking, :sti_comments), Post.find(:all, :include => [:author, :comments], :conditions => "authors.name = 'David'", :order => 'UPPER(posts.title), posts.id', :limit => 2, :offset => 1)
     assert_equal posts(:sti_post_and_comments, :sti_comments), Post.find(:all, :include => [:author, :comments], :conditions => "authors.name = 'David'", :order => 'UPPER(posts.title) DESC, posts.id', :limit => 2, :offset => 1)
+  end
+
+  def test_limited_eager_with_numeric_in_association
+    assert_equal people(:david, :susan), Person.find(:all, :include => [:readers, :primary_contact, :number1_fan], :conditions => "number1_fans_people.first_name like 'M%'", :order => 'people.id', :limit => 2, :offset => 0)
   end
 
   def test_preload_with_interpolation
@@ -797,12 +806,17 @@ class EagerAssociationTest < ActiveRecord::TestCase
 
   def test_include_has_many_using_primary_key
     expected = Firm.find(1).clients_using_primary_key.sort_by &:name
-    firm = Firm.find 1, :include => :clients_using_primary_key, :order => 'clients_using_primary_keys_companies.name'
+    # Oracle adapter truncates alias to 30 characters
+    if current_adapter?(:OracleAdapter)
+      firm = Firm.find 1, :include => :clients_using_primary_key, :order => 'clients_using_primary_keys_companies'[0,30]+'.name'
+    else
+      firm = Firm.find 1, :include => :clients_using_primary_key, :order => 'clients_using_primary_keys_companies.name'
+    end
     assert_no_queries do
       assert_equal expected, firm.clients_using_primary_key
     end
   end
-  
+
   def test_preload_has_one_using_primary_key
     expected = Firm.find(:first).account_using_primary_key
     firm = Firm.find :first, :include => :account_using_primary_key
@@ -818,5 +832,5 @@ class EagerAssociationTest < ActiveRecord::TestCase
       assert_equal expected, firm.account_using_primary_key
     end
   end
-  
+
 end

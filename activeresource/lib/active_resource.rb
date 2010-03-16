@@ -21,24 +21,24 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
 
-begin
-  require 'active_support'
-rescue LoadError
-  activesupport_path = "#{File.dirname(__FILE__)}/../../activesupport/lib"
-  if File.directory?(activesupport_path)
-    $:.unshift activesupport_path
-    require 'active_support'
-  end
-end
+activesupport_path = File.expand_path('../../../activesupport/lib', __FILE__)
+$:.unshift(activesupport_path) if File.directory?(activesupport_path) && !$:.include?(activesupport_path)
 
-require 'active_resource/formats'
-require 'active_resource/base'
-require 'active_resource/validations'
-require 'active_resource/custom_methods'
+activemodel_path = File.expand_path('../../../activemodel/lib', __FILE__)
+$:.unshift(activemodel_path) if File.directory?(activemodel_path) && !$:.include?(activemodel_path)
+
+require 'active_support'
+require 'active_model'
 
 module ActiveResource
-  Base.class_eval do
-    include Validations
-    include CustomMethods
-  end
+  extend ActiveSupport::Autoload
+
+  autoload :Base
+  autoload :Connection
+  autoload :CustomMethods
+  autoload :Formats
+  autoload :HttpMock
+  autoload :Observing
+  autoload :Schema
+  autoload :Validations
 end

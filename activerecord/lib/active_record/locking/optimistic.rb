@@ -32,16 +32,16 @@ module ActiveRecord
     # To override the name of the lock_version column, invoke the <tt>set_locking_column</tt> method.
     # This method uses the same syntax as <tt>set_table_name</tt>
     module Optimistic
-      def self.included(base) #:nodoc:
-        base.extend ClassMethods
+      extend ActiveSupport::Concern
 
-        base.cattr_accessor :lock_optimistically, :instance_writer => false
-        base.lock_optimistically = true
+      included do
+        cattr_accessor :lock_optimistically, :instance_writer => false
+        self.lock_optimistically = true
 
-        base.alias_method_chain :update, :lock
-        base.alias_method_chain :attributes_from_column_definition, :lock
+        alias_method_chain :update, :lock
+        alias_method_chain :attributes_from_column_definition, :lock
 
-        class << base
+        class << self
           alias_method :locking_column=, :set_locking_column
         end
       end
@@ -78,12 +78,14 @@ module ActiveRecord
           attribute_names.uniq!
 
           begin
-            affected_rows = connection.update(<<-end_sql, "#{self.class.name} Update with optimistic locking")
-              UPDATE #{self.class.quoted_table_name}
-              SET #{quoted_comma_pair_list(connection, attributes_with_quotes(false, false, attribute_names))}
-              WHERE #{self.class.primary_key} = #{quote_value(id)}
-              AND #{self.class.quoted_locking_column} = #{quote_value(previous_value)}
-            end_sql
+            relation = self.class.unscoped
+
+            affected_rows = relation.where(
+              relation[self.class.primary_key].eq(quoted_id).and(
+                relation[self.class.locking_column].eq(quote_value(previous_value))
+              )
+            ).update(arel_attributes_values(false, false, attribute_names))
+
 
             unless affected_rows == 1
               raise ActiveRecord::StaleObjectError, "Attempted to update a stale object"

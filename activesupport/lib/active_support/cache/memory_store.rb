@@ -1,3 +1,5 @@
+require 'active_support/core_ext/object/duplicable'
+
 module ActiveSupport
   module Cache
     # A cache store implementation which stores everything into memory in the
@@ -20,28 +22,33 @@ module ActiveSupport
       end
 
       def read(name, options = nil)
-        super
-        @data[name]
+        super do
+          @data[name]
+        end
       end
 
       def write(name, value, options = nil)
-        super
-        @data[name] = value.freeze
+        super do
+          @data[name] = (value.duplicable? ? value.dup : value).freeze
+        end
       end
 
       def delete(name, options = nil)
-        super
-        @data.delete(name)
+        super do
+          @data.delete(name)
+        end
       end
 
       def delete_matched(matcher, options = nil)
-        super
-        @data.delete_if { |k,v| k =~ matcher }
+        super do
+          @data.delete_if { |k,v| k =~ matcher }
+        end
       end
 
       def exist?(name,options = nil)
-        super
-        @data.has_key?(name)
+        super do
+          @data.has_key?(name)
+        end
       end
 
       def clear

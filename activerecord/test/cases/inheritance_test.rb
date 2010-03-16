@@ -30,7 +30,7 @@ class InheritanceTest < ActiveRecord::TestCase
   ensure
     ActiveRecord::Base.store_full_sti_class = old
   end
-  
+
   def test_should_store_full_class_name_with_store_full_sti_class_option_enabled
     old = ActiveRecord::Base.store_full_sti_class
     ActiveRecord::Base.store_full_sti_class = true
@@ -39,7 +39,7 @@ class InheritanceTest < ActiveRecord::TestCase
   ensure
     ActiveRecord::Base.store_full_sti_class = old
   end
-  
+
   def test_different_namespace_subclass_should_load_correctly_with_store_full_sti_class_option
     old = ActiveRecord::Base.store_full_sti_class
     ActiveRecord::Base.store_full_sti_class = true
@@ -68,7 +68,7 @@ class InheritanceTest < ActiveRecord::TestCase
     if current_adapter?(:SybaseAdapter)
       Company.connection.execute "SET IDENTITY_INSERT companies OFF"
     end
-    assert_raises(ActiveRecord::SubclassNotFound) { Company.find(100) }
+    assert_raise(ActiveRecord::SubclassNotFound) { Company.find(100) }
   end
 
   def test_inheritance_find
@@ -112,9 +112,9 @@ class InheritanceTest < ActiveRecord::TestCase
   end
 
   def test_inheritance_condition
-    assert_equal 9, Company.count
+    assert_equal 10, Company.count
     assert_equal 2, Firm.count
-    assert_equal 3, Client.count
+    assert_equal 4, Client.count
   end
 
   def test_alt_inheritance_condition
@@ -124,7 +124,7 @@ class InheritanceTest < ActiveRecord::TestCase
   end
 
   def test_finding_incorrect_type_data
-    assert_raises(ActiveRecord::RecordNotFound) { Firm.find(2) }
+    assert_raise(ActiveRecord::RecordNotFound) { Firm.find(2) }
     assert_nothing_raised   { Firm.find(1) }
   end
 
@@ -137,7 +137,8 @@ class InheritanceTest < ActiveRecord::TestCase
   def test_update_all_within_inheritance
     Client.update_all "name = 'I am a client'"
     assert_equal "I am a client", Client.find(:all).first.name
-    assert_equal "37signals", Firm.find(:all).first.name
+    # Order by added as otherwise Oracle tests were failing because of different order of results
+    assert_equal "37signals", Firm.find(:all, :order => "id").first.name
   end
 
   def test_alt_update_all_within_inheritance
@@ -240,6 +241,7 @@ class InheritanceComputeTypeTest < ActiveRecord::TestCase
   end
 
   def test_instantiation_doesnt_try_to_require_corresponding_file
+    ActiveRecord::Base.store_full_sti_class = false
     foo = Firm.find(:first).clone
     foo.ruby_type = foo.type = 'FirmOnTheFly'
     foo.save!
@@ -258,5 +260,7 @@ class InheritanceComputeTypeTest < ActiveRecord::TestCase
     # And instantiate will find the existing constant rather than trying
     # to require firm_on_the_fly.
     assert_nothing_raised { assert_kind_of Firm::FirmOnTheFly, Firm.find(foo.id) }
+  ensure
+    ActiveRecord::Base.store_full_sti_class = true
   end
 end

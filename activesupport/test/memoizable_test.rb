@@ -1,13 +1,16 @@
 require 'abstract_unit'
 
-class MemoizableTest < Test::Unit::TestCase
+class MemoizableTest < ActiveSupport::TestCase
   class Person
     extend ActiveSupport::Memoizable
 
-    attr_reader :name_calls, :age_calls
+    attr_reader :name_calls, :age_calls, :is_developer_calls, :name_query_calls
+
     def initialize
       @name_calls = 0
       @age_calls = 0
+      @is_developer_calls = 0
+      @name_query_calls = 0
     end
 
     def name
@@ -16,6 +19,7 @@ class MemoizableTest < Test::Unit::TestCase
     end
 
     def name?
+      @name_query_calls += 1
       true
     end
     memoize :name?
@@ -31,6 +35,14 @@ class MemoizableTest < Test::Unit::TestCase
     end
 
     memoize :name, :age
+
+    private
+
+    def is_developer?
+      @is_developer_calls += 1
+      "Yes"
+    end
+    memoize :is_developer?
   end
 
   class Company
@@ -106,17 +118,19 @@ class MemoizableTest < Test::Unit::TestCase
     end
   end
 
+  def test_memoization_flush_with_punctuation
+    assert_equal true, @person.name?
+    @person.flush_cache(:name?)
+    3.times { assert_equal true, @person.name? }
+    assert_equal 2, @person.name_query_calls
+  end
+
   def test_memoization_with_nil_value
     assert_equal nil, @person.age
     assert_equal 1, @person.age_calls
 
     3.times { assert_equal nil, @person.age }
     assert_equal 1, @person.age_calls
-  end
-
-  def test_memorized_results_are_immutable
-    assert_equal "Josh", @person.name
-    assert_raise(ActiveSupport::FrozenObjectError) { @person.name.gsub!("Josh", "Gosh") }
   end
 
   def test_reloadable
@@ -223,4 +237,15 @@ class MemoizableTest < Test::Unit::TestCase
     company.memoize :name
     assert_raise(RuntimeError) { company.memoize :name }
   end
+
+  def test_private_method_memoization
+    person = Person.new
+
+    assert_raise(NoMethodError) { person.is_developer? }
+    assert_equal "Yes", person.send(:is_developer?)
+    assert_equal 1, person.is_developer_calls
+    assert_equal "Yes", person.send(:is_developer?)
+    assert_equal 1, person.is_developer_calls
+  end
+
 end

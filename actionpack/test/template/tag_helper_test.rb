@@ -34,6 +34,7 @@ class TagHelperTest < ActionView::TestCase
 
   def test_content_tag
     assert_equal "<a href=\"create\">Create</a>", content_tag("a", "Create", "href" => "create")
+    assert content_tag("a", "Create", "href" => "create").html_safe?
     assert_equal content_tag("a", "Create", "href" => "create"),
                  content_tag("a", "Create", :href => "create")
   end
@@ -69,6 +70,19 @@ class TagHelperTest < ActionView::TestCase
     __in_erb_template = true
     content_tag("p") { concat content_tag("b", "Hello") }
     assert_equal '<p><b>Hello</b></p>', output_buffer
+  end
+
+  def test_content_tag_with_escaped_array_class
+    str = content_tag('p', "limelight", :class => ["song", "play>"])
+    assert_equal "<p class=\"song play&gt;\">limelight</p>", str
+
+    str = content_tag('p', "limelight", :class => ["song", "play"])
+    assert_equal "<p class=\"song play\">limelight</p>", str
+  end
+
+  def test_content_tag_with_unescaped_array_class
+    str = content_tag('p', "limelight", {:class => ["song", "play>"]}, false)
+    assert_equal "<p class=\"song play>\">limelight</p>", str
   end
 
   def test_cdata_section

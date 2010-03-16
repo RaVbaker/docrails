@@ -1,6 +1,8 @@
 class Post < ActiveRecord::Base
-  named_scope :containing_the_letter_a, :conditions => "body LIKE '%a%'"
-  named_scope :with_authors_at_address, lambda { |address| {
+  scope :containing_the_letter_a, where("body LIKE '%a%'")
+  scope :ranked_by_comments, order("comments_count DESC")
+  scope :limit_by, lambda {|l| limit(l) }
+  scope :with_authors_at_address, lambda { |address| {
       :conditions => [ 'authors.author_address_id = ?', address.id ],
       :joins => 'JOIN authors ON authors.id = posts.author_id'
     }
@@ -17,7 +19,13 @@ class Post < ActiveRecord::Base
 
   has_one :last_comment, :class_name => 'Comment', :order => 'id desc'
 
-  has_many   :comments, :order => "body" do
+  scope :with_special_comments, :joins => :comments, :conditions => {:comments => {:type => 'SpecialComment'} }
+  scope :with_very_special_comments, joins(:comments).where(:comments => {:type => 'VerySpecialComment'})
+  scope :with_post, lambda {|post_id|
+    { :joins => :comments, :conditions => {:comments => {:post_id => post_id} } }
+  }
+
+  has_many   :comments do
     def find_most_recent
       find(:first, :order => "id DESC")
     end
@@ -61,6 +69,12 @@ class Post < ActiveRecord::Base
               :after_add     => lambda {|owner, reader| log(:added,   :after,  reader.first_name) },
               :before_remove => lambda {|owner, reader| log(:removed, :before, reader.first_name) },
               :after_remove  => lambda {|owner, reader| log(:removed, :after,  reader.first_name) }
+  has_many :skimmers, :class_name => 'Reader', :conditions => { :skimmer => true }
+  has_many :impatient_people, :through => :skimmers, :source => :person
+
+  def self.top(limit)
+    ranked_by_comments.limit_by(limit)
+  end
 
   def self.reset_log
     @log = []

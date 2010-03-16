@@ -4,7 +4,6 @@ require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rake/packagetask'
 require 'rake/gempackagetask'
-require 'rake/contrib/sshpublisher'
 
 require File.join(File.dirname(__FILE__), 'lib', 'active_record', 'version')
 require File.expand_path(File.dirname(__FILE__)) + "/test/config"
@@ -25,31 +24,70 @@ PKG_FILES = FileList[
     "lib/**/*", "test/**/*", "examples/**/*", "doc/**/*", "[A-Z]*", "install.rb", "Rakefile"
 ].exclude(/\bCVS\b|~$/)
 
+def run_without_aborting(*tasks)
+  errors = []
+
+  tasks.each do |task|
+    begin
+      Rake::Task[task].invoke
+    rescue Exception
+      errors << task
+    end
+  end
+
+  abort "Errors running #{errors.join(', ')}" if errors.any?
+end
 
 desc 'Run mysql, sqlite, and postgresql tests by default'
 task :default => :test
 
 desc 'Run mysql, sqlite, and postgresql tests'
-task :test => %w(test_mysql test_sqlite3 test_postgresql)
+task :test do
+  tasks = defined?(JRUBY_VERSION) ?
+    %w(test_jdbcmysql test_jdbcsqlite3 test_jdbcpostgresql) :
+    %w(test_mysql test_sqlite3 test_postgresql)
+  run_without_aborting(*tasks)
+end
 
-for adapter in %w( mysql postgresql sqlite sqlite3 firebird db2 oracle sybase openbase frontbase )
+namespace :test do
+  task :isolated do
+    tasks = defined?(JRUBY_VERSION) ?
+      %w(isolated_test_jdbcmysql isolated_test_jdbcsqlite3 isolated_test_jdbcpostgresql) :
+      %w(isolated_test_mysql isolated_test_sqlite3 isolated_test_postgresql)
+    run_without_aborting(*tasks)
+  end
+end
+
+%w( mysql postgresql sqlite3 firebird db2 oracle sybase openbase frontbase jdbcmysql jdbcpostgresql jdbcsqlite3 jdbcderby jdbch2 jdbchsqldb ).each do |adapter|
   Rake::TestTask.new("test_#{adapter}") { |t|
-    t.libs << "test" << "test/connections/native_#{adapter}"
+    connection_path = "test/connections/#{adapter =~ /jdbc/ ? 'jdbc' : 'native'}_#{adapter}"
     adapter_short = adapter == 'db2' ? adapter : adapter[/^[a-z]+/]
+    t.libs << "test" << connection_path
     t.test_files=Dir.glob( "test/cases/**/*_test{,_#{adapter_short}}.rb" ).sort
     t.verbose = true
   }
 
+  task "isolated_test_#{adapter}" do
+    connection_path = "test/connections/#{adapter =~ /jdbc/ ? 'jdbc' : 'native'}_#{adapter}"
+    adapter_short = adapter == 'db2' ? adapter : adapter[/^[a-z]+/]
+    puts [adapter, adapter_short, connection_path].inspect
+    ruby = File.join(*RbConfig::CONFIG.values_at('bindir', 'RUBY_INSTALL_NAME'))
+    Dir["test/cases/**/*_test{,_#{adapter_short}}.rb"].all? do |file|
+      system(ruby, "-Ilib:test:#{connection_path}", file)
+    end or raise "Failures"
+  end
+
   namespace adapter do
     task :test => "test_#{adapter}"
+    task :isolated_test => "isolated_test_#{adapter}"
   end
 end
 
 namespace :mysql do
   desc 'Build the MySQL test databases'
   task :build_databases do
-    %x( mysqladmin --user=#{MYSQL_DB_USER} create activerecord_unittest )
-    %x( mysqladmin --user=#{MYSQL_DB_USER} create activerecord_unittest2 )
+    %x( echo "create DATABASE activerecord_unittest DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci " | mysql --user=#{MYSQL_DB_USER})
+    %x( echo "create DATABASE activerecord_unittest2 DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci " | mysql --user=#{MYSQL_DB_USER})
   end
 
   desc 'Drop the MySQL test databases'
@@ -70,8 +108,8 @@ task :rebuild_mysql_databases => 'mysql:rebuild_databases'
 namespace :postgresql do
   desc 'Build the PostgreSQL test databases'
   task :build_databases do
-    %x( createdb activerecord_unittest )
-    %x( createdb activerecord_unittest2 )
+    %x( createdb -E UTF8 activerecord_unittest )
+    %x( createdb -E UTF8 activerecord_unittest2 )
   end
 
   desc 'Drop the PostgreSQL test databases'
@@ -155,45 +193,10 @@ task :rdoc do
 end
 
 
-# Create compressed packages
-
-dist_dirs = [ "lib", "test", "examples" ]
-
-spec = Gem::Specification.new do |s|
-  s.platform = Gem::Platform::RUBY
-  s.name = PKG_NAME
-  s.version = PKG_VERSION
-  s.summary = "Implements the ActiveRecord pattern for ORM."
-  s.description = %q{Implements the ActiveRecord pattern (Fowler, PoEAA) for ORM. It ties database tables and classes together for business objects, like Customer or Subscription, that can find, save, and destroy themselves without resorting to manual SQL.}
-
-  s.files = [ "Rakefile", "install.rb", "README", "RUNNING_UNIT_TESTS", "CHANGELOG" ]
-  dist_dirs.each do |dir|
-    s.files = s.files + Dir.glob( "#{dir}/**/*" ).delete_if { |item| item.include?( "\.svn" ) }
-  end
-
-  s.add_dependency('activesupport', '= 2.3.0' + PKG_BUILD)
-
-  s.files.delete FIXTURES_ROOT + "/fixture_database.sqlite"
-  s.files.delete FIXTURES_ROOT + "/fixture_database_2.sqlite"
-  s.files.delete FIXTURES_ROOT + "/fixture_database.sqlite3"
-  s.files.delete FIXTURES_ROOT + "/fixture_database_2.sqlite3"
-  s.require_path = 'lib'
-  s.autorequire = 'active_record'
-
-  s.has_rdoc = true
-  s.extra_rdoc_files = %w( README )
-  s.rdoc_options.concat ['--main',  'README']
-
-  s.author = "David Heinemeier Hansson"
-  s.email = "david@loudthinking.com"
-  s.homepage = "http://www.rubyonrails.org"
-  s.rubyforge_project = "activerecord"
-end
+spec = eval(File.read('activerecord.gemspec'))
 
 Rake::GemPackageTask.new(spec) do |p|
   p.gem_spec = spec
-  p.need_tar = true
-  p.need_zip = true
 end
 
 task :lines do
@@ -225,12 +228,14 @@ end
 
 desc "Publish the beta gem"
 task :pgem => [:package] do
+  require 'rake/contrib/sshpublisher'
   Rake::SshFilePublisher.new("gems.rubyonrails.org", "/u/sites/gems/gems", "pkg", "#{PKG_FILE_NAME}.gem").upload
   `ssh gems.rubyonrails.org '/u/sites/gems/gemupdate.sh'`
 end
 
 desc "Publish the API documentation"
 task :pdoc => [:rdoc] do
+  require 'rake/contrib/sshpublisher'
   Rake::SshDirPublisher.new("wrath.rubyonrails.org", "public_html/ar", "doc").upload
 end
 

@@ -50,12 +50,15 @@ class QueryCacheTest < ActiveRecord::TestCase
 
   def test_cache_does_not_wrap_string_results_in_arrays
     Task.cache do
-      assert_instance_of String, Task.connection.select_value("SELECT count(*) AS count_all FROM tasks")
+      # Oracle adapter returns count() as Fixnum or Float
+      if current_adapter?(:OracleAdapter)
+        assert Task.connection.select_value("SELECT count(*) AS count_all FROM tasks").is_a?(Numeric)
+      else
+        assert_instance_of String, Task.connection.select_value("SELECT count(*) AS count_all FROM tasks")
+      end
     end
   end
 end
-
-uses_mocha 'QueryCacheExpiryTest' do
 
 class QueryCacheExpiryTest < ActiveRecord::TestCase
   fixtures :tasks, :posts, :categories, :categories_posts
@@ -122,6 +125,4 @@ class QueryCacheExpiryTest < ActiveRecord::TestCase
       p.categories.delete_all
     end
   end
-end
-
 end

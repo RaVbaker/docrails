@@ -11,7 +11,7 @@ module ActiveRecord
     # ones created with +build+ are added to the target. So, the target may be
     # non-empty and still lack children waiting to be read from the database.
     # If you look directly to the database you cannot assume that's the entire
-    # collection because new records may have beed added to the target, etc.
+    # collection because new records may have been added to the target, etc.
     #
     # If you need to work on all current children, new and existing records,
     # +load_target+ and the +loaded+ flag are your friends.
@@ -20,7 +20,22 @@ module ActiveRecord
         super
         construct_sql
       end
-      
+
+      delegate :group, :order, :limit, :joins, :where, :preload, :eager_load, :includes, :from, :lock, :readonly, :having, :to => :scoped
+
+      def select(select = nil, &block)
+        if block_given?
+          load_target
+          @target.select(&block)
+        else
+          scoped.select(select)
+        end
+      end
+
+      def scoped
+        with_scope(construct_scope) { @reflection.klass.scoped }
+      end
+
       def find(*args)
         options = args.extract_options!
 
@@ -37,30 +52,27 @@ module ActiveRecord
             load_target.select { |r| ids.include?(r.id) }
           end
         else
-          conditions = "#{@finder_sql}"
-          if sanitized_conditions = sanitize_sql(options[:conditions])
-            conditions << " AND (#{sanitized_conditions})"
-          end
-          
-          options[:conditions] = conditions
-
-          if options[:order] && @reflection.options[:order]
-            options[:order] = "#{options[:order]}, #{@reflection.options[:order]}"
-          elsif @reflection.options[:order]
-            options[:order] = @reflection.options[:order]
-          end
-          
-          # Build options specific to association
-          construct_find_options!(options)
-          
           merge_options_from_reflection!(options)
-          
-          # Pass through args exactly as we received them.
-          args << options
-          @reflection.klass.find(*args)
+          construct_find_options!(options)
+
+          find_scope = construct_scope[:find].slice(:conditions, :order)
+
+          with_scope(:find => find_scope) do
+            relation = @reflection.klass.send(:construct_finder_arel, options, @reflection.klass.send(:current_scoped_methods))
+
+            case args.first
+            when :first, :last
+              relation.send(args.first)
+            when :all
+              records = relation.all
+              @reflection.options[:uniq] ? uniq(records) : records
+            else
+              relation.find(*args)
+            end
+          end
         end
       end
-      
+
       # Fetches the first one using SQL if possible.
       def first(*args)
         if fetch_first_or_last_using_find?(args)
@@ -143,6 +155,8 @@ module ActiveRecord
       end
 
       # Remove all records from this association
+      #
+      # See delete for more info.
       def delete_all
         load_target
         delete(@target)
@@ -166,7 +180,7 @@ module ActiveRecord
         if @reflection.options[:counter_sql]
           @reflection.klass.count_by_sql(@counter_sql)
         else
-          column_name, options = @reflection.klass.send(:construct_count_options_from_args, *args)
+          column_name, options = @reflection.klass.scoped.send(:construct_count_options_from_args, *args)
           if @reflection.options[:uniq]
             # This is needed because 'SELECT count(DISTINCT *)..' is not valid SQL.
             column_name = "#{@reflection.quoted_table_name}.#{@reflection.klass.primary_key}" if column_name == :all
@@ -186,7 +200,6 @@ module ActiveRecord
         end
       end
 
-
       # Removes +records+ from this association calling +before_remove+ and
       # +after_remove+ callbacks.
       #
@@ -195,20 +208,24 @@ module ActiveRecord
       # are actually removed from the database, that depends precisely on
       # +delete_records+. They are in any case removed from the collection.
       def delete(*records)
-        records = flatten_deeper(records)
-        records.each { |record| raise_on_type_mismatch(record) }
-        
-        transaction do
-          records.each { |record| callback(:before_remove, record) }
-          
-          old_records = records.reject {|r| r.new_record? }
+        remove_records(records) do |records, old_records|
           delete_records(old_records) if old_records.any?
-          
-          records.each do |record|
-            @target.delete(record)
-            callback(:after_remove, record)
-          end
+          records.each { |record| @target.delete(record) }
         end
+      end
+
+      # Destroy +records+ and remove them from this association calling
+      # +before_remove+ and +after_remove+ callbacks.
+      #
+      # Note that this method will _always_ remove records from the database
+      # ignoring the +:dependent+ option.
+      def destroy(*records)
+        records = find(records) if records.any? {|record| record.kind_of?(Fixnum) || record.kind_of?(String)}
+        remove_records(records) do |records, old_records|
+          old_records.each { |record| record.destroy }
+        end
+
+        load_target
       end
 
       # Removes all records from this association.  Returns +self+ so method calls may be chained.
@@ -223,15 +240,16 @@ module ActiveRecord
 
         self
       end
-      
-      def destroy_all
-        transaction do
-          each { |record| record.destroy }
-        end
 
+      # Destroy all the records from this association.
+      #
+      # See destroy for more info.
+      def destroy_all
+        load_target
+        destroy(@target)
         reset_target!
       end
-      
+
       def create(attrs = {})
         if attrs.is_a?(Array)
           attrs.collect { |attr| create(attr) }
@@ -297,6 +315,15 @@ module ActiveRecord
         end
       end
 
+      # Returns true if the collection has more than 1 record. Equivalent to collection.size > 1.
+      def many?
+        if block_given?
+          method_missing(:many?) { |*block_args| yield(*block_args) }
+        else
+          size > 1
+        end
+      end
+
       def uniq(collection = self)
         seen = Set.new
         collection.inject([]) do |kept, record|
@@ -337,7 +364,19 @@ module ActiveRecord
       protected
         def construct_find_options!(options)
         end
-        
+
+        def construct_counter_sql
+          if @reflection.options[:counter_sql]
+            @counter_sql = interpolate_sql(@reflection.options[:counter_sql])
+          elsif @reflection.options[:finder_sql]
+            # replace the SELECT clause with COUNT(*), preserving any hints within /* ... */
+            @reflection.options[:counter_sql] = @reflection.options[:finder_sql].sub(/SELECT\b(\/\*.*?\*\/ )?(.*)\bFROM\b/im) { "SELECT #{$1}COUNT(*) FROM" }
+            @counter_sql = interpolate_sql(@reflection.options[:counter_sql])
+          else
+            @counter_sql = @finder_sql
+          end
+        end
+
         def load_target
           if !@owner.new_record? || foreign_key_present
             begin
@@ -356,7 +395,7 @@ module ActiveRecord
           loaded if target
           target
         end
-        
+
         def method_missing(method, *args)
           if @target.respond_to?(method) || (!@reflection.klass.respond_to?(method) && Class.respond_to?(method))
             if block_given?
@@ -364,9 +403,7 @@ module ActiveRecord
             else
               super
             end
-          elsif @reflection.klass.scopes.include?(method)
-            @reflection.klass.scopes[method].call(self, *args)
-          else          
+          else
             with_scope(construct_scope) do
               if block_given?
                 @reflection.klass.send(method, *args) { |*block_args| yield(*block_args) }
@@ -394,11 +431,14 @@ module ActiveRecord
               find(:all)
             end
 
-          @reflection.options[:uniq] ? uniq(records) : records
+          records = @reflection.options[:uniq] ? uniq(records) : records
+          records.each do |record|
+            set_inverse_instance(record, @owner)
+          end
+          records
         end
 
       private
-
         def create_record(attrs)
           attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
           ensure_owner_is_not_new
@@ -428,12 +468,32 @@ module ActiveRecord
           @target ||= [] unless loaded?
           @target << record unless @reflection.options[:uniq] && @target.include?(record)
           callback(:after_add, record)
+          set_inverse_instance(record, @owner)
           record
+        end
+
+        def remove_records(*records)
+          records = flatten_deeper(records)
+          records.each { |record| raise_on_type_mismatch(record) }
+
+          transaction do
+            records.each { |record| callback(:before_remove, record) }
+            old_records = records.reject { |r| r.new_record? }
+            yield(records, old_records)
+            records.each { |record| callback(:after_remove, record) }
+          end
         end
 
         def callback(method, record)
           callbacks_for(method).each do |callback|
-            ActiveSupport::Callbacks::Callback.new(method, callback, record).call(@owner, record)
+            case callback
+            when Symbol
+              @owner.send(callback, record)
+            when Proc
+              callback.call(@owner, record)
+            else
+              callback.send(method, @owner, record)
+            end
           end
         end
 

@@ -103,19 +103,13 @@ class VerificationTest < ActionController::TestCase
     end
 
     protected
-      def rescue_action(e) raise end
 
-      def unconditional_redirect
-        redirect_to :action => "unguarded"
-      end
+    def unconditional_redirect
+      redirect_to :action => "unguarded"
+    end
   end
 
-  def setup
-    @controller = TestController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-    ActionController::Routing::Routes.add_named_route :foo, '/foo', :controller => 'test', :action => 'foo'
-  end
+  tests TestController
 
   def test_using_symbol_back_with_no_referrer
     assert_raise(ActionController::RedirectBackError) { get :guarded_with_back }
@@ -129,8 +123,14 @@ class VerificationTest < ActionController::TestCase
 
   def test_no_deprecation_warning_for_named_route
     assert_not_deprecated do
-      get :guarded_one_for_named_route_test, :two => "not one"
-      assert_redirected_to '/foo'
+      with_routing do |set|
+        set.draw do |map|
+          match 'foo', :to => 'test#foo', :as => :foo
+          match 'verification_test/:action', :to => ::VerificationTest::TestController
+        end
+        get :guarded_one_for_named_route_test, :two => "not one"
+        assert_redirected_to '/foo'
+      end
     end
   end
 
@@ -184,7 +184,7 @@ class VerificationTest < ActionController::TestCase
 
   def test_unguarded_without_params
     get :unguarded
-    assert_equal "", @response.body
+    assert @response.body.blank?
   end
 
   def test_guarded_in_session_with_prereqs

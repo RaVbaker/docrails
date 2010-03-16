@@ -1,8 +1,49 @@
-*2.3.0 [Edge]*
+*Edge*
 
-* Remove script/performance/profiler in favour of performance integration tests. [Pratik Naik]
+* Removed config/initializers/new_rails_defaults.rb as all frameworks now follow the settings from it [DHH]
 
-  To continue using script/performance/profiler, install the request_profiler plugin :
+* Set config.time_zone to UTC by default [DHH]
+
+* Added default .gitignore (this is just recognizing Git market share, don't throw a hissy if you use another SCM) [DHH]
+
+* Added cookies.permanent, cookies.signed, and cookies.permanent.signed accessor for common cookie actions [DHH]. Examples:
+
+    cookies.permanent[:prefers_open_id] = true
+    # => Set-Cookie: prefers_open_id=true; path=/; expires=Sun, 16-Dec-2029 03:24:16 GMT
+
+    cookies.signed[:discount] = 45
+    # => Set-Cookie: discount=BAhpMg==--2c1c6906c90a3bc4fd54a51ffb41dffa4bf6b5f7; path=/
+
+    cookies.signed[:discount]
+    # => 45 (if the cookie was changed, you'll get a InvalidSignature exception)
+
+    cookies.permanent.signed[:remember_me] = current_user.id
+    # => Set-Cookie: discount=BAhU--848956038e692d7046deab32b7131856ab20e14e; path=/; expires=Sun, 16-Dec-2029 03:24:16 GMT
+    
+  ...to use the signed cookies, you need to set a secret to ActionController::Base.cookie_verifier_secret (automatically done in config/initializers/cookie_verification_secret.rb for new Rails applications).
+
+* Added config/initializers/cookie_verification_secret.rb with an auto-generated secret for using ActionController::Base#cookies.signed [DHH]
+
+* Fixed that the debugger wouldn't go into IRB mode because of left-over ARGVs [DHH]
+
+* I18n support for plugins.  #2325 [Antonio Tapiador, Sven Fuchs]
+
+* Ruby 1.9: use UTF-8 for default internal and external encodings.  [Jeremy Kemper]
+
+* Added db/seeds.rb as a default file for storing seed data for the database. Can be loaded with rake db:seed (or created alongside the db with db:setup). (This is also known as the "Stop Putting Gawd Damn Seed Data In Your Migrations" feature) [DHH]
+
+
+*2.3.2 [Final] (March 15, 2009)*
+
+* Remove outdated script/plugin options [Pratik Naik]
+
+* Allow metal to live in plugins #2045 [Matthew Rudy]
+
+* Added metal [Josh Peek]
+
+* Remove script/performance/request in favour of the performance integration tests. [Pratik Naik]
+
+  To continue using script/performance/request, install the request_profiler plugin :
 
     script/plugin install git://github.com/rails/request_profiler.git
 

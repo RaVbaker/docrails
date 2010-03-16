@@ -1,3 +1,5 @@
+require 'active_support/core_ext/class/attribute_accessors'
+
 module ActiveSupport
   # Inspired by the buffered logger idea by Ezra
   class BufferedLogger
@@ -51,7 +53,6 @@ module ActiveSupport
         FileUtils.mkdir_p(File.dirname(log))
         @log = open(log, (File::WRONLY | File::APPEND | File::CREAT))
         @log.sync = true
-        @log.write("# Logfile created on %s" % [Time.now.to_s])
       end
     end
 
@@ -66,15 +67,19 @@ module ActiveSupport
       message
     end
 
+    # Dynamically add methods such as:
+    # def info
+    # def warn
+    # def debug
     for severity in Severity.constants
-      class_eval <<-EOT, __FILE__, __LINE__
-        def #{severity.downcase}(message = nil, progname = nil, &block)  # def debug(message = nil, progname = nil, &block)
-          add(#{severity}, message, progname, &block)                    #   add(DEBUG, message, progname, &block)
-        end                                                              # end
-                                                                         #
-        def #{severity.downcase}?                                        # def debug?
-          #{severity} >= @level                                          #   DEBUG >= @level
-        end                                                              # end
+      class_eval <<-EOT, __FILE__, __LINE__ + 1
+        def #{severity.downcase}(message = nil, progname = nil, &block) # def debug(message = nil, progname = nil, &block)
+          add(#{severity}, message, progname, &block)                   #   add(DEBUG, message, progname, &block)
+        end                                                             # end
+
+        def #{severity.downcase}?                                       # def debug?
+          #{severity} >= @level                                         #   DEBUG >= @level
+        end                                                             # end
       EOT
     end
 

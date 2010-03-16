@@ -1,6 +1,21 @@
-require 'active_resource/connection'
-require 'cgi'
+require 'active_support'
+require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext/class/inheritable_attributes'
+require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/kernel/reporting'
+require 'active_support/core_ext/module/attr_accessor_with_default'
+require 'active_support/core_ext/module/delegation'
+require 'active_support/core_ext/module/aliasing'
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/object/misc'
+require 'active_support/core_ext/object/to_query'
 require 'set'
+require 'uri'
+
+require 'active_resource/exceptions'
+require 'active_resource/connection'
+require 'active_resource/formats'
+require 'active_resource/schema'
 
 module ActiveResource
   # ActiveResource::Base is the main class for mapping RESTful resources as models in a Rails application.
@@ -19,12 +34,19 @@ module ActiveResource
   #   end
   #
   # Now the Person class is mapped to RESTful resources located at <tt>http://api.people.com:3000/people/</tt>, and
-  # you can now use Active Resource's lifecycles methods to manipulate resources. In the case where you already have
+  # you can now use Active Resource's lifecycle methods to manipulate resources. In the case where you already have
   # an existing model with the same name as the desired RESTful resource you can set the +element_name+ value.
   #
   #   class PersonResource < ActiveResource::Base
   #     self.site = "http://api.people.com:3000/"
   #     self.element_name = "person"
+  #   end
+  #
+  # If your Active Resource object is required to use an HTTP proxy you can set the +proxy+ value which holds a URI.
+  #
+  #   class PersonResource < ActiveResource::Base
+  #     self.site = "http://api.people.com:3000/"
+  #     self.proxy = "http://user:password@proxy.people.com:8080"
   #   end
   #
   #
@@ -93,6 +115,8 @@ module ActiveResource
   #
   # Many REST APIs will require authentication, usually in the form of basic
   # HTTP authentication.  Authentication can be specified by:
+  #
+  # === HTTP Basic Authentication
   # * putting the credentials in the URL for the +site+ variable.
   #
   #    class Person < ActiveResource::Base
@@ -112,6 +136,20 @@ module ActiveResource
   #
   # Note: Some values cannot be provided in the URL passed to site.  e.g. email addresses
   # as usernames.  In those situations you should use the separate user and password option.
+  #
+  # === Certificate Authentication
+  #
+  # * End point uses an X509 certificate for authentication. <tt>See ssl_options=</tt> for all options.
+  #
+  #    class Person < ActiveResource::Base
+  #      self.site = "https://secure.api.people.com/"
+  #      self.ssl_options = {:cert         => OpenSSL::X509::Certificate.new(File.open(pem_file))
+  #                          :key          => OpenSSL::PKey::RSA.new(File.open(pem_file)),
+  #                          :ca_path      => "/path/to/OpenSSL/formatted/CA_Certs",
+  #                          :verify_mode  => OpenSSL::SSL::VERIFY_PEER}
+  #    end
+  #
+  #
   # == Errors & Validation
   #
   # Error handling and validation is handled in much the same manner as you're used to seeing in
@@ -129,7 +167,7 @@ module ActiveResource
   #
   # <tt>404</tt> is just one of the HTTP error response codes that Active Resource will handle with its own exception. The
   # following HTTP response codes will also result in these exceptions:
-  # 
+  #
   # * 200..399 - Valid response, no exception (other than 301, 302)
   # * 301, 302 - ActiveResource::Redirection
   # * 400 - ActiveResource::BadRequest
@@ -138,6 +176,7 @@ module ActiveResource
   # * 404 - ActiveResource::ResourceNotFound
   # * 405 - ActiveResource::MethodNotAllowed
   # * 409 - ActiveResource::ResourceConflict
+  # * 410 - ActiveResource::ResourceGone
   # * 422 - ActiveResource::ResourceInvalid (rescued by save as validation errors)
   # * 401..499 - ActiveResource::ClientError
   # * 500..599 - ActiveResource::ServerError
@@ -156,9 +195,9 @@ module ActiveResource
   #
   # === Validation errors
   #
-  # Active Resource supports validations on resources and will return errors if any these validations fail
+  # Active Resource supports validations on resources and will return errors if any of these validations fail
   # (e.g., "First name can not be blank" and so on).  These types of errors are denoted in the response by
-  # a response code of <tt>422</tt> and an XML representation of the validation errors.  The save operation will
+  # a response code of <tt>422</tt> and an XML or JSON representation of the validation errors.  The save operation will
   # then fail (with a <tt>false</tt> return value) and the validation errors can be accessed on the resource in question.
   #
   #   ryan = Person.find(1)
@@ -167,10 +206,14 @@ module ActiveResource
   #
   #   # When
   #   # PUT http://api.people.com:3000/people/1.xml
+  #   # or
+  #   # PUT http://api.people.com:3000/people/1.json
   #   # is requested with invalid values, the response is:
   #   #
   #   # Response (422):
   #   # <errors type="array"><error>First cannot be empty</error></errors>
+  #   # or
+  #   # {"errors":["First cannot be empty"]}
   #   #
   #
   #   ryan.errors.invalid?(:first)  # => true
@@ -208,6 +251,124 @@ module ActiveResource
     cattr_accessor :logger
 
     class << self
+      # Creates a schema for this resource - setting the attributes that are
+      # known prior to fetching an instance from the remote system.
+      #
+      # The schema helps define the set of <tt>known_attributes</tt> of the
+      # current resource.
+      #
+      # There is no need to specify a schema for your Active Resource. If
+      # you do not, the <tt>known_attributes</tt> will be guessed from the
+      # instance attributes returned when an instance is fetched from the
+      # remote system.
+      #
+      # example:
+      # class Person < ActiveResource::Base
+      #   schema do
+      #     # define each attribute separately
+      #     attribute 'name', :string
+      #
+      #     # or use the convenience methods and pass >=1 attribute names
+      #     string  'eye_colour', 'hair_colour'
+      #     integer 'age'
+      #     float   'height', 'weight'
+      #
+      #     # unsupported types should be left as strings
+      #     # overload the accessor methods if you need to convert them
+      #     attribute 'created_at', 'string'
+      #   end
+      # end
+      #
+      # p = Person.new
+      # p.respond_to? :name   # => true
+      # p.respond_to? :age    # => true
+      # p.name                # => nil
+      # p.age                 # => nil
+      #
+      # j = Person.find_by_name('John') # <person><name>John</name><age>34</age><num_children>3</num_children></person>
+      # j.respond_to? :name   # => true
+      # j.respond_to? :age    # => true
+      # j.name                # => 'John'
+      # j.age                 # => '34'  # note this is a string!
+      # j.num_children        # => '3'  # note this is a string!
+      #
+      # p.num_children        # => NoMethodError
+      #
+      # Attribute-types must be one of:
+      #  string, integer, float
+      #
+      # Note: at present the attribute-type doesn't do anything, but stay
+      # tuned...
+      # Shortly it will also *cast* the value of the returned attribute.
+      # ie:
+      # j.age                 # => 34   # cast to an integer
+      # j.weight              # => '65' # still a string!
+      #
+      def schema(&block)
+        if block_given?
+          schema_definition = Schema.new
+          schema_definition.instance_eval(&block)
+
+          # skip out if we didn't define anything
+          return unless schema_definition.attrs.present?
+
+          @schema ||= {}.with_indifferent_access
+          @known_attributes ||= []
+
+          schema_definition.attrs.each do |k,v|
+            @schema[k] = v
+            @known_attributes << k
+          end
+
+          schema
+        else
+          @schema ||= nil
+        end
+      end
+
+      # Alternative, direct way to specify a <tt>schema</tt> for this
+      # Resource. <tt>schema</tt> is more flexible, but this is quick
+      # for a very simple schema.
+      #
+      # Pass the schema as a hash with the keys being the attribute-names
+      # and the value being one of the accepted attribute types (as defined
+      # in <tt>schema</tt>)
+      #
+      # example:
+      #
+      # class Person < ActiveResource::Base
+      #   schema = {'name' => :string, 'age' => :integer }
+      # end
+      #
+      # The keys/values can be strings or symbols. They will be converted to
+      # strings.
+      #
+      def schema=(the_schema)
+        unless the_schema.present?
+          # purposefully nulling out the schema
+          @schema = nil
+          @known_attributes = []
+          return
+        end
+
+        raise ArgumentError, "Expected a hash" unless the_schema.kind_of? Hash
+
+        schema do
+          the_schema.each {|k,v| attribute(k,v) }
+        end
+      end
+
+      # Returns the list of known attributes for this resource, gathered
+      # from the provided <tt>schema</tt>
+      # Attributes that are known will cause your resource to return 'true'
+      # when <tt>respond_to?</tt> is called on them. A known attribute will
+      # return nil if not set (rather than <t>MethodNotFound</tt>); thus
+      # known attributes can be used with <tt>validates_presence_of</tt>
+      # without a getter-method.
+      def known_attributes
+        @known_attributes ||= []
+      end
+
       # Gets the URI of the REST resources to map for this class.  The site variable is required for
       # Active Resource's mapping to work.
       def site
@@ -241,9 +402,25 @@ module ActiveResource
           @site = nil
         else
           @site = create_site_uri_from(site)
-          @user = URI.decode(@site.user) if @site.user
-          @password = URI.decode(@site.password) if @site.password
+          @user = uri_parser.unescape(@site.user) if @site.user
+          @password = uri_parser.unescape(@site.password) if @site.password
         end
+      end
+
+      # Gets the \proxy variable if a proxy is required
+      def proxy
+        # Not using superclass_delegating_reader. See +site+ for explanation
+        if defined?(@proxy)
+          @proxy
+        elsif superclass != Object && superclass.proxy
+          superclass.proxy.dup.freeze
+        end
+      end
+
+      # Sets the URI of the http proxy to the value in the +proxy+ argument.
+      def proxy=(proxy)
+        @connection = nil
+        @proxy = proxy.nil? ? nil : create_proxy_uri_from(proxy)
       end
 
       # Gets the \user for REST HTTP authentication.
@@ -278,6 +455,17 @@ module ActiveResource
         @password = password
       end
 
+      def auth_type
+        if defined?(@auth_type)
+          @auth_type
+        end
+      end
+
+      def auth_type=(auth_type)
+        @connection = nil
+        @auth_type = auth_type
+      end
+
       # Sets the format that attributes are sent and received in from a mime type reference:
       #
       #   Person.format = :json
@@ -297,7 +485,7 @@ module ActiveResource
 
       # Returns the current format, default is ActiveResource::Formats::XmlFormat.
       def format
-        read_inheritable_attribute(:format) || ActiveResource::Formats[:xml]
+        read_inheritable_attribute(:format) || ActiveResource::Formats::XmlFormat
       end
 
       # Sets the number of seconds after which requests to the REST API should time out.
@@ -315,15 +503,43 @@ module ActiveResource
         end
       end
 
+      # Options that will get applied to an SSL connection.
+      #
+      # * <tt>:key</tt> - An OpenSSL::PKey::RSA or OpenSSL::PKey::DSA object.
+      # * <tt>:cert</tt> - An OpenSSL::X509::Certificate object as client certificate
+      # * <tt>:ca_file</tt> - Path to a CA certification file in PEM format. The file can contrain several CA certificates.
+      # * <tt>:ca_path</tt> - Path of a CA certification directory containing certifications in PEM format.
+      # * <tt>:verify_mode</tt> - Flags for server the certification verification at begining of SSL/TLS session. (OpenSSL::SSL::VERIFY_NONE or OpenSSL::SSL::VERIFY_PEER is acceptable)
+      # * <tt>:verify_callback</tt> - The verify callback for the server certification verification.
+      # * <tt>:verify_depth</tt> - The maximum depth for the certificate chain verification.
+      # * <tt>:cert_store</tt> - OpenSSL::X509::Store to verify peer certificate.
+      # * <tt>:ssl_timeout</tt> -The SSL timeout in seconds.
+      def ssl_options=(opts={})
+        @connection   = nil
+        @ssl_options  = opts
+      end
+
+      # Returns the SSL options hash.
+      def ssl_options
+        if defined?(@ssl_options)
+          @ssl_options
+        elsif superclass != Object && superclass.ssl_options
+          superclass.ssl_options
+        end
+      end
+
       # An instance of ActiveResource::Connection that is the base \connection to the remote service.
       # The +refresh+ parameter toggles whether or not the \connection is refreshed at every request
       # or not (defaults to <tt>false</tt>).
       def connection(refresh = false)
         if defined?(@connection) || superclass == Object
           @connection = Connection.new(site, format) if refresh || @connection.nil?
+          @connection.proxy = proxy if proxy
           @connection.user = user if user
           @connection.password = password if password
+          @connection.auth_type = auth_type if auth_type
           @connection.timeout = timeout if timeout
+          @connection.ssl_options = ssl_options if ssl_options
           @connection
         else
           superclass.connection
@@ -336,11 +552,11 @@ module ActiveResource
 
       # Do not include any modules in the default element name. This makes it easier to seclude ARes objects
       # in a separate namespace without having to set element_name repeatedly.
-      attr_accessor_with_default(:element_name)    { to_s.split("::").last.underscore } #:nodoc:
+      attr_accessor_with_default(:element_name)    { ActiveSupport::Inflector.underscore(to_s.split("::").last) } #:nodoc:
 
-      attr_accessor_with_default(:collection_name) { element_name.pluralize } #:nodoc:
+      attr_accessor_with_default(:collection_name) { ActiveSupport::Inflector.pluralize(element_name) } #:nodoc:
       attr_accessor_with_default(:primary_key, 'id') #:nodoc:
-      
+
       # Gets the \prefix for a resource's nested URL (e.g., <tt>prefix/collectionname/1.xml</tt>)
       # This method is regenerated at runtime based on what the \prefix is set to.
       def prefix(options={})
@@ -374,7 +590,7 @@ module ActiveResource
         end_code
         silence_warnings { instance_eval code, __FILE__, __LINE__ }
       rescue
-        logger.error "Couldn't set prefix: #{$!}\n  #{code}"
+        logger.error "Couldn't set prefix: #{$!}\n  #{code}" if logger
         raise
       end
 
@@ -413,7 +629,7 @@ module ActiveResource
       # will split from the +prefix_options+.
       #
       # ==== Options
-      # * +prefix_options+ - A hash to add a prefix to the request for nested URL's (e.g., <tt>:account_id => 19</tt>
+      # * +prefix_options+ - A hash to add a prefix to the request for nested URLs (e.g., <tt>:account_id => 19</tt>
       #   would yield a URL like <tt>/accounts/19/purchases.xml</tt>).
       # * +query_options+ - A hash to add items to the query string for the request.
       #
@@ -462,7 +678,7 @@ module ActiveResource
       #   that_guy.valid? # => false
       #   that_guy.new?   # => true
       def create(attributes = {})
-        returning(self.new(attributes)) { |res| res.save }
+        self.new(attributes).tap { |resource| resource.save }
       end
 
       # Core method for finding resources.  Used similarly to Active Record's +find+ method.
@@ -511,6 +727,19 @@ module ActiveResource
       #
       #   StreetAddress.find(1, :params => { :person_id => 1 })
       #   # => GET /people/1/street_addresses/1.xml
+      #
+      # == Failure or missing data
+      #   A failure to find the requested object raises a ResourceNotFound
+      #   exception if the find was called with an id.
+      #   With any other scope, find returns nil when no data is returned.
+      #
+      #   Person.find(1)
+      #   # => raises ResourcenotFound
+      #
+      #   Person.find(:all)
+      #   Person.find(:first)
+      #   Person.find(:last)
+      #   # => nil
       def find(*arguments)
         scope   = arguments.slice!(0)
         options = arguments.slice!(0) || {}
@@ -523,6 +752,28 @@ module ActiveResource
           else             find_single(scope, options)
         end
       end
+
+
+      # A convenience wrapper for <tt>find(:first, *args)</tt>. You can pass
+      # in all the same arguments to this method as you can to
+      # <tt>find(:first)</tt>.
+      def first(*args)
+        find(:first, *args)
+      end
+
+      # A convenience wrapper for <tt>find(:last, *args)</tt>. You can pass
+      # in all the same arguments to this method as you can to
+      # <tt>find(:last)</tt>.
+      def last(*args)
+        find(:last, *args)
+      end
+
+      # This is an alias for find(:all).  You can pass in all the same
+      # arguments to this method as you can to <tt>find(:all)</tt>
+      def all(*args)
+        find(:all, *args)
+      end
+
 
       # Deletes the resources with the ID in the +id+ parameter.
       #
@@ -557,23 +808,29 @@ module ActiveResource
           response.code.to_i == 200
         end
         # id && !find_single(id, options).nil?
-      rescue ActiveResource::ResourceNotFound
+      rescue ActiveResource::ResourceNotFound, ActiveResource::ResourceGone
         false
       end
 
       private
         # Find every resource
         def find_every(options)
-          case from = options[:from]
-          when Symbol
-            instantiate_collection(get(from, options[:params]))
-          when String
-            path = "#{from}#{query_string(options[:params])}"
-            instantiate_collection(connection.get(path, headers) || [])
-          else
-            prefix_options, query_options = split_options(options[:params])
-            path = collection_path(prefix_options, query_options)
-            instantiate_collection( (connection.get(path, headers) || []), prefix_options )
+          begin
+            case from = options[:from]
+            when Symbol
+              instantiate_collection(get(from, options[:params]))
+            when String
+              path = "#{from}#{query_string(options[:params])}"
+              instantiate_collection(connection.get(path, headers) || [])
+            else
+              prefix_options, query_options = split_options(options[:params])
+              path = collection_path(prefix_options, query_options)
+              instantiate_collection( (connection.get(path, headers) || []), prefix_options )
+            end
+          rescue ActiveResource::ResourceNotFound
+            # Swallowing ResourceNotFound exceptions and return nil - as per
+            # ActiveRecord.
+            nil
           end
         end
 
@@ -600,7 +857,7 @@ module ActiveResource
         end
 
         def instantiate_record(record, prefix_options = {})
-          returning new(record) do |resource|
+          new(record).tap do |resource|
             resource.prefix_options = prefix_options
           end
         end
@@ -608,7 +865,12 @@ module ActiveResource
 
         # Accepts a URI and creates the site URI from that.
         def create_site_uri_from(site)
-          site.is_a?(URI) ? site.dup : URI.parse(site)
+          site.is_a?(URI) ? site.dup : uri_parser.parse(site)
+        end
+
+        # Accepts a URI and creates the proxy URI from that.
+        def create_proxy_uri_from(proxy)
+          proxy.is_a?(URI) ? proxy.dup : uri_parser.parse(proxy)
         end
 
         # contains a set of the current prefix parameters.
@@ -633,10 +895,29 @@ module ActiveResource
 
           [ prefix_options, query_options ]
         end
+
+        def uri_parser
+          @uri_parser ||= URI.const_defined?(:Parser) ? URI::Parser.new : URI
+        end
     end
 
     attr_accessor :attributes #:nodoc:
     attr_accessor :prefix_options #:nodoc:
+
+    # If no schema has been defined for the class (see
+    # <tt>ActiveResource::schema=</tt>), the default automatic schema is
+    # generated from the current instance's attributes
+    def schema
+      self.class.schema || self.attributes
+    end
+
+    # This is a list of known attributes for this resource. Either
+    # gathered fromthe provided <tt>schema</tt>, or from the attributes
+    # set on this instance after it has been fetched from the remote system.
+    def known_attributes
+      self.class.known_attributes + self.attributes.keys.map(&:to_s)
+    end
+
 
     # Constructor method for \new resources; the optional +attributes+ parameter takes a \hash
     # of attributes for the \new resource.
@@ -650,7 +931,7 @@ module ActiveResource
     #   my_other_course = Course.new(:name => "Philosophy: Reason and Being", :lecturer => "Ralph Cling")
     #   my_other_course.save
     def initialize(attributes = {})
-      @attributes     = {}
+      @attributes     = {}.with_indifferent_access
       @prefix_options = {}
       load(attributes)
     end
@@ -691,7 +972,7 @@ module ActiveResource
     end
 
 
-    # A method to determine if the resource a \new object (i.e., it has not been POSTed to the remote service yet).
+    # Returns +true+ if this object hasn't yet been saved, otherwise, returns +false+.
     #
     # ==== Examples
     #   not_new = Computer.create(:brand => 'Apple', :make => 'MacBook', :vendor => 'MacMall')
@@ -746,7 +1027,7 @@ module ActiveResource
     #   # => true
     #
     def ==(other)
-      other.equal?(self) || (other.instance_of?(self.class) && !other.new? && other.id == id)
+      other.equal?(self) || (other.instance_of?(self.class) && other.id == id && other.prefix_options == prefix_options)
     end
 
     # Tests for equality (delegates to ==).
@@ -760,7 +1041,7 @@ module ActiveResource
       id.hash
     end
 
-    # Duplicate the current resource without saving it.
+    # Duplicates the current resource without saving it.
     #
     # ==== Examples
     #   my_invoice = Invoice.create(:customer => 'That Company')
@@ -773,14 +1054,14 @@ module ActiveResource
     #   my_invoice.customer   # => That Company
     #   next_invoice.customer # => That Company
     def dup
-      returning self.class.new do |resource|
+      self.class.new.tap do |resource|
         resource.attributes     = @attributes
         resource.prefix_options = @prefix_options
       end
     end
 
-    # A method to \save (+POST+) or \update (+PUT+) a resource.  It delegates to +create+ if a \new object, 
-    # +update+ if it is existing. If the response to the \save includes a body, it will be assumed that this body
+    # Saves (+POST+) or \updates (+PUT+) a resource.  Delegates to +create+ if the object is \new,
+    # +update+ if it exists. If the response to the \save includes a body, it will be assumed that this body
     # is XML for the final object as it looked after the \save (which would include attributes like +created_at+
     # that weren't part of the original submit).
     #
@@ -794,6 +1075,23 @@ module ActiveResource
     #   my_company.save # sends PUT /companies/1 (update)
     def save
       new? ? create : update
+    end
+
+    # Saves the resource.
+    #
+    # If the resource is new, it is created via +POST+, otherwise the
+    # existing resource is updated via +PUT+.
+    #
+    # With <tt>save!</tt> validations always run. If any of them fail
+    # ActiveResource::ResourceInvalid gets raised, and nothing is POSTed to
+    # the remote system.
+    # See ActiveResource::Validations for more information.
+    #
+    # There's a series of callbacks associated with <tt>save!</tt>. If any
+    # of the <tt>before_*</tt> callbacks return +false+ the action is
+    # cancelled and <tt>save!</tt> raises ActiveResource::ResourceInvalid.
+    def save!
+      save || raise(ResourceInvalid.new(self))
     end
 
     # Deletes the resource from the remote service.
@@ -832,7 +1130,7 @@ module ActiveResource
       !new? && self.class.exists?(to_param, :params => prefix_options)
     end
 
-    # A method to convert the the resource to an XML string.
+    # Converts the resource to an XML string representation.
     #
     # ==== Options
     # The +options+ parameter is handed off to the +to_xml+ method on each
@@ -861,8 +1159,7 @@ module ActiveResource
       attributes.to_xml({:root => self.class.element_name}.merge(options))
     end
 
-    # Returns a JSON string representing the model. Some configuration is
-    # available through +options+.
+    # Coerces to a hash for JSON encoding.
     #
     # ==== Options
     # The +options+ are passed to the +to_json+ method on each
@@ -886,8 +1183,8 @@ module ActiveResource
     #
     #   person.to_json(:except => ["first_name"])
     #   # => {"last_name": "Smith"}
-    def to_json(options={})
-      attributes.to_json(options)
+    def as_json(options = nil)
+      attributes.as_json(options)
     end
 
     # Returns the serialized string representation of the resource in the configured
@@ -895,7 +1192,7 @@ module ActiveResource
     # applicable depend on the configured encoding format.
     def encode(options={})
       case self.class.format
-        when ActiveResource::Formats[:xml]
+        when ActiveResource::Formats::XmlFormat
           self.class.format.encode(attributes, {:root => self.class.element_name}.merge(options))
         else
           self.class.format.encode(attributes, options)
@@ -946,7 +1243,13 @@ module ActiveResource
           case value
             when Array
               resource = find_or_create_resource_for_collection(key)
-              value.map { |attrs| attrs.is_a?(String) ? attrs.dup : resource.new(attrs) }
+              value.map do |attrs|
+                if attrs.is_a?(String) || attrs.is_a?(Numeric)
+                  attrs.duplicable? ? attrs.dup : attrs
+                else
+                  resource.new(attrs)
+                end
+              end
             when Hash
               resource = find_or_create_resource_for(key)
               resource.new(value)
@@ -955,6 +1258,36 @@ module ActiveResource
           end
       end
       self
+    end
+
+    # Updates a single attribute and then saves the object.
+    #
+    # Note: Unlike ActiveRecord::Base.update_attribute, this method <b>is</b>
+    # subject to normal validation routines as an update sends the whole body
+    # of the resource in the request.  (See Validations).
+    #
+    # As such, this method is equivalent to calling update_attributes with a single attribute/value pair.
+    #
+    # If the saving fails because of a connection or remote service error, an
+    # exception will be raised.  If saving fails because the resource is
+    # invalid then <tt>false</tt> will be returned.
+    def update_attribute(name, value)
+      self.send("#{name}=".to_sym, value)
+      self.save
+    end
+
+    # Updates this resource with all the attributes from the passed-in Hash
+    # and requests that the record be saved.
+    #
+    # If the saving fails because of a connection or remote service error, an
+    # exception will be raised.  If saving fails because the resource is
+    # invalid then <tt>false</tt> will be returned.
+    #
+    # Note: Though this request can be made with a partial set of the
+    # resource's attributes, the full body of the request will still be sent
+    # in the save request to the remote service.
+    def update_attributes(attributes)
+      load(attributes) && save
     end
 
     # For checking <tt>respond_to?</tt> without searching the attributes (which is faster).
@@ -966,17 +1299,17 @@ module ActiveResource
     def respond_to?(method, include_priv = false)
       method_name = method.to_s
       if attributes.nil?
-        return super
-      elsif attributes.has_key?(method_name)
-        return true
-      elsif ['?','='].include?(method_name.last) && attributes.has_key?(method_name.first(-1))
-        return true
+        super
+      elsif known_attributes.include?(method_name)
+        true
+      elsif method_name =~ /(?:=|\?)$/ && attributes.include?($`)
+        true
+      else
+        # super must be called at the end of the method, because the inherited respond_to?
+        # would return true for generated readers, even if the attribute wasn't present
+        super
       end
-      # super must be called at the end of the method, because the inherited respond_to?
-      # would return true for generated readers, even if the attribute wasn't present
-      super
     end
-
 
     protected
       def connection(refresh = false)
@@ -985,14 +1318,14 @@ module ActiveResource
 
       # Update the resource on the remote service.
       def update
-        returning connection.put(element_path(prefix_options), encode, self.class.headers) do |response|
+        connection.put(element_path(prefix_options), encode, self.class.headers).tap do |response|
           load_attributes_from_response(response)
         end
       end
 
       # Create (i.e., \save to the remote service) the \new resource.
       def create
-        returning connection.post(collection_path, encode, self.class.headers) do |response|
+        connection.post(collection_path, encode, self.class.headers).tap do |response|
           self.id = id_from_response(response)
           load_attributes_from_response(response)
         end
@@ -1006,7 +1339,7 @@ module ActiveResource
 
       # Takes a response from a typical create post and pulls the ID out
       def id_from_response(response)
-        response['Location'][/\/([^\/]*?)(\.\w+)?$/, 1]
+        response['Location'][/\/([^\/]*?)(\.\w+)?$/, 1] if response['Location']
       end
 
       def element_path(options = nil)
@@ -1020,7 +1353,7 @@ module ActiveResource
     private
       # Tries to find a resource for a given collection name; if it fails, then the resource is created
       def find_or_create_resource_for_collection(name)
-        find_or_create_resource_for(name.to_s.singularize)
+        find_or_create_resource_for(ActiveSupport::Inflector.singularize(name.to_s))
       end
 
       # Tries to find a resource in a non empty list of nested modules
@@ -1064,14 +1397,24 @@ module ActiveResource
       def method_missing(method_symbol, *arguments) #:nodoc:
         method_name = method_symbol.to_s
 
-        case method_name.last
+        if method_name =~ /(=|\?)$/
+          case $1
           when "="
-            attributes[method_name.first(-1)] = arguments.first
+            attributes[$`] = arguments.first
           when "?"
-            attributes[method_name.first(-1)]
-          else
-            attributes.has_key?(method_name) ? attributes[method_name] : super
+            attributes[$`]
+          end
+        else
+          return attributes[method_name] if attributes.include?(method_name)
+          # not set right now but we know about it
+          return nil if known_attributes.include?(method_name)
+          super
         end
       end
+  end
+
+  class Base
+    extend ActiveModel::Naming
+    include CustomMethods, Observing, Validations
   end
 end

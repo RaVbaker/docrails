@@ -1,4 +1,5 @@
 require 'active_record/connection_adapters/abstract_adapter'
+require 'active_support/core_ext/kernel/requires'
 require 'set'
 
 module MysqlCompat #:nodoc:
@@ -7,7 +8,8 @@ module MysqlCompat #:nodoc:
     raise 'Mysql not loaded' unless defined?(::Mysql)
 
     target = defined?(Mysql::Result) ? Mysql::Result : MysqlRes
-    return if target.instance_methods.include?('all_hashes')
+    return if target.instance_methods.include?('all_hashes') ||
+              target.instance_methods.include?(:all_hashes)
 
     # Ruby driver has a version string and returns null values in each_hash
     # C driver >= 2.7 returns null values in each_hash
@@ -52,12 +54,7 @@ module ActiveRecord
       socket   = config[:socket]
       username = config[:username] ? config[:username].to_s : 'root'
       password = config[:password].to_s
-
-      if config.has_key?(:database)
-        database = config[:database]
-      else
-        raise ArgumentError, "No database specified. Missing argument: database."
-      end
+      database = config[:database]
 
       # Require the MySQL driver and define Mysql::Result.all_hashes
       unless defined? Mysql
@@ -68,19 +65,22 @@ module ActiveRecord
           raise
         end
       end
+
       MysqlCompat.define_all_hashes_method!
 
       mysql = Mysql.init
       mysql.ssl_set(config[:sslkey], config[:sslcert], config[:sslca], config[:sslcapath], config[:sslcipher]) if config[:sslca] || config[:sslkey]
 
-      ConnectionAdapters::MysqlAdapter.new(mysql, logger, [host, username, password, database, port, socket], config)
+      default_flags = Mysql.const_defined?(:CLIENT_MULTI_RESULTS) ? Mysql::CLIENT_MULTI_RESULTS : 0
+      options = [host, username, password, database, port, socket, default_flags]
+      ConnectionAdapters::MysqlAdapter.new(mysql, logger, options, config)
     end
   end
 
   module ConnectionAdapters
     class MysqlColumn < Column #:nodoc:
       def extract_default(default)
-        if type == :binary || type == :text
+        if sql_type =~ /blob/i || type == :text
           if default.blank?
             return null ? nil : ''
           else
@@ -94,7 +94,7 @@ module ActiveRecord
       end
 
       def has_default?
-        return false if type == :binary || type == :text #mysql forbids defaults on blob and text columns
+        return false if sql_type =~ /blob/i || type == :text #mysql forbids defaults on blob and text columns
         super
       end
 
@@ -152,6 +152,7 @@ module ActiveRecord
     # * <tt>:password</tt> - Defaults to nothing.
     # * <tt>:database</tt> - The name of the database. No default, must be provided.
     # * <tt>:encoding</tt> - (Optional) Sets the client encoding by executing "SET NAMES <encoding>" after connection.
+    # * <tt>:reconnect</tt> - Defaults to false (See MySQL documentation: http://dev.mysql.com/doc/refman/5.0/en/auto-reconnect.html).
     # * <tt>:sslca</tt> - Necessary to use MySQL with an SSL connection.
     # * <tt>:sslkey</tt> - Necessary to use MySQL with an SSL connection.
     # * <tt>:sslcert</tt> - Necessary to use MySQL with an SSL connection.
@@ -210,7 +211,11 @@ module ActiveRecord
       def supports_migrations? #:nodoc:
         true
       end
-      
+
+      def supports_primary_key? #:nodoc:
+        true
+      end
+
       def supports_savepoints? #:nodoc:
         true
       end
@@ -329,6 +334,7 @@ module ActiveRecord
         super sql, name
         id_value || @connection.insert_id
       end
+      alias :create :insert_sql
 
       def update_sql(sql, name = nil) #:nodoc:
         super
@@ -364,18 +370,6 @@ module ActiveRecord
       def release_savepoint
         execute("RELEASE SAVEPOINT #{current_savepoint_name}")
       end
-
-      def add_limit_offset!(sql, options) #:nodoc:
-        if limit = options[:limit]
-          limit = sanitize_limit(limit)
-          unless offset = options[:offset]
-            sql << " LIMIT #{limit}"
-          else
-            sql << " LIMIT #{offset.to_i}, #{limit}"
-          end
-        end
-      end
-
 
       # SCHEMA STATEMENTS ========================================
 
@@ -476,6 +470,13 @@ module ActiveRecord
         execute "RENAME TABLE #{quote_table_name(table_name)} TO #{quote_table_name(new_name)}"
       end
 
+      def add_column(table_name, column_name, type, options = {})
+        add_column_sql = "ALTER TABLE #{quote_table_name(table_name)} ADD #{quote_column_name(column_name)} #{type_to_sql(type, options[:limit], options[:precision], options[:scale])}"
+        add_column_options!(add_column_sql, options)
+        add_column_position!(add_column_sql, options)
+        execute(add_column_sql)
+      end
+
       def change_column_default(table_name, column_name, default) #:nodoc:
         column = column_for(table_name, column_name)
         change_column table_name, column_name, column.sql_type, :default => default
@@ -504,6 +505,7 @@ module ActiveRecord
 
         change_column_sql = "ALTER TABLE #{quote_table_name(table_name)} CHANGE #{quote_column_name(column_name)} #{quote_column_name(column_name)} #{type_to_sql(type, options[:limit], options[:precision], options[:scale])}"
         add_column_options!(change_column_sql, options)
+        add_column_position!(change_column_sql, options)
         execute(change_column_sql)
       end
 
@@ -535,6 +537,13 @@ module ActiveRecord
         end
       end
 
+      def add_column_position!(sql, options)
+        if options[:first]
+          sql << " FIRST"
+        elsif options[:after]
+          sql << " AFTER #{quote_column_name(options[:after])}"
+        end
+      end
 
       # SHOW VARIABLES LIKE 'name'
       def show_variable(name)
@@ -553,6 +562,12 @@ module ActiveRecord
         keys.length == 1 ? [keys.first, nil] : nil
       end
 
+      # Returns just a table's primary key
+      def primary_key(table)
+        pk_and_sequence = pk_and_sequence_for(table)
+        pk_and_sequence && pk_and_sequence.first
+      end
+
       def case_sensitive_equality_operator
         "= BINARY"
       end
@@ -561,10 +576,23 @@ module ActiveRecord
         where_sql
       end
 
+      protected
+
+        def translate_exception(exception, message)
+          return super unless exception.respond_to?(:errno)
+
+          case exception.errno
+          when 1062
+            RecordNotUnique.new(message, exception)
+          when 1452
+            InvalidForeignKey.new(message, exception)
+          else
+            super
+          end
+        end
+
       private
         def connect
-          @connection.reconnect = true if @connection.respond_to?(:reconnect=)
-
           encoding = @config[:encoding]
           if encoding
             @connection.options(Mysql::SET_CHARSET_NAME, encoding) rescue nil
@@ -574,7 +602,15 @@ module ActiveRecord
             @connection.ssl_set(@config[:sslkey], @config[:sslcert], @config[:sslca], @config[:sslcapath], @config[:sslcipher])
           end
 
+          @connection.options(Mysql::OPT_CONNECT_TIMEOUT, @config[:connect_timeout]) if @config[:connect_timeout]
+          @connection.options(Mysql::OPT_READ_TIMEOUT, @config[:read_timeout]) if @config[:read_timeout]
+          @connection.options(Mysql::OPT_WRITE_TIMEOUT, @config[:write_timeout]) if @config[:write_timeout]
+
           @connection.real_connect(*@connection_options)
+
+          # reconnect must be set after real_connect is called, because real_connect sets it to false internally
+          @connection.reconnect = !!@config[:reconnect] if @connection.respond_to?(:reconnect=)
+
           configure_connection
         end
 

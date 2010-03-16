@@ -38,11 +38,15 @@ class XmlSerializationTest < ActiveRecord::TestCase
     assert_match %r{<CreatedAt},    @xml
   end
 
+  def test_should_allow_skipped_types
+    @xml = Contact.new(:age => 25).to_xml :skip_types => true
+    assert %r{<age>25</age>}.match(@xml)
+  end
+
   def test_should_include_yielded_additions
     @xml = Contact.new.to_xml do |xml|
       xml.creator "David"
     end
-
     assert_match %r{<creator>David</creator>}, @xml
   end
 end
@@ -145,6 +149,13 @@ class DatabaseConnectedXmlSerializationTest < ActiveRecord::TestCase
     assert_match %r{<hello-post type="StiPost">}, xml
   end
 
+  def test_included_associations_should_skip_types
+    xml = authors(:david).to_xml :include=>:hello_posts, :indent => 0, :skip_types => true
+    assert_match %r{<hello-posts>}, xml
+    assert_match %r{<hello-post>}, xml
+    assert_match %r{<hello-post>}, xml
+  end
+
   def test_methods_are_called_on_object
     xml = authors(:david).to_xml :methods => :label, :indent => 0
     assert_match %r{<label>.*</label>}, xml
@@ -161,6 +172,12 @@ class DatabaseConnectedXmlSerializationTest < ActiveRecord::TestCase
     proc = Proc.new { |options| options[:builder].tag!('nationality', 'Danish') }
     xml = authors(:david).to_xml(:procs => [ proc ])
     assert_match %r{<nationality>Danish</nationality>}, xml
+  end
+
+  def test_dual_arity_procs_are_called_on_object
+    proc = Proc.new { |options, record| options[:builder].tag!('name-reverse', record.name.reverse) }
+    xml = authors(:david).to_xml(:procs => [ proc ])
+    assert_match %r{<name-reverse>divaD</name-reverse>}, xml
   end
 
   def test_top_level_procs_arent_applied_to_associations

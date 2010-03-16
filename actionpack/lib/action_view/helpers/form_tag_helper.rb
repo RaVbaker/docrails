@@ -1,5 +1,6 @@
 require 'cgi'
 require 'action_view/helpers/tag_helper'
+require 'active_support/core_ext/object/returning'
 
 module ActionView
   module Helpers
@@ -54,6 +55,9 @@ module ActionView
       # * Any other key creates standard HTML attributes for the tag.
       #
       # ==== Examples
+      #   select_tag "people", options_from_collection_for_select(@people, "name", "id")
+      #   # <select id="people" name="people"><option value="1">David</option></select>
+      #   
       #   select_tag "people", "<option>David</option>"
       #   # => <select id="people" name="people"><option>David</option></select>
       #
@@ -78,6 +82,13 @@ module ActionView
       #   #    <option>Paris</option><option>Rome</option></select>
       def select_tag(name, option_tags = nil, options = {})
         html_name = (options[:multiple] == true && !name.to_s.ends_with?("[]")) ? "#{name}[]" : name
+        if blank = options.delete(:include_blank)
+          if blank.kind_of?(String)
+            option_tags = "<option value=\"\">#{blank}</option>" + option_tags
+          else
+            option_tags = "<option value=\"\"></option>" + option_tags
+          end
+        end
         content_tag :select, option_tags, { "name" => html_name, "id" => sanitize_to_id(name) }.update(options.stringify_keys)
       end
 
@@ -230,6 +241,8 @@ module ActionView
       # * <tt>:rows</tt> - Specify the number of rows in the textarea
       # * <tt>:cols</tt> - Specify the number of columns in the textarea
       # * <tt>:disabled</tt> - If set to true, the user will not be able to use this input.
+      # * <tt>:escape</tt> - By default, the contents of the text input are HTML escaped.
+      #   If you need unescaped contents, set this to false.
       # * Any other key creates standard HTML attributes for the tag.
       #
       # ==== Examples
@@ -257,7 +270,10 @@ module ActionView
           options["cols"], options["rows"] = size.split("x") if size.respond_to?(:split)
         end
 
-        content_tag :textarea, content, { "name" => name, "id" => name }.update(options.stringify_keys)
+        escape = options.key?("escape") ? options.delete("escape") : true
+        content = html_escape(content) if escape
+
+        content_tag :textarea, content, { "name" => name, "id" => sanitize_to_id(name) }.update(options)
       end
 
       # Creates a check box form input tag.
@@ -353,15 +369,16 @@ module ActionView
           disable_with << ";#{options.delete('onclick')}" if options['onclick']
           
           options["onclick"]  = "if (window.hiddenCommit) { window.hiddenCommit.setAttribute('value', this.value); }"
-          options["onclick"] << "else { hiddenCommit = this.cloneNode(false);hiddenCommit.setAttribute('type', 'hidden');this.form.appendChild(hiddenCommit); }"
+          options["onclick"] << "else { hiddenCommit = document.createElement('input');hiddenCommit.type = 'hidden';"
+          options["onclick"] << "hiddenCommit.value = this.value;hiddenCommit.name = this.name;this.form.appendChild(hiddenCommit); }"
           options["onclick"] << "this.setAttribute('originalValue', this.value);this.disabled = true;#{disable_with};"
           options["onclick"] << "result = (this.form.onsubmit ? (this.form.onsubmit() ? this.form.submit() : false) : this.form.submit());"
           options["onclick"] << "if (result == false) { this.value = this.getAttribute('originalValue');this.disabled = false; }return result;"
         end
 
         if confirm = options.delete("confirm")
-          options["onclick"] ||= ''
-          options["onclick"] << "return #{confirm_javascript_function(confirm)};"
+          options["onclick"] ||= 'return true;'
+          options["onclick"] = "if (!#{confirm_javascript_function(confirm)}) return false; #{options['onclick']}"
         end
 
         tag :input, { "type" => "submit", "name" => "commit", "value" => value }.update(options.stringify_keys)
@@ -406,7 +423,7 @@ module ActionView
       # <tt>legend</tt> will become the fieldset's title (optional as per W3C).
       # <tt>options</tt> accept the same values as tag.
       #
-      # === Examples
+      # ==== Examples
       #   <% field_set_tag do %>
       #     <p><%= text_field_tag 'name' %></p>
       #   <% end %>
@@ -426,7 +443,7 @@ module ActionView
         concat(tag(:fieldset, options, true))
         concat(content_tag(:legend, legend)) unless legend.blank?
         concat(content)
-        concat("</fieldset>")
+        concat("</fieldset>".html_safe!)
       end
 
       private
@@ -444,23 +461,23 @@ module ActionView
               ''
             when /^post$/i, "", nil
               html_options["method"] = "post"
-              protect_against_forgery? ? content_tag(:div, token_tag, :style => 'margin:0;padding:0') : ''
+              protect_against_forgery? ? content_tag(:div, token_tag, :style => 'margin:0;padding:0;display:inline') : ''
             else
               html_options["method"] = "post"
-              content_tag(:div, tag(:input, :type => "hidden", :name => "_method", :value => method) + token_tag, :style => 'margin:0;padding:0')
+              content_tag(:div, tag(:input, :type => "hidden", :name => "_method", :value => method) + token_tag, :style => 'margin:0;padding:0;display:inline')
           end
         end
 
         def form_tag_html(html_options)
           extra_tags = extra_tags_for_form(html_options)
-          tag(:form, html_options, true) + extra_tags
+          (tag(:form, html_options, true) + extra_tags).html_safe!
         end
 
         def form_tag_in_block(html_options, &block)
           content = capture(&block)
           concat(form_tag_html(html_options))
           concat(content)
-          concat("</form>")
+          concat("</form>".html_safe!)
         end
 
         def token_tag

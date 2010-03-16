@@ -21,37 +21,42 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
 
-begin
-  require 'active_support'
-rescue LoadError
-  activesupport_path = "#{File.dirname(__FILE__)}/../../activesupport/lib"
-  if File.directory?(activesupport_path)
-    $:.unshift activesupport_path
-    require 'active_support'
-  end
-end
+activesupport_path = File.expand_path('../../../activesupport/lib', __FILE__)
+$:.unshift(activesupport_path) if File.directory?(activesupport_path) && !$:.include?(activesupport_path)
+require 'active_support/ruby/shim'
+require 'active_support/core_ext/class/attribute_accessors'
+
+require 'action_pack'
 
 module ActionView
-  def self.load_all!
-    [Base, InlineTemplate, TemplateError]
+  extend ActiveSupport::Autoload
+
+  eager_autoload do
+    autoload :Context
+    autoload :Template
+    autoload :Helpers
+    autoload :SafeBuffer
+
+    autoload_under "render" do
+      autoload :Partials
+      autoload :Rendering
+    end
+
+    autoload :MissingTemplate,   'action_view/base'
+    autoload :Resolver,          'action_view/template/resolver'
+    autoload :PathResolver,      'action_view/template/resolver'
+    autoload :PathSet,           'action_view/paths'
+    autoload :FileSystemResolverWithFallback, 'action_view/template/resolver'
+
+    autoload :TemplateError,     'action_view/template/error'
+    autoload :TemplateHandler,   'action_view/template'
+    autoload :TemplateHandlers,  'action_view/template'
   end
 
-  autoload :Base, 'action_view/base'
-  autoload :Helpers, 'action_view/helpers'
-  autoload :InlineTemplate, 'action_view/inline_template'
-  autoload :Partials, 'action_view/partials'
-  autoload :PathSet, 'action_view/paths'
-  autoload :Renderable, 'action_view/renderable'
-  autoload :RenderablePartial, 'action_view/renderable_partial'
-  autoload :Template, 'action_view/template'
-  autoload :TemplateError, 'action_view/template_error'
-  autoload :TemplateHandler, 'action_view/template_handler'
-  autoload :TemplateHandlers, 'action_view/template_handlers'
-  autoload :Helpers, 'action_view/helpers'
+  autoload :TestCase, 'action_view/test_case'
 end
 
-class ERB
-  autoload :Util, 'action_view/erb/util'
-end
+require 'action_view/erb/util'
+require 'action_view/base'
 
 I18n.load_path << "#{File.dirname(__FILE__)}/action_view/locale/en.yml"

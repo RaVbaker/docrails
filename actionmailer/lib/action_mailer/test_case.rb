@@ -1,5 +1,3 @@
-require 'active_support/test_case'
-
 module ActionMailer
   class NonInferrableMailerError < ::StandardError
     def initialize(name)
@@ -43,8 +41,8 @@ module ActionMailer
       end
 
       def set_expected_mail
-        @expected = TMail::Mail.new
-        @expected.set_content_type "text", "plain", { "charset" => charset }
+        @expected = Mail.new
+        @expected.content_type ["text", "plain", { "charset" => charset }]
         @expected.mime_version = '1.0'
       end
 

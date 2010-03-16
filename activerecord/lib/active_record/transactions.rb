@@ -3,16 +3,14 @@ require 'thread'
 module ActiveRecord
   # See ActiveRecord::Transactions::ClassMethods for documentation.
   module Transactions
+    extend ActiveSupport::Concern
+
     class TransactionError < ActiveRecordError # :nodoc:
     end
 
-    def self.included(base)
-      base.extend(ClassMethods)
-
-      base.class_eval do
-        [:destroy, :save, :save!].each do |method|
-          alias_method_chain method, :transactions
-        end
+    included do
+      [:destroy, :save, :save!].each do |method|
+        alias_method_chain method, :transactions
       end
     end
 
@@ -175,6 +173,8 @@ module ActiveRecord
     #     end                                                     # RELEASE savepoint active_record_1
     #                                                             # ^^^^ BOOM! database error!
     #   end
+    #
+    # Note that "TRUNCATE" is also a MySQL DDL statement!
     module ClassMethods
       # See ActiveRecord::Transactions::ClassMethods for detailed documentation.
       def transaction(options = {}, &block)
@@ -192,8 +192,8 @@ module ActiveRecord
       with_transaction_returning_status(:destroy_without_transactions)
     end
 
-    def save_with_transactions(perform_validation = true) #:nodoc:
-      rollback_active_record_state! { with_transaction_returning_status(:save_without_transactions, perform_validation) }
+    def save_with_transactions(*args) #:nodoc:
+      rollback_active_record_state! { with_transaction_returning_status(:save_without_transactions, *args) }
     end
 
     def save_with_transactions! #:nodoc:

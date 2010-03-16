@@ -1,8 +1,6 @@
 module ActiveRecord
   module Reflection # :nodoc:
-    def self.included(base)
-      base.extend(ClassMethods)
-    end
+    extend ActiveSupport::Concern
 
     # Reflection allows you to interrogate Active Record classes and objects about their associations and aggregations.
     # This information can, for example, be used in a form builder that took an Active Record object and created input
@@ -64,6 +62,11 @@ module ActiveRecord
       #
       def reflect_on_association(association)
         reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+      end
+
+      # Returns an array of AssociationReflection objects for all associations which have <tt>:autosave</tt> enabled.
+      def reflect_on_all_autosave_associations
+        reflections.values.select { |reflection| reflection.options[:autosave] }
       end
     end
 
@@ -192,7 +195,7 @@ module ActiveRecord
 
       def counter_cache_column
         if options[:counter_cache] == true
-          "#{active_record.name.underscore.pluralize}_count"
+          "#{active_record.name.demodulize.underscore.pluralize}_count"
         elsif options[:counter_cache]
           options[:counter_cache]
         end
@@ -207,6 +210,15 @@ module ActiveRecord
       end
 
       def check_validity!
+        check_validity_of_inverse!
+      end
+
+      def check_validity_of_inverse!
+        unless options[:polymorphic]
+          if has_inverse? && inverse_of.nil?
+            raise InverseOfAssociationNotFoundError.new(self)
+          end
+        end
       end
 
       def through_reflection
@@ -220,10 +232,53 @@ module ActiveRecord
         nil
       end
 
+      def has_inverse?
+        !@options[:inverse_of].nil?
+      end
+
+      def inverse_of
+        if has_inverse?
+          @inverse_of ||= klass.reflect_on_association(options[:inverse_of])
+        end
+      end
+
+      def polymorphic_inverse_of(associated_class)
+        if has_inverse?
+          if inverse_relationship = associated_class.reflect_on_association(options[:inverse_of])
+            inverse_relationship
+          else
+            raise InverseOfAssociationNotFoundError.new(self, associated_class)
+          end
+        end
+      end
+
+      # Returns whether or not this association reflection is for a collection
+      # association. Returns +true+ if the +macro+ is one of +has_many+ or
+      # +has_and_belongs_to_many+, +false+ otherwise.
+      def collection?
+        if @collection.nil?
+          @collection = [:has_many, :has_and_belongs_to_many].include?(macro)
+        end
+        @collection
+      end
+
+      # Returns whether or not the association should be validated as part of
+      # the parent's validation.
+      #
+      # Unless you explicitely disable validation with
+      # <tt>:validate => false</tt>, it will take place when:
+      #
+      # * you explicitely enable validation; <tt>:validate => true</tt>
+      # * you use autosave; <tt>:autosave => true</tt>
+      # * the association is a +has_many+ association
+      def validate?
+        !options[:validate].nil? ? options[:validate] : (options[:autosave] == true || macro == :has_many)
+      end
+
       private
         def derive_class_name
           class_name = name.to_s.camelize
-          class_name = class_name.singularize if [ :has_many, :has_and_belongs_to_many ].include?(macro)
+          class_name = class_name.singularize if collection?
           class_name
         end
 
@@ -292,9 +347,11 @@ module ActiveRecord
           raise HasManyThroughAssociationPolymorphicError.new(active_record.name, self, source_reflection)
         end
 
-        unless [:belongs_to, :has_many].include?(source_reflection.macro) && source_reflection.options[:through].nil?
+        unless [:belongs_to, :has_many, :has_one].include?(source_reflection.macro) && source_reflection.options[:through].nil?
           raise HasManyThroughSourceAssociationMacroError.new(self)
         end
+
+        check_validity_of_inverse!
       end
 
       def through_reflection_primary_key

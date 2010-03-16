@@ -35,7 +35,7 @@ class OptimisticLockingTest < ActiveRecord::TestCase
     assert_equal 0, p2.lock_version
 
     p2.first_name = 'sue'
-    assert_raises(ActiveRecord::StaleObjectError) { p2.save! }
+    assert_raise(ActiveRecord::StaleObjectError) { p2.save! }
   end
 
   def test_lock_repeating
@@ -50,9 +50,9 @@ class OptimisticLockingTest < ActiveRecord::TestCase
     assert_equal 0, p2.lock_version
 
     p2.first_name = 'sue'
-    assert_raises(ActiveRecord::StaleObjectError) { p2.save! }
+    assert_raise(ActiveRecord::StaleObjectError) { p2.save! }
     p2.first_name = 'sue2'
-    assert_raises(ActiveRecord::StaleObjectError) { p2.save! }
+    assert_raise(ActiveRecord::StaleObjectError) { p2.save! }
   end
 
   def test_lock_new
@@ -71,7 +71,7 @@ class OptimisticLockingTest < ActiveRecord::TestCase
     assert_equal 0, p2.lock_version
 
     p2.first_name = 'sue'
-    assert_raises(ActiveRecord::StaleObjectError) { p2.save! }
+    assert_raise(ActiveRecord::StaleObjectError) { p2.save! }
   end
 
   def test_lock_new_with_nil
@@ -95,7 +95,7 @@ class OptimisticLockingTest < ActiveRecord::TestCase
     assert_equal 0, t2.version
 
     t2.tps_report_number = 800
-    assert_raises(ActiveRecord::StaleObjectError) { t2.save! }
+    assert_raise(ActiveRecord::StaleObjectError) { t2.save! }
   end
 
   def test_lock_column_is_mass_assignable
@@ -225,7 +225,7 @@ unless current_adapter?(:SybaseAdapter, :OpenBaseAdapter)
     def test_sane_find_with_scoped_lock
       assert_nothing_raised do
         Person.transaction do
-          Person.with_scope(:find => { :lock => true }) do
+          Person.send(:with_scope, :find => { :lock => true }) do
             Person.find 1
           end
         end
@@ -264,11 +264,14 @@ unless current_adapter?(:SybaseAdapter, :OpenBaseAdapter)
         assert first.end > second.end
       end
 
-      def test_second_lock_waits
-        assert [0.2, 1, 5].any? { |zzz|
-          first, second = duel(zzz) { Person.find 1, :lock => true }
-          second.end > first.end
-        }
+      # Hit by ruby deadlock detection since connection checkout is mutexed.
+      if RUBY_VERSION < '1.9.0'
+        def test_second_lock_waits
+          assert [0.2, 1, 5].any? { |zzz|
+            first, second = duel(zzz) { Person.find 1, :lock => true }
+            second.end > first.end
+          }
+        end
       end
 
       protected

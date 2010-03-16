@@ -1,15 +1,17 @@
 require "cases/helper"
+require "models/project"
+require "timeout"
 
 class PooledConnectionsTest < ActiveRecord::TestCase
   def setup
-    super
+    @per_test_teardown = []
     @connection = ActiveRecord::Base.remove_connection
   end
 
   def teardown
     ActiveRecord::Base.clear_all_connections!
     ActiveRecord::Base.establish_connection(@connection)
-    super
+    @per_test_teardown.each {|td| td.call }
   end
 
   def checkout_connections
@@ -59,12 +61,14 @@ class PooledConnectionsTest < ActiveRecord::TestCase
     checkout_checkin_connections 1, 2
     assert_equal 2, @connection_count
     assert_equal 0, @timed_out
+    assert_equal 1, ActiveRecord::Base.connection_pool.connections.size
   end
 
   def test_pooled_connection_checkin_two
     checkout_checkin_connections 2, 3
     assert_equal 3, @connection_count
     assert_equal 0, @timed_out
+    assert_equal 1, ActiveRecord::Base.connection_pool.connections.size
   end
 
   def test_pooled_connection_checkout_existing_first
@@ -89,15 +93,48 @@ class PooledConnectionsTest < ActiveRecord::TestCase
   ensure
     ActiveRecord::Base.connection_handler = old_handler
   end
-end unless %w(FrontBase).include? ActiveRecord::Base.connection.adapter_name
 
-class AllowConcurrencyDeprecatedTest < ActiveRecord::TestCase
-  def test_allow_concurrency_is_deprecated
-    assert_deprecated('ActiveRecord::Base.allow_concurrency') do
-      ActiveRecord::Base.allow_concurrency
+  def test_with_connection_nesting_safety
+    ActiveRecord::Base.establish_connection(@connection.merge({:pool => 1, :wait_timeout => 0.1}))
+
+    before_count = Project.count
+
+    add_record('one')
+
+    ActiveRecord::Base.connection.transaction do
+      add_record('two')
+      # Have another thread try to screw up the transaction
+      Thread.new do
+        ActiveRecord::Base.connection.rollback_db_transaction
+        ActiveRecord::Base.connection_pool.release_connection
+      end
+      add_record('three')
     end
-    assert_deprecated('ActiveRecord::Base.allow_concurrency=') do
-      ActiveRecord::Base.allow_concurrency = true
-    end
+
+    after_count = Project.count
+    assert_equal 3, after_count - before_count
   end
-end
+
+  def test_connection_pool_callbacks
+    checked_out, checked_in = false, false
+    ActiveRecord::ConnectionAdapters::AbstractAdapter.class_eval do
+      set_callback(:checkout, :after) { checked_out = true }
+      set_callback(:checkin, :before) { checked_in = true }
+    end
+    @per_test_teardown << proc do
+      ActiveRecord::ConnectionAdapters::AbstractAdapter.class_eval do
+        reset_callbacks :checkout
+        reset_callbacks :checkin
+      end
+    end
+    checkout_checkin_connections 1, 1
+    assert checked_out
+    assert checked_in
+  end
+
+  private
+
+  def add_record(name)
+    ActiveRecord::Base.connection_pool.with_connection { Project.create! :name => name }
+  end
+end unless %w(FrontBase).include? ActiveRecord::Base.connection.adapter_name

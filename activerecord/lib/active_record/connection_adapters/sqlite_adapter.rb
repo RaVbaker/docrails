@@ -1,42 +1,21 @@
 require 'active_record/connection_adapters/abstract_adapter'
+require 'active_support/core_ext/kernel/requires'
 
 module ActiveRecord
   class Base
     class << self
-      # Establishes a connection to the database that's used by all Active Record objects
-      def sqlite_connection(config) # :nodoc:
-        parse_sqlite_config!(config)
-
-        unless self.class.const_defined?(:SQLite)
-          require_library_or_gem(config[:adapter])
-
-          db = SQLite::Database.new(config[:database], 0)
-          db.show_datatypes   = "ON" if !defined? SQLite::Version
-          db.results_as_hash  = true if defined? SQLite::Version
-          db.type_translation = false
-
-          # "Downgrade" deprecated sqlite API
-          if SQLite.const_defined?(:Version)
-            ConnectionAdapters::SQLite2Adapter.new(db, logger)
-          else
-            ConnectionAdapters::DeprecatedSQLiteAdapter.new(db, logger)
-          end
-        end
-      end
-
       private
         def parse_sqlite_config!(config)
-          config[:database] ||= config[:dbfile]
           # Require database.
           unless config[:database]
             raise ArgumentError, "No database file specified. Missing argument: database"
           end
 
-          # Allow database path relative to RAILS_ROOT, but only if
+          # Allow database path relative to Rails.root, but only if
           # the database path is not the special path that tells
           # Sqlite to build a database only in memory.
-          if Object.const_defined?(:RAILS_ROOT) && ':memory:' != config[:database]
-            config[:database] = File.expand_path(config[:database], RAILS_ROOT)
+          if defined?(Rails.root) && ':memory:' != config[:database]
+            config[:database] = File.expand_path(config[:database], Rails.root)
           end
         end
     end
@@ -72,18 +51,47 @@ module ActiveRecord
     #
     # * <tt>:database</tt> - Path to the database file.
     class SQLiteAdapter < AbstractAdapter
+      class Version
+        include Comparable
+
+        def initialize(version_string)
+          @version = version_string.split('.').map(&:to_i)
+        end
+
+        def <=>(version_string)
+          @version <=> version_string.split('.').map(&:to_i)
+        end
+      end
+
+      def initialize(connection, logger, config)
+        super(connection, logger)
+        @config = config
+      end
+
       def adapter_name #:nodoc:
         'SQLite'
+      end
+
+      def supports_ddl_transactions?
+        sqlite_version >= '2.0.0'
       end
 
       def supports_migrations? #:nodoc:
         true
       end
 
+      def supports_primary_key? #:nodoc:
+        true
+      end
+
       def requires_reloading?
         true
       end
- 
+
+      def supports_add_column?
+        sqlite_version >= '3.1.6'
+      end
+
       def disconnect!
         super
         @connection.close rescue nil
@@ -125,6 +133,16 @@ module ActiveRecord
         %Q("#{name}")
       end
 
+      # Quote date/time values for use in SQL input. Includes microseconds
+      # if the value is a Time responding to usec.
+      def quoted_date(value) #:nodoc:
+        if value.acts_like?(:time) && value.respond_to?(:usec)
+          "#{super}.#{sprintf("%06d", value.usec)}"
+        else
+          super
+        end
+      end
+
 
       # DATABASE STATEMENTS ======================================
 
@@ -145,6 +163,7 @@ module ActiveRecord
       def insert_sql(sql, name = nil, pk = nil, id_value = nil, sequence_name = nil) #:nodoc:
         super || @connection.last_insert_row_id
       end
+      alias :create :insert_sql
 
       def select_rows(sql, name = nil)
         execute(sql, name).map do |row|
@@ -163,13 +182,6 @@ module ActiveRecord
       def rollback_db_transaction #:nodoc:
         catch_schema_changes { @connection.rollback }
       end
-
-
-      # SELECT ... FOR UPDATE is redundant since the table is locked.
-      def add_lock!(sql, options) #:nodoc:
-        sql
-      end
-
 
       # SCHEMA STATEMENTS ========================================
 
@@ -210,17 +222,23 @@ module ActiveRecord
       end
 
       def rename_table(name, new_name)
-        execute "ALTER TABLE #{name} RENAME TO #{new_name}"
+        execute "ALTER TABLE #{quote_table_name(name)} RENAME TO #{quote_table_name(new_name)}"
+      end
+
+      # See: http://www.sqlite.org/lang_altertable.html
+      # SQLite has an additional restriction on the ALTER TABLE statement
+      def valid_alter_table_options( type, options)
+        type.to_sym != :primary_key
       end
 
       def add_column(table_name, column_name, type, options = {}) #:nodoc:
-        if @connection.respond_to?(:transaction_active?) && @connection.transaction_active?
-          raise StatementInvalid, 'Cannot add columns to a SQLite database while inside a transaction'
+        if supports_add_column? && valid_alter_table_options( type, options )
+          super(table_name, column_name, type, options)
+        else
+          alter_table(table_name) do |definition|
+            definition.column(column_name, type, options)
+          end
         end
-        
-        super(table_name, column_name, type, options)
-        # See last paragraph on http://www.sqlite.org/lang_altertable.html
-        execute "VACUUM"
       end
 
       def remove_column(table_name, *column_names) #:nodoc:
@@ -266,8 +284,8 @@ module ActiveRecord
         alter_table(table_name, :rename => {column_name.to_s => new_column_name.to_s})
       end
 
-      def empty_insert_statement(table_name)
-        "INSERT INTO #{table_name} VALUES(NULL)"
+      def empty_insert_statement_value
+        "VALUES(NULL)"
       end
 
       protected
@@ -284,9 +302,9 @@ module ActiveRecord
         end
 
         def table_structure(table_name)
-          returning structure = execute("PRAGMA table_info(#{quote_table_name(table_name)})") do
-            raise(ActiveRecord::StatementInvalid, "Could not find table '#{table_name}'") if structure.empty?
-          end
+          structure = @connection.table_info(quote_table_name(table_name))
+          raise(ActiveRecord::StatementInvalid, "Could not find table '#{table_name}'") if structure.empty?
+          structure
         end
 
         def alter_table(table_name, options = {}) #:nodoc:
@@ -306,7 +324,7 @@ module ActiveRecord
         end
 
         def copy_table(from, to, options = {}) #:nodoc:
-          options = options.merge(:id => !columns(from).detect{|c| c.name == 'id'}.nil?)
+          options = options.merge(:id => (!columns(from).detect{|c| c.name == 'id'}.nil? && 'id' == primary_key(from).to_s))
           create_table(to, options) do |definition|
             @definition = definition
             columns(from).each do |column|
@@ -314,7 +332,7 @@ module ActiveRecord
                 (options[:rename][column.name] ||
                  options[:rename][column.name.to_sym] ||
                  column.name) : column.name
-              
+
               @definition.column(column_name, column.type,
                 :limit => column.limit, :default => column.default,
                 :null => column.null)
@@ -380,7 +398,7 @@ module ActiveRecord
         end
 
         def sqlite_version
-          @sqlite_version ||= select_value('select sqlite_version(*)')
+          @sqlite_version ||= SQLiteAdapter::Version.new(select_value('select sqlite_version(*)'))
         end
 
         def default_primary_key_type
@@ -390,33 +408,16 @@ module ActiveRecord
             'INTEGER PRIMARY KEY NOT NULL'.freeze
           end
         end
-    end
 
-    class SQLite2Adapter < SQLiteAdapter # :nodoc:
-      def supports_count_distinct? #:nodoc:
-        false
-      end
-
-      def rename_table(name, new_name)
-        move_table(name, new_name)
-      end
-
-      def add_column(table_name, column_name, type, options = {}) #:nodoc:
-        if @connection.respond_to?(:transaction_active?) && @connection.transaction_active?
-          raise StatementInvalid, 'Cannot add columns to a SQLite database while inside a transaction'
+        def translate_exception(exception, message)
+          case exception.message
+          when /column(s)? .* (is|are) not unique/
+            RecordNotUnique.new(message, exception)
+          else
+            super
+          end
         end
 
-        alter_table(table_name) do |definition|
-          definition.column(column_name, type, options)
-        end
-      end
-    end
-
-    class DeprecatedSQLiteAdapter < SQLite2Adapter # :nodoc:
-      def insert(sql, name = nil, pk = nil, id_value = nil)
-        execute(sql, name = nil)
-        id_value || @connection.last_insert_rowid
-      end
     end
   end
 end

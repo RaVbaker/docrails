@@ -70,7 +70,7 @@ module ActionController #:nodoc:
         protected
           # gets the action cache path for the given options.
           def action_path_for(options)
-            ActionController::Caching::Actions::ActionCachePath.path_for(controller, options)
+            Actions::ActionCachePath.new(controller, options).path
           end
 
           # Retrieve instance variables set in the controller.
@@ -87,9 +87,9 @@ module ActionController #:nodoc:
             __send__(action_callback_method_name)     if respond_to?(action_callback_method_name, true)
           end
 
-          def method_missing(method, *arguments)
+          def method_missing(method, *arguments, &block)
             return if @controller.nil?
-            @controller.__send__(method, *arguments)
+            @controller.__send__(method, *arguments, &block)
           end
       end
     end

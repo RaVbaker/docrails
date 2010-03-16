@@ -1,4 +1,158 @@
-*2.3.0/3.0*
+*Edge*
+
+* Allow relations to be used as scope.
+
+  class Item
+    scope :red, where(:colour => 'red')
+  end
+
+  Item.red.limit(10) # Ten red items
+
+* Rename named_scope to scope. [Pratik Naik]
+
+* Changed ActiveRecord::Base.store_full_sti_class to be true by default reflecting the previously announced Rails 3 default [DHH]
+
+* Add Relation#except. [Pratik Naik]
+
+  one_red_item = Item.where(:colour => 'red').limit(1)
+  all_items = one_red_item.except(:where, :limit)
+
+* Add Relation#delete_all. [Pratik Naik]
+
+  Item.where(:colour => 'red').delete_all
+
+* Add Model.having and Relation#having. [Pratik Naik]
+
+  Developer.group("salary").having("sum(salary) >  10000").select("salary")
+
+* Add Relation#count. [Pratik Naik]
+
+  legends = People.where("age > 100")
+  legends.count
+  legends.count(:age, :distinct => true)
+  legends.select('id').count
+
+* Add Model.readonly and association_collection#readonly finder method. [Pratik Naik]
+
+  Post.readonly.to_a # Load all posts in readonly mode
+  @user.items.readonly(false).to_a # Load all the user items in writable mode
+
+* Add .lock finder method [Pratik Naik]
+
+  User.lock.where(:name => 'lifo').to_a
+
+  old_items = Item.where("age > 100")
+  old_items.lock.each {|i| .. }
+
+* Add Model.from and association_collection#from finder methods [Pratik Naik]
+
+  user = User.scoped
+  user.select('*').from('users, items')
+
+* Add relation.destroy_all [Pratik Naik]
+
+  old_items = Item.where("age > 100")
+  old_items.destroy_all
+
+* Add relation.exists? [Pratik Naik]
+
+  red_items = Item.where(:colours => 'red')
+  red_items.exists?
+  red_items.exists?(1)
+
+* Add find(ids) to relations. [Pratik Naik]
+
+  old_users = User.order("age DESC")
+  old_users.find(1)
+  old_users.find(1, 2, 3)
+
+* Add new finder methods to association collection. [Pratik Naik]
+
+  class User < ActiveRecord::Base
+    has_many :items
+  end
+
+  user = User.first
+  user.items.where(:items => {:colour => 'red'})
+  user.items.select('items.id')
+
+* Add relation.reload to force reloading the records. [Pratik Naik]
+
+  topics = Topic.scoped
+  topics.to_a  # force load
+  topics.first # returns a cached record
+  topics.reload
+  topics.first # Fetches a new record from the database
+
+* Rename Model.conditions and relation.conditions to .where. [Pratik Naik]
+
+  Before :
+    User.conditions(:name => 'lifo')
+    User.select('id').conditions(["age > ?", 21])
+
+  Now :
+    User.where(:name => 'lifo')
+    User.select('id').where(["age > ?", 21])
+
+* Add Model.select/group/order/limit/joins/conditions/preload/eager_load class methods returning a lazy relation. [Pratik Naik]
+
+  Examples :
+
+    posts = Post.select('id).order('name') # Returns a lazy relation
+    posts.each {|p| puts p.id } # Fires "select id from posts order by name"
+
+* Model.scoped now returns a relation if invoked without any arguments. [Pratik Naik]
+
+  Example :
+
+    posts = Post.scoped
+    posts.size # Fires "select count(*) from  posts" and returns the count
+    posts.each {|p| puts p.name } # Fires "select * from posts" and loads post objects
+
+* Association inverses for belongs_to, has_one, and has_many. Optimization to reduce database queries.  #3533 [Murray Steele]
+
+    # post.comments sets each comment's post without needing to :include
+    class Post < ActiveRecord::Base
+      has_many :comments, :inverse_of => :post
+    end
+
+* MySQL: add_ and change_column support positioning.  #3286 [Ben Marini]
+
+* Reset your Active Record counter caches with the reset_counter_cache class method.  #1211 [Mike Breen, Gabe da Silveira]
+
+* Remove support for SQLite 2. Please upgrade to SQLite 3+ or install the plugin from git://github.com/rails/sqlite2_adapter.git [Pratik Naik]
+
+* PostgreSQL: XML datatype support.  #1874 [Leonardo Borges]
+
+* quoted_date converts time-like objects to ActiveRecord::Base.default_timezone before serialization. This allows you to use Time.now in find conditions and have it correctly be serialized as the current time in UTC when default_timezone == :utc. #2946 [Geoff Buesing]
+
+* SQLite: drop support for 'dbfile' option in favor of 'database.'  #2363 [Paul Hinze, Jeremy Kemper]
+
+* Added :primary_key option to belongs_to associations.  #765 [Szymon Nowak, Philip Hallstrom, Noel Rocha]
+    # employees.company_name references companies.name
+    Employee.belongs_to :company, :primary_key => 'name', :foreign_key => 'company_name'
+
+* Implement #many? for NamedScope and AssociationCollection using #size. #1500 [Chris Kampmeier]
+
+* Added :touch option to belongs_to associations that will touch the parent record when the current record is saved or destroyed [DHH]
+
+* Added ActiveRecord::Base#touch to update the updated_at/on attributes (or another specified timestamp) with the current time [DHH]
+
+
+*2.3.2 [Final] (March 15, 2009)*
+
+* Added ActiveRecord::Base.find_each and ActiveRecord::Base.find_in_batches for batch processing [DHH/Jamis Buck]
+
+* Added that ActiveRecord::Base.exists? can be called with no arguments #1817 [Scott Taylor]
+
+* Add Support for updating deeply nested models from a single form. #1202 [Eloy Duran]
+
+	class Book < ActiveRecord::Base
+	  has_one :author
+	  has_many :pages
+
+	  accepts_nested_attributes_for :author, :pages
+	end
 
 * Make after_save callbacks fire only if the record was successfully saved.  #1735 [Michael Lovitt]
 
@@ -2167,7 +2321,7 @@ during calendar reform.  #7649, #7724 [fedot, Geoff Buesing]
 
 * Escape database name in MySQL adapter when creating and dropping databases. #3409 [anna@wota.jp]
 
-* Disambiguate table names for columns in validates_uniquness_of's WHERE clause. #3423 [alex.borovsky@gmail.com]
+* Disambiguate table names for columns in validates_uniqueness_of's WHERE clause. #3423 [alex.borovsky@gmail.com]
 
 * .with_scope imposed create parameters now bypass attr_protected [Tobias Lütke]
 
@@ -3682,7 +3836,7 @@ in effect.  Added :readonly finder constraint.  Calling an association collectio
 
 * Escape database name in MySQL adapter when creating and dropping databases. #3409 [anna@wota.jp]
 
-* Disambiguate table names for columns in validates_uniquness_of's WHERE clause. #3423 [alex.borovsky@gmail.com]
+* Disambiguate table names for columns in validates_uniqueness_of's WHERE clause. #3423 [alex.borovsky@gmail.com]
 
 * .with_scope imposed create parameters now bypass attr_protected [Tobias Lütke]
 

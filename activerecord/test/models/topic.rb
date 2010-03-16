@@ -1,15 +1,19 @@
 class Topic < ActiveRecord::Base
-  named_scope :base
-  named_scope :written_before, lambda { |time|
-    { :conditions => ['written_on < ?', time] }
+  scope :base
+  scope :written_before, lambda { |time|
+    if time
+      { :conditions => ['written_on < ?', time] }
+    end
   }
-  named_scope :approved, :conditions => {:approved => true}
-  named_scope :by_lifo, :conditions => {:author_name => 'lifo'}
+  scope :approved, :conditions => {:approved => true}
+  scope :rejected, :conditions => {:approved => false}
+
+  scope :by_lifo, :conditions => {:author_name => 'lifo'}
   
-  named_scope :approved_as_hash_condition, :conditions => {:topics => {:approved => true}}
-  named_scope 'approved_as_string', :conditions => {:approved => true}
-  named_scope :replied, :conditions => ['replies_count > 0']
-  named_scope :anonymous_extension do
+  scope :approved_as_hash_condition, :conditions => {:topics => {:approved => true}}
+  scope 'approved_as_string', :conditions => {:approved => true}
+  scope :replied, :conditions => ['replies_count > 0']
+  scope :anonymous_extension do
     def one
       1
     end
@@ -29,10 +33,11 @@ class Topic < ActiveRecord::Base
       2
     end
   end
-  named_scope :named_extension, :extend => NamedExtension
-  named_scope :multiple_extensions, :extend => [MultipleExtensionTwo, MultipleExtensionOne]
+  scope :named_extension, :extend => NamedExtension
+  scope :multiple_extensions, :extend => [MultipleExtensionTwo, MultipleExtensionOne]
 
   has_many :replies, :dependent => :destroy, :foreign_key => "parent_id"
+  has_many :replies_with_primary_key, :class_name => "Reply", :dependent => :destroy, :primary_key => "title", :foreign_key => "parent_title"
   serialize :content
 
   before_create  :default_written_on
@@ -46,6 +51,15 @@ class Topic < ActiveRecord::Base
   def topic_id
     id
   end
+
+  before_validation :before_validation_for_transaction
+  before_save :before_save_for_transaction
+  before_destroy :before_destroy_for_transaction
+
+  after_save :after_save_for_transaction
+  after_create :after_create_for_transaction
+
+  after_initialize :set_email_address
 
   protected
     def approved=(val)
@@ -61,9 +75,21 @@ class Topic < ActiveRecord::Base
       self.class.delete_all "parent_id = #{id}"
     end
 
-    def after_initialize
+    def set_email_address
       if self.new_record?
         self.author_email_address = 'test@test.com'
       end
     end
+
+    def before_validation_for_transaction; end
+    def before_save_for_transaction; end
+    def before_destroy_for_transaction; end
+    def after_save_for_transaction; end
+    def after_create_for_transaction; end
+end
+
+module Web
+  class Topic < ActiveRecord::Base
+    has_many :replies, :dependent => :destroy, :foreign_key => "parent_id", :class_name => 'Web::Reply'
+  end
 end

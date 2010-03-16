@@ -1,4 +1,5 @@
 require 'abstract_unit'
+require 'active_support/time'
 
 class MessageEncryptorTest < Test::Unit::TestCase
   def setup
@@ -33,7 +34,7 @@ class MessageEncryptorTest < Test::Unit::TestCase
   
   private
     def assert_not_decrypted(value)
-      assert_raises(ActiveSupport::MessageEncryptor::InvalidMessage) do
+      assert_raise(ActiveSupport::MessageEncryptor::InvalidMessage) do
         @encryptor.decrypt(value)
       end
     end

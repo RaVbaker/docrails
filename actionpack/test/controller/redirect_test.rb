@@ -4,6 +4,8 @@ class WorkshopsController < ActionController::Base
 end
 
 class Workshop
+  extend ActiveModel::Naming
+  include ActiveModel::Conversion
   attr_accessor :id, :new_record
 
   def initialize(id, new_record)
@@ -30,6 +32,10 @@ class RedirectController < ActionController::Base
 
   def redirect_with_status_hash
     redirect_to({:action => "hello_world"}, {:status => 301})
+  end
+
+  def redirect_with_protocol
+    redirect_to :action => "hello_world", :protocol => "https"
   end
 
   def url_redirect_with_status
@@ -130,6 +136,12 @@ class RedirectTest < ActionController::TestCase
     assert_equal "http://test.host/redirect/hello_world", redirect_to_url
   end
 
+  def test_redirect_with_protocol
+    get :redirect_with_protocol
+    assert_response 302
+    assert_equal "https://test.host/redirect/hello_world", redirect_to_url
+  end
+
   def test_url_redirect_with_status
     get :url_redirect_with_status
     assert_response 301
@@ -212,34 +224,31 @@ class RedirectTest < ActionController::TestCase
   end
 
   def test_redirect_to_back_with_no_referer
-    assert_raises(ActionController::RedirectBackError) {
+    assert_raise(ActionController::RedirectBackError) {
       @request.env["HTTP_REFERER"] = nil
       get :redirect_to_back
     }
   end
 
   def test_redirect_to_record
-    ActionController::Routing::Routes.draw do |map|
-      map.resources :workshops
-      map.connect ':controller/:action/:id'
+    with_routing do |set|
+      set.draw do |map|
+        resources :workshops
+        match ':controller/:action'
+      end
+
+      get :redirect_to_existing_record
+      assert_equal "http://test.host/workshops/5", redirect_to_url
+      assert_redirected_to Workshop.new(5, false)
+
+      get :redirect_to_new_record
+      assert_equal "http://test.host/workshops", redirect_to_url
+      assert_redirected_to Workshop.new(5, true)
     end
-
-    get :redirect_to_existing_record
-    assert_equal "http://test.host/workshops/5", redirect_to_url
-    assert_redirected_to Workshop.new(5, false)
-
-    get :redirect_to_new_record
-    assert_equal "http://test.host/workshops", redirect_to_url
-    assert_redirected_to Workshop.new(5, true)
-  end
-
-  def test_redirect_with_partial_params
-    get :module_redirect
-    assert_redirected_to :action => 'hello_world'
   end
 
   def test_redirect_to_nil
-    assert_raises(ActionController::ActionControllerError) do
+    assert_raise(ActionController::ActionControllerError) do
       get :redirect_to_nil
     end
   end

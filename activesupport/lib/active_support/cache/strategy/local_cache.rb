@@ -1,3 +1,6 @@
+require 'active_support/core_ext/object/duplicable'
+require 'active_support/core_ext/string/inflections'
+
 module ActiveSupport
   module Cache
     module Strategy
@@ -27,6 +30,11 @@ module ActiveSupport
                 Thread.current[:#{thread_local_key}] = nil
               end
             EOS
+
+            def klass.to_s
+              "ActiveSupport::Cache::Strategy::LocalCache"
+            end
+
             klass
           end
         end
@@ -37,22 +45,22 @@ module ActiveSupport
             nil
           elsif value.nil?
             value = super
-            local_cache.write(key, value || NULL) if local_cache
-            value
+            local_cache.mute { local_cache.write(key, value || NULL) } if local_cache
+            value.duplicable? ? value.dup : value
           else
             # forcing the value to be immutable
-            value.dup
+            value.duplicable? ? value.dup : value
           end
         end
 
         def write(key, value, options = nil)
           value = value.to_s if respond_to?(:raw?) && raw?(options)
-          local_cache.write(key, value || NULL) if local_cache
+          local_cache.mute { local_cache.write(key, value || NULL) } if local_cache
           super
         end
 
         def delete(key, options = nil)
-          local_cache.write(key, NULL) if local_cache
+          local_cache.mute { local_cache.write(key, NULL) } if local_cache
           super
         end
 
@@ -69,7 +77,7 @@ module ActiveSupport
 
         def increment(key, amount = 1)
           if value = super
-            local_cache.write(key, value.to_s) if local_cache
+            local_cache.mute { local_cache.write(key, value.to_s) } if local_cache
             value
           else
             nil
@@ -78,7 +86,7 @@ module ActiveSupport
 
         def decrement(key, amount = 1)
           if value = super
-            local_cache.write(key, value.to_s) if local_cache
+            local_cache.mute { local_cache.write(key, value.to_s) } if local_cache
             value
           else
             nil

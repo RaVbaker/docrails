@@ -1,7 +1,34 @@
 require 'abstract_unit'
+require 'active_support/time'
 
 class DurationTest < ActiveSupport::TestCase
+  def test_is_a
+    d = 1.day
+    assert d.is_a?(ActiveSupport::Duration)
+    assert d.is_a?(Numeric)
+    assert d.is_a?(Fixnum)
+    assert !d.is_a?(Hash)
+
+    k = Class.new
+    class << k; undef_method :== end
+    assert !d.is_a?(k)
+  end
+
+  def test_threequals
+    assert ActiveSupport::Duration === 1.day
+    assert !(ActiveSupport::Duration === 1.day.to_i)
+    assert !(ActiveSupport::Duration === 'foo')
+    assert !(ActiveSupport::Duration === ActiveSupport::BasicObject.new)
+  end
+
+  def test_equals
+    assert 1.day == 1.day
+    assert 1.day == 1.day.to_i
+    assert !(1.day == 'foo')
+  end
+
   def test_inspect
+    assert_equal '0 seconds',                       0.seconds.inspect
     assert_equal '1 month',                         1.month.inspect
     assert_equal '1 month and 1 day',               (1.month + 1.day).inspect
     assert_equal '6 months and -2 days',            (6.months - 2.days).inspect
@@ -41,43 +68,23 @@ class DurationTest < ActiveSupport::TestCase
   end
 
   def test_since_and_ago_with_fractional_days
-    Time.stubs(:now).returns Time.local(2000)
+    t = Time.local(2000)
     # since
-    assert_equal 36.hours.since, 1.5.days.since
-    assert_equal((24 * 1.7).hours.since, 1.7.days.since)
+    assert_equal 36.hours.since(t), 1.5.days.since(t)
+    assert_in_delta((24 * 1.7).hours.since(t), 1.7.days.since(t), 1)
     # ago
-    assert_equal 36.hours.ago, 1.5.days.ago
-    assert_equal((24 * 1.7).hours.ago, 1.7.days.ago)
+    assert_equal 36.hours.ago(t), 1.5.days.ago(t)
+    assert_in_delta((24 * 1.7).hours.ago(t), 1.7.days.ago(t), 1)
   end
 
   def test_since_and_ago_with_fractional_weeks
-    Time.stubs(:now).returns Time.local(2000)
+    t = Time.local(2000)
     # since
-    assert_equal((7 * 36).hours.since, 1.5.weeks.since)
-    assert_equal((7 * 24 * 1.7).hours.since, 1.7.weeks.since)
+    assert_equal((7 * 36).hours.since(t), 1.5.weeks.since(t))
+    assert_in_delta((7 * 24 * 1.7).hours.since(t), 1.7.weeks.since(t), 1)
     # ago
-    assert_equal((7 * 36).hours.ago, 1.5.weeks.ago)
-    assert_equal((7 * 24 * 1.7).hours.ago, 1.7.weeks.ago)
-  end
-
-  def test_deprecated_fractional_years
-    years_re = /Fractional years are not respected\. Convert value to integer before calling #years\./
-    assert_deprecated(years_re){1.0.years}
-    assert_deprecated(years_re){1.5.years}
-    assert_not_deprecated{1.years}
-    assert_deprecated(years_re){1.0.year}
-    assert_deprecated(years_re){1.5.year}
-    assert_not_deprecated{1.year}
-  end
-
-  def test_deprecated_fractional_months
-    months_re = /Fractional months are not respected\. Convert value to integer before calling #months\./
-    assert_deprecated(months_re){1.5.months}
-    assert_deprecated(months_re){1.0.months}
-    assert_not_deprecated{1.months}
-    assert_deprecated(months_re){1.5.month}
-    assert_deprecated(months_re){1.0.month}
-    assert_not_deprecated{1.month}
+    assert_equal((7 * 36).hours.ago(t), 1.5.weeks.ago(t))
+    assert_in_delta((7 * 24 * 1.7).hours.ago(t), 1.7.weeks.ago(t), 1)
   end
 
   def test_since_and_ago_anchored_to_time_now_when_time_zone_default_not_set
@@ -94,22 +101,32 @@ class DurationTest < ActiveSupport::TestCase
   end
 
   def test_since_and_ago_anchored_to_time_zone_now_when_time_zone_default_set
-    silence_warnings do # silence warnings raised by tzinfo gem
-      Time.zone_default = ActiveSupport::TimeZone['Eastern Time (US & Canada)']
-      with_env_tz 'US/Eastern' do
-        Time.stubs(:now).returns Time.local(2000)
-        # since
-        assert_equal true, 5.seconds.since.is_a?(ActiveSupport::TimeWithZone)
-        assert_equal Time.utc(2000,1,1,0,0,5), 5.seconds.since.time
-        assert_equal 'Eastern Time (US & Canada)', 5.seconds.since.time_zone.name
-        # ago
-        assert_equal true, 5.seconds.ago.is_a?(ActiveSupport::TimeWithZone)
-        assert_equal Time.utc(1999,12,31,23,59,55), 5.seconds.ago.time
-        assert_equal 'Eastern Time (US & Canada)', 5.seconds.ago.time_zone.name
-      end
+    Time.zone_default = ActiveSupport::TimeZone['Eastern Time (US & Canada)']
+    with_env_tz 'US/Eastern' do
+      Time.stubs(:now).returns Time.local(2000)
+      # since
+      assert_equal true, 5.seconds.since.is_a?(ActiveSupport::TimeWithZone)
+      assert_equal Time.utc(2000,1,1,0,0,5), 5.seconds.since.time
+      assert_equal 'Eastern Time (US & Canada)', 5.seconds.since.time_zone.name
+      # ago
+      assert_equal true, 5.seconds.ago.is_a?(ActiveSupport::TimeWithZone)
+      assert_equal Time.utc(1999,12,31,23,59,55), 5.seconds.ago.time
+      assert_equal 'Eastern Time (US & Canada)', 5.seconds.ago.time_zone.name
     end
   ensure
     Time.zone_default = nil
+  end
+  
+  def test_adding_hours_across_dst_boundary
+    with_env_tz 'CET' do
+      assert_equal Time.local(2009,3,29,0,0,0) + 24.hours, Time.local(2009,3,30,1,0,0)
+    end
+  end
+  
+  def test_adding_day_across_dst_boundary
+    with_env_tz 'CET' do
+      assert_equal Time.local(2009,3,29,0,0,0) + 1.day, Time.local(2009,3,30,0,0,0)
+    end
   end
 
   protected

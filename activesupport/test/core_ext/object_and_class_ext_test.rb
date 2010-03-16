@@ -1,4 +1,7 @@
 require 'abstract_unit'
+require 'active_support/time'
+require 'active_support/core_ext/object'
+require 'active_support/core_ext/class/removal'
 
 class ClassA; end
 class ClassB < ClassA; end
@@ -108,16 +111,6 @@ class ClassExtTest < Test::Unit::TestCase
 end
 
 class ObjectTests < Test::Unit::TestCase
-  def test_suppress_re_raises
-    assert_raises(LoadError) { suppress(ArgumentError) {raise LoadError} }
-  end
-  def test_suppress_supresses
-    suppress(ArgumentError) { raise ArgumentError }
-    suppress(LoadError) { raise LoadError }
-    suppress(LoadError, ArgumentError) { raise LoadError }
-    suppress(LoadError, ArgumentError) { raise ArgumentError }
-  end
-
   def test_extended_by
     foo = Foo.new
     assert foo.extended_by.include?(Bar)
@@ -189,13 +182,6 @@ class ObjectInstanceVariableTest < Test::Unit::TestCase
     assert_equal %w(@bar @baz), @source.instance_variable_names.sort
   end
 
-  def test_instance_variable_defined
-    assert @source.instance_variable_defined?('@bar')
-    assert @source.instance_variable_defined?(:@bar)
-    assert !@source.instance_variable_defined?(:@foo)
-    assert !@source.instance_variable_defined?('@foo')
-  end
-
   def test_copy_instance_variables_from_without_explicit_excludes
     assert_equal [], @dest.instance_variables
     @dest.copy_instance_variables_from(@source)
@@ -256,7 +242,7 @@ class ObjectTryTest < Test::Unit::TestCase
   def test_nonexisting_method
     method = :undefined_method
     assert !@string.respond_to?(method)
-    assert_raises(NoMethodError) { @string.try(method) }
+    assert_raise(NoMethodError) { @string.try(method) }
   end
   
   def test_valid_method

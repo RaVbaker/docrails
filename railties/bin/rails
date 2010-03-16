@@ -1,20 +1,27 @@
-require File.dirname(__FILE__) + '/../lib/ruby_version_check'
+begin
+  require 'rails/ruby_version_check'
+rescue LoadError
+  # If people are not using gems, the load path must still
+  # be correct.
+  # TODO: Remove the begin / rescue block somehow
+  $:.unshift File.expand_path('../../lib', __FILE__)
+  $:.unshift File.expand_path('../../../activesupport/lib', __FILE__)
+  $:.unshift File.expand_path('../../../actionpack/lib', __FILE__)
+  require 'rails/ruby_version_check'
+end
+
 Signal.trap("INT") { puts; exit }
 
-require File.dirname(__FILE__) + '/../lib/rails/version'
+require 'rails/version'
 if %w(--version -v).include? ARGV.first
   puts "Rails #{Rails::VERSION::STRING}"
   exit(0)
 end
 
-freeze   = ARGV.any? { |option| %w(--freeze -f).include?(option) }
+ARGV << "--help" if ARGV.empty?
 
-app_path = ARGV.first
 
-require File.dirname(__FILE__) + '/../lib/rails_generator'
+require 'rails/generators'
+require 'generators/rails/app/app_generator'
 
-require 'rails_generator/scripts/generate'
-Rails::Generator::Base.use_application_sources!
-Rails::Generator::Scripts::Generate.new.run(ARGV, :generator => 'app')
-
-Dir.chdir(app_path) { `rake rails:freeze:gems`; puts "froze" } if freeze
+Rails::Generators::AppGenerator.start

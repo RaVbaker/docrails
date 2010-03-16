@@ -64,26 +64,17 @@ class AssociationsTest < ActiveRecord::TestCase
     assert !firm.clients(true).empty?, "New firm should have reloaded client objects"
     assert_equal 1, firm.clients(true).size, "New firm should have reloaded clients count"
   end
-
-  def test_storing_in_pstore
-    require "tmpdir"
-    store_filename = File.join(Dir.tmpdir, "ar-pstore-association-test")
-    File.delete(store_filename) if File.exist?(store_filename)
-    require "pstore"
-    apple = Firm.create("name" => "Apple")
-    natural = Client.new("name" => "Natural Company")
-    apple.clients << natural
-
-    db = PStore.new(store_filename)
-    db.transaction do
-      db["apple"] = apple
-    end
-
-    db = PStore.new(store_filename)
-    db.transaction do
-      assert_equal "Natural Company", db["apple"].clients.first.name
+  
+  def test_force_reload_is_uncached
+    firm = Firm.create!("name" => "A New Firm, Inc")
+    client = Client.create!("name" => "TheClient.com", :firm => firm)
+    ActiveRecord::Base.cache do
+      firm.clients.each {}
+      assert_queries(0) { assert_not_nil firm.clients.each {} }
+      assert_queries(1) { assert_not_nil firm.clients(true).each {} }
     end
   end
+
 end
 
 class AssociationProxyTest < ActiveRecord::TestCase

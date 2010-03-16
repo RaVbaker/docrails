@@ -1,4 +1,6 @@
 require 'abstract_unit'
+require 'active_support/inflector'
+
 require 'inflector_test_cases'
 
 module Ace
@@ -116,6 +118,12 @@ class InflectorTest < Test::Unit::TestCase
     end
   end
 
+  def test_parameterize_with_multi_character_separator
+    StringToParameterized.each do |some_string, parameterized_string|
+      assert_equal(parameterized_string.gsub('-', '__sep__'), ActiveSupport::Inflector.parameterize(some_string, '__sep__'))
+    end
+  end
+
   def test_classify
     ClassNameToTableName.each do |class_name, table_name|
       assert_equal(class_name, ActiveSupport::Inflector.classify(table_name))
@@ -161,13 +169,13 @@ class InflectorTest < Test::Unit::TestCase
     assert_nothing_raised { assert_equal Ace::Base::Case, ActiveSupport::Inflector.constantize("::Ace::Base::Case") }
     assert_nothing_raised { assert_equal InflectorTest, ActiveSupport::Inflector.constantize("InflectorTest") }
     assert_nothing_raised { assert_equal InflectorTest, ActiveSupport::Inflector.constantize("::InflectorTest") }
-    assert_raises(NameError) { ActiveSupport::Inflector.constantize("UnknownClass") }
-    assert_raises(NameError) { ActiveSupport::Inflector.constantize("An invalid string") }
-    assert_raises(NameError) { ActiveSupport::Inflector.constantize("InvalidClass\n") }
+    assert_raise(NameError) { ActiveSupport::Inflector.constantize("UnknownClass") }
+    assert_raise(NameError) { ActiveSupport::Inflector.constantize("An invalid string") }
+    assert_raise(NameError) { ActiveSupport::Inflector.constantize("InvalidClass\n") }
   end
 
   def test_constantize_does_lexical_lookup
-    assert_raises(NameError) { ActiveSupport::Inflector.constantize("Ace::Base::InflectorTest") }
+    assert_raise(NameError) { ActiveSupport::Inflector.constantize("Ace::Base::InflectorTest") }
   end
 
   def test_ordinal
@@ -191,6 +199,12 @@ class InflectorTest < Test::Unit::TestCase
   def test_underscore_to_lower_camel
     UnderscoreToLowerCamel.each do |underscored, lower_camel|
       assert_equal(lower_camel, ActiveSupport::Inflector.camelize(underscored, false))
+    end
+  end
+
+  def test_symbol_to_lower_camel
+    SymbolToLowerCamel.each do |symbol, lower_camel|
+      assert_equal(lower_camel, ActiveSupport::Inflector.camelize(symbol, false))
     end
   end
 
@@ -238,6 +252,16 @@ class InflectorTest < Test::Unit::TestCase
         inflect.irregular(singular, plural)
         assert_equal singular, ActiveSupport::Inflector.singularize(plural)
         assert_equal plural, ActiveSupport::Inflector.pluralize(singular)
+      end
+    end
+  end
+
+  Irregularities.each do |irregularity|
+    singular, plural = *irregularity
+    ActiveSupport::Inflector.inflections do |inflect|
+      define_method("test_pluralize_of_irregularity_#{plural}_should_be_the_same") do
+        inflect.irregular(singular, plural)
+        assert_equal plural, ActiveSupport::Inflector.pluralize(plural)
       end
     end
   end

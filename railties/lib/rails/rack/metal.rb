@@ -1,36 +1,26 @@
-require 'active_support/ordered_hash'
+require 'action_dispatch'
 
 module Rails
   module Rack
     class Metal
-      NotFoundResponse = [404, {}, []].freeze
-      NotFound = lambda { NotFoundResponse }
+      def initialize(metal_roots, metals=nil)
+        load_list = metals || Dir["{#{metal_roots.join(",")}}/**/*.rb"]
 
-      def self.metals
-        base = "#{Rails.root}/app/metal"
-        matcher = /\A#{Regexp.escape(base)}\/(.*)\.rb\Z/
-
-        Dir["#{base}/**/*.rb"].sort.map do |file|
-          file.sub!(matcher, '\1')
-          require file
-          file.classify.constantize
-        end
+        @metals = load_list.map { |metal|
+          metal = File.basename(metal, '.rb')
+          require_dependency metal
+          metal.camelize.constantize
+        }.compact
       end
 
-      def initialize(app)
-        @app = app
-        @metals = ActiveSupport::OrderedHash.new
-        self.class.metals.each { |app| @metals[app] = true }
-        freeze
+      def new(app)
+        ActionDispatch::Cascade.new(@metals, app)
       end
 
-      def call(env)
-        @metals.keys.each do |app|
-          result = app.call(env)
-          return result unless result[0].to_i == 404
-        end
-        @app.call(env)
+      def name
+        ActionDispatch::Cascade.name
       end
+      alias_method :to_s, :name
     end
   end
 end

@@ -40,11 +40,11 @@ module ActiveRecord
           # we are certain the current target is an empty array. This is a
           # documented side-effect of the method that may avoid an extra SELECT.
           @target ||= [] and loaded if count == 0
-          
+
           if @reflection.options[:limit]
             count = [ @reflection.options[:limit], count ].min
           end
-          
+
           return count
         end
 
@@ -56,9 +56,9 @@ module ActiveRecord
           "#{@reflection.name}_count"
         end
 
-        def insert_record(record)
+        def insert_record(record, force = false, validate = true)
           set_belongs_to_association_for(record)
-          record.save
+          force ? record.save! : record.save(:validate => validate)
         end
 
         # Deletes the records according to the <tt>:dependent</tt> option.
@@ -69,11 +69,12 @@ module ActiveRecord
             when :delete_all
               @reflection.klass.delete(records.map { |record| record.id })
             else
-              ids = quoted_record_ids(records)
-              @reflection.klass.update_all(
-                "#{@reflection.primary_key_name} = NULL", 
-                "#{@reflection.primary_key_name} = #{owner_quoted_id} AND #{@reflection.klass.primary_key} IN (#{ids})"
-              )
+              relation = Arel::Table.new(@reflection.table_name)
+              relation.where(relation[@reflection.primary_key_name].eq(@owner.id).
+                  and(Arel::Predicates::In.new(relation[@reflection.klass.primary_key], records.map(&:id)))
+              ).update(relation[@reflection.primary_key_name] => nil)
+
+              @owner.class.update_counters(@owner.id, cached_counter_attribute_name => -records.size) if has_cached_counter?
           end
         end
 
@@ -87,25 +88,17 @@ module ActiveRecord
               @finder_sql = interpolate_sql(@reflection.options[:finder_sql])
 
             when @reflection.options[:as]
-              @finder_sql = 
+              @finder_sql =
                 "#{@reflection.quoted_table_name}.#{@reflection.options[:as]}_id = #{owner_quoted_id} AND " +
                 "#{@reflection.quoted_table_name}.#{@reflection.options[:as]}_type = #{@owner.class.quote_value(@owner.class.base_class.name.to_s)}"
               @finder_sql << " AND (#{conditions})" if conditions
-            
+
             else
               @finder_sql = "#{@reflection.quoted_table_name}.#{@reflection.primary_key_name} = #{owner_quoted_id}"
               @finder_sql << " AND (#{conditions})" if conditions
           end
 
-          if @reflection.options[:counter_sql]
-            @counter_sql = interpolate_sql(@reflection.options[:counter_sql])
-          elsif @reflection.options[:finder_sql]
-            # replace the SELECT clause with COUNT(*), preserving any hints within /* ... */
-            @reflection.options[:counter_sql] = @reflection.options[:finder_sql].sub(/SELECT (\/\*.*?\*\/ )?(.*)\bFROM\b/im) { "SELECT #{$1}COUNT(*) FROM" }
-            @counter_sql = interpolate_sql(@reflection.options[:counter_sql])
-          else
-            @counter_sql = @finder_sql
-          end
+          construct_counter_sql
         end
 
         def construct_scope
@@ -115,6 +108,11 @@ module ActiveRecord
             :find => { :conditions => @finder_sql, :readonly => false, :order => @reflection.options[:order], :limit => @reflection.options[:limit], :include => @reflection.options[:include]},
             :create => create_scoping
           }
+        end
+
+        def we_can_set_the_inverse_on_this?(record)
+          inverse = @reflection.inverse_of
+          return !inverse.nil?
         end
     end
   end

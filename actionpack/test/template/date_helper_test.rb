@@ -53,13 +53,14 @@ class DateHelperTest < ActionView::TestCase
     assert_equal "about 2 hours", distance_of_time_in_words(from, to + 89.minutes + 30.seconds)
     assert_equal "about 24 hours", distance_of_time_in_words(from, to + 23.hours + 59.minutes + 29.seconds)
 
-    # 1440..2879
+    # 1440..2529
     assert_equal "1 day", distance_of_time_in_words(from, to + 23.hours + 59.minutes + 30.seconds)
-    assert_equal "1 day", distance_of_time_in_words(from, to + 47.hours + 59.minutes + 29.seconds)
+    assert_equal "1 day", distance_of_time_in_words(from, to + 41.hours + 59.minutes + 29.seconds)
 
-    # 2880..43199
-    assert_equal "2 days", distance_of_time_in_words(from, to + 47.hours + 59.minutes + 30.seconds)
-    assert_equal "29 days", distance_of_time_in_words(from, to + 29.days + 23.hours + 59.minutes + 29.seconds)
+    # 2530..43199
+    assert_equal "2 days", distance_of_time_in_words(from, to + 42.hours + 59.minutes + 30.seconds)
+    assert_equal "3 days", distance_of_time_in_words(from, to + 2.days + 12.hours)
+    assert_equal "30 days", distance_of_time_in_words(from, to + 29.days + 23.hours + 59.minutes + 29.seconds)
 
     # 43200..86399
     assert_equal "about 1 month", distance_of_time_in_words(from, to + 29.days + 23.hours + 59.minutes + 30.seconds)
@@ -69,13 +70,28 @@ class DateHelperTest < ActionView::TestCase
     assert_equal "2 months", distance_of_time_in_words(from, to + 59.days + 23.hours + 59.minutes + 30.seconds)
     assert_equal "12 months", distance_of_time_in_words(from, to + 1.years - 31.seconds)
 
-    # 525600..1051199
-    assert_equal "about 1 year", distance_of_time_in_words(from, to + 1.years - 30.seconds)
-    assert_equal "about 1 year", distance_of_time_in_words(from, to + 2.years - 31.seconds)
+    # > 525599
+    assert_equal "about 1 year",    distance_of_time_in_words(from, to + 1.years - 30.seconds)
+    assert_equal "about 1 year",    distance_of_time_in_words(from, to + 1.years + 3.months - 1.day)
+    assert_equal "over 1 year",     distance_of_time_in_words(from, to + 1.years + 6.months)
 
-    # > 1051199
-    assert_equal "over 2 years", distance_of_time_in_words(from, to + 2.years + 30.seconds)
-    assert_equal "over 10 years", distance_of_time_in_words(from, to + 10.years)
+    assert_equal "almost 2 years",  distance_of_time_in_words(from, to + 2.years - 3.months + 1.day)
+    assert_equal "about 2 years",   distance_of_time_in_words(from, to + 2.years + 3.months - 1.day)
+    assert_equal "over 2 years",    distance_of_time_in_words(from, to + 2.years + 3.months + 1.day)
+    assert_equal "over 2 years",    distance_of_time_in_words(from, to + 2.years + 9.months - 1.day)
+    assert_equal "almost 3 years",  distance_of_time_in_words(from, to + 2.years + 9.months + 1.day)
+
+    assert_equal "almost 5 years",  distance_of_time_in_words(from, to + 5.years - 3.months + 1.day)
+    assert_equal "about 5 years",   distance_of_time_in_words(from, to + 5.years + 3.months - 1.day)
+    assert_equal "over 5 years",    distance_of_time_in_words(from, to + 5.years + 3.months + 1.day)
+    assert_equal "over 5 years",    distance_of_time_in_words(from, to + 5.years + 9.months - 1.day)
+    assert_equal "almost 6 years",  distance_of_time_in_words(from, to + 5.years + 9.months + 1.day)
+
+    assert_equal "almost 10 years", distance_of_time_in_words(from, to + 10.years - 3.months + 1.day)
+    assert_equal "about 10 years",  distance_of_time_in_words(from, to + 10.years + 3.months - 1.day)
+    assert_equal "over 10 years",   distance_of_time_in_words(from, to + 10.years + 3.months + 1.day)
+    assert_equal "over 10 years",   distance_of_time_in_words(from, to + 10.years + 9.months - 1.day)
+    assert_equal "almost 11 years", distance_of_time_in_words(from, to + 10.years + 9.months + 1.day)
 
     # test to < from
     assert_equal "about 4 hours", distance_of_time_in_words(from + 4.hours, to)
@@ -104,7 +120,7 @@ class DateHelperTest < ActionView::TestCase
   def test_distance_in_words_with_dates
     start_date = Date.new 1975, 1, 31
     end_date = Date.new 1977, 1, 31
-    assert_equal("over 2 years", distance_of_time_in_words(start_date, end_date))
+    assert_equal("about 2 years", distance_of_time_in_words(start_date, end_date))
   end
 
   def test_distance_in_words_with_integers
@@ -1726,40 +1742,38 @@ class DateHelperTest < ActionView::TestCase
     assert_dom_equal expected, datetime_select("post", "updated_at")
   end
 
-  uses_mocha 'TestDatetimeSelectDefaultsToTimeZoneNowWhenConfigTimeZoneIsSet' do
-    def test_datetime_select_defaults_to_time_zone_now_when_config_time_zone_is_set
-      time = stub(:year => 2004, :month => 6, :day => 15, :hour => 16, :min => 35, :sec => 0)
-      time_zone = mock()
-      time_zone.expects(:now).returns time
-      Time.zone_default = time_zone
-      @post = Post.new
+  def test_datetime_select_defaults_to_time_zone_now_when_config_time_zone_is_set
+    time = stub(:year => 2004, :month => 6, :day => 15, :hour => 16, :min => 35, :sec => 0)
+    time_zone = mock()
+    time_zone.expects(:now).returns time
+    Time.zone_default = time_zone
+    @post = Post.new
 
-      expected = %{<select id="post_updated_at_1i" name="post[updated_at(1i)]">\n}
-      expected << %{<option value="1999">1999</option>\n<option value="2000">2000</option>\n<option value="2001">2001</option>\n<option value="2002">2002</option>\n<option value="2003">2003</option>\n<option value="2004" selected="selected">2004</option>\n<option value="2005">2005</option>\n<option value="2006">2006</option>\n<option value="2007">2007</option>\n<option value="2008">2008</option>\n<option value="2009">2009</option>\n}
-      expected << "</select>\n"
+    expected = %{<select id="post_updated_at_1i" name="post[updated_at(1i)]">\n}
+    expected << %{<option value="1999">1999</option>\n<option value="2000">2000</option>\n<option value="2001">2001</option>\n<option value="2002">2002</option>\n<option value="2003">2003</option>\n<option value="2004" selected="selected">2004</option>\n<option value="2005">2005</option>\n<option value="2006">2006</option>\n<option value="2007">2007</option>\n<option value="2008">2008</option>\n<option value="2009">2009</option>\n}
+    expected << "</select>\n"
 
-      expected << %{<select id="post_updated_at_2i" name="post[updated_at(2i)]">\n}
-      expected << %{<option value="1">January</option>\n<option value="2">February</option>\n<option value="3">March</option>\n<option value="4">April</option>\n<option value="5">May</option>\n<option value="6" selected="selected">June</option>\n<option value="7">July</option>\n<option value="8">August</option>\n<option value="9">September</option>\n<option value="10">October</option>\n<option value="11">November</option>\n<option value="12">December</option>\n}
-      expected << "</select>\n"
+    expected << %{<select id="post_updated_at_2i" name="post[updated_at(2i)]">\n}
+    expected << %{<option value="1">January</option>\n<option value="2">February</option>\n<option value="3">March</option>\n<option value="4">April</option>\n<option value="5">May</option>\n<option value="6" selected="selected">June</option>\n<option value="7">July</option>\n<option value="8">August</option>\n<option value="9">September</option>\n<option value="10">October</option>\n<option value="11">November</option>\n<option value="12">December</option>\n}
+    expected << "</select>\n"
 
-      expected << %{<select id="post_updated_at_3i" name="post[updated_at(3i)]">\n}
-      expected << %{<option value="1">1</option>\n<option value="2">2</option>\n<option value="3">3</option>\n<option value="4">4</option>\n<option value="5">5</option>\n<option value="6">6</option>\n<option value="7">7</option>\n<option value="8">8</option>\n<option value="9">9</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15" selected="selected">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n}
-      expected << "</select>\n"
+    expected << %{<select id="post_updated_at_3i" name="post[updated_at(3i)]">\n}
+    expected << %{<option value="1">1</option>\n<option value="2">2</option>\n<option value="3">3</option>\n<option value="4">4</option>\n<option value="5">5</option>\n<option value="6">6</option>\n<option value="7">7</option>\n<option value="8">8</option>\n<option value="9">9</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15" selected="selected">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n}
+    expected << "</select>\n"
 
-      expected << " &mdash; "
+    expected << " &mdash; "
 
-      expected << %{<select id="post_updated_at_4i" name="post[updated_at(4i)]">\n}
-      expected << %{<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16" selected="selected">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n}
-      expected << "</select>\n"
-      expected << " : "
-      expected << %{<select id="post_updated_at_5i" name="post[updated_at(5i)]">\n}
-      expected << %{<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n<option value="32">32</option>\n<option value="33">33</option>\n<option value="34">34</option>\n<option value="35" selected="selected">35</option>\n<option value="36">36</option>\n<option value="37">37</option>\n<option value="38">38</option>\n<option value="39">39</option>\n<option value="40">40</option>\n<option value="41">41</option>\n<option value="42">42</option>\n<option value="43">43</option>\n<option value="44">44</option>\n<option value="45">45</option>\n<option value="46">46</option>\n<option value="47">47</option>\n<option value="48">48</option>\n<option value="49">49</option>\n<option value="50">50</option>\n<option value="51">51</option>\n<option value="52">52</option>\n<option value="53">53</option>\n<option value="54">54</option>\n<option value="55">55</option>\n<option value="56">56</option>\n<option value="57">57</option>\n<option value="58">58</option>\n<option value="59">59</option>\n}
-      expected << "</select>\n"
+    expected << %{<select id="post_updated_at_4i" name="post[updated_at(4i)]">\n}
+    expected << %{<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16" selected="selected">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n}
+    expected << "</select>\n"
+    expected << " : "
+    expected << %{<select id="post_updated_at_5i" name="post[updated_at(5i)]">\n}
+    expected << %{<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n<option value="32">32</option>\n<option value="33">33</option>\n<option value="34">34</option>\n<option value="35" selected="selected">35</option>\n<option value="36">36</option>\n<option value="37">37</option>\n<option value="38">38</option>\n<option value="39">39</option>\n<option value="40">40</option>\n<option value="41">41</option>\n<option value="42">42</option>\n<option value="43">43</option>\n<option value="44">44</option>\n<option value="45">45</option>\n<option value="46">46</option>\n<option value="47">47</option>\n<option value="48">48</option>\n<option value="49">49</option>\n<option value="50">50</option>\n<option value="51">51</option>\n<option value="52">52</option>\n<option value="53">53</option>\n<option value="54">54</option>\n<option value="55">55</option>\n<option value="56">56</option>\n<option value="57">57</option>\n<option value="58">58</option>\n<option value="59">59</option>\n}
+    expected << "</select>\n"
 
-      assert_dom_equal expected, datetime_select("post", "updated_at")
-    ensure
-      Time.zone_default = nil
-    end
+    assert_dom_equal expected, datetime_select("post", "updated_at")
+  ensure
+    Time.zone_default = nil
   end
 
   def test_datetime_select_with_html_options_within_fields_for
@@ -1822,60 +1836,60 @@ class DateHelperTest < ActionView::TestCase
 
   def test_datetime_select_with_default_prompt
     @post = Post.new
-    @post.updated_at = Time.local(2004, 6, 15, 16, 35)
+    @post.updated_at = nil
 
     expected = %{<select id="post_updated_at_1i" name="post[updated_at(1i)]">\n}
-    expected << %{<option value="">Year</option>\n<option value="1999">1999</option>\n<option value="2000">2000</option>\n<option value="2001">2001</option>\n<option value="2002">2002</option>\n<option value="2003">2003</option>\n<option value="2004" selected="selected">2004</option>\n<option value="2005">2005</option>\n<option value="2006">2006</option>\n<option value="2007">2007</option>\n<option value="2008">2008</option>\n<option value="2009">2009</option>\n}
+    expected << %{<option value="">Year</option>\n<option value="1999">1999</option>\n<option value="2000">2000</option>\n<option value="2001">2001</option>\n<option value="2002">2002</option>\n<option value="2003">2003</option>\n<option value="2004">2004</option>\n<option value="2005">2005</option>\n<option value="2006">2006</option>\n<option value="2007">2007</option>\n<option value="2008">2008</option>\n<option value="2009">2009</option>\n}
     expected << "</select>\n"
 
     expected << %{<select id="post_updated_at_2i" name="post[updated_at(2i)]">\n}
-    expected << %{<option value="">Month</option>\n<option value="1">January</option>\n<option value="2">February</option>\n<option value="3">March</option>\n<option value="4">April</option>\n<option value="5">May</option>\n<option value="6" selected="selected">June</option>\n<option value="7">July</option>\n<option value="8">August</option>\n<option value="9">September</option>\n<option value="10">October</option>\n<option value="11">November</option>\n<option value="12">December</option>\n}
+    expected << %{<option value="">Month</option>\n<option value="1">January</option>\n<option value="2">February</option>\n<option value="3">March</option>\n<option value="4">April</option>\n<option value="5">May</option>\n<option value="6">June</option>\n<option value="7">July</option>\n<option value="8">August</option>\n<option value="9">September</option>\n<option value="10">October</option>\n<option value="11">November</option>\n<option value="12">December</option>\n}
     expected << "</select>\n"
 
     expected << %{<select id="post_updated_at_3i" name="post[updated_at(3i)]">\n}
-    expected << %{<option value="">Day</option>\n<option value="1">1</option>\n<option value="2">2</option>\n<option value="3">3</option>\n<option value="4">4</option>\n<option value="5">5</option>\n<option value="6">6</option>\n<option value="7">7</option>\n<option value="8">8</option>\n<option value="9">9</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15" selected="selected">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n}
+    expected << %{<option value="">Day</option>\n<option value="1">1</option>\n<option value="2">2</option>\n<option value="3">3</option>\n<option value="4">4</option>\n<option value="5">5</option>\n<option value="6">6</option>\n<option value="7">7</option>\n<option value="8">8</option>\n<option value="9">9</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n}
     expected << "</select>\n"
 
     expected << " &mdash; "
 
     expected << %{<select id="post_updated_at_4i" name="post[updated_at(4i)]">\n}
-    expected << %{<option value="">Hour</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16" selected="selected">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n}
+    expected << %{<option value="">Hour</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n}
     expected << "</select>\n"
     expected << " : "
     expected << %{<select id="post_updated_at_5i" name="post[updated_at(5i)]">\n}
-    expected << %{<option value="">Minute</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n<option value="32">32</option>\n<option value="33">33</option>\n<option value="34">34</option>\n<option value="35" selected="selected">35</option>\n<option value="36">36</option>\n<option value="37">37</option>\n<option value="38">38</option>\n<option value="39">39</option>\n<option value="40">40</option>\n<option value="41">41</option>\n<option value="42">42</option>\n<option value="43">43</option>\n<option value="44">44</option>\n<option value="45">45</option>\n<option value="46">46</option>\n<option value="47">47</option>\n<option value="48">48</option>\n<option value="49">49</option>\n<option value="50">50</option>\n<option value="51">51</option>\n<option value="52">52</option>\n<option value="53">53</option>\n<option value="54">54</option>\n<option value="55">55</option>\n<option value="56">56</option>\n<option value="57">57</option>\n<option value="58">58</option>\n<option value="59">59</option>\n}
+    expected << %{<option value="">Minute</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n<option value="32">32</option>\n<option value="33">33</option>\n<option value="34">34</option>\n<option value="35">35</option>\n<option value="36">36</option>\n<option value="37">37</option>\n<option value="38">38</option>\n<option value="39">39</option>\n<option value="40">40</option>\n<option value="41">41</option>\n<option value="42">42</option>\n<option value="43">43</option>\n<option value="44">44</option>\n<option value="45">45</option>\n<option value="46">46</option>\n<option value="47">47</option>\n<option value="48">48</option>\n<option value="49">49</option>\n<option value="50">50</option>\n<option value="51">51</option>\n<option value="52">52</option>\n<option value="53">53</option>\n<option value="54">54</option>\n<option value="55">55</option>\n<option value="56">56</option>\n<option value="57">57</option>\n<option value="58">58</option>\n<option value="59">59</option>\n}
     expected << "</select>\n"
 
-    assert_dom_equal expected, datetime_select("post", "updated_at", :prompt => true)
+    assert_dom_equal expected, datetime_select("post", "updated_at", :start_year=>1999, :end_year=>2009,  :prompt => true)
   end
 
   def test_datetime_select_with_custom_prompt
     @post = Post.new
-    @post.updated_at = Time.local(2004, 6, 15, 16, 35)
+    @post.updated_at = nil
 
     expected = %{<select id="post_updated_at_1i" name="post[updated_at(1i)]">\n}
-    expected << %{<option value="">Choose year</option>\n<option value="1999">1999</option>\n<option value="2000">2000</option>\n<option value="2001">2001</option>\n<option value="2002">2002</option>\n<option value="2003">2003</option>\n<option value="2004" selected="selected">2004</option>\n<option value="2005">2005</option>\n<option value="2006">2006</option>\n<option value="2007">2007</option>\n<option value="2008">2008</option>\n<option value="2009">2009</option>\n}
+    expected << %{<option value="">Choose year</option>\n<option value="1999">1999</option>\n<option value="2000">2000</option>\n<option value="2001">2001</option>\n<option value="2002">2002</option>\n<option value="2003">2003</option>\n<option value="2004">2004</option>\n<option value="2005">2005</option>\n<option value="2006">2006</option>\n<option value="2007">2007</option>\n<option value="2008">2008</option>\n<option value="2009">2009</option>\n}
     expected << "</select>\n"
 
     expected << %{<select id="post_updated_at_2i" name="post[updated_at(2i)]">\n}
-    expected << %{<option value="">Choose month</option>\n<option value="1">January</option>\n<option value="2">February</option>\n<option value="3">March</option>\n<option value="4">April</option>\n<option value="5">May</option>\n<option value="6" selected="selected">June</option>\n<option value="7">July</option>\n<option value="8">August</option>\n<option value="9">September</option>\n<option value="10">October</option>\n<option value="11">November</option>\n<option value="12">December</option>\n}
+    expected << %{<option value="">Choose month</option>\n<option value="1">January</option>\n<option value="2">February</option>\n<option value="3">March</option>\n<option value="4">April</option>\n<option value="5">May</option>\n<option value="6">June</option>\n<option value="7">July</option>\n<option value="8">August</option>\n<option value="9">September</option>\n<option value="10">October</option>\n<option value="11">November</option>\n<option value="12">December</option>\n}
     expected << "</select>\n"
 
     expected << %{<select id="post_updated_at_3i" name="post[updated_at(3i)]">\n}
-    expected << %{<option value="">Choose day</option>\n<option value="1">1</option>\n<option value="2">2</option>\n<option value="3">3</option>\n<option value="4">4</option>\n<option value="5">5</option>\n<option value="6">6</option>\n<option value="7">7</option>\n<option value="8">8</option>\n<option value="9">9</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15" selected="selected">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n}
+    expected << %{<option value="">Choose day</option>\n<option value="1">1</option>\n<option value="2">2</option>\n<option value="3">3</option>\n<option value="4">4</option>\n<option value="5">5</option>\n<option value="6">6</option>\n<option value="7">7</option>\n<option value="8">8</option>\n<option value="9">9</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n}
     expected << "</select>\n"
 
     expected << " &mdash; "
 
     expected << %{<select id="post_updated_at_4i" name="post[updated_at(4i)]">\n}
-    expected << %{<option value="">Choose hour</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16" selected="selected">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n}
+    expected << %{<option value="">Choose hour</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n}
     expected << "</select>\n"
     expected << " : "
     expected << %{<select id="post_updated_at_5i" name="post[updated_at(5i)]">\n}
-    expected << %{<option value="">Choose minute</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n<option value="32">32</option>\n<option value="33">33</option>\n<option value="34">34</option>\n<option value="35" selected="selected">35</option>\n<option value="36">36</option>\n<option value="37">37</option>\n<option value="38">38</option>\n<option value="39">39</option>\n<option value="40">40</option>\n<option value="41">41</option>\n<option value="42">42</option>\n<option value="43">43</option>\n<option value="44">44</option>\n<option value="45">45</option>\n<option value="46">46</option>\n<option value="47">47</option>\n<option value="48">48</option>\n<option value="49">49</option>\n<option value="50">50</option>\n<option value="51">51</option>\n<option value="52">52</option>\n<option value="53">53</option>\n<option value="54">54</option>\n<option value="55">55</option>\n<option value="56">56</option>\n<option value="57">57</option>\n<option value="58">58</option>\n<option value="59">59</option>\n}
+    expected << %{<option value="">Choose minute</option>\n<option value="00">00</option>\n<option value="01">01</option>\n<option value="02">02</option>\n<option value="03">03</option>\n<option value="04">04</option>\n<option value="05">05</option>\n<option value="06">06</option>\n<option value="07">07</option>\n<option value="08">08</option>\n<option value="09">09</option>\n<option value="10">10</option>\n<option value="11">11</option>\n<option value="12">12</option>\n<option value="13">13</option>\n<option value="14">14</option>\n<option value="15">15</option>\n<option value="16">16</option>\n<option value="17">17</option>\n<option value="18">18</option>\n<option value="19">19</option>\n<option value="20">20</option>\n<option value="21">21</option>\n<option value="22">22</option>\n<option value="23">23</option>\n<option value="24">24</option>\n<option value="25">25</option>\n<option value="26">26</option>\n<option value="27">27</option>\n<option value="28">28</option>\n<option value="29">29</option>\n<option value="30">30</option>\n<option value="31">31</option>\n<option value="32">32</option>\n<option value="33">33</option>\n<option value="34">34</option>\n<option value="35">35</option>\n<option value="36">36</option>\n<option value="37">37</option>\n<option value="38">38</option>\n<option value="39">39</option>\n<option value="40">40</option>\n<option value="41">41</option>\n<option value="42">42</option>\n<option value="43">43</option>\n<option value="44">44</option>\n<option value="45">45</option>\n<option value="46">46</option>\n<option value="47">47</option>\n<option value="48">48</option>\n<option value="49">49</option>\n<option value="50">50</option>\n<option value="51">51</option>\n<option value="52">52</option>\n<option value="53">53</option>\n<option value="54">54</option>\n<option value="55">55</option>\n<option value="56">56</option>\n<option value="57">57</option>\n<option value="58">58</option>\n<option value="59">59</option>\n}
     expected << "</select>\n"
 
-    assert_dom_equal expected, datetime_select("post", "updated_at", :prompt => {:year => 'Choose year', :month => 'Choose month', :day => 'Choose day', :hour => 'Choose hour', :minute => 'Choose minute'})
+    assert_dom_equal expected, datetime_select("post", "updated_at", :start_year=>1999, :end_year=>2009, :prompt => {:year => 'Choose year', :month => 'Choose month', :day => 'Choose day', :hour => 'Choose hour', :minute => 'Choose minute'})
   end
 
   def test_date_select_with_zero_value_and_no_start_year
@@ -2459,6 +2473,28 @@ class DateHelperTest < ActionView::TestCase
       :ignore_date => false,
       :include_seconds => true
     }, options)
+  end
+
+  def test_select_html_safety
+    assert select_day(16).html_safe?
+    assert select_month(8).html_safe?
+    assert select_year(Time.mktime(2003, 8, 16, 8, 4, 18)).html_safe?
+    assert select_minute(Time.mktime(2003, 8, 16, 8, 4, 18)).html_safe?
+    assert select_second(Time.mktime(2003, 8, 16, 8, 4, 18)).html_safe?
+
+    assert select_minute(8, :use_hidden => true).html_safe?
+    assert select_month(8, :prompt => 'Choose month').html_safe?
+
+    assert select_time(Time.mktime(2003, 8, 16, 8, 4, 18), {}, :class => 'selector').html_safe?
+    assert select_date(Time.mktime(2003, 8, 16), :date_separator => " / ", :start_year => 2003, :end_year => 2005, :prefix => "date[first]").html_safe?
+  end
+  
+  def test_object_select_html_safety
+    @post = Post.new
+    @post.written_on = Date.new(2004, 6, 15)
+
+    assert date_select("post", "written_on", :default => Time.local(2006, 9, 19, 15, 16, 35), :include_blank => true).html_safe?    
+    assert time_select("post", "written_on", :ignore_date => true).html_safe?    
   end
 
   protected

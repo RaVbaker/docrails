@@ -1,4 +1,6 @@
+require 'logger'
 require 'abstract_unit'
+require 'active_support/cache'
 
 class CacheKeyTest < ActiveSupport::TestCase
   def test_expand_cache_key
@@ -13,29 +15,37 @@ class CacheStoreSettingTest < ActiveSupport::TestCase
     assert_equal "/path/to/cache/directory", store.cache_path
   end
 
-  def test_drb_fragment_cache_store
-    store = ActiveSupport::Cache.lookup_store :drb_store, "druby://localhost:9192"
-    assert_kind_of(ActiveSupport::Cache::DRbStore, store)
-    assert_equal "druby://localhost:9192", store.address
-  end
-
   def test_mem_cache_fragment_cache_store
+    MemCache.expects(:new).with(%w[localhost], {})
     store = ActiveSupport::Cache.lookup_store :mem_cache_store, "localhost"
     assert_kind_of(ActiveSupport::Cache::MemCacheStore, store)
-    assert_equal %w(localhost), store.addresses
+  end
+
+  def test_mem_cache_fragment_cache_store_with_given_mem_cache
+    mem_cache = MemCache.new
+    MemCache.expects(:new).never
+    store = ActiveSupport::Cache.lookup_store :mem_cache_store, mem_cache
+    assert_kind_of(ActiveSupport::Cache::MemCacheStore, store)
+  end
+
+  def test_mem_cache_fragment_cache_store_with_given_mem_cache_like_object
+    MemCache.expects(:new).never
+    memcache = Object.new
+    def memcache.get() true end
+    store = ActiveSupport::Cache.lookup_store :mem_cache_store, memcache
+    assert_kind_of(ActiveSupport::Cache::MemCacheStore, store)
   end
 
   def test_mem_cache_fragment_cache_store_with_multiple_servers
+    MemCache.expects(:new).with(%w[localhost 192.168.1.1], {})
     store = ActiveSupport::Cache.lookup_store :mem_cache_store, "localhost", '192.168.1.1'
     assert_kind_of(ActiveSupport::Cache::MemCacheStore, store)
-    assert_equal %w(localhost 192.168.1.1), store.addresses
   end
 
   def test_mem_cache_fragment_cache_store_with_options
+    MemCache.expects(:new).with(%w[localhost 192.168.1.1], { :namespace => "foo" })
     store = ActiveSupport::Cache.lookup_store :mem_cache_store, "localhost", '192.168.1.1', :namespace => 'foo'
     assert_kind_of(ActiveSupport::Cache::MemCacheStore, store)
-    assert_equal %w(localhost 192.168.1.1), store.addresses
-    assert_equal 'foo', store.instance_variable_get('@data').instance_variable_get('@namespace')
   end
 
   def test_object_assigned_fragment_cache_store
@@ -79,6 +89,11 @@ module CacheStoreBehavior
   def test_should_read_and_write_hash
     @cache.write('foo', {:a => "b"})
     assert_equal({:a => "b"}, @cache.read('foo'))
+  end
+
+  def test_should_read_and_write_integer
+    @cache.write('foo', 1)
+    assert_equal 1, @cache.read('foo')
   end
 
   def test_should_read_and_write_nil
@@ -134,6 +149,22 @@ class FileStoreTest < ActiveSupport::TestCase
   end
 
   include CacheStoreBehavior
+
+  def test_expires_in
+    time = Time.local(2008, 4, 24)
+    Time.stubs(:now).returns(time)
+    File.stubs(:mtime).returns(time)
+
+    @cache.write('foo', 'bar')
+    cache_read = lambda { @cache.read('foo', :expires_in => 60) }
+    assert_equal 'bar', cache_read.call
+
+    Time.stubs(:now).returns(time + 30)
+    assert_equal 'bar', cache_read.call
+
+    Time.stubs(:now).returns(time + 120)
+    assert_nil cache_read.call
+  end
 end
 
 class MemoryStoreTest < ActiveSupport::TestCase
@@ -148,6 +179,12 @@ class MemoryStoreTest < ActiveSupport::TestCase
     assert_raise(ActiveSupport::FrozenObjectError) { @cache.read('foo').gsub!(/.*/, 'baz') }
     assert_equal 'bar', @cache.read('foo')
   end
+
+  def test_original_store_objects_should_not_be_immutable
+    bar = 'bar'
+    @cache.write('foo', bar)
+    assert_nothing_raised { bar.gsub!(/.*/, 'baz') }
+  end
 end
 
 uses_memcached 'memcached backed store' do
@@ -156,6 +193,8 @@ uses_memcached 'memcached backed store' do
       @cache = ActiveSupport::Cache.lookup_store(:mem_cache_store)
       @data = @cache.instance_variable_get(:@data)
       @cache.clear
+      @cache.silence!
+      @cache.logger = Logger.new("/dev/null")
     end
 
     include CacheStoreBehavior
@@ -165,6 +204,15 @@ uses_memcached 'memcached backed store' do
         @cache.write('foo', 'bar')
         @cache.read('foo').gsub!(/.*/, 'baz')
         assert_equal 'bar', @cache.read('foo')
+      end
+    end
+
+    def test_stored_objects_should_not_be_frozen
+      @cache.with_local_cache do
+        @cache.write('foo', 'bar')
+      end
+      @cache.with_local_cache do
+        assert !@cache.read('foo').frozen?
       end
     end
 
@@ -197,6 +245,13 @@ uses_memcached 'memcached backed store' do
         @cache.write('foo', 'bar')
         @data.flush_all # Clear remote cache
         assert_equal 'bar', @cache.read('foo')
+      end
+    end
+
+    def test_local_cache_should_read_and_write_integer
+      @cache.with_local_cache do
+        @cache.write('foo', 1)
+        assert_equal 1, @cache.read('foo')
       end
     end
 
@@ -244,6 +299,15 @@ uses_memcached 'memcached backed store' do
       end
     end
 
+    def test_multi_get
+      @cache.with_local_cache do
+        @cache.write('foo', 1)
+        @cache.write('goo', 2)
+        result = @cache.read_multi('foo', 'goo')
+        assert_equal({'foo' => 1, 'goo' => 2}, result)
+      end
+    end
+
     def test_middleware
       app = lambda { |env|
         result = @cache.write('foo', 'bar')
@@ -252,6 +316,22 @@ uses_memcached 'memcached backed store' do
       }
       app = @cache.middleware.new(app)
       app.call({})
+    end
+
+    def test_expires_in
+      result = @cache.write('foo', 'bar', :expires_in => 1)
+      assert_equal 'bar', @cache.read('foo')
+      sleep 2
+      assert_equal nil, @cache.read('foo')
+    end
+
+    def test_expires_in_with_invalid_value
+      @cache.write('baz', 'bat')
+      assert_raise(RuntimeError) do
+        @cache.write('foo', 'bar', :expires_in => 'Mon Jun 29 13:10:40 -0700 2150')
+      end
+      assert_equal 'bat', @cache.read('baz')
+      assert_equal nil, @cache.read('foo')
     end
   end
 
@@ -262,5 +342,24 @@ uses_memcached 'memcached backed store' do
     end
 
     include CacheStoreBehavior
+  end
+end
+
+class CacheStoreLoggerTest < ActiveSupport::TestCase
+  def setup
+    @cache = ActiveSupport::Cache.lookup_store(:memory_store)
+
+    @buffer = StringIO.new
+    @cache.logger = Logger.new(@buffer)
+  end
+
+  def test_logging
+    @cache.fetch('foo') { 'bar' }
+    assert @buffer.string.present?
+  end
+
+  def test_mute_logging
+    @cache.mute { @cache.fetch('foo') { 'bar' } }
+    assert @buffer.string.blank?
   end
 end

@@ -34,7 +34,7 @@ class FlashTest < ActionController::TestCase
       flash.keep
       render :inline => "hello"
     end
-    
+
     def use_flash_and_update_it
       flash.update("this" => "hello again")
       @flash_copy = {}.update flash
@@ -60,6 +60,7 @@ class FlashTest < ActionController::TestCase
 
     def std_action
       @flash_copy = {}.update(flash)
+      render :nothing => true
     end
 
     def filter_halting_action
@@ -71,6 +72,18 @@ class FlashTest < ActionController::TestCase
       redirect_to :action => "std_action"
       @flash_copy = {}.update(flash)
     end
+
+    def redirect_with_alert
+      redirect_to '/nowhere', :alert => "Beware the nowheres!"
+    end
+
+    def redirect_with_notice
+      redirect_to '/somewhere', :notice => "Good luck in the somewheres!"
+    end
+
+    def redirect_with_other_flashes
+      redirect_to '/wonderland', :flash => { :joyride => "Horses!" }
+    end
   end
 
   tests TestController
@@ -79,64 +92,137 @@ class FlashTest < ActionController::TestCase
     get :set_flash
 
     get :use_flash
-    assert_equal "hello", @response.template.assigns["flash_copy"]["that"]
-    assert_equal "hello", @response.template.assigns["flashy"]
+    assert_equal "hello", assigns["flash_copy"]["that"]
+    assert_equal "hello", assigns["flashy"]
 
     get :use_flash
-    assert_nil @response.template.assigns["flash_copy"]["that"], "On second flash"
+    assert_nil assigns["flash_copy"]["that"], "On second flash"
   end
 
   def test_keep_flash
     get :set_flash
-    
+
     get :use_flash_and_keep_it
-    assert_equal "hello", @response.template.assigns["flash_copy"]["that"]
-    assert_equal "hello", @response.template.assigns["flashy"]
+    assert_equal "hello", assigns["flash_copy"]["that"]
+    assert_equal "hello", assigns["flashy"]
 
     get :use_flash
-    assert_equal "hello", @response.template.assigns["flash_copy"]["that"], "On second flash"
+    assert_equal "hello", assigns["flash_copy"]["that"], "On second flash"
 
     get :use_flash
-    assert_nil @response.template.assigns["flash_copy"]["that"], "On third flash"
+    assert_nil assigns["flash_copy"]["that"], "On third flash"
   end
-  
+
   def test_flash_now
     get :set_flash_now
-    assert_equal "hello", @response.template.assigns["flash_copy"]["that"]
-    assert_equal "bar"  , @response.template.assigns["flash_copy"]["foo"]
-    assert_equal "hello", @response.template.assigns["flashy"]
+    assert_equal "hello", assigns["flash_copy"]["that"]
+    assert_equal "bar"  , assigns["flash_copy"]["foo"]
+    assert_equal "hello", assigns["flashy"]
 
     get :attempt_to_use_flash_now
-    assert_nil @response.template.assigns["flash_copy"]["that"]
-    assert_nil @response.template.assigns["flash_copy"]["foo"]
-    assert_nil @response.template.assigns["flashy"]
-  end 
-  
+    assert_nil assigns["flash_copy"]["that"]
+    assert_nil assigns["flash_copy"]["foo"]
+    assert_nil assigns["flashy"]
+  end
+
   def test_update_flash
     get :set_flash
     get :use_flash_and_update_it
-    assert_equal "hello",       @response.template.assigns["flash_copy"]["that"]
-    assert_equal "hello again", @response.template.assigns["flash_copy"]["this"]
+    assert_equal "hello",       assigns["flash_copy"]["that"]
+    assert_equal "hello again", assigns["flash_copy"]["this"]
     get :use_flash
-    assert_nil                  @response.template.assigns["flash_copy"]["that"], "On second flash"
-    assert_equal "hello again", @response.template.assigns["flash_copy"]["this"], "On second flash"
+    assert_nil                  assigns["flash_copy"]["that"], "On second flash"
+    assert_equal "hello again", assigns["flash_copy"]["this"], "On second flash"
   end
-  
+
   def test_flash_after_reset_session
     get :use_flash_after_reset_session
-    assert_equal "hello",    @response.template.assigns["flashy_that"]
-    assert_equal "good-bye", @response.template.assigns["flashy_this"]
-    assert_nil   @response.template.assigns["flashy_that_reset"]
-  end 
+    assert_equal "hello",    assigns["flashy_that"]
+    assert_equal "good-bye", assigns["flashy_this"]
+    assert_nil   assigns["flashy_that_reset"]
+  end
+
+  def test_does_not_set_the_session_if_the_flash_is_empty
+    get :std_action
+    assert_nil session["flash"]
+  end
 
   def test_sweep_after_halted_filter_chain
     get :std_action
-    assert_nil @response.template.assigns["flash_copy"]["foo"]
+    assert_nil assigns["flash_copy"]["foo"]
     get :filter_halting_action
-    assert_equal "bar", @response.template.assigns["flash_copy"]["foo"]
+    assert_equal "bar", assigns["flash_copy"]["foo"]
     get :std_action # follow redirection
-    assert_equal "bar", @response.template.assigns["flash_copy"]["foo"]
+    assert_equal "bar", assigns["flash_copy"]["foo"]
     get :std_action
-    assert_nil @response.template.assigns["flash_copy"]["foo"]
+    assert_nil assigns["flash_copy"]["foo"]
   end
+
+  def test_keep_and_discard_return_values
+    flash = ActionDispatch::Flash::FlashHash.new
+    flash.update(:foo => :foo_indeed, :bar => :bar_indeed)
+
+    assert_equal(:foo_indeed, flash.discard(:foo)) # valid key passed
+    assert_nil flash.discard(:unknown) # non existant key passed
+    assert_equal({:foo => :foo_indeed, :bar => :bar_indeed}, flash.discard()) # nothing passed
+    assert_equal({:foo => :foo_indeed, :bar => :bar_indeed}, flash.discard(nil)) # nothing passed
+
+    assert_equal(:foo_indeed, flash.keep(:foo)) # valid key passed
+    assert_nil flash.keep(:unknown) # non existant key passed
+    assert_equal({:foo => :foo_indeed, :bar => :bar_indeed}, flash.keep()) # nothing passed
+    assert_equal({:foo => :foo_indeed, :bar => :bar_indeed}, flash.keep(nil)) # nothing passed
+  end
+
+  def test_redirect_to_with_alert
+    get :redirect_with_alert
+    assert_equal "Beware the nowheres!", @controller.send(:flash)[:alert]
+  end
+
+  def test_redirect_to_with_notice
+    get :redirect_with_notice
+    assert_equal "Good luck in the somewheres!", @controller.send(:flash)[:notice]
+  end
+
+  def test_redirect_to_with_other_flashes
+    get :redirect_with_other_flashes
+    assert_equal "Horses!", @controller.send(:flash)[:joyride]
+  end
+end
+
+class FlashIntegrationTest < ActionController::IntegrationTest
+  SessionKey = '_myapp_session'
+  SessionSecret = 'b3c631c314c0bbca50c1b2843150fe33'
+
+  class TestController < ActionController::Base
+    def set_flash
+      flash["that"] = "hello"
+      head :ok
+    end
+
+    def use_flash
+      render :inline => "flash: #{flash["that"]}"
+    end
+  end
+
+  def test_flash
+    with_test_route_set do
+      get '/set_flash'
+      assert_response :success
+      assert_equal "hello", @request.flash["that"]
+
+      get '/use_flash'
+      assert_response :success
+      assert_equal "flash: hello", @response.body
+    end
+  end
+
+  private
+    def with_test_route_set
+      with_routing do |set|
+        set.draw do |map|
+          match ':action', :to => ActionDispatch::Session::CookieStore.new(FlashIntegrationTest::TestController, :key => FlashIntegrationTest::SessionKey, :secret => FlashIntegrationTest::SessionSecret)
+        end
+        yield
+      end
+    end
 end

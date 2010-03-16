@@ -25,13 +25,6 @@ module ActionController #:nodoc:
     # The expiration call for this example is:
     #
     #   expire_fragment(:controller => "topics", :action => "list", :action_suffix => "all_topics")
-    #
-    # You can also pass a options hash to the call, which is passed on to the read and write methods of your fragment cache store. For example,
-    # if you are using the MemCacheStore, then you can pass the :expire_in option to make the fragment expire in a certain amount of time.
-    #
-    #  <% cache "latest_photos", :expires_in => 5.minutes do %>
-    #    <%= render :partial => "photo", :collection => Photo.latest%>
-    #  <% end%>
     module Fragments
       # Given a key (as described in <tt>expire_fragment</tt>), returns a key suitable for use in reading,
       # writing, or expiring a cached fragment. If the key is a hash, the generated key is the return
@@ -43,8 +36,8 @@ module ActionController #:nodoc:
 
       def fragment_for(buffer, name = {}, options = nil, &block) #:nodoc:
         if perform_caching
-          if cache = read_fragment(name, options)
-            buffer.concat(cache)
+          if fragment_exist?(name, options)
+            buffer.safe_concat(read_fragment(name, options))
           else
             pos = buffer.length
             block.call
@@ -58,23 +51,20 @@ module ActionController #:nodoc:
       # Writes <tt>content</tt> to the location signified by <tt>key</tt> (see <tt>expire_fragment</tt> for acceptable formats)
       def write_fragment(key, content, options = nil)
         return content unless cache_configured?
-
         key = fragment_cache_key(key)
 
-        self.class.benchmark "Cached fragment miss: #{key}" do
+        instrument_fragment_cache :write_fragment, key do
           cache_store.write(key, content, options)
         end
-
         content
       end
 
       # Reads a cached fragment from the location signified by <tt>key</tt> (see <tt>expire_fragment</tt> for acceptable formats)
       def read_fragment(key, options = nil)
         return unless cache_configured?
-
         key = fragment_cache_key(key)
 
-        self.class.benchmark "Cached fragment hit: #{key}" do
+        instrument_fragment_cache :read_fragment, key do
           cache_store.read(key, options)
         end
       end
@@ -82,10 +72,9 @@ module ActionController #:nodoc:
       # Check if a cached fragment from the location signified by <tt>key</tt> exists (see <tt>expire_fragment</tt> for acceptable formats)
       def fragment_exist?(key, options = nil)
         return unless cache_configured?
-
         key = fragment_cache_key(key)
 
-        self.class.benchmark "Cached fragment exists?: #{key}" do
+        instrument_fragment_cache :exist_fragment?, key do
           cache_store.exist?(key, options)
         end
       end
@@ -109,18 +98,20 @@ module ActionController #:nodoc:
       # method (or <tt>delete_matched</tt>, for Regexp keys.)
       def expire_fragment(key, options = nil)
         return unless cache_configured?
+        key = fragment_cache_key(key) unless key.is_a?(Regexp)
+        message = nil
 
-        key = key.is_a?(Regexp) ? key : fragment_cache_key(key)
-
-        if key.is_a?(Regexp)
-          self.class.benchmark "Expired fragments matching: #{key.source}" do
+        instrument_fragment_cache :expire_fragment, key do
+          if key.is_a?(Regexp)
             cache_store.delete_matched(key, options)
-          end
-        else
-          self.class.benchmark "Expired fragment: #{key}" do
+          else
             cache_store.delete(key, options)
           end
         end
+      end
+
+      def instrument_fragment_cache(name, key)
+        ActiveSupport::Notifications.instrument("action_controller.#{name}", :key => key){ yield }
       end
     end
   end
