@@ -32,7 +32,7 @@ module Rails
           options[:git] = "-b #{options[:branch]} #{options[:git]}"   if options[:branch]
           options[:svn] = "-r #{options[:revision]} #{options[:svn]}" if options[:revision]
           in_root do
-            run_ruby_script "script/plugin install #{options[:svn] || options[:git]}", :verbose => false
+            run_ruby_script "script/rails plugin install #{options[:svn] || options[:git]}", :verbose => false
           end
         else
           log "! no git or svn provided for #{name}. Skipping..."
@@ -69,7 +69,7 @@ module Rails
         # otherwise use name (version).
         parts, message = [ name.inspect ], name
         if version ||= options.delete(:version)
-          parts   << version
+          parts   << version.inspect
           message << " (#{version})"
         end
         message = options[:git] if options[:git]
@@ -81,7 +81,7 @@ module Rails
         end
 
         in_root do
-          append_file "Gemfile", "gem #{parts.join(", ")}", :verbose => false
+          append_file "Gemfile", "gem #{parts.join(", ")}\n", :verbose => false
         end
       end
 
@@ -89,12 +89,12 @@ module Rails
       #
       # ==== Example
       #
-      #   source "http://gems.github.com/"
+      #   add_source "http://gems.github.com/"
       def add_source(source, options={})
         log :source, source
 
         in_root do
-          prepend_file "Gemfile", "source #{source.inspect}", :verbose => false
+          prepend_file "Gemfile", "source #{source.inspect}\n", :verbose => false
         end
       end
 
@@ -226,7 +226,7 @@ module Rails
         log :generate, what
         argument = args.map {|arg| arg.to_s }.flatten.join(" ")
 
-        in_root { run_ruby_script("script/generate #{what} #{argument}", :verbose => false) }
+        in_root { run_ruby_script("script/rails generate #{what} #{argument}", :verbose => false) }
       end
 
       # Runs the supplied rake task
@@ -278,6 +278,16 @@ module Rails
         in_root do
           inject_into_file 'config/routes.rb', "\n  #{routing_code}\n", { :after => sentinel, :verbose => false }
         end
+      end
+
+      # Reads the given file at the source root and prints it in the console.
+      #
+      # === Example
+      #
+      #   readme "README"
+      #
+      def readme(path)
+        say File.read(find_in_source_paths(path))
       end
 
       protected

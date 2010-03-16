@@ -17,13 +17,14 @@ module ApplicationTests
         "ActionDispatch::Static",
         "Rack::Lock",
         "Rack::Runtime",
+        "Rails::Rack::Logger",
         "ActionDispatch::ShowExceptions",
-        "ActionDispatch::Notifications",
+        "ActionDispatch::RemoteIp",
+        "Rack::Sendfile",
         "ActionDispatch::Callbacks",
         "ActionDispatch::Cookies",
         "ActionDispatch::Session::CookieStore",
         "ActionDispatch::Flash",
-        "ActionDispatch::Cascade",
         "ActionDispatch::ParamsParser",
         "Rack::MethodOverride",
         "ActionDispatch::Head",
@@ -40,7 +41,7 @@ module ApplicationTests
     end
 
     test "removes lock if allow concurrency is set" do
-      add_to_config "config.action_controller.allow_concurrency = true"
+      add_to_config "config.allow_concurrency = true"
       boot!
       assert !middleware.include?("Rack::Lock")
     end
@@ -70,13 +71,19 @@ module ApplicationTests
       assert_equal "Rack::Config", middleware.first
     end
 
+    test "shows cascade if any metal exists" do
+      app_file "app/metal/foo.rb", "class Foo; end"
+      boot!
+      assert middleware.include?("ActionDispatch::Cascade")
+    end
+
     private
       def boot!
         require "#{app_path}/config/environment"
       end
 
       def middleware
-        AppTemplate::Application.instance.middleware.active.map(&:klass).map(&:name)
+        AppTemplate::Application.middleware.active.map(&:klass).map(&:name)
       end
   end
 end

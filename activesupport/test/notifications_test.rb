@@ -3,16 +3,10 @@ require 'abstract_unit'
 module Notifications
   class TestCase < ActiveSupport::TestCase
     def setup
-      Thread.abort_on_exception = true
-
       ActiveSupport::Notifications.notifier = nil
       @notifier = ActiveSupport::Notifications.notifier
       @events = []
-      @notifier.subscribe { |*args| @events << event(*args) }
-    end
-
-    def teardown
-      Thread.abort_on_exception = false
+      @subscription = @notifier.subscribe { |*args| @events << event(*args) }
     end
 
     private
@@ -25,14 +19,53 @@ module Notifications
       end
   end
 
-  class PubSubTest < TestCase
+  class UnsubscribeTest < TestCase
+    def test_unsubscribing_removes_a_subscription
+      @notifier.publish :foo
+      @notifier.wait
+      assert_equal [[:foo]], @events
+      @notifier.unsubscribe(@subscription)
+      @notifier.publish :foo
+      @notifier.wait
+      assert_equal [[:foo]], @events
+    end
+
+  private
+    def event(*args)
+      args
+    end
+  end
+
+  class SyncPubSubTest < TestCase
     def test_events_are_published_to_a_listener
       @notifier.publish :foo
       @notifier.wait
       assert_equal [[:foo]], @events
     end
 
-    def test_subscriber_with_pattern
+    def test_publishing_multiple_times_works
+      @notifier.publish :foo
+      @notifier.publish :foo
+      @notifier.wait
+      assert_equal [[:foo], [:foo]], @events
+    end
+
+    def test_publishing_after_a_new_subscribe_works
+      @notifier.publish :foo
+      @notifier.publish :foo
+
+      @notifier.subscribe("not_existant") do |*args|
+        @events << ActiveSupport::Notifications::Event.new(*args)
+      end
+
+      @notifier.publish :foo
+      @notifier.publish :foo
+      @notifier.wait
+
+      assert_equal [[:foo]] * 4, @events
+    end
+
+    def test_log_subscriber_with_pattern
       events = []
       @notifier.subscribe('1') { |*args| events << args }
 
@@ -44,7 +77,7 @@ module Notifications
       assert_equal [['1'], ['1.a']], events
     end
 
-    def test_subscriber_with_pattern_as_regexp
+    def test_log_subscriber_with_pattern_as_regexp
       events = []
       @notifier.subscribe(/\d/) { |*args| events << args }
 
@@ -56,7 +89,7 @@ module Notifications
       assert_equal [['1'], ['a.1'], ['1.a']], events
     end
 
-    def test_multiple_subscribers
+    def test_multiple_log_subscribers
       @another = []
       @notifier.subscribe { |*args| @another << args }
       @notifier.publish :foo
@@ -72,38 +105,12 @@ module Notifications
       end
   end
 
-  class SyncPubSubTest < PubSubTest
-    def setup
-      Thread.abort_on_exception = true
-
-      @notifier = ActiveSupport::Notifications::Notifier.new(ActiveSupport::Notifications::Fanout.new(true))
-      @events = []
-      @notifier.subscribe { |*args| @events << event(*args) }
-    end
-  end
-
   class InstrumentationTest < TestCase
-    delegate :instrument, :instrument!, :to => ActiveSupport::Notifications
+    delegate :instrument, :to => ActiveSupport::Notifications
 
     def test_instrument_returns_block_result
       assert_equal 2, instrument(:awesome) { 1 + 1 }
       drain
-    end
-
-    def test_instrument_with_bang_returns_result_even_on_failure
-      begin
-        instrument!(:awesome, :payload => "notifications") do
-          raise "OMG"
-        end
-        flunk
-      rescue
-      end
-
-      drain
-
-      assert_equal 1, @events.size
-      assert_equal :awesome, @events.last.name
-      assert_equal Hash[:payload => "notifications"], @events.last.payload
     end
 
     def test_instrument_yields_the_paylod_for_further_modification
@@ -142,10 +149,10 @@ module Notifications
     def test_instrument_does_not_publish_when_exception_is_raised
       begin
         instrument(:awesome, :payload => "notifications") do
-          raise "OMG"
+          raise "FAIL"
         end
       rescue RuntimeError => e
-        assert_equal "OMG", e.message
+        assert_equal "FAIL", e.message
       end
 
       drain

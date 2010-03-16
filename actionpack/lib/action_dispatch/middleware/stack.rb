@@ -55,14 +55,16 @@ module ActionDispatch
         when Class
           klass == middleware
         else
-          klass == ActiveSupport::Inflector.constantize(middleware.to_s)
+          if lazy_compare?(@klass) && lazy_compare?(middleware)
+            normalize(@klass) == normalize(middleware)
+          else
+            klass.name == middleware.to_s
+          end
         end
       end
 
       def inspect
-        str = klass.to_s
-        args.each { |arg| str += ", #{build_args.inspect}" }
-        str
+        klass.to_s
       end
 
       def build(app)
@@ -74,6 +76,14 @@ module ActionDispatch
       end
 
       private
+        def lazy_compare?(object)
+          object.is_a?(String) || object.is_a?(Symbol)
+        end
+
+        def normalize(object)
+          object.to_s.strip.sub(/^::/, '')
+        end
+
         def build_args
           Array(args).map { |arg| arg.respond_to?(:call) ? arg.call : arg }
         end
@@ -112,7 +122,11 @@ module ActionDispatch
       find_all { |middleware| middleware.active? }
     end
 
-    def build(app)
+    def build(app = nil, &blk)
+      app ||= blk
+
+      raise "MiddlewareStack#build requires an app" unless app
+
       active.reverse.inject(app) { |a, e| e.build(a) }
     end
   end

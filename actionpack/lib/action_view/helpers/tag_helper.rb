@@ -1,4 +1,3 @@
-require 'action_view/erb/util'
 require 'set'
 
 module ActionView
@@ -7,6 +6,9 @@ module ActionView
     # a Builder. By default, they output XHTML compliant tags.
     module TagHelper
       include ERB::Util
+
+      extend ActiveSupport::Concern
+      include CaptureHelper
 
       BOOLEAN_ATTRIBUTES = %w(disabled readonly multiple checked autobuffer
                            autoplay controls loop selected hidden scoped async
@@ -41,7 +43,7 @@ module ActionView
       #   tag("img", { :src => "open &amp; shut.png" }, false, false)
       #   # => <img src="open &amp; shut.png" />
       def tag(name, options = nil, open = false, escape = true)
-        "<#{name}#{tag_options(options, escape) if options}#{open ? ">" : " />"}".html_safe!
+        "<#{name}#{tag_options(options, escape) if options}#{open ? ">" : " />"}".html_safe
       end
 
       # Returns an HTML block tag of type +name+ surrounding the +content+. Add
@@ -63,20 +65,14 @@ module ActionView
       #   content_tag("select", options, :multiple => true)
       #    # => <select multiple="multiple">...options...</select>
       #
-      #   <% content_tag :div, :class => "strong" do -%>
+      #   <%= content_tag :div, :class => "strong" do -%>
       #     Hello world!
       #   <% end -%>
       #    # => <div class="strong">Hello world!</div>
       def content_tag(name, content_or_options_with_block = nil, options = nil, escape = true, &block)
         if block_given?
           options = content_or_options_with_block if content_or_options_with_block.is_a?(Hash)
-          content_tag = content_tag_string(name, capture(&block), options, escape)
-
-          if block_called_from_erb?(block)
-            concat(content_tag)
-          else
-            content_tag
-          end
+          content_tag_string(name, capture(&block), options, escape)
         else
           content_tag_string(name, content_or_options_with_block, options, escape)
         end
@@ -94,7 +90,7 @@ module ActionView
       #   cdata_section(File.read("hello_world.txt"))
       #   # => <![CDATA[<hello from a text file]]>
       def cdata_section(content)
-        "<![CDATA[#{content}]]>".html_safe!
+        "<![CDATA[#{content}]]>".html_safe
       end
 
       # Returns an escaped version of +html+ without affecting existing escaped entities.
@@ -110,25 +106,10 @@ module ActionView
       end
 
       private
-        BLOCK_CALLED_FROM_ERB = 'defined? __in_erb_template'
-
-        if RUBY_VERSION < '1.9.0'
-          # Check whether we're called from an erb template.
-          # We'd return a string in any other case, but erb <%= ... %>
-          # can't take an <% end %> later on, so we have to use <% ... %>
-          # and implicitly concat.
-          def block_called_from_erb?(block)
-            block && eval(BLOCK_CALLED_FROM_ERB, block)
-          end
-        else
-          def block_called_from_erb?(block)
-            block && eval(BLOCK_CALLED_FROM_ERB, block.binding)
-          end
-        end
 
         def content_tag_string(name, content, options, escape = true)
           tag_options = tag_options(options, escape) if options
-          "<#{name}#{tag_options}>#{content}</#{name}>".html_safe!
+          "<#{name}#{tag_options}>#{ERB::Util.h(content)}</#{name}>".html_safe
         end
 
         def tag_options(options, escape = true)
@@ -143,7 +124,7 @@ module ActionView
                 attrs << %(#{key}="#{final_value}")
               end
             end
-            " #{attrs.sort * ' '}".html_safe! unless attrs.empty?
+            " #{attrs.sort * ' '}".html_safe unless attrs.empty?
           end
         end
     end

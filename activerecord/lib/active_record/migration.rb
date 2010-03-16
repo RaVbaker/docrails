@@ -1,4 +1,4 @@
-require 'active_support/core_ext/object/metaclass'
+require 'active_support/core_ext/object/singleton_class'
 
 module ActiveRecord
   # Exception that can be raised to stop migrations from going backwards.
@@ -107,7 +107,7 @@ module ActiveRecord
   # The Rails package has several tools to help create and apply migrations.
   #
   # To generate a new migration, you can use
-  #   script/generate migration MyNewMigration
+  #   rails generate migration MyNewMigration
   #
   # where MyNewMigration is the name of your migration. The generator will
   # create an empty migration file <tt>timestamp_my_new_migration.rb</tt> in the <tt>db/migrate/</tt>
@@ -117,7 +117,7 @@ module ActiveRecord
   # MyNewMigration.
   #
   # There is a special syntactic shortcut to generate migrations that add fields to a table.
-  #   script/generate migration add_fieldname_to_tablename fieldname:string
+  #   rails generate migration add_fieldname_to_tablename fieldname:string
   #
   # This will generate the file <tt>timestamp_add_fieldname_to_tablename</tt>, which will look like this:
   #   class AddFieldnameToTablename < ActiveRecord::Migration
@@ -303,7 +303,7 @@ module ActiveRecord
 
           case sym
             when :up, :down
-              metaclass.send(:alias_method_chain, sym, "benchmarks")
+              singleton_class.send(:alias_method_chain, sym, "benchmarks")
           end
         ensure
           @ignore_new_methods = false
@@ -315,7 +315,9 @@ module ActiveRecord
       end
 
       def announce(message)
-        text = "#{@version} #{name}: #{message}"
+        version = defined?(@version) ? @version : nil
+
+        text = "#{version} #{name}: #{message}"
         length = [0, 75 - text.length].max
         write "== %s %s" % [text, "=" * length]
       end
@@ -488,7 +490,7 @@ module ActiveRecord
       runnable.pop if down? && !target.nil?
 
       runnable.each do |migration|
-        Base.logger.info "Migrating to #{migration.name} (#{migration.version})"
+        Base.logger.info "Migrating to #{migration.name} (#{migration.version})" if Base.logger
 
         # On our way up, we skip migrating the ones we've already migrated
         next if up? && migrated.include?(migration.version.to_i)

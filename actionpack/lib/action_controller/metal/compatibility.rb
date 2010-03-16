@@ -5,24 +5,20 @@ module ActionController
     class ::ActionController::ActionControllerError < StandardError #:nodoc:
     end
 
+    module ClassMethods
+    end
+
     # Temporary hax
     included do
       ::ActionController::UnknownAction = ::AbstractController::ActionNotFound
       ::ActionController::DoubleRenderError = ::AbstractController::DoubleRenderError
 
-      cattr_accessor :session_options
-      self.session_options = {}
-
-      cattr_accessor :allow_concurrency
-      self.allow_concurrency = false
-
-      cattr_accessor :relative_url_root
-      self.relative_url_root = ENV['RAILS_RELATIVE_URL_ROOT']
+      # ROUTES TODO: This should be handled by a middleware and route generation
+      # should be able to handle SCRIPT_NAME
+      self.config.relative_url_root = ENV['RAILS_RELATIVE_URL_ROOT']
 
       class << self
         delegate :default_charset=, :to => "ActionDispatch::Response"
-        delegate :resources_path_names, :to => "ActionController::Routing::Routes"
-        delegate :resources_path_names=, :to => "ActionController::Routing::Routes"
       end
 
       # cattr_reader :protected_instance_variables
@@ -33,34 +29,17 @@ module ActionController
                                              @before_filter_chain_aborted @_headers @_params
                                              @_response)
 
-      # Controls the resource action separator
-      cattr_accessor :resource_action_separator
-      self.resource_action_separator = "/"
-
-      cattr_accessor :use_accept_header
-      self.use_accept_header = true
+      def rescue_action(env)
+        raise env["action_dispatch.rescue.exception"]
+      end
 
       self.page_cache_directory = defined?(Rails.public_path) ? Rails.public_path : ""
-
-      cattr_accessor :consider_all_requests_local
-      self.consider_all_requests_local = true
-
-      # Prepends all the URL-generating helpers from AssetHelper. This makes it possible to easily move javascripts, stylesheets,
-      # and images to a dedicated asset server away from the main web server. Example:
-      #   ActionController::Base.asset_host = "http://assets.example.com"
-      cattr_accessor :asset_host
-
-      cattr_accessor :ip_spoofing_check
-      self.ip_spoofing_check = true
-
-      cattr_accessor :trusted_proxies
     end
 
     # For old tests
     def initialize_template_class(*) end
     def assign_shortcuts(*) end
 
-    # TODO: Remove this after we flip
     def template
       @template ||= view_context
     end
@@ -70,28 +49,20 @@ module ActionController
       super
     end
 
-    module ClassMethods
-      def consider_all_requests_local
-      end
-
-      def rescue_action(env)
-        raise env["action_dispatch.rescue.exception"]
-      end
-
-      # Defines the storage option for cached fragments
-      def cache_store=(store_option)
-        @@cache_store = ActiveSupport::Cache.lookup_store(store_option)
-      end
-    end
-
-    def render_to_body(options)
-      if options.is_a?(Hash) && options.key?(:template)
-        options[:template].sub!(/^\//, '')
+    def _normalize_options(options)
+      if options[:action] && options[:action].to_s.include?(?/)
+        ActiveSupport::Deprecation.warn "Giving a path to render :action is deprecated. " <<
+          "Please use render :template instead", caller
+        options[:template] = options.delete(:action)
       end
 
       options[:text] = nil if options.delete(:nothing) == true
       options[:text] = " " if options.key?(:text) && options[:text].nil?
+      super
+    end
 
+    def render_to_body(options)
+      options[:template].sub!(/^\//, '') if options.key?(:template)
       super || " "
     end
 
@@ -103,34 +74,8 @@ module ActionController
       super || (respond_to?(:method_missing) && "_handle_method_missing")
     end
 
-    def _find_layout(name, details)
-      details[:prefix] = nil if name =~ /\blayouts/
-      super
-    end
-
-    # Move this into a "don't run in production" module
-    def _default_layout(details, require_layout = false)
-      super
-    rescue ActionView::MissingTemplate
-      _find_layout(_layout({}), {})
-      nil
-    end
-
     def performed?
       response_body
-    end
-
-    # ==== Request only view path switching ====
-    def append_view_path(path)
-      view_paths.push(*path)
-    end
-
-    def prepend_view_path(path)
-      view_paths.unshift(*path)
-    end
-
-    def view_paths
-      view_context.view_paths
     end
   end
 end

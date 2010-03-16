@@ -1,7 +1,7 @@
 require 'abstract_unit'
 require 'active_support/time'
 require 'active_support/core_ext/object'
-require 'active_support/core_ext/class/removal'
+require 'active_support/core_ext/class/subclasses'
 
 class ClassA; end
 class ClassB < ClassA; end
@@ -41,29 +41,8 @@ class Foo
 end
 
 class ClassExtTest < Test::Unit::TestCase
-  def test_methods
-    assert defined?(ClassB)
-    assert defined?(ClassC)
-    assert defined?(ClassD)
-
-    ClassA.remove_subclasses
-
-    assert !defined?(ClassB)
-    assert !defined?(ClassC)
-    assert !defined?(ClassD)
-  end
-
-  def test_subclasses_of
-    cj = ClassJ
-    assert_equal [ClassJ], Object.subclasses_of(ClassI)
-    ClassI.remove_subclasses
-    assert_equal [], Object.subclasses_of(ClassI)
-  ensure
-    Object.const_set :ClassJ, cj
-  end
-
   def test_subclasses_of_should_find_nested_classes
-    assert Object.subclasses_of(ClassK).include?(Nested::ClassL)
+    assert Class.subclasses_of(ClassK).include?(Nested::ClassL)
   end
 
   def test_subclasses_of_should_not_return_removed_classes
@@ -73,66 +52,44 @@ class ClassExtTest < Test::Unit::TestCase
     Nested.const_set :ClassL, new_class
     assert_equal "Nested::ClassL", new_class.name # Sanity check
 
-    subclasses = Object.subclasses_of(ClassK)
+    subclasses = Class.subclasses_of(ClassK)
     assert subclasses.include?(new_class)
     assert ! subclasses.include?(old_class)
   ensure
     Nested.const_set :ClassL, old_class unless defined?(Nested::ClassL)
   end
-  
+
   def test_subclasses_of_should_not_trigger_const_missing
     const_missing = false
     Nested.on_const_missing { const_missing = true }
-    
-    subclasses = Object.subclasses_of ClassK
+
+    subclasses = Class.subclasses_of ClassK
     assert !const_missing
     assert_equal [ Nested::ClassL ], subclasses
-    
+
     removed = Nested.class_eval { remove_const :ClassL }  # keep it in memory
-    subclasses = Object.subclasses_of ClassK
+    subclasses = Class.subclasses_of ClassK
     assert !const_missing
     assert subclasses.empty?
   ensure
     Nested.const_set :ClassL, removed unless defined?(Nested::ClassL)
   end
-  
+
   def test_subclasses_of_with_multiple_roots
-    classes = Object.subclasses_of(ClassI, ClassK)
+    classes = Class.subclasses_of(ClassI, ClassK)
     assert_equal %w(ClassJ Nested::ClassL), classes.collect(&:to_s).sort
   end
 
   def test_subclasses_of_doesnt_find_anonymous_classes
-    assert_equal [], Object.subclasses_of(Foo)
+    assert_equal [], Class.subclasses_of(Foo)
     bar = Class.new(Foo)
     assert_nothing_raised do
-      assert_equal [bar], Object.subclasses_of(Foo)
+      assert_equal [bar], Class.subclasses_of(Foo)
     end
   end
 end
 
-class ObjectTests < Test::Unit::TestCase
-  def test_extended_by
-    foo = Foo.new
-    assert foo.extended_by.include?(Bar)
-    foo.extend(Baz)
-    assert(([Bar, Baz] - foo.extended_by).empty?, "Expected Bar, Baz in #{foo.extended_by.inspect}")
-  end
-
-  def test_extend_with_included_modules_from
-    foo, object = Foo.new, Object.new
-    assert !object.respond_to?(:bar)
-    assert !object.respond_to?(:baz)
-
-    object.extend_with_included_modules_from(foo)
-    assert object.respond_to?(:bar)
-    assert !object.respond_to?(:baz)
-
-    foo.extend(Baz)
-    object.extend_with_included_modules_from(foo)
-    assert object.respond_to?(:bar)
-    assert object.respond_to?(:baz)
-  end
-
+class ObjectTests < ActiveSupport::TestCase
   class DuckTime
     def acts_like_time?
       true
@@ -162,12 +119,9 @@ class ObjectTests < Test::Unit::TestCase
     assert !duck.acts_like?(:date)
   end
 
-  def test_metaclass
-    string = "Hello"
-    string.metaclass.instance_eval do
-      define_method(:foo) { "bar" }
-    end
-    assert_equal "bar", string.foo
+  def test_singleton_class
+    o = Object.new
+    assert_equal class << o; self end, o.singleton_class
   end
 end
 

@@ -1,5 +1,8 @@
 module ActionMailer
   module Quoting #:nodoc:
+    # TODO extract this into Mail itself.
+    # 
+    # 
     # Convert the given text into quoted printable format, with an instruction
     # that the text be eventually interpreted in the given charset.
     def quoted_printable(text, charset)
@@ -19,7 +22,7 @@ module ActionMailer
     # A quick-and-dirty regexp for determining whether a string contains any
     # characters that need escaping.
     if !defined?(CHARS_NEEDING_QUOTING)
-      CHARS_NEEDING_QUOTING = /[\000-\011\013\014\016-\037\177-\377]/
+      CHARS_NEEDING_QUOTING = Regexp.new('[\000-\011\013\014\016-\037\177-\377]', nil, 'n')
     end
 
     # Quote the given text if it contains any "illegal" characters

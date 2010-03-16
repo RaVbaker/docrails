@@ -5,7 +5,7 @@ require 'active_support/core_ext/hash/keys'
 module ActionView
   module Helpers #:nodoc:
     # Provides a set of methods for making links and getting URLs that
-    # depend on the routing subsystem (see ActionController::Routing).
+    # depend on the routing subsystem (see ActionDispatch::Routing).
     # This allows you to use the same format for links in views
     # and controllers.
     module UrlHelper
@@ -13,7 +13,7 @@ module ActionView
 
       # Need to map default url options to controller one.
       def default_url_options(*args) #:nodoc:
-        @controller.send(:default_url_options, *args)
+        controller.send(:default_url_options, *args)
       end
 
       # Returns the URL for the set of +options+ provided. This takes the
@@ -63,7 +63,7 @@ module ActionView
       #   # => /testing/jump/#tax&ship
       #
       #   <%= url_for(Workshop.new) %>
-      #   # relies on Workshop answering a new_record? call (and in this case returning true)
+      #   # relies on Workshop answering a persisted? call (and in this case returning false)
       #   # => /workshops
       #
       #   <%= url_for(@workshop) %>
@@ -89,16 +89,16 @@ module ActionView
         when Hash
           options = { :only_path => options[:host].nil? }.update(options.symbolize_keys)
           escape  = options.key?(:escape) ? options.delete(:escape) : false
-          @controller.send(:url_for, options)
+          controller.send(:url_for, options)
         when :back
           escape = false
-          @controller.request.env["HTTP_REFERER"] || 'javascript:history.back()'
+          controller.request.env["HTTP_REFERER"] || 'javascript:history.back()'
         else
           escape = false
           polymorphic_path(options)
         end
 
-        escape ? escape_once(url).html_safe! : url
+        escape ? escape_once(url).html_safe : url
       end
 
       # Creates a link tag of the given +name+ using a URL created by the set
@@ -117,13 +117,9 @@ module ActionView
       #   end
       #
       # ==== Options
-      # * <tt>:confirm => 'question?'</tt> - This will add a JavaScript confirm
-      #   prompt with the question specified. If the user accepts, the link is
+      # * <tt>:confirm => 'question?'</tt> - This will allow the unobtrusive JavaScript 
+      #   driver to prompt with the question specified. If the user accepts, the link is
       #   processed normally, otherwise no action is taken.
-      # * <tt>:popup => true || array of window options</tt> - This will force the
-      #   link to open in a popup window. By passing true, a default browser window
-      #   will be opened with the URL. You can also specify an array of options
-      #   that are passed to the <tt>window.open</tt> JavaScript call.
       # * <tt>:method => symbol of HTTP verb</tt> - This modifier will dynamically
       #   create an HTML form and immediately submit the form for processing using
       #   the HTTP verb specified. Useful for having links perform a POST operation
@@ -135,10 +131,6 @@ module ActionView
       #   POST behavior, you should check for it in your controller's action by using
       #   the request object's methods for <tt>post?</tt>, <tt>delete?</tt> or <tt>put?</tt>.
       # * The +html_options+ will accept a hash of html attributes for the link tag.
-      #
-      # You can mix and match the +html_options+ with the exception of
-      # <tt>:popup</tt> and <tt>:method</tt> which will raise an
-      # <tt>ActionView::ActionViewError</tt> exception.
       #
       # ==== Examples
       # Because it relies on +url_for+, +link_to+ supports both older-style controller/action/id arguments
@@ -170,7 +162,7 @@ module ActionView
       #
       # You can use a block as well if your link target is hard to fit into the name parameter. ERb example:
       #
-      #   <% link_to(@profile) do %>
+      #   <%= link_to(@profile) do %>
       #     <strong><%= @profile.name %></strong> -- <span>Check it out!</span>
       #   <% end %>
       #   # => <a href="/profiles/1">
@@ -203,47 +195,36 @@ module ActionView
       #   link_to "Nonsense search", searches_path(:foo => "bar", :baz => "quux")
       #   # => <a href="/searches?foo=bar&amp;baz=quux">Nonsense search</a>
       #
-      # The three options specific to +link_to+ (<tt>:confirm</tt>, <tt>:popup</tt>, and <tt>:method</tt>) are used as follows:
+      # The two options specific to +link_to+ (<tt>:confirm</tt> and <tt>:method</tt>) are used as follows:
       #
       #   link_to "Visit Other Site", "http://www.rubyonrails.org/", :confirm => "Are you sure?"
-      #   # => <a href="http://www.rubyonrails.org/" onclick="return confirm('Are you sure?');">Visit Other Site</a>
+      #   # => <a href="http://www.rubyonrails.org/" data-confirm="Are you sure?"">Visit Other Site</a>
       #
-      #   link_to "Help", { :action => "help" }, :popup => true
-      #   # => <a href="/testing/help/" onclick="window.open(this.href);return false;">Help</a>
-      #
-      #   link_to "View Image", @image, :popup => ['new_window_name', 'height=300,width=600']
-      #   # => <a href="/images/9" onclick="window.open(this.href,'new_window_name','height=300,width=600');return false;">View Image</a>
-      #
-      #   link_to "Delete Image", @image, :confirm => "Are you sure?", :method => :delete
-      #   # => <a href="/images/9" onclick="if (confirm('Are you sure?')) { var f = document.createElement('form');
-      #        f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;
-      #        var m = document.createElement('input'); m.setAttribute('type', 'hidden'); m.setAttribute('name', '_method');
-      #        m.setAttribute('value', 'delete');var s = document.createElement('input'); s.setAttribute('type', 'hidden');
-      #        s.setAttribute('name', 'authenticity_token'); s.setAttribute('value', 'Q/ttlxPYZ6R77B+vZ1sBkhj21G2isO9dpE6UtOHBApg=');
-      #        f.appendChild(s)f.appendChild(m);f.submit(); };return false;">Delete Image</a>
+      #   link_to("Destroy", "http://www.example.com", :method => :delete, :confirm => "Are you sure?")
+      #   # => <a href='http://www.example.com' rel="nofollow" data-method="delete" data-confirm="Are you sure?">Destroy</a>
       def link_to(*args, &block)
         if block_given?
           options      = args.first || {}
           html_options = args.second
-          concat(link_to(capture(&block), options, html_options).html_safe!)
+          safe_concat(link_to(capture(&block), options, html_options))
         else
           name         = args[0]
           options      = args[1] || {}
           html_options = args[2]
 
           url = url_for(options)
+          html_options = convert_options_to_data_attributes(options, html_options)
 
           if html_options
             html_options = html_options.stringify_keys
             href = html_options['href']
-            convert_options_to_javascript!(html_options, url)
             tag_options = tag_options(html_options)
           else
             tag_options = nil
           end
 
           href_attr = "href=\"#{url}\"" unless href
-          "<a #{href_attr}#{tag_options}>#{ERB::Util.h(name || url)}</a>".html_safe!
+          "<a #{href_attr}#{tag_options}>#{ERB::Util.h(name || url)}</a>".html_safe
         end
       end
 
@@ -270,9 +251,11 @@ module ActionView
       # There are a few special +html_options+:
       # * <tt>:method</tt> - Specifies the anchor name to be appended to the path.
       # * <tt>:disabled</tt> - Specifies the anchor name to be appended to the path.
-      # * <tt>:confirm</tt> - This will add a JavaScript confirm
+      # * <tt>:confirm</tt> - This will use the unobtrusive JavaScript driver to 
       #   prompt with the question specified. If the user accepts, the link is
       #   processed normally, otherwise no action is taken.
+      # * <tt>:remote</tt> -  If set to true, will allow the Unobtrusive JavaScript drivers to control the 
+      #   submit behaviour. By default this behaviour is an ajax submit.
       #
       # ==== Examples
       #   <%= button_to "New", :action => "new" %>
@@ -280,15 +263,27 @@ module ActionView
       #   #      <div><input value="New" type="submit" /></div>
       #   #    </form>"
       #
-      #   button_to "Delete Image", { :action => "delete", :id => @image.id },
-      #             :confirm => "Are you sure?", :method => :delete
+      #
+      #   <%= button_to "Delete Image", { :action => "delete", :id => @image.id },
+      #             :confirm => "Are you sure?", :method => :delete %>
       #   # => "<form method="post" action="/images/delete/1" class="button-to">
       #   #      <div>
       #   #        <input type="hidden" name="_method" value="delete" />
-      #   #        <input onclick="return confirm('Are you sure?');"
-      #   #              value="Delete" type="submit" />
+      #   #        <input data-confirm='Are you sure?' value="Delete" type="submit" />
       #   #      </div>
       #   #    </form>"
+      #
+      #
+      #   <%= button_to('Destroy', 'http://www.example.com', :confirm => 'Are you sure?', 
+      #             :method => "delete", :remote => true, :disable_with => 'loading...') %>
+      #   # => "<form class='button-to' method='post' action='http://www.example.com' data-remote='true'>
+      #   #       <div>
+      #   #         <input name='_method' value='delete' type='hidden' />
+      #   #         <input value='Destroy' type='submit' disable_with='loading...' data-confirm='Are you sure?' />
+      #   #       </div>
+      #   #     </form>"
+      #   #
+
       def button_to(name, options = {}, html_options = {})
         html_options = html_options.stringify_keys
         convert_boolean_attributes!(html_options, %w( disabled ))
@@ -300,22 +295,22 @@ module ActionView
 
         form_method = method.to_s == 'get' ? 'get' : 'post'
 
+        remote = html_options.delete('remote')
+
         request_token_tag = ''
         if form_method == 'post' && protect_against_forgery?
           request_token_tag = tag(:input, :type => "hidden", :name => request_forgery_protection_token.to_s, :value => form_authenticity_token)
         end
 
-        if confirm = html_options.delete("confirm")
-          html_options["onclick"] = "return #{confirm_javascript_function(confirm)};"
-        end
-
         url = options.is_a?(String) ? options : self.url_for(options)
         name ||= url
 
+        html_options = convert_options_to_data_attributes(options, html_options)
+
         html_options.merge!("type" => "submit", "value" => name)
 
-        ("<form method=\"#{form_method}\" action=\"#{escape_once url}\" class=\"button-to\"><div>" +
-          method_tag + tag("input", html_options) + request_token_tag + "</div></form>").html_safe!
+        ("<form method=\"#{form_method}\" action=\"#{escape_once url}\" #{"data-remote=\"true\"" if remote} class=\"button-to\"><div>" +
+          method_tag + tag("input", html_options) + request_token_tag + "</div></form>").html_safe
       end
 
 
@@ -472,14 +467,12 @@ module ActionView
         extras << "subject=#{Rack::Utils.escape(subject).gsub("+", "%20")}&" unless subject.nil?
         extras = "?" << extras.gsub!(/&?$/,"") unless extras.empty?
 
-        email_address = email_address.to_s
-
-        email_address_obfuscated = email_address.dup
+        email_address_obfuscated = html_escape(email_address)
         email_address_obfuscated.gsub!(/@/, html_options.delete("replace_at")) if html_options.has_key?("replace_at")
         email_address_obfuscated.gsub!(/\./, html_options.delete("replace_dot")) if html_options.has_key?("replace_dot")
 
         if encode == "javascript"
-          "document.write('#{content_tag("a", name || email_address_obfuscated, html_options.merge({ "href" => "mailto:"+email_address+extras }))}');".each_byte do |c|
+          "document.write('#{content_tag("a", name || email_address_obfuscated.html_safe, html_options.merge({ "href" => "mailto:"+email_address+extras }))}');".each_byte do |c|
             string << sprintf("%%%x", c)
           end
           "<script type=\"#{Mime::JS}\">eval(decodeURIComponent('#{string}'))</script>"
@@ -496,9 +489,9 @@ module ActionView
             char = c.chr
             string << (char =~ /\w/ ? sprintf("%%%x", c) : char)
           end
-          content_tag "a", name || email_address_encoded, html_options.merge({ "href" => "#{string}#{extras}" })
+          content_tag "a", name || email_address_encoded.html_safe, html_options.merge({ "href" => "#{string}#{extras}" })
         else
-          content_tag "a", name || email_address_obfuscated, html_options.merge({ "href" => "mailto:#{email_address}#{extras}" })
+          content_tag "a", name || email_address_obfuscated.html_safe, html_options.merge({ "href" => "mailto:#{email_address}#{extras}" })
         end
       end
 
@@ -546,15 +539,16 @@ module ActionView
       #   # => false
       def current_page?(options)
         url_string = CGI.unescapeHTML(url_for(options))
-        request = @controller.request
-        # We ignore any extra parameters in the request_uri if the 
+        request = controller.request
+        # We ignore any extra parameters in the request_uri if the
         # submitted url doesn't have any either.  This lets the function
-        # work with things like ?order=asc 
+        # work with things like ?order=asc
         if url_string.index("?")
-          request_uri = request.request_uri
+          request_uri = request.fullpath
         else
-          request_uri = request.request_uri.split('?').first
+          request_uri = request.path
         end
+
         if url_string =~ /^\w+:\/\//
           url_string == "#{request.protocol}#{request.host_with_port}#{request_uri}"
         else
@@ -563,53 +557,55 @@ module ActionView
       end
 
       private
-        def convert_options_to_javascript!(html_options, url = '')
-          confirm, popup = html_options.delete("confirm"), html_options.delete("popup")
+        def convert_options_to_data_attributes(options, html_options)
+          html_options = {} if html_options.nil?
+          html_options = html_options.stringify_keys
+
+          if (options.is_a?(Hash) && options.key?('remote')) || (html_options.is_a?(Hash) && html_options.key?('remote'))
+            html_options['data-remote'] = 'true'
+            options.delete('remote') if options.is_a?(Hash)
+            html_options.delete('remote') if html_options.is_a?(Hash)
+          end
+
+          confirm = html_options.delete("confirm")
+
+          if html_options.key?("popup")
+            ActiveSupport::Deprecation.warn(":popup has been deprecated", caller)
+          end
 
           method, href = html_options.delete("method"), html_options['href']
 
-          html_options["onclick"] = case
-            when popup && method
-              raise ActionView::ActionViewError, "You can't use :popup and :method in the same link"
-            when confirm && popup
-              "if (#{confirm_javascript_function(confirm)}) { #{popup_javascript_function(popup)} };return false;"
-            when confirm && method
-              "if (#{confirm_javascript_function(confirm)}) { #{method_javascript_function(method, url, href)} };return false;"
-            when confirm
-              "return #{confirm_javascript_function(confirm)};"
-            when method
-              "#{method_javascript_function(method, url, href)}return false;"
-            when popup
-              "#{popup_javascript_function(popup)}return false;"
-            else
-              html_options["onclick"]
+          add_confirm_to_attributes!(html_options, confirm) if confirm
+          add_method_to_attributes!(html_options, method)   if method
+
+          html_options["data-url"] = options[:url] if options.is_a?(Hash) && options[:url]
+
+          html_options
+        end
+
+        def add_confirm_to_attributes!(html_options, confirm)
+          html_options["data-confirm"] = confirm if confirm
+        end
+
+        def add_method_to_attributes!(html_options, method)
+          html_options["rel"] = "nofollow" if method && method.to_s.downcase != "get"
+          html_options["data-method"] = method if method
+        end
+
+        def options_for_javascript(options)
+          if options.empty?
+            '{}'
+          else
+            "{#{options.keys.map { |k| "#{k}:#{options[k]}" }.sort.join(', ')}}"
           end
         end
 
-        def confirm_javascript_function(confirm)
-          "confirm('#{escape_javascript(confirm)}')"
-        end
-
-        def popup_javascript_function(popup)
-          popup.is_a?(Array) ? "window.open(this.href,'#{popup.first}','#{popup.last}');" : "window.open(this.href);"
-        end
-
-        def method_javascript_function(method, url = '', href = nil)
-          action = (href && url.size > 0) ? "'#{url}'" : 'this.href'
-          submit_function =
-            "var f = document.createElement('form'); f.style.display = 'none'; " +
-            "this.parentNode.appendChild(f); f.method = 'POST'; f.action = #{action};"
-
-          unless method == :post
-            submit_function << "var m = document.createElement('input'); m.setAttribute('type', 'hidden'); "
-            submit_function << "m.setAttribute('name', '_method'); m.setAttribute('value', '#{method}'); f.appendChild(m);"
+        def array_or_string_for_javascript(option)
+          if option.kind_of?(Array)
+            "['#{option.join('\',\'')}']"
+          elsif !option.nil?
+            "'#{option}'"
           end
-
-          if protect_against_forgery?
-            submit_function << "var s = document.createElement('input'); s.setAttribute('type', 'hidden'); "
-            submit_function << "s.setAttribute('name', '#{request_forgery_protection_token}'); s.setAttribute('value', '#{escape_javascript form_authenticity_token}'); f.appendChild(s);"
-          end
-          submit_function << "f.submit();"
         end
 
         # Processes the +html_options+ hash, converting the boolean

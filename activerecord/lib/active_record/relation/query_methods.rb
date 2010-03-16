@@ -8,11 +8,10 @@ module ActiveRecord
 
         class_eval <<-CEVAL
           def #{query_method}(*args)
-            spawn.tap do |new_relation|
-              new_relation.#{query_method}_values ||= []
-              value = Array.wrap(args.flatten).reject {|x| x.blank? }
-              new_relation.#{query_method}_values += value if value.present?
-            end
+            new_relation = clone
+            value = Array.wrap(args.flatten).reject {|x| x.blank? }
+            new_relation.#{query_method}_values += value if value.present?
+            new_relation
           end
         CEVAL
       end
@@ -20,11 +19,10 @@ module ActiveRecord
       [:where, :having].each do |query_method|
         class_eval <<-CEVAL
           def #{query_method}(*args)
-            spawn.tap do |new_relation|
-              new_relation.#{query_method}_values ||= []
-              value = build_where(*args)
-              new_relation.#{query_method}_values += [*value] if value.present?
-            end
+            new_relation = clone
+            value = build_where(*args)
+            new_relation.#{query_method}_values += [*value] if value.present?
+            new_relation
           end
         CEVAL
       end
@@ -34,21 +32,21 @@ module ActiveRecord
 
         class_eval <<-CEVAL
           def #{query_method}(value = true)
-            spawn.tap do |new_relation|
-              new_relation.#{query_method}_value = value
-            end
+            new_relation = clone
+            new_relation.#{query_method}_value = value
+            new_relation
           end
         CEVAL
       end
     end
 
     def lock(locks = true)
-      relation = spawn
+      relation = clone
       case locks
       when String, TrueClass, NilClass
-        spawn.tap {|new_relation| new_relation.lock_value = locks || true }
+        clone.tap {|new_relation| new_relation.lock_value = locks || true }
       else
-        spawn.tap {|new_relation| new_relation.lock_value = false }
+        clone.tap {|new_relation| new_relation.lock_value = false }
       end
     end
 
@@ -77,7 +75,7 @@ module ActiveRecord
 
       # Build association joins first
       joins.each do |join|
-        association_joins << join if [Hash, Array, Symbol].include?(join.class) && !@klass.send(:array_of_strings?, join)
+        association_joins << join if [Hash, Array, Symbol].include?(join.class) && !array_of_strings?(join)
       end
 
       if association_joins.any?
@@ -110,7 +108,7 @@ module ActiveRecord
         when Relation::JoinOperation
           arel = arel.join(join.relation, join.join_class).on(*join.on)
         when Hash, Array, Symbol
-          if @klass.send(:array_of_strings?, join)
+          if array_of_strings?(join)
             join_string = join.join(' ')
             arel = arel.join(join_string)
           end
@@ -119,44 +117,64 @@ module ActiveRecord
         end
       end
 
-      @where_values.uniq.each do |w|
-        arel = w.is_a?(String) ? arel.where(w) : arel.where(*w)
+      @where_values.uniq.each do |where|
+        next if where.blank?
+
+        case where
+        when Arel::SqlLiteral
+          arel = arel.where(where)
+        else
+          sql = where.is_a?(String) ? where : where.to_sql
+          arel = arel.where(Arel::SqlLiteral.new("(#{sql})"))
+        end
       end
 
       @having_values.uniq.each do |h|
         arel = h.is_a?(String) ? arel.having(h) : arel.having(*h)
       end
 
-      arel = arel.take(@limit_value) if @limit_value.present?
-      arel = arel.skip(@offset_value) if @offset_value.present?
+      if defined?(@limit_value) && @limit_value.present?
+        arel = arel.take(@limit_value)
+      end
+
+      if defined?(@offset_value) && @offset_value.present?
+        arel = arel.skip(@offset_value)
+      end
 
       @group_values.uniq.each do |g|
         arel = arel.group(g) if g.present?
       end
 
       @order_values.uniq.each do |o|
-        arel = arel.order(o) if o.present?
+        arel = arel.order(Arel::SqlLiteral.new(o.to_s)) if o.present?
       end
 
       selects = @select_values.uniq
+
+      quoted_table_name = @klass.quoted_table_name
 
       if selects.present?
         selects.each do |s|
           @implicit_readonly = false
           arel = arel.project(s) if s.present?
         end
-      elsif joins.present?
-        arel = arel.project(@klass.quoted_table_name + '.*')
+      else
+        arel = arel.project(quoted_table_name + '.*')
       end
 
-      arel = arel.from(@from_value) if @from_value.present?
+      arel =
+        if defined?(@from_value) && @from_value.present?
+          arel.from(@from_value)
+        else
+          arel.from(quoted_table_name)
+        end
 
       case @lock_value
       when TrueClass
         arel = arel.lock
       when String
         arel = arel.lock(@lock_value)
-      end
+      end if defined?(@lock_value)
 
       arel
     end
@@ -166,17 +184,16 @@ module ActiveRecord
 
       builder = PredicateBuilder.new(table.engine)
 
-      conditions = if [String, Array].include?(args.first.class)
-        merged = @klass.send(:merge_conditions, args.size > 1 ? Array.wrap(args) : args.first)
-        Arel::SqlLiteral.new(merged) if merged
-      elsif args.first.is_a?(Hash)
-        attributes = @klass.send(:expand_hash_conditions_for_aggregates, args.first)
+      opts = args.first
+      case opts
+      when String, Array
+        @klass.send(:sanitize_sql, args.size > 1 ? args : opts)
+      when Hash
+        attributes = @klass.send(:expand_hash_conditions_for_aggregates, opts)
         builder.build_from_hash(attributes, table)
       else
-        args.first
+        opts
       end
-
-      conditions
     end
 
     private
@@ -191,6 +208,10 @@ module ActiveRecord
           s.concat(' DESC')
         end
       }.join(',')
+    end
+
+    def array_of_strings?(o)
+      o.is_a?(Array) && o.all?{|obj| obj.is_a?(String)}
     end
 
   end

@@ -1,18 +1,16 @@
-begin
-  require File.expand_path('../../../../vendor/gems/environment', __FILE__)
-rescue LoadError
-end
+require File.expand_path('../../../../load_paths', __FILE__)
 
-lib = File.expand_path('../../../lib', __FILE__)
+lib = File.expand_path("#{File.dirname(__FILE__)}/../../lib")
 $:.unshift(lib) unless $:.include?('lib') || $:.include?(lib)
 
 require 'config'
 
-require 'rubygems'
 require 'test/unit'
 require 'stringio'
+require 'mocha'
 
 require 'active_record'
+require 'active_support/dependencies'
 require 'connection'
 
 begin

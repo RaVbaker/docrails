@@ -1,5 +1,27 @@
+require 'rails/engine'
+require 'active_support/core_ext/array/conversions'
+
 module Rails
-  class Plugin < Railtie
+  # Rails::Plugin is nothing more than a Rails::Engine, but since it's loaded too late
+  # in the boot process, it does not have the same configuration powers as a bare
+  # Rails::Engine.
+  #
+  # Opposite to Rails::Railtie and Rails::Engine, you are not supposed to inherit from
+  # Rails::Plugin. Rails::Plugin is automatically configured to be an engine by simply
+  # placing inside vendor/plugins. Since this is done automatically, you actually cannot
+  # declare a Rails::Engine inside your Plugin, otherwise it would cause the same files
+  # to be loaded twice. This means that if you want to ship an Engine as gem it cannot
+  # be used as plugin and vice-versa.
+  #
+  # Besides this conceptual difference, the only difference between Rails::Engine and
+  # Rails::Plugin is that plugins automatically load the file "init.rb" at the plugin
+  # root during the boot process.
+  # 
+  class Plugin < Engine
+    def self.inherited(base)
+      raise "You cannot inherit from Rails::Plugin"
+    end
+
     def self.all(list, paths)
       plugins = []
       paths.each do |path|
@@ -17,53 +39,49 @@ module Rails
 
     attr_reader :name, :path
 
-    def initialize(path)
-      @name = File.basename(path).to_sym
-      @path = path
-    end
-
-    def load_paths
-      Dir["#{path}/{lib}", "#{path}/app/{models,controllers,helpers}"]
-    end
-
     def load_tasks
-      Dir["#{path}/**/tasks/**/*.rake"].sort.each { |ext| load ext }
+      super
+      load_deprecated_tasks
     end
 
-    initializer :add_to_load_path, :after => :set_autoload_paths do |app|
-      load_paths.each do |path|
-        $LOAD_PATH << path
-        require "active_support/dependencies"
-
-        ActiveSupport::Dependencies.load_paths << path
-
-        unless app.config.reload_plugins
-          ActiveSupport::Dependencies.load_once_paths << path
-        end
+    def load_deprecated_tasks
+      tasks = Dir["#{root}/{tasks,rails/tasks}/**/*.rake"].sort
+      if tasks.any?
+        ActiveSupport::Deprecation.warn "Rake tasks in #{tasks.to_sentence} are deprecated. Use lib/tasks instead"
+        tasks.each { |ext| load(ext) }
       end
+    end
+
+    def initialize(root)
+      @name = File.basename(root).to_sym
+      config.root = root
+    end
+
+    def config
+      @config ||= Engine::Configuration.new
     end
 
     initializer :load_init_rb, :before => :load_application_initializers do |app|
-      file   = "#{@path}/init.rb"
-      config = app.config
-      eval File.read(file), binding, file if File.file?(file)
-    end
-
-    initializer :add_view_paths, :after => :initialize_framework_views do
-      plugin_views = "#{path}/app/views"
-      if File.directory?(plugin_views)
-        ActionController::Base.view_paths.concat([plugin_views]) if defined? ActionController
-        ActionMailer::Base.view_paths.concat([plugin_views])     if defined? ActionMailer
+      files = %w(rails/init.rb init.rb).map { |path| File.expand_path path, root }
+      if initrb = files.find { |path| File.file? path }
+        if initrb == files.first
+          ActiveSupport::Deprecation.warn "Use toplevel init.rb; rails/init.rb is deprecated: #{initrb}"
+        end
+        config = app.config
+        eval(File.read(initrb), binding, initrb)
       end
     end
 
-    # TODO Isn't it supposed to be :after => "action_controller.initialize_routing" ?
-    initializer :add_routing_file, :after => :initialize_routing do |app|
-      routing_file = "#{path}/config/routes.rb"
-      if File.exist?(routing_file)
-        app.route_configuration_files << routing_file
-        app.reload_routes!
+    initializer :sanity_check_railties_collision do
+      if Engine.subclasses.map { |k| k.root.to_s }.include?(root.to_s)
+        raise "\"#{name}\" is a Railtie/Engine and cannot be installed as plugin"
       end
+    end
+
+  protected
+
+    def reloadable?(app)
+      app.config.reload_plugins
     end
   end
 end

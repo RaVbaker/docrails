@@ -12,10 +12,10 @@ module AbstractController
     end
 
     included do
-      extlib_inheritable_accessor(:_helpers) { Module.new }
-      extlib_inheritable_accessor(:_helper_serial) do
-        AbstractController::Helpers.next_serial
-      end
+      class_attribute :_helpers, :_helper_serial
+      delegate :_helpers, :to => :'self.class'
+      self._helpers = Module.new
+      self._helper_serial = ::AbstractController::Helpers.next_serial
     end
 
     module ClassMethods
@@ -25,7 +25,7 @@ module AbstractController
       def inherited(klass)
         helpers = _helpers
         klass._helpers = Module.new { include helpers }
-
+        klass.class_eval { default_helper_module! unless anonymous? }
         super
       end
 
@@ -97,7 +97,7 @@ module AbstractController
       def helper(*args, &block)
         self._helper_serial = AbstractController::Helpers.next_serial + 1
 
-        _modules_for_helpers(args).each do |mod|
+        modules_for_helpers(args).each do |mod|
           add_template_helper(mod)
         end
 
@@ -132,7 +132,7 @@ module AbstractController
       # ==== Returns
       # Array[Module]:: A normalized list of modules for the list of
       #   helpers provided.
-      def _modules_for_helpers(args)
+      def modules_for_helpers(args)
         args.flatten.map! do |arg|
           case arg
           when String, Symbol
@@ -145,6 +145,16 @@ module AbstractController
             raise ArgumentError, "helper must be a String, Symbol, or Module"
           end
         end
+      end
+
+      def default_helper_module!
+        module_name = name.sub(/Controller$/, '')
+        module_path = module_name.underscore
+        helper module_path
+      rescue MissingSourceFile => e
+        raise e unless e.is_missing? "helpers/#{module_path}_helper"
+      rescue NameError => e
+        raise e unless e.missing_name? "#{module_name}Helper"
       end
     end
   end

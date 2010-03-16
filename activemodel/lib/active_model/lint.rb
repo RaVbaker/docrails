@@ -13,6 +13,33 @@
 module ActiveModel
   module Lint
     module Tests
+
+      # == Responds to <tt>to_key</tt>
+      #
+      # Returns an Enumerable of all (primary) key attributes
+      # or nil if model.persisted? is false
+      def test_to_key
+        assert model.respond_to?(:to_key), "The model should respond to to_key"
+        def model.persisted?() false end
+        assert model.to_key.nil?
+      end
+
+      # == Responds to <tt>to_param</tt>
+      #
+      # Returns a string representing the object's key suitable for use in URLs
+      # or nil if model.persisted? is false.
+      #
+      # Implementers can decide to either raise an exception or provide a default
+      # in case the record uses a composite primary key. There are no tests for this
+      # behavior in lint because it doesn't make sense to force any of the possible
+      # implementation strategies on the implementer. However, if the resource is
+      # not persisted?, then to_param should always return nil.
+      def test_to_param
+        assert model.respond_to?(:to_param), "The model should respond to to_param"
+        def model.persisted?() false end
+        assert model.to_param.nil?
+      end
+
       # == Responds to <tt>valid?</tt>
       #
       # Returns a boolean that specifies whether the object is in a valid or invalid
@@ -22,21 +49,16 @@ module ActiveModel
         assert_boolean model.valid?, "valid?"
       end
 
-      # == Responds to <tt>new_record?</tt>
+      # == Responds to <tt>persisted?</tt>
       #
       # Returns a boolean that specifies whether the object has been persisted yet.
       # This is used when calculating the URL for an object. If the object is
       # not persisted, a form for that object, for instance, will be POSTed to the
       # collection. If it is persisted, a form for the object will put PUTed to the
       # URL for the object.
-      def test_new_record?
-        assert model.respond_to?(:new_record?), "The model should respond to new_record?"
-        assert_boolean model.new_record?, "new_record?"
-      end
-
-      def test_destroyed?
-        assert model.respond_to?(:destroyed?), "The model should respond to destroyed?"
-        assert_boolean model.destroyed?, "destroyed?"
+      def test_persisted?
+        assert model.respond_to?(:persisted?), "The model should respond to persisted?"
+        assert_boolean model.persisted?, "persisted?"
       end
 
       # == Naming
@@ -50,13 +72,15 @@ module ActiveModel
         assert_kind_of String, model_name
         assert_kind_of String, model_name.human
         assert_kind_of String, model_name.partial_path
+        assert_kind_of String, model_name.singular
+        assert_kind_of String, model_name.plural
       end
 
       # == Errors Testing
       # 
       # Returns an object that has :[] and :full_messages defined on it. See below
       # for more details.
-
+      #
       # Returns an Array of Strings that are the errors for the attribute in
       # question. If localization is used, the Strings should be localized
       # for the current locale. If no error is present, this method should

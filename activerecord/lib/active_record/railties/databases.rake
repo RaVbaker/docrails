@@ -1,7 +1,7 @@
 namespace :db do
   task :load_config => :rails_env do
     require 'active_record'
-    ActiveRecord::Base.configurations = Rails::Configuration.new.database_configuration
+    ActiveRecord::Base.configurations = Rails::Application.config.database_configuration
   end
 
   namespace :create do
@@ -26,8 +26,12 @@ namespace :db do
     end
   end
 
-  desc 'Create the database defined in config/database.yml for the current Rails.env'
+  desc 'Create the database defined in config/database.yml for the current Rails.env - also makes test database if in development mode'
   task :create => :load_config do
+    # Make the test database at the same time as the development one, if it exists
+    if Rails.env.development? && ActiveRecord::Base.configurations['test']
+      create_database(ActiveRecord::Base.configurations['test'])
+    end
     create_database(ActiveRecord::Base.configurations[Rails.env])
   end
 
@@ -105,7 +109,7 @@ namespace :db do
           # Only connect to local databases
           local_database?(config) { drop_database(config) }
         rescue Exception => e
-          puts "Couldn't drop #{config['database']} : #{e.inspect}"
+          $stderr.puts "Couldn't drop #{config['database']} : #{e.inspect}"
         end
       end
     end
@@ -117,7 +121,7 @@ namespace :db do
     begin
       drop_database(config)
     rescue Exception => e
-      puts "Couldn't drop #{config['database']} : #{e.inspect}"
+      $stderr.puts "Couldn't drop #{config['database']} : #{e.inspect}"
     end
   end
 
@@ -125,7 +129,7 @@ namespace :db do
     if %w( 127.0.0.1 localhost ).include?(config['host']) || config['host'].blank?
       yield
     else
-      puts "This task only modifies local databases. #{config['database']} is on a remote host."
+      $stderr.puts "This task only modifies local databases. #{config['database']} is on a remote host."
     end
   end
 
@@ -196,8 +200,11 @@ namespace :db do
     when 'postgresql'
       ActiveRecord::Base.establish_connection(config)
       puts ActiveRecord::Base.connection.encoding
+    when 'sqlite3'
+      ActiveRecord::Base.establish_connection(config)
+      puts ActiveRecord::Base.connection.encoding
     else
-      puts 'sorry, your database adapter is not supported yet, feel free to submit a patch'
+      $stderr.puts 'sorry, your database adapter is not supported yet, feel free to submit a patch'
     end
   end
 
@@ -209,7 +216,7 @@ namespace :db do
       ActiveRecord::Base.establish_connection(config)
       puts ActiveRecord::Base.connection.collation
     else
-      puts 'sorry, your database adapter is not supported yet, feel free to submit a patch'
+      $stderr.puts 'sorry, your database adapter is not supported yet, feel free to submit a patch'
     end
   end
 

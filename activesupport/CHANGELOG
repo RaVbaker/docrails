@@ -1,4 +1,21 @@
-*Edge*
+*Rails 3.0 (pending)*
+
+* Use Object#singleton_class instead of #metaclass. Prefer Ruby's choice.  [Jeremy Kemper]
+
+* JSON backend for YAJL. Preferred if available.  #2666 [Brian Lopez]
+
+
+*Rails 3.0.0 [beta] (February 4, 2010)*
+
+* Introduce class_attribute to declare inheritable class attributes. Writing an attribute on a subclass behaves just like overriding the superclass reader method.  Unifies and replaces most usage of cattr_accessor, class_inheritable_attribute, superclass_delegating_attribute, and extlib_inheritable_attribute.  [Jeremy Kemper, Yehuda Katz]
+
+* Time#- with a DateTime argument behaves the same as with a Time argument, i.e. returns the difference between self and arg as a Float #3476 [Geoff Buesing]
+
+* YAML serialization for OrderedHash.  #3608 [Gregor Schmidt]
+
+* Update bundled TZInfo to v0.3.16 [Geoff Buesing]
+
+* Georgetown TimeZone is now mapped to "America/Guyana" instead of "America/Argentina/San_Juan" #1821 [Geoff Buesing, Reuben Sivan]
 
 * Changed the default ActiveSupport.use_standard_json_time_format from false to true and
 ActiveSupport.escape_html_entities_in_json from true to false to match previously announced Rails 3 defaults [DHH]

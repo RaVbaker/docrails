@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2004-2009 David Heinemeier Hansson
+# Copyright (c) 2004-2010 David Heinemeier Hansson
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -30,7 +30,6 @@ $:.unshift(activemodel_path) if File.directory?(activemodel_path) && !$:.include
 
 require 'active_support'
 require 'active_model'
-require 'arel'
 
 module ActiveRecord
   extend ActiveSupport::Autoload
@@ -38,14 +37,13 @@ module ActiveRecord
   eager_autoload do
     autoload :VERSION
 
-    autoload :ActiveRecordError, 'active_record/base'
-    autoload :ConnectionNotEstablished, 'active_record/base'
+    autoload :ActiveRecordError, 'active_record/errors'
+    autoload :ConnectionNotEstablished, 'active_record/errors'
 
     autoload :Aggregations
     autoload :AssociationPreload
     autoload :Associations
     autoload :AttributeMethods
-    autoload :Attributes
     autoload :AutosaveAssociation
 
     autoload :Relation
@@ -53,14 +51,13 @@ module ActiveRecord
     autoload_under 'relation' do
       autoload :QueryMethods
       autoload :FinderMethods
-      autoload :CalculationMethods
+      autoload :Calculations
       autoload :PredicateBuilder
       autoload :SpawnMethods
+      autoload :Batches
     end
 
     autoload :Base
-    autoload :Batches
-    autoload :Calculations
     autoload :Callbacks
     autoload :DynamicFinderMatch
     autoload :DynamicScopeMatch
@@ -75,10 +72,8 @@ module ActiveRecord
     autoload :SchemaDumper
     autoload :Serialization
     autoload :SessionStore
-    autoload :StateMachine
     autoload :Timestamp
     autoload :Transactions
-    autoload :Types
     autoload :Validations
   end
 
@@ -96,28 +91,6 @@ module ActiveRecord
     end
   end
 
-  module Attributes
-    extend ActiveSupport::Autoload
-
-    eager_autoload do
-      autoload :Aliasing
-      autoload :Store
-      autoload :Typecasting
-    end
-  end
-
-  module Type
-    extend ActiveSupport::Autoload
-
-    eager_autoload do
-      autoload :Number, 'active_record/types/number'
-      autoload :Object, 'active_record/types/object'
-      autoload :Serialize, 'active_record/types/serialize'
-      autoload :TimeWithZone, 'active_record/types/time_with_zone'
-      autoload :Unknown, 'active_record/types/unknown'
-    end
-  end
-
   module Locking
     extend ActiveSupport::Autoload
 
@@ -132,12 +105,16 @@ module ActiveRecord
 
     eager_autoload do
       autoload :AbstractAdapter
+      autoload :ConnectionManagement, "active_record/connection_adapters/abstract/connection_pool"
     end
   end
 
   autoload :TestCase
   autoload :TestFixtures, 'active_record/fixtures'
+
+  base_hook do
+    Arel::Table.engine = Arel::Sql::Engine.new(self)
+  end
 end
 
-Arel::Table.engine = Arel::Sql::Engine.new(ActiveRecord::Base)
 I18n.load_path << File.dirname(__FILE__) + '/active_record/locale/en.yml'

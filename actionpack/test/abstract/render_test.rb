@@ -6,11 +6,17 @@ module AbstractController
     class ControllerRenderer < AbstractController::Base
       include AbstractController::Rendering
 
+      def _prefix
+        "renderer"
+      end
+
       self.view_paths = [ActionView::FixtureResolver.new(
-        "default.erb" => "With Default",
         "template.erb" => "With Template",
-        "some/file.erb" => "With File",
-        "template_name.erb" => "With Template Name"
+        "renderer/default.erb" => "With Default",
+        "renderer/string.erb" => "With String",
+        "renderer/symbol.erb" => "With Symbol",
+        "string/with_path.erb" => "With String With Path",
+        "some/file.erb" => "With File"
       )]
 
       def template
@@ -33,12 +39,16 @@ module AbstractController
         render
       end
 
-      def template_name
-        render :_template_name => :template_name
+      def string
+        render "string"
       end
 
-      def object
-        render :_template => ActionView::Template::Text.new("With Object")
+      def string_with_path
+        render "string/with_path"
+      end
+
+      def symbol
+        render :symbol
       end
     end
 
@@ -73,16 +83,20 @@ module AbstractController
         assert_equal "With Default", @controller.response_body
       end
 
-      def test_render_template_name
-        @controller.process(:template_name)
-        assert_equal "With Template Name", @controller.response_body
+      def test_render_string
+        @controller.process(:string)
+        assert_equal "With String", @controller.response_body
       end
 
-      def test_render_object
-        @controller.process(:object)
-        assert_equal "With Object", @controller.response_body
+      def test_render_symbol
+        @controller.process(:symbol)
+        assert_equal "With Symbol", @controller.response_body
       end
 
+      def test_render_string_with_path
+        @controller.process(:string_with_path)
+        assert_equal "With String With Path", @controller.response_body
+      end
     end
   end
 end

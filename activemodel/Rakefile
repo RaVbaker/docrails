@@ -1,19 +1,11 @@
 dir = File.dirname(__FILE__)
-require "#{dir}/lib/active_model/version"
-
-PKG_BUILD     = ENV['PKG_BUILD'] ? '.' + ENV['PKG_BUILD'] : ''
-PKG_NAME      = 'activemodel'
-PKG_VERSION   = ActiveModel::VERSION::STRING + PKG_BUILD
-PKG_FILE_NAME = "#{PKG_NAME}-#{PKG_VERSION}"
-RELEASE_NAME  = "REL #{PKG_VERSION}"
-
 
 require 'rake/testtask'
 
 task :default => :test
 
 Rake::TestTask.new do |t|
-  t.libs << "#{dir}/test"
+  t.libs << "test"
   t.test_files = Dir.glob("#{dir}/test/cases/**/*_test.rb").sort
   t.warning = true
 end
@@ -32,13 +24,13 @@ require 'rake/rdoctask'
 
 # Generate the RDoc documentation
 Rake::RDocTask.new do |rdoc|
-  rdoc.rdoc_dir = "#{dir}/doc"
+  rdoc.rdoc_dir = "doc"
   rdoc.title    = "Active Model"
   rdoc.options << '--line-numbers' << '--inline-source' << '-A cattr_accessor=object'
   rdoc.options << '--charset' << 'utf-8'
   rdoc.template = ENV['template'] ? "#{ENV['template']}.rb" : '../doc/template/horo'
-  rdoc.rdoc_files.include("#{dir}/README", "#{dir}/CHANGES")
-  rdoc.rdoc_files.include("#{dir}/lib/**/*.rb")
+  rdoc.rdoc_files.include("README", "CHANGELOG")
+  rdoc.rdoc_files.include("lib/**/*.rb")
 end
 
 
@@ -49,4 +41,11 @@ spec = eval(File.read("#{dir}/activemodel.gemspec"))
 
 Rake::GemPackageTask.new(spec) do |p|
   p.gem_spec = spec
+end
+
+desc "Release to gemcutter"
+task :release => :package do
+  require 'rake/gemcutter'
+  Rake::Gemcutter::Tasks.new(spec).define
+  Rake::Task['gem:push'].invoke
 end

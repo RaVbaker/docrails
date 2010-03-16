@@ -15,6 +15,8 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
   stub_controllers do |routes|
     Routes = routes
     Routes.draw do
+      default_url_options :host => "rubyonrails.org"
+
       controller :sessions do
         get  'login' => :new, :as => :login
         post 'login' => :create
@@ -24,6 +26,8 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
 
       resource :session do
         get :create
+
+        resource :info
       end
 
       match 'account/logout' => redirect("/logout"), :as => :logout_redirect
@@ -104,7 +108,9 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
         end
       end
 
-      resources :posts, :only => [:index, :show]
+      resources :posts, :only => [:index, :show] do
+        resources :comments, :except => :destroy
+      end
 
       match 'sprockets.js' => ::TestRoutingMapper::SprocketsApp
 
@@ -117,6 +123,8 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
       namespace :account do
         match 'description', :to => "account#description", :as => "description"
         resource :subscription, :credit, :credit_card
+
+        root :to => "account#index"
 
         namespace :admin do
           resource :subscription
@@ -141,25 +149,26 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
         resources :rooms
       end
 
-      scope '(:locale)', :locale => /en|pl/ do
-        resources :descriptions
-      end
+      match '/info' => 'projects#info', :as => 'info'
 
       namespace :admin do
-        scope '(/:locale)', :locale => /en|pl/ do
+        scope '(:locale)', :locale => /en|pl/ do
           resources :descriptions
         end
       end
 
-      match '/info' => 'projects#info', :as => 'info'
-
-      root :to => 'projects#index'
+      scope '(:locale)', :locale => /en|pl/ do
+        resources :descriptions
+        root :to => 'projects#index'
+      end
     end
   end
 
   def app
     Routes
   end
+
+  include Routes.url_helpers
 
   def test_logout
     with_test_routes do
@@ -182,6 +191,8 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
 
       assert_equal '/login', url_for(:controller => 'sessions', :action => 'create', :only_path => true)
       assert_equal '/login', url_for(:controller => 'sessions', :action => 'new', :only_path => true)
+
+      assert_equal 'http://rubyonrails.org/login', Routes.url_for(:controller => 'sessions', :action => 'create')
     end
   end
 
@@ -226,6 +237,14 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
       get '/session/edit'
       assert_equal 'sessions#edit', @response.body
       assert_equal '/session/edit', edit_session_path
+    end
+  end
+
+  def test_session_info_nested_singleton_resource
+    with_test_routes do
+      get '/session/info'
+      assert_equal 'infos#show', @response.body
+      assert_equal '/session/info', session_info_path
     end
   end
 
@@ -470,7 +489,7 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     end
   end
 
-  def test_posts
+  def test_resource_routes_with_only_and_except
     with_test_routes do
       get '/posts'
       assert_equal 'posts#index', @response.body
@@ -480,9 +499,14 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
       assert_equal 'posts#show', @response.body
       assert_equal '/posts/1', post_path(:id => 1)
 
+      get '/posts/1/comments'
+      assert_equal 'comments#index', @response.body
+      assert_equal '/posts/1/comments', post_comments_path(:post_id => 1)
+
       assert_raise(ActionController::RoutingError) { post '/posts' }
       assert_raise(ActionController::RoutingError) { put '/posts/1' }
       assert_raise(ActionController::RoutingError) { delete '/posts/1' }
+      assert_raise(ActionController::RoutingError) { delete '/posts/1/comments' }
     end
   end
 
@@ -660,6 +684,22 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
     end
   end
 
+  def test_namespaced_roots
+    with_test_routes do
+      assert_equal '/account', account_root_path
+      get '/account'
+      assert_equal 'account#index', @response.body
+    end
+  end
+
+  def test_optional_scoped_root
+    with_test_routes do
+      assert_equal '/en', root_path("en")
+      get '/en'
+      assert_equal 'projects#index', @response.body
+    end
+  end
+
   def test_optional_scoped_path
     with_test_routes do
       assert_equal '/en/descriptions', descriptions_path("en")
@@ -704,14 +744,6 @@ class TestRoutingMapper < ActionDispatch::IntegrationTest
 
   private
     def with_test_routes
-      real_routes, temp_routes = ActionController::Routing::Routes, Routes
-
-      ActionController::Routing.module_eval { remove_const :Routes }
-      ActionController::Routing.module_eval { const_set :Routes, temp_routes }
-
       yield
-    ensure
-      ActionController::Routing.module_eval { remove_const :Routes }
-      ActionController::Routing.const_set(:Routes, real_routes)
     end
 end

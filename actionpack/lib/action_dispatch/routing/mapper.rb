@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash/except'
+
 module ActionDispatch
   module Routing
     class Mapper
@@ -36,7 +38,7 @@ module ActionDispatch
         end
 
         def to_route
-          [ app, conditions, requirements, defaults, @options[:as] ]
+          [ app, conditions, requirements, defaults, @options[:as], @options[:anchor] ]
         end
 
         private
@@ -64,7 +66,7 @@ module ActionDispatch
 
           # match "account/overview"
           def using_match_shorthand?(args, options)
-            args.present? && options.except(:via).empty? && !args.first.include?(':')
+            args.present? && options.except(:via, :anchor).empty? && !args.first.include?(':')
           end
 
           def normalize_path(path)
@@ -85,10 +87,9 @@ module ActionDispatch
           end
 
           def requirements
-            @requirements ||= returning(@options[:constraints] || {}) do |requirements|
+            @requirements ||= (@options[:constraints] || {}).tap do |requirements|
               requirements.reverse_merge!(@scope[:constraints]) if @scope[:constraints]
               @options.each { |k, v| requirements[k] = v if v.is_a?(Regexp) }
-              requirements[:controller] ||= @set.controller_constraints
             end
           end
 
@@ -157,10 +158,11 @@ module ActionDispatch
       end
 
       # Invokes Rack::Mount::Utils.normalize path and ensure that
-      # (:locale) becomes (/:locale) instead of /(:locale).
+      # (:locale) becomes (/:locale) instead of /(:locale). Except
+      # for root cases, where the latter is the correct one.
       def self.normalize_path(path)
         path = Rack::Mount::Utils.normalize_path(path)
-        path.sub!(%r{/\(+/?:}, '(/:')
+        path.sub!(%r{/(\(+)/?:}, '\1/:') unless path =~ %r{^/\(+:.*\)$}
         path
       end
 
@@ -174,9 +176,15 @@ module ActionDispatch
         end
 
         def match(*args)
-          @set.add_route(*Mapping.new(@set, @scope, args).to_route)
+          mapping = Mapping.new(@set, @scope, args).to_route
+          @set.add_route(*mapping)
           self
         end
+
+        def default_url_options=(options)
+          @set.default_url_options = options
+        end
+        alias_method :default_url_options, :default_url_options=
       end
 
       module HttpHelpers
@@ -206,8 +214,7 @@ module ActionDispatch
 
           lambda do |env|
             req = Request.new(env)
-
-            uri = URI.parse(path_proc.call(req.params.symbolize_keys))
+            uri = URI.parse(path_proc.call(req.symbolized_path_parameters))
             uri.scheme ||= req.scheme
             uri.host   ||= req.host
             uri.port   ||= req.port unless req.port == 80
@@ -283,7 +290,7 @@ module ActionDispatch
         end
 
         def namespace(path)
-          scope(path.to_s, :name_prefix => path.to_s, :namespace => path.to_s) { yield }
+          scope(path.to_s, :name_prefix => path.to_s, :controller_namespace => path.to_s) { yield }
         end
 
         def constraints(constraints = {})
@@ -294,6 +301,7 @@ module ActionDispatch
           options = args.extract_options!
 
           options = (@scope[:options] || {}).merge(options)
+          options[:anchor] = true unless options.key?(:anchor)
 
           if @scope[:name_prefix] && !options[:as].blank?
             options[:as] = "#{@scope[:name_prefix]}_#{options[:as]}"
@@ -318,12 +326,12 @@ module ActionDispatch
             parent ? "#{parent}_#{child}" : child
           end
 
-          def merge_namespace_scope(parent, child)
+          def merge_controller_namespace_scope(parent, child)
             parent ? "#{parent}/#{child}" : child
           end
 
           def merge_controller_scope(parent, child)
-            @scope[:namespace] ? "#{@scope[:namespace]}/#{child}" : child
+            @scope[:controller_namespace] ? "#{@scope[:controller_namespace]}/#{child}" : child
           end
 
           def merge_resources_path_names_scope(parent, child)
@@ -354,11 +362,11 @@ module ActionDispatch
           attr_reader :plural, :singular, :options
 
           def initialize(entities, options = {})
-            entities = entities.to_s
+            @name = entities.to_s
             @options = options
 
-            @plural   = entities.pluralize
-            @singular = entities.singularize
+            @plural   = @name.pluralize
+            @singular = @name.singularize
           end
 
           def default_actions
@@ -367,16 +375,25 @@ module ActionDispatch
 
           def actions
             if only = options[:only]
-              only.map(&:to_sym)
+              Array(only).map(&:to_sym)
             elsif except = options[:except]
-              default_actions - except.map(&:to_sym)
+              default_actions - Array(except).map(&:to_sym)
             else
               default_actions
             end
           end
 
+          def action_type(action)
+            case action
+            when :index, :create
+              :collection
+            when :show, :update, :destroy
+              :member
+            end
+          end
+
           def name
-            options[:as] || plural
+            options[:as] || @name
           end
 
           def controller
@@ -389,6 +406,15 @@ module ActionDispatch
 
           def collection_name
             plural
+          end
+
+          def name_for_action(action)
+            case action_type(action)
+            when :collection
+              collection_name
+            when :member
+              member_name
+            end
           end
 
           def id_segment
@@ -405,8 +431,15 @@ module ActionDispatch
             super
           end
 
-          def name
-            options[:as] || singular
+          def action_type(action)
+            case action
+            when :show, :create, :update, :destroy
+              :member
+            end
+          end
+
+          def member_name
+            name
           end
         end
 
@@ -418,7 +451,7 @@ module ActionDispatch
         def resource(*resources, &block)
           options = resources.extract_options!
 
-          if verify_common_behavior_for(:resource, resources, options, &block)
+          if apply_common_behavior_for(:resource, resources, options, &block)
             return self
           end
 
@@ -426,14 +459,17 @@ module ActionDispatch
 
           scope(:path => resource.name.to_s, :controller => resource.controller) do
             with_scope_level(:resource, resource) do
-              yield if block_given?
 
-              get    :show, :as => resource.member_name if resource.actions.include?(:show)
+              scope(:name_prefix => resource.name.to_s) do
+                yield if block_given?
+              end
+
+              get    :show if resource.actions.include?(:show)
               post   :create if resource.actions.include?(:create)
               put    :update if resource.actions.include?(:update)
               delete :destroy if resource.actions.include?(:destroy)
-              get    :new, :as => resource.singular if resource.actions.include?(:new)
-              get    :edit, :as => resource.singular if resource.actions.include?(:edit)
+              get    :new, :as => resource.name if resource.actions.include?(:new)
+              get    :edit, :as => resource.name if resource.actions.include?(:edit)
             end
           end
 
@@ -443,7 +479,7 @@ module ActionDispatch
         def resources(*resources, &block)
           options = resources.extract_options!
 
-          if verify_common_behavior_for(:resources, resources, options, &block)
+          if apply_common_behavior_for(:resources, resources, options, &block)
             return self
           end
 
@@ -454,14 +490,14 @@ module ActionDispatch
               yield if block_given?
 
               with_scope_level(:collection) do
-                get  :index, :as => resource.collection_name if resource.actions.include?(:index)
+                get  :index if resource.actions.include?(:index)
                 post :create if resource.actions.include?(:create)
                 get  :new, :as => resource.singular if resource.actions.include?(:new)
               end
 
               with_scope_level(:member) do
                 scope(':id') do
-                  get    :show, :as => resource.member_name if resource.actions.include?(:show)
+                  get    :show if resource.actions.include?(:show)
                   put    :update if resource.actions.include?(:update)
                   delete :destroy if resource.actions.include?(:destroy)
                   get    :edit, :as => resource.singular if resource.actions.include?(:edit)
@@ -509,6 +545,21 @@ module ActionDispatch
           end
         end
 
+        def mount(app, options = nil)
+          if options
+            path = options.delete(:at)
+          else
+            options = app
+            app, path = options.find { |k, v| k.respond_to?(:call) }
+            options.delete(app) if app
+          end
+
+          raise "A rack application must be specified" unless path
+
+          match(path, options.merge(:to => app, :anchor => false))
+          self
+        end
+
         def match(*args)
           options = args.extract_options!
 
@@ -525,7 +576,10 @@ module ActionDispatch
               begin
                 old_path = @scope[:path]
                 @scope[:path] = "#{@scope[:path]}(.:format)"
-                return match(options.reverse_merge(:to => action))
+                return match(options.reverse_merge(
+                  :to => action,
+                  :as => parent_resource.name_for_action(action)
+                ))
               ensure
                 @scope[:path] = old_path
               end
@@ -563,7 +617,7 @@ module ActionDispatch
             path_names[name.to_sym] || name.to_s
           end
 
-          def verify_common_behavior_for(method, resources, options, &block)
+          def apply_common_behavior_for(method, resources, options, &block)
             if resources.length > 1
               resources.each { |r| send(method, r, options, &block) }
               return true

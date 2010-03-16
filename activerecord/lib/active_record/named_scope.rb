@@ -1,6 +1,6 @@
 require 'active_support/core_ext/array'
 require 'active_support/core_ext/hash/except'
-require 'active_support/core_ext/object/metaclass'
+require 'active_support/core_ext/object/singleton_class'
 
 module ActiveRecord
   module NamedScope
@@ -26,7 +26,7 @@ module ActiveRecord
         if options.present?
           Scope.init(self, options, &block)
         else
-          current_scoped_methods ? unscoped.merge(current_scoped_methods) : unscoped.spawn
+          current_scoped_methods ? unscoped.merge(current_scoped_methods) : unscoped.clone
         end
       end
 
@@ -112,7 +112,7 @@ module ActiveRecord
               options.call(*args)
           end, &block)
         end
-        metaclass.instance_eval do
+        singleton_class.instance_eval do
           define_method name do |*args|
             scopes[name].call(self, *args)
           end
@@ -148,18 +148,6 @@ module ActiveRecord
         relation
       end
 
-      def find(*args)
-        options = args.extract_options!
-        relation = options.present? ? apply_finder_options(options) : self
-
-        case args.first
-        when :first, :last, :all
-          relation.send(args.first)
-        else
-          options.present? ? relation.find(*args) : super
-        end
-      end
-
       def first(*args)
         if args.first.kind_of?(Integer) || (loaded? && !args.first.kind_of?(Hash))
           to_a.first(*args)
@@ -176,13 +164,8 @@ module ActiveRecord
         end
       end
 
-      def count(*args)
-        options = args.extract_options!
-        options.present? ? apply_finder_options(options).count(*args) : super
-      end
-
       def ==(other)
-        to_a == other.to_a
+        other.respond_to?(:to_ary) ? to_a == other.to_a : false
       end
 
       private

@@ -1,20 +1,26 @@
 require 'active_support/core_ext/module/attr_internal'
 require 'active_support/core_ext/module/delegation'
+require 'active_support/core_ext/class/attribute'
 
 module ActionView #:nodoc:
   class ActionViewError < StandardError #:nodoc:
   end
 
   class MissingTemplate < ActionViewError #:nodoc:
-    attr_reader :path, :action_name
+    attr_reader :path
 
-    def initialize(paths, path, template_format = nil)
+    def initialize(paths, path, details, partial)
       @path = path
-      @action_name = path.split("/").last.split(".")[0...-1].join(".")
-      full_template_path = path.include?('.') ? path : "#{path}.erb"
-      display_paths = paths.compact.join(":")
-      template_type = (path =~ /layouts/i) ? 'layout' : 'template'
-      super("Missing #{template_type} #{full_template_path} in view path #{display_paths}")
+      display_paths = paths.compact.map{ |p| p.to_s.inspect }.join(", ")
+      template_type = if partial
+        "partial"
+      elsif path =~ /layouts/i
+        'layout'
+      else
+        'template'
+      end
+
+      super("Missing #{template_type} #{path} with #{details.inspect} in view paths #{display_paths}")
     end
   end
 
@@ -167,81 +173,42 @@ module ActionView #:nodoc:
     module Subclasses
     end
 
-    include Helpers, Rendering, Partials, ::ERB::Util
+    include Helpers, Rendering, Partials, Layouts, ::ERB::Util, Context
+    extend  ActiveSupport::Memoizable
 
-    def config
-      self.config = DEFAULT_CONFIG unless @config
-      @config
-    end
+    ActionView.run_base_hooks(self)
 
-    def config=(config)
-      @config = ActiveSupport::OrderedOptions.new.merge(config)
-    end
+    # Specify whether RJS responses should be wrapped in a try/catch block
+    # that alert()s the caught exception (and then re-raises it).
+    cattr_accessor :debug_rjs
+    @@debug_rjs = false
 
-    extend ActiveSupport::Memoizable
-
-    attr_accessor :base_path, :assigns, :template_extension, :formats
-    attr_accessor :controller
-    attr_internal :captures
-
-    def reset_formats(formats)
-      @formats = formats
-
-      if defined?(AbstractController::HashKey)
-        # This is expensive, but we need to reset this when the format is updated,
-        # which currently only happens
-        Thread.current[:format_locale_key] =
-          AbstractController::HashKey.get(self.class, formats, I18n.locale)
-      end
-    end
+    class_attribute :helpers
+    attr_reader :helpers
 
     class << self
       delegate :erb_trim_mode=, :to => 'ActionView::Template::Handlers::ERB'
       delegate :logger, :to => 'ActionController::Base', :allow_nil => true
     end
 
-    @@debug_rjs = false
-    ##
-    # :singleton-method:
-    # Specify whether RJS responses should be wrapped in a try/catch block
-    # that alert()s the caught exception (and then re-raises it).
-    cattr_accessor :debug_rjs
+    attr_accessor :base_path, :assigns, :template_extension, :lookup_context
+    attr_internal :captures, :request, :layout, :controller, :template, :config
 
-    # Specify whether templates should be cached. Otherwise the file we be read everytime it is accessed.
-    # Automatically reloading templates are not thread safe and should only be used in development mode.
-    @@cache_template_loading = nil
-    cattr_accessor :cache_template_loading
-
-    # :nodoc:
-    def self.xss_safe?
-      true
-    end
-
-    def self.cache_template_loading?
-      ActionController::Base.allow_concurrency || (cache_template_loading.nil? ? !ActiveSupport::Dependencies.load? : cache_template_loading)
-    end
-
-    attr_internal :request, :layout
-
-    def controller_path
-      @controller_path ||= controller && controller.controller_path
-    end
+    delegate :find_template, :template_exists?, :formats, :formats=, :locale, :locale=,
+             :view_paths, :view_paths=, :with_fallbacks, :update_details, :to => :lookup_context
 
     delegate :request_forgery_protection_token, :template, :params, :session, :cookies, :response, :headers,
              :flash, :action_name, :controller_name, :to => :controller
 
     delegate :logger, :to => :controller, :allow_nil => true
 
-    delegate :find, :to => :view_paths
-
-    include Context
+    def self.xss_safe? #:nodoc:
+      true
+    end
 
     def self.process_view_paths(value)
       ActionView::PathSet.new(Array(value))
     end
-
-    extlib_inheritable_accessor :helpers
-    attr_reader :helpers
 
     def self.for_controller(controller)
       @views ||= {}
@@ -270,24 +237,26 @@ module ActionView #:nodoc:
         klass = self
       end
 
-      klass.new(controller.class.view_paths, {}, controller)
+      klass.new(controller.lookup_context, {}, controller)
     end
 
-    def initialize(view_paths = [], assigns_for_first_render = {}, controller = nil, formats = nil)#:nodoc:
+    def initialize(lookup_context = nil, assigns_for_first_render = {}, controller = nil, formats = nil) #:nodoc:
       @config = nil
-      @formats = formats
       @assigns = assigns_for_first_render.each { |key, value| instance_variable_set("@#{key}", value) }
-      @controller = controller
       @helpers = self.class.helpers || Module.new
-      @_content_for = Hash.new {|h,k| h[k] = ActionView::SafeBuffer.new }
-      self.view_paths = view_paths
+
+      @_controller   = controller
+      @_config       = ActiveSupport::InheritableOptions.new(controller.config) if controller
+      @_content_for  = Hash.new { |h,k| h[k] = ActiveSupport::SafeBuffer.new }
+      @_virtual_path = nil
+
+      @lookup_context = lookup_context.is_a?(ActionView::LookupContext) ?
+        lookup_context : ActionView::LookupContext.new(lookup_context)
+      @lookup_context.formats = formats if formats
     end
 
-    attr_internal :template
-    attr_reader :view_paths
-
-    def view_paths=(paths)
-      @view_paths = self.class.process_view_paths(paths)
+    def controller_path
+      @controller_path ||= controller && controller.controller_path
     end
 
     def punctuate_body!(part)
@@ -295,15 +264,5 @@ module ActionView #:nodoc:
       response.body_parts << part
       nil
     end
-
-    # Evaluates the local assigns and controller ivars, pushes them to the view.
-    def _evaluate_assigns_and_ivars #:nodoc:
-      if @controller
-        variables = @controller.instance_variable_names
-        variables -= @controller.protected_instance_variables if @controller.respond_to?(:protected_instance_variables)
-        variables.each { |name| instance_variable_set(name, @controller.instance_variable_get(name)) }
-      end
-    end
-
   end
 end

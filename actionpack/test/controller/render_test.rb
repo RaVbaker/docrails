@@ -21,6 +21,10 @@ class TestController < ActionController::Base
   def hello_world
   end
 
+  def hello_world_file
+    render :file => File.expand_path("../../fixtures/hello.html", __FILE__)
+  end
+
   def conditional_hello
     if stale?(:last_modified => Time.now.utc.beginning_of_day, :etag => [:foo, 123])
       render :action => 'hello_world'
@@ -214,6 +218,10 @@ class TestController < ActionController::Base
     render :text => false
   end
 
+  def render_text_with_resource
+    render :text => Customer.new("David")
+  end
+
   # :ported:
   def render_nothing_with_appendix
     render :text => "appended"
@@ -347,7 +355,7 @@ class TestController < ActionController::Base
     @before = "i'm before the render"
     render_to_string :text => "foo"
     @after = "i'm after the render"
-    render :action => "test/hello_world"
+    render :template => "test/hello_world"
   end
 
   def render_to_string_with_exception
@@ -361,7 +369,7 @@ class TestController < ActionController::Base
     rescue
     end
     @after = "i'm after the render"
-    render :action => "test/hello_world"
+    render :template => "test/hello_world"
   end
 
   def accessing_params_in_template_with_layout
@@ -506,7 +514,7 @@ class TestController < ActionController::Base
   def render_to_string_with_partial
     @partial_only = render_to_string :partial => "partial_only"
     @partial_with_locals = render_to_string :partial => "customer", :locals => { :customer => Customer.new("david") }
-    render :action => "test/hello_world"
+    render :template => "test/hello_world"
   end
 
   def partial_with_counter
@@ -607,6 +615,15 @@ class TestController < ActionController::Base
 
   def rescue_action(e)
     raise
+  end
+
+  before_filter :only => :render_with_filters do
+    request.format = :xml
+  end
+
+  # Ensure that the before filter is executed *before* self.formats is set.
+  def render_with_filters
+    render :action => :formatted_xml_erb
   end
 
   private
@@ -747,6 +764,11 @@ class RenderTest < ActionController::TestCase
     assert_equal "The secret is in the sauce\n", @response.body
   end
 
+  def test_render_file
+    get :hello_world_file
+    assert_equal "Hello world!", @response.body
+  end
+
   # :ported:
   def test_render_file_as_string_with_instance_variables
     get :render_file_as_string_with_instance_variables
@@ -815,6 +837,11 @@ class RenderTest < ActionController::TestCase
     get :render_nothing_with_appendix
     assert_response 200
     assert_equal 'appended', @response.body
+  end
+
+  def test_render_text_with_resource
+    get :render_text_with_resource
+    assert_equal 'name: "David"', @response.body
   end
 
   # :ported:
@@ -1014,6 +1041,11 @@ class RenderTest < ActionController::TestCase
   def test_render_with_explicit_string_template
     get :render_with_explicit_string_template
     assert_equal "<html>Hello world!</html>", @response.body
+  end
+
+  def test_render_with_filters
+    get :render_with_filters
+    assert_equal "<test>passed formatted xml erb</test>", @response.body
   end
 
   # :ported:

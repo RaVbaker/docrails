@@ -7,8 +7,14 @@ module Rails::Generators
   # can change in Ruby 1.8.7 when we FileUtils.cd.
   RAILS_DEV_PATH = File.expand_path("../../../../..", File.dirname(__FILE__))
 
+  RESERVED_NAMES = %w[generate console server dbconsole
+                      application destroy benchmarker profiler
+                      plugin runner test]
+
   class AppGenerator < Base
     DATABASES = %w( mysql oracle postgresql sqlite3 frontbase ibm_db )
+
+    attr_accessor :rails_template
     add_shebang_option!
 
     argument :app_path, :type => :string
@@ -132,8 +138,11 @@ module Rails::Generators
     end
 
     def create_prototype_files
-      return if options[:skip_prototype]
-      directory "public/javascripts"
+      unless options[:skip_prototype]
+        directory "public/javascripts"
+      else
+        empty_directory_with_gitkeep "public/javascripts"
+      end
     end
 
     def create_script_files
@@ -169,11 +178,15 @@ module Rails::Generators
     end
 
     def bundle_if_dev_or_edge
-      run "gem bundle" if dev_or_edge?
+      bundle_command = File.basename(Thor::Util.ruby_command).sub(/ruby/, 'bundle')
+      run "#{bundle_command} install" if dev_or_edge?
     end
 
     protected
-      attr_accessor :rails_template
+
+      def self.banner
+        "rails #{self.arguments.map(&:usage).join(' ')} [options]"
+      end
 
       def set_default_accessors!
         self.rails_template = case options[:template]
@@ -204,9 +217,12 @@ module Rails::Generators
       end
 
       def valid_app_const?
-        case app_const
-        when /^\d/
+        if app_const =~ /^\d/
           raise Error, "Invalid application name #{app_name}. Please give a name which does not start with numbers."
+        elsif RESERVED_NAMES.include?(app_name)
+          raise Error, "Invalid application name #{app_name}. Please give a name which does not match one of the reserved rails words."
+        elsif Object.const_defined?(app_const_base)
+          raise Error, "Invalid application name #{app_name}, constant #{app_const_base} is already in use. Please choose another application name."
         end
       end
 
@@ -218,8 +234,21 @@ module Rails::Generators
         options.dev? || options.edge?
       end
 
-      def self.banner
-        "#{$0} #{self.arguments.map(&:usage).join(' ')} [options]"
+      def gem_for_database
+        # %w( mysql oracle postgresql sqlite3 frontbase ibm_db )
+        case options[:database]
+        when "oracle"     then "ruby-oci8"
+        when "postgresql" then "pg"
+        when "sqlite3"    then "sqlite3-ruby"
+        when "frontbase"  then "ruby-frontbase"
+        else options[:database]
+        end
+      end
+
+      def require_for_database
+        case options[:database]
+        when "sqlite3" then "sqlite3"
+        end
       end
 
       def mysql_socket

@@ -1,15 +1,12 @@
 module ActionView #:nodoc:
   class Template
     class Text < String #:nodoc:
-      HTML = Mime[:html]
+      attr_accessor :mime_type
 
-      def initialize(string, content_type = HTML)
+      def initialize(string, mime_type = nil)
         super(string.to_s)
-        @content_type = Mime[content_type] || content_type
-      end
-
-      def details
-        {:formats => [@content_type.to_sym]}
+        @mime_type   = Mime[mime_type] || mime_type if mime_type
+        @mime_type ||= Mime::TEXT
       end
 
       def identifier
@@ -24,12 +21,8 @@ module ActionView #:nodoc:
         to_s
       end
 
-      def mime_type
-        @content_type
-      end
-
       def formats
-        [mime_type]
+        [@mime_type.to_sym]
       end
 
       def partial?

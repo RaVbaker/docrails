@@ -1,3 +1,5 @@
+require 'tsort'
+
 module Rails
   module Initializable
     def self.included(base)
@@ -19,12 +21,6 @@ module Rails
         @options[:after]
       end
 
-      def global
-        @options[:global]
-      end
-
-      alias global? global
-
       def run(*args)
         @context.instance_exec(*args, &block)
       end
@@ -36,28 +32,20 @@ module Rails
     end
 
     class Collection < Array
+      include TSort
+
+      alias :tsort_each_node :each
+      def tsort_each_child(initializer, &block)
+        select { |i| i.before == initializer.name || i.name == initializer.after }.each(&block)
+      end
+
       def initialize(initializers = [])
-        super()
-        initializers.each do |initializer|
-          if initializer.before
-            index = index_for(initializer.before)
-          elsif initializer.after
-            index = index_for(initializer.after)
-            index += 1 if index
-          else
-            index = length
-          end
-          insert(index || -1, initializer)
-        end
+        super(initializers)
+        replace(tsort)
       end
 
       def +(other)
         Collection.new(to_a + other.to_a)
-      end
-
-      def index_for(name)
-        initializer = find { |i| i.name == name }
-        initializer && index(initializer)
       end
     end
 
@@ -70,10 +58,7 @@ module Rails
     end
 
     def initializers
-      @initializers ||= begin
-        initializers = self.class.initializers_for(:instance)
-        Collection.new(initializers.map { |i| i.bind(self) })
-      end
+      @initializers ||= self.class.initializers_for(self)
     end
 
     module ClassMethods
@@ -81,26 +66,28 @@ module Rails
         @initializers ||= []
       end
 
-      def initializers_for(scope = :global)
+      def initializers_chain
         initializers = Collection.new
         ancestors.reverse_each do |klass|
           next unless klass.respond_to?(:initializers)
-          initializers = initializers + klass.initializers.select { |i|
-            (scope == :global) == !!i.global?
-          }
+          initializers = initializers + klass.initializers
         end
         initializers
       end
 
+      def initializers_for(binding)
+        Collection.new(initializers_chain.map { |i| i.bind(binding) })
+      end
+
       def initializer(name, opts = {}, &blk)
         raise ArgumentError, "A block must be passed when defining an initializer" unless blk
-        @initializers ||= []
-        @initializers << Initializer.new(name, nil, opts, &blk)
+        opts[:after] ||= initializers.last.name unless initializers.empty? || initializers.find { |i| i.name == opts[:before] }
+        initializers << Initializer.new(name, nil, opts, &blk)
       end
 
       def run_initializers(*args)
         return if @ran
-        initializers_for(:global).each do |initializer|
+        initializers_chain.each do |initializer|
           instance_exec(*args, &initializer.block)
         end
         @ran = true

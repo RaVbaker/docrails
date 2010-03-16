@@ -2,6 +2,9 @@ require 'abstract_unit'
 require 'logger'
 require 'pp' # require 'pp' early to prevent hidden_methods from not picking up the pretty-print methods until too late
 
+module Rails
+end
+
 # Provide some controller to run the tests on.
 module Submodule
   class ContainedEmptyController < ActionController::Base
@@ -63,7 +66,20 @@ class DefaultUrlOptionsController < ActionController::Base
   end
 end
 
-class ControllerClassTests < Test::Unit::TestCase
+class UrlOptionsController < ActionController::Base
+  def from_view
+    render :inline => "<%= #{params[:route]} %>"
+  end
+
+  def url_options
+    super.merge(:host => 'www.override.com', :action => 'new', :locale => 'en')
+  end
+end
+
+class RecordIdentifierController < ActionController::Base
+end
+
+class ControllerClassTests < ActiveSupport::TestCase
   def test_controller_path
     assert_equal 'empty', EmptyController.controller_path
     assert_equal EmptyController.controller_path, EmptyController.new.controller_path
@@ -74,7 +90,26 @@ class ControllerClassTests < Test::Unit::TestCase
   def test_controller_name
     assert_equal 'empty', EmptyController.controller_name
     assert_equal 'contained_empty', Submodule::ContainedEmptyController.controller_name
- end
+  end
+ 
+  def test_filter_parameter_logging
+    parameters = []
+    config = mock(:config => mock(:filter_parameters => parameters))
+    Rails.expects(:application).returns(config)
+
+    assert_deprecated do
+      Class.new(ActionController::Base) do
+        filter_parameter_logging :password
+      end
+    end
+
+    assert_equal [:password], parameters
+  end
+
+  def test_record_identifier
+    assert_respond_to RecordIdentifierController.new, :dom_id
+    assert_respond_to RecordIdentifierController.new, :dom_class
+  end
 end
 
 class ControllerInstanceTests < Test::Unit::TestCase
@@ -95,6 +130,15 @@ class ControllerInstanceTests < Test::Unit::TestCase
     @non_empty_controllers.each do |c|
       assert_equal Set.new(%w(public_action)), c.class.__send__(:action_methods), "#{c.controller_path} should not be empty!"
     end
+  end
+
+  def test_temporary_anonymous_controllers
+    name = 'ExamplesController'
+    klass = Class.new(ActionController::Base)
+    Object.const_set(name, klass)
+
+    controller = klass.new
+    assert_equal "examples", controller.controller_path
   end
 end
 
@@ -136,6 +180,31 @@ class PerformActionTest < ActionController::TestCase
   end
 end
 
+class UrlOptionsTest < ActionController::TestCase
+  tests UrlOptionsController
+
+  def setup
+    super
+    @request.host = 'www.example.com'
+    rescue_action_in_public!
+  end
+
+  def test_url_options_override
+    with_routing do |set|
+      set.draw do |map|
+        match 'from_view', :to => 'url_options#from_view', :as => :from_view
+        match ':controller/:action'
+      end
+
+      get :from_view, :route => "from_view_url"
+
+      assert_equal 'http://www.override.com/from_view?locale=en', @response.body
+      assert_equal 'http://www.override.com/from_view?locale=en', @controller.send(:from_view_url)
+      assert_equal 'http://www.override.com/default_url_options/new?locale=en', @controller.url_for(:controller => 'default_url_options')
+    end
+  end  
+end
+
 class DefaultUrlOptionsTest < ActionController::TestCase
   tests DefaultUrlOptionsController
 
@@ -145,7 +214,7 @@ class DefaultUrlOptionsTest < ActionController::TestCase
     rescue_action_in_public!
   end
 
-  def test_default_url_options_are_used_if_set
+  def test_default_url_options_override
     with_routing do |set|
       set.draw do |map|
         match 'from_view', :to => 'default_url_options#from_view', :as => :from_view
@@ -202,12 +271,15 @@ class EmptyUrlOptionsTest < ActionController::TestCase
   end
 
   def test_named_routes_with_path_without_doing_a_request_first
+    @controller = EmptyController.new
+    @controller.request = @request
+
     with_routing do |set|
       set.draw do |map|
         resources :things
       end
 
-      assert_equal '/things', EmptyController.new.send(:things_path)
+      assert_equal '/things', @controller.send(:things_path)
     end
   end
 end

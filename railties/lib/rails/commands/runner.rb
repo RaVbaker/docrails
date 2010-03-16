@@ -5,7 +5,7 @@ code_or_file = nil
 
 ARGV.clone.options do |opts|
   script_name = File.basename($0)
-  opts.banner = "Usage: #{$0} [options] ('Some.ruby(code)' or a filename)"
+  opts.banner = "Usage: runner [options] ('Some.ruby(code)' or a filename)"
 
   opts.separator ""
 
@@ -34,6 +34,8 @@ end
 ARGV.delete(code_or_file)
 
 ENV["RAILS_ENV"] = options[:environment]
+
+require ENV_PATH
 
 begin
   if code_or_file.nil?

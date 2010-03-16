@@ -38,12 +38,12 @@ class CalculationsTest < ActiveRecord::TestCase
   end
 
   def test_should_get_maximum_of_field_with_include
-    assert_equal 50, Account.maximum(:credit_limit, :include => :firm, :conditions => "companies.name != 'Summit'")
+    assert_equal 55, Account.maximum(:credit_limit, :include => :firm, :conditions => "companies.name != 'Summit'")
   end
 
   def test_should_get_maximum_of_field_with_scoped_include
     Account.send :with_scope, :find => { :include => :firm, :conditions => "companies.name != 'Summit'" } do
-      assert_equal 50, Account.maximum(:credit_limit)
+      assert_equal 55, Account.maximum(:credit_limit)
     end
   end
 
@@ -246,23 +246,6 @@ class CalculationsTest < ActiveRecord::TestCase
     assert_equal 8, c['Jadedpixel']
   end
 
-  def test_should_reject_invalid_options
-    assert_nothing_raised do
-      # empty options are valid
-      Company.send(:validate_calculation_options)
-      # these options are valid for all calculations
-      [:select, :conditions, :joins, :order, :group, :having, :distinct].each do |opt|
-        Company.send(:validate_calculation_options, opt => true)
-      end
-
-      # :include is only valid on :count
-      Company.send(:validate_calculation_options, :include => true)
-    end
-
-    assert_raise(ArgumentError) { Company.send(:validate_calculation_options, :sum,   :foo => :bar) }
-    assert_raise(ArgumentError) { Company.send(:validate_calculation_options, :count, :foo => :bar) }
-  end
-
   def test_should_count_selected_field_with_include
     assert_equal 6, Account.count(:distinct => true, :include => :firm)
     assert_equal 4, Account.count(:distinct => true, :include => :firm, :select => :credit_limit)
@@ -305,6 +288,9 @@ class CalculationsTest < ActiveRecord::TestCase
     # Oracle adapter returns floating point value 636.0 after SUM
     if current_adapter?(:OracleAdapter)
       assert_equal 636, Account.sum("2 * credit_limit")
+    elsif current_adapter?(:SQLite3Adapter)
+      # Future versions of the SQLite3 adapter will return a number
+      assert_equal 636, Account.sum("2 * credit_limit").to_i
     else
       assert_equal '636', Account.sum("2 * credit_limit")
     end

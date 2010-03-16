@@ -4,6 +4,10 @@ require 'controller/fake_models'
 class FormHelperTest < ActionView::TestCase
   tests ActionView::Helpers::FormHelper
 
+  def form_for(*)
+    @output_buffer = super
+  end
+
   def setup
     super
 
@@ -53,6 +57,7 @@ class FormHelperTest < ActionView::TestCase
     def @post.id_before_type_cast; 123; end
     def @post.to_param; '123'; end
 
+    @post.persisted   = true
     @post.title       = "Hello World"
     @post.author_name = ""
     @post.body        = "Back to the hill and over it again!"
@@ -451,6 +456,25 @@ class FormHelperTest < ActionView::TestCase
     assert_dom_equal expected, output_buffer
   end
 
+  def test_form_for_with_remote
+    form_for(:post, @post, :remote => true, :html => { :id => 'create-post', :method => :put }) do |f|
+      concat f.text_field(:title)
+      concat f.text_area(:body)
+      concat f.check_box(:secret)
+    end
+
+    expected =
+      "<form action='http://www.example.com' id='create-post' method='post' data-remote='true'>" +
+      "<div style='margin:0;padding:0;display:inline'><input name='_method' type='hidden' value='put' /></div>" +
+      "<input name='post[title]' size='30' type='text' id='post_title' value='Hello World' />" +
+      "<textarea name='post[body]' id='post_body' rows='20' cols='40'>Back to the hill and over it again!</textarea>" +
+      "<input name='post[secret]' type='hidden' value='0' />" +
+      "<input name='post[secret]' checked='checked' type='checkbox' id='post_secret' value='1' />" +
+      "</form>"
+
+    assert_dom_equal expected, output_buffer
+  end
+
   def test_form_for_without_object
     form_for(:post, :html => { :id => 'create-post' }) do |f|
       concat f.text_field(:title)
@@ -510,7 +534,7 @@ class FormHelperTest < ActionView::TestCase
   def test_submit_with_object_as_new_record_and_locale_strings
     old_locale, I18n.locale = I18n.locale, :submit
 
-    def @post.new_record?() true; end
+    @post.persisted = false
     form_for(:post, @post) do |f|
       concat f.submit
     end
@@ -570,9 +594,9 @@ class FormHelperTest < ActionView::TestCase
 
   def test_nested_fields_for
     form_for(:post, @post) do |f|
-      f.fields_for(:comment, @post) do |c|
+      concat f.fields_for(:comment, @post) { |c|
         concat c.text_field(:title)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -585,9 +609,9 @@ class FormHelperTest < ActionView::TestCase
   def test_nested_fields_for_with_nested_collections
     form_for('post[]', @post) do |f|
       concat f.text_field(:title)
-      f.fields_for('comment[]', @comment) do |c|
+      concat f.fields_for('comment[]', @comment) { |c|
         concat c.text_field(:name)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -601,9 +625,9 @@ class FormHelperTest < ActionView::TestCase
   def test_nested_fields_for_with_index_and_parent_fields
     form_for('post', @post, :index => 1) do |c|
       concat c.text_field(:title)
-      c.fields_for('comment', @comment, :index => 1) do |r|
+      concat c.fields_for('comment', @comment, :index => 1) { |r|
         concat r.text_field(:name)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -615,10 +639,10 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_form_for_with_index_and_nested_fields_for
-    form_for(:post, @post, :index => 1) do |f|
-      f.fields_for(:comment, @post) do |c|
+    output_buffer = form_for(:post, @post, :index => 1) do |f|
+      concat f.fields_for(:comment, @post) { |c|
         concat c.text_field(:title)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -630,9 +654,9 @@ class FormHelperTest < ActionView::TestCase
 
   def test_nested_fields_for_with_index_on_both
     form_for(:post, @post, :index => 1) do |f|
-      f.fields_for(:comment, @post, :index => 5) do |c|
+      concat f.fields_for(:comment, @post, :index => 5) { |c|
         concat c.text_field(:title)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -644,9 +668,9 @@ class FormHelperTest < ActionView::TestCase
 
   def test_nested_fields_for_with_auto_index
     form_for("post[]", @post) do |f|
-      f.fields_for(:comment, @post) do |c|
+      concat f.fields_for(:comment, @post) { |c|
         concat c.text_field(:title)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -658,9 +682,9 @@ class FormHelperTest < ActionView::TestCase
 
   def test_nested_fields_for_with_index_radio_button
     form_for(:post, @post) do |f|
-      f.fields_for(:comment, @post, :index => 5) do |c|
+      concat f.fields_for(:comment, @post, :index => 5) { |c|
         concat c.radio_button(:title, "hello")
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -672,9 +696,9 @@ class FormHelperTest < ActionView::TestCase
 
   def test_nested_fields_for_with_auto_index_on_both
     form_for("post[]", @post) do |f|
-      f.fields_for("comment[]", @post) do |c|
+      concat f.fields_for("comment[]", @post) { |c|
         concat c.text_field(:title)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -685,16 +709,16 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_nested_fields_for_with_index_and_auto_index
-    form_for("post[]", @post) do |f|
-      f.fields_for(:comment, @post, :index => 5) do |c|
+    output_buffer = form_for("post[]", @post) do |f|
+      concat f.fields_for(:comment, @post, :index => 5) { |c|
         concat c.text_field(:title)
-      end
+      }
     end
 
-    form_for(:post, @post, :index => 1) do |f|
-      f.fields_for("comment[]", @post) do |c|
+    output_buffer << form_for(:post, @post, :index => 1) do |f|
+      concat f.fields_for("comment[]", @post) { |c|
         concat c.text_field(:title)
-      end
+      }
     end
 
     expected = "<form action='http://www.example.com' method='post'>" +
@@ -712,9 +736,9 @@ class FormHelperTest < ActionView::TestCase
 
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
-      f.fields_for(:author) do |af|
+      concat f.fields_for(:author) { |af|
         concat af.text_field(:name)
-      end
+      }
     end
 
     expected = '<form action="http://www.example.com" method="post">' +
@@ -739,9 +763,9 @@ class FormHelperTest < ActionView::TestCase
 
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
-      f.fields_for(:author) do |af|
+      concat f.fields_for(:author) { |af|
         concat af.text_field(:name)
-      end
+      }
     end
 
     expected = '<form action="http://www.example.com" method="post">' +
@@ -758,10 +782,10 @@ class FormHelperTest < ActionView::TestCase
 
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
-      f.fields_for(:author) do |af|
+      concat f.fields_for(:author) { |af|
         concat af.hidden_field(:id)
         concat af.text_field(:name)
-      end
+      }
     end
 
     expected = '<form action="http://www.example.com" method="post">' +
@@ -779,9 +803,9 @@ class FormHelperTest < ActionView::TestCase
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
       @post.comments.each do |comment|
-        f.fields_for(:comments, comment) do |cf|
+        concat f.fields_for(:comments, comment) { |cf|
           concat cf.text_field(:name)
-        end
+        }
       end
     end
 
@@ -802,10 +826,10 @@ class FormHelperTest < ActionView::TestCase
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
       @post.comments.each do |comment|
-        f.fields_for(:comments, comment) do |cf|
+        concat f.fields_for(:comments, comment) { |cf|
           concat cf.hidden_field(:id)
           concat cf.text_field(:name)
-        end
+        }
       end
     end
 
@@ -826,9 +850,9 @@ class FormHelperTest < ActionView::TestCase
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
       @post.comments.each do |comment|
-        f.fields_for(:comments, comment) do |cf|
+        concat f.fields_for(:comments, comment) { |cf|
           concat cf.text_field(:name)
-        end
+        }
       end
     end
 
@@ -847,9 +871,9 @@ class FormHelperTest < ActionView::TestCase
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
       @post.comments.each do |comment|
-        f.fields_for(:comments, comment) do |cf|
+        concat f.fields_for(:comments, comment) { |cf|
           concat cf.text_field(:name)
-        end
+        }
       end
     end
 
@@ -883,9 +907,31 @@ class FormHelperTest < ActionView::TestCase
 
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
-      f.fields_for(:comments, @post.comments) do |cf|
+      concat f.fields_for(:comments, @post.comments) { |cf|
         concat cf.text_field(:name)
-      end
+      }
+    end
+
+    expected = '<form action="http://www.example.com" method="post">' +
+               '<input name="post[title]" size="30" type="text" id="post_title" value="Hello World" />' +
+               '<input id="post_comments_attributes_0_name" name="post[comments_attributes][0][name]" size="30" type="text" value="comment #1" />' +
+               '<input id="post_comments_attributes_0_id" name="post[comments_attributes][0][id]" type="hidden" value="1" />' +
+               '<input id="post_comments_attributes_1_name" name="post[comments_attributes][1][name]" size="30" type="text" value="comment #2" />' +
+               '<input id="post_comments_attributes_1_id" name="post[comments_attributes][1][id]" type="hidden" value="2" />' +
+               '</form>'
+
+    assert_dom_equal expected, output_buffer
+  end
+
+  def test_nested_fields_for_with_existing_records_on_a_supplied_nested_attributes_collection_different_from_record_one
+    comments = Array.new(2) { |id| Comment.new(id + 1) }
+    @post.comments = []
+
+    form_for(:post, @post) do |f|
+      concat f.text_field(:title)
+      concat f.fields_for(:comments, comments) { |cf|
+        concat cf.text_field(:name)
+      }
     end
 
     expected = '<form action="http://www.example.com" method="post">' +
@@ -905,10 +951,10 @@ class FormHelperTest < ActionView::TestCase
 
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
-      f.fields_for(:comments) do |cf|
+      concat f.fields_for(:comments) { |cf|
         concat cf.text_field(:name)
         yielded_comments << cf.object
-      end
+      }
     end
 
     expected = '<form action="http://www.example.com" method="post">' +
@@ -926,9 +972,9 @@ class FormHelperTest < ActionView::TestCase
     @post.comments = []
 
     form_for(:post, @post) do |f|
-      f.fields_for(:comments, Comment.new(321), :child_index => 'abc') do |cf|
+      concat f.fields_for(:comments, Comment.new(321), :child_index => 'abc') { |cf|
         concat cf.text_field(:name)
-      end
+      }
     end
 
     expected = '<form action="http://www.example.com" method="post">' +
@@ -946,24 +992,24 @@ class FormHelperTest < ActionView::TestCase
     @post.tags[0].relevances = []
     @post.tags[1].relevances = []
     form_for(:post, @post) do |f|
-      f.fields_for(:comments, @post.comments[0]) do |cf|
+      concat f.fields_for(:comments, @post.comments[0]) { |cf|
         concat cf.text_field(:name)
-        cf.fields_for(:relevances, CommentRelevance.new(314)) do |crf|
+        concat cf.fields_for(:relevances, CommentRelevance.new(314)) { |crf|
           concat crf.text_field(:value)
-        end
-      end
-      f.fields_for(:tags, @post.tags[0]) do |tf|
+        }
+      }
+      concat f.fields_for(:tags, @post.tags[0]) { |tf|
         concat tf.text_field(:value)
-        tf.fields_for(:relevances, TagRelevance.new(3141)) do |trf|
+        concat tf.fields_for(:relevances, TagRelevance.new(3141)) { |trf|
           concat trf.text_field(:value)
-        end
-      end
-      f.fields_for('tags', @post.tags[1]) do |tf|
+        }
+      }
+      concat f.fields_for('tags', @post.tags[1]) { |tf|
         concat tf.text_field(:value)
-        tf.fields_for(:relevances, TagRelevance.new(31415)) do |trf|
+        concat tf.fields_for(:relevances, TagRelevance.new(31415)) { |trf|
           concat trf.text_field(:value)
-        end
-      end
+        }
+      }
     end
 
     expected = '<form action="http://www.example.com" method="post">' +
@@ -985,7 +1031,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for
-    fields_for(:post, @post) do |f|
+    output_buffer = fields_for(:post, @post) do |f|
       concat f.text_field(:title)
       concat f.text_area(:body)
       concat f.check_box(:secret)
@@ -1001,7 +1047,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for_with_index
-    fields_for("post[]", @post) do |f|
+    output_buffer = fields_for("post[]", @post) do |f|
       concat f.text_field(:title)
       concat f.text_area(:body)
       concat f.check_box(:secret)
@@ -1017,7 +1063,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for_with_nil_index_option_override
-    fields_for("post[]", @post, :index => nil) do |f|
+    output_buffer = fields_for("post[]", @post, :index => nil) do |f|
       concat f.text_field(:title)
       concat f.text_area(:body)
       concat f.check_box(:secret)
@@ -1033,7 +1079,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for_with_index_option_override
-    fields_for("post[]", @post, :index => "abc") do |f|
+    output_buffer = fields_for("post[]", @post, :index => "abc") do |f|
       concat f.text_field(:title)
       concat f.text_area(:body)
       concat f.check_box(:secret)
@@ -1049,7 +1095,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for_without_object
-    fields_for(:post) do |f|
+    output_buffer = fields_for(:post) do |f|
       concat f.text_field(:title)
       concat f.text_area(:body)
       concat f.check_box(:secret)
@@ -1065,7 +1111,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for_with_only_object
-    fields_for(@post) do |f|
+    output_buffer = fields_for(@post) do |f|
       concat f.text_field(:title)
       concat f.text_area(:body)
       concat f.check_box(:secret)
@@ -1081,7 +1127,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for_object_with_bracketed_name
-    fields_for("author[post]", @post) do |f|
+    output_buffer = fields_for("author[post]", @post) do |f|
       concat f.label(:title)
       concat f.text_field(:title)
     end
@@ -1092,7 +1138,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_fields_for_object_with_bracketed_name_and_index
-    fields_for("author[post]", @post, :index => 1) do |f|
+    output_buffer = fields_for("author[post]", @post, :index => 1) do |f|
       concat f.label(:title)
       concat f.text_field(:title)
     end
@@ -1111,9 +1157,9 @@ class FormHelperTest < ActionView::TestCase
       concat post_form.text_field(:title)
       concat post_form.text_area(:body)
 
-      fields_for(:parent_post, @post) do |parent_fields|
+      concat fields_for(:parent_post, @post) { |parent_fields|
         concat parent_fields.check_box(:secret)
-      end
+      }
     end
 
     expected =
@@ -1132,9 +1178,9 @@ class FormHelperTest < ActionView::TestCase
       concat post_form.text_field(:title)
       concat post_form.text_area(:body)
 
-      post_form.fields_for(@comment) do |comment_fields|
+      concat post_form.fields_for(@comment) { |comment_fields|
         concat comment_fields.text_field(:name)
-      end
+      }
     end
 
     expected =
@@ -1151,7 +1197,7 @@ class FormHelperTest < ActionView::TestCase
     (field_helpers - %w(hidden_field)).each do |selector|
       src = <<-END_SRC
         def #{selector}(field, *args, &proc)
-          ("<label for='\#{field}'>\#{field.to_s.humanize}:</label> " + super + "<br/>").html_safe!
+          ("<label for='\#{field}'>\#{field.to_s.humanize}:</label> " + super + "<br/>").html_safe
         end
       END_SRC
       class_eval src, __FILE__, __LINE__
@@ -1176,8 +1222,8 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_default_form_builder
-    old_default_form_builder, ActionView.default_form_builder =
-      ActionView.default_form_builder, LabelledFormBuilder
+    old_default_form_builder, ActionView::Base.default_form_builder =
+      ActionView::Base.default_form_builder, LabelledFormBuilder
 
     form_for(:post, @post) do |f|
       concat f.text_field(:title)
@@ -1194,7 +1240,7 @@ class FormHelperTest < ActionView::TestCase
 
     assert_dom_equal expected, output_buffer
   ensure
-    ActionView.default_form_builder = old_default_form_builder
+    ActionView::Base.default_form_builder = old_default_form_builder
   end
 
   def test_default_form_builder_with_active_record_helpers
@@ -1230,28 +1276,8 @@ class FormHelperTest < ActionView::TestCase
 
   end
 
-  # Perhaps this test should be moved to prototype helper tests.
-  def test_remote_form_for_with_labelled_builder
-    self.extend ActionView::Helpers::PrototypeHelper
-
-     remote_form_for(:post, @post, :builder => LabelledFormBuilder) do |f|
-       concat f.text_field(:title)
-       concat f.text_area(:body)
-       concat f.check_box(:secret)
-     end
-
-     expected =
-       %(<form action="http://www.example.com" onsubmit="new Ajax.Request('http://www.example.com', {asynchronous:true, evalScripts:true, parameters:Form.serialize(this)}); return false;" method="post">) +
-       "<label for='title'>Title:</label> <input name='post[title]' size='30' type='text' id='post_title' value='Hello World' /><br/>" +
-       "<label for='body'>Body:</label> <textarea name='post[body]' id='post_body' rows='20' cols='40'>Back to the hill and over it again!</textarea><br/>" +
-       "<label for='secret'>Secret:</label> <input name='post[secret]' type='hidden' value='0' /><input name='post[secret]' checked='checked' type='checkbox' id='post_secret' value='1' /><br/>" +
-       "</form>"
-
-     assert_dom_equal expected, output_buffer
-  end
-
   def test_fields_for_with_labelled_builder
-    fields_for(:post, @post, :builder => LabelledFormBuilder) do |f|
+    output_buffer = fields_for(:post, @post, :builder => LabelledFormBuilder) do |f|
       concat f.text_field(:title)
       concat f.text_area(:body)
       concat f.check_box(:secret)
@@ -1342,7 +1368,7 @@ class FormHelperTest < ActionView::TestCase
 
   def test_form_for_with_new_object
     post = Post.new
-    post.new_record = true
+    post.persisted = false
     def post.id() nil end
 
     form_for(post) do |f| end
@@ -1352,9 +1378,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_form_for_with_existing_object_in_list
-    @post.new_record = false
     @comment.save
-
     form_for([@post, @comment]) {}
 
     expected = %(<form action="#{comment_path(@post, @comment)}" class="edit_comment" id="edit_comment_1" method="post"><div style="margin:0;padding:0;display:inline"><input name="_method" type="hidden" value="put" /></div></form>)
@@ -1362,8 +1386,6 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_form_for_with_new_object_in_list
-    @post.new_record = false
-
     form_for([@post, @comment]) {}
 
     expected = %(<form action="#{comments_path(@post)}" class="new_comment" id="new_comment" method="post"></form>)
@@ -1371,9 +1393,7 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_form_for_with_existing_object_and_namespace_in_list
-    @post.new_record = false
     @comment.save
-
     form_for([:admin, @post, @comment]) {}
 
     expected = %(<form action="#{admin_comment_path(@post, @comment)}" class="edit_comment" id="edit_comment_1" method="post"><div style="margin:0;padding:0;display:inline"><input name="_method" type="hidden" value="put" /></div></form>)
@@ -1381,8 +1401,6 @@ class FormHelperTest < ActionView::TestCase
   end
 
   def test_form_for_with_new_object_and_namespace_in_list
-    @post.new_record = false
-
     form_for([:admin, @post, @comment]) {}
 
     expected = %(<form action="#{admin_comments_path(@post)}" class="new_comment" id="new_comment" method="post"></form>)
@@ -1394,15 +1412,6 @@ class FormHelperTest < ActionView::TestCase
 
     expected = "<form action=\"/super_posts\" class=\"edit_post\" id=\"edit_post_123\" method=\"post\"><div style=\"margin:0;padding:0;display:inline\"><input name=\"_method\" type=\"hidden\" value=\"put\" /></div></form>"
     assert_equal expected, output_buffer
-  end
-
-  def test_remote_form_for_with_html_options_adds_options_to_form_tag
-    self.extend ActionView::Helpers::PrototypeHelper
-
-    remote_form_for(:post, @post, :html => {:id => 'some_form', :class => 'some_class'}) do |f| end
-    expected = "<form action=\"http://www.example.com\" class=\"some_class\" id=\"some_form\" method=\"post\" onsubmit=\"new Ajax.Request('http://www.example.com', {asynchronous:true, evalScripts:true, parameters:Form.serialize(this)}); return false;\"></form>"
-
-    assert_dom_equal expected, output_buffer
   end
 
   protected

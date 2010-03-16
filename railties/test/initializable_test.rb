@@ -10,14 +10,14 @@ module InitializableTests
       attr_accessor :foo, :bar
     end
 
-    initializer :omg, :global => true do
+    initializer :start do
       @foo ||= 0
       @foo += 1
     end
   end
 
   class Bar < Foo
-    initializer :bar, :global => true do
+    initializer :bar do
       @bar ||= 0
       @bar += 1
     end
@@ -26,7 +26,7 @@ module InitializableTests
   module Word
     include Rails::Initializable
 
-    initializer :word, :global => true do
+    initializer :word do
       $word = "bird"
     end
   end
@@ -34,11 +34,11 @@ module InitializableTests
   class Parent
     include Rails::Initializable
 
-    initializer :one, :global => true do
+    initializer :one do
       $arr << 1
     end
 
-    initializer :two, :global => true do
+    initializer :two do
       $arr << 2
     end
   end
@@ -46,17 +46,17 @@ module InitializableTests
   class Child < Parent
     include Rails::Initializable
 
-    initializer :three, :before => :one, :global => true do
+    initializer :three, :before => :one do
       $arr << 3
     end
 
-    initializer :four, :after => :one, :global => true do
+    initializer :four, :after => :one, :before => :two do
       $arr << 4
     end
   end
 
   class Parent
-    initializer :five, :before => :one, :global => true do
+    initializer :five, :before => :one do
       $arr << 5
     end
   end
@@ -72,11 +72,11 @@ module InitializableTests
       $arr << 2
     end
 
-    initializer :three, :global => true do
+    initializer :three do
       $arr << 3
     end
 
-    initializer :four, :global => true do
+    initializer :four do
       $arr << 4
     end
   end
@@ -97,7 +97,7 @@ module InitializableTests
         $arr << 3
       end
 
-      initializer :terminate, :after => :first do
+      initializer :terminate, :after => :first, :before => :startup do
         $arr << two
       end
 
@@ -118,6 +118,39 @@ module InitializableTests
 
     def self.initializers
       super + MoreInitializers.new.initializers
+    end
+  end
+
+  module Interdependent
+    class PluginA
+      include Rails::Initializable
+
+      initializer "plugin_a.startup" do
+        $arr << 1
+      end
+
+      initializer "plugin_a.terminate" do
+        $arr << 4
+      end
+    end
+
+    class PluginB
+      include Rails::Initializable
+
+      initializer "plugin_b.startup", :after => "plugin_a.startup" do
+        $arr << 2
+      end
+
+      initializer "plugin_b.terminate", :before => "plugin_a.terminate" do
+        $arr << 3
+      end
+    end
+
+    class Application
+      include Rails::Initializable
+      def self.initializers
+        PluginB.initializers + PluginA.initializers
+      end
     end
   end
 
@@ -174,6 +207,12 @@ module InitializableTests
       Child.run_initializers
       assert_equal [5, 3, 1, 4, 2], $arr
     end
+
+    test "handles dependencies introduced before all initializers are loaded" do
+      $arr = []
+      Interdependent::Application.run_initializers
+      assert_equal [1, 2, 3, 4], $arr
+    end
   end
 
   class InstanceTest < ActiveSupport::TestCase
@@ -181,13 +220,7 @@ module InitializableTests
       $arr = []
       instance = Instance.new
       instance.run_initializers
-      assert_equal [1, 2], $arr
-    end
-
-    test "running globals" do
-      $arr = []
-      Instance.run_initializers
-      assert_equal [3, 4], $arr
+      assert_equal [1, 2, 3, 4], $arr
     end
   end
 

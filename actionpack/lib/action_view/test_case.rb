@@ -1,3 +1,6 @@
+require 'action_controller/test_case'
+require 'action_view'
+
 module ActionView
   class Base
     alias_method :initialize_without_template_tracking, :initialize
@@ -32,6 +35,8 @@ module ActionView
         @request = ActionController::TestRequest.new
         @response = ActionController::TestResponse.new
 
+        @request.env.delete('PATH_INFO')
+
         @params = {}
       end
     end
@@ -51,11 +56,15 @@ module ActionView
     setup :setup_with_controller
     def setup_with_controller
       @controller = TestController.new
-      @output_buffer = ActionView::SafeBuffer.new
+      @output_buffer = ActiveSupport::SafeBuffer.new
       @rendered = ''
 
       self.class.send(:include_helper_modules!)
       make_test_case_available_to_view!
+    end
+
+    def config
+      @controller.config
     end
 
     def render(options = {}, local_assigns = {}, &block)
@@ -150,7 +159,7 @@ module ActionView
       end
 
       def method_missing(selector, *args)
-        if ActionController::Routing::Routes.named_routes.helpers.include?(selector)
+        if @controller._router.named_routes.helpers.include?(selector)
           @controller.__send__(selector, *args)
         else
           super

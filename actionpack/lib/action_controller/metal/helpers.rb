@@ -1,3 +1,5 @@
+require 'active_support/core_ext/class/attribute'
+
 module ActionController
   # The Rails framework provides a large number of helpers for working with +assets+, +dates+, +forms+,
   # +numbers+ and model objects, to name a few. These helpers are available to all templates
@@ -50,16 +52,19 @@ module ActionController
     include AbstractController::Helpers
 
     included do
-      # Set the default directory for helpers
-      extlib_inheritable_accessor(:helpers_dir) do
-        defined?(Rails.root) ? "#{Rails.root}/app/helpers" : "app/helpers"
-      end
+      class_attribute :helpers_path
+      self.helpers_path = []
     end
 
     module ClassMethods
-      def inherited(klass)
-        klass.class_eval { default_helper_module! unless name.blank? }
-        super
+      def helpers_dir
+        ActiveSupport::Deprecation.warn "helpers_dir is deprecated, use helpers_path instead"
+        self.helpers_path
+      end
+
+      def helpers_dir=(value)
+        ActiveSupport::Deprecation.warn "helpers_dir= is deprecated, use helpers_path= instead"
+        self.helpers_path = Array(value)
       end
 
       # Declares helper accessors for controller attributes. For example, the
@@ -80,36 +85,32 @@ module ActionController
         @helper_proxy ||= ActionView::Base.new.extend(_helpers)
       end
 
-    private
-      # Overwrite _modules_for_helpers to accept :all as argument, which loads
-      # all helpers in helpers_dir.
-      #
-      # ==== Parameters
-      # args<Array[String, Symbol, Module, all]>:: A list of helpers
-      #
-      # ==== Returns
-      # Array[Module]:: A normalized list of modules for the list of
-      #   helpers provided.
-      def _modules_for_helpers(args)
-        args += all_application_helpers if args.delete(:all)
-        super(args)
-      end
+      private
+        # Overwrite modules_for_helpers to accept :all as argument, which loads
+        # all helpers in helpers_dir.
+        #
+        # ==== Parameters
+        # args<Array[String, Symbol, Module, all]>:: A list of helpers
+        #
+        # ==== Returns
+        # Array[Module]:: A normalized list of modules for the list of
+        #   helpers provided.
+        def modules_for_helpers(args)
+          args += all_application_helpers if args.delete(:all)
+          super(args)
+        end
 
-      def default_helper_module!
-        module_name = name.sub(/Controller$/, '')
-        module_path = module_name.underscore
-        helper module_path
-      rescue MissingSourceFile => e
-        raise e unless e.is_missing? "#{module_path}_helper"
-      rescue NameError => e
-        raise e unless e.missing_name? "#{module_name}Helper"
-      end
-
-      # Extract helper names from files in app/helpers/**/*.rb
-      def all_application_helpers
-        extract = /^#{Regexp.quote(helpers_dir)}\/?(.*)_helper.rb$/
-        Dir["#{helpers_dir}/**/*_helper.rb"].map { |file| file.sub extract, '\1' }
-      end
+        # Extract helper names from files in app/helpers/**/*_helper.rb
+        def all_application_helpers
+          helpers = []
+          helpers_path.each do |path|
+            extract  = /^#{Regexp.quote(path)}\/?(.*)_helper.rb$/
+            helpers += Dir["#{path}/**/*_helper.rb"].map { |file| file.sub(extract, '\1') }
+          end
+          helpers.sort!
+          helpers.uniq!
+          helpers
+        end
     end
   end
 end

@@ -1,8 +1,7 @@
 require 'rails/generators'
-Rails::Generators.configure!
 
-if ARGV.size == 0
-  Rails::Generators.help
+if [nil, "-h", "--help"].include?(ARGV.first)
+  Rails::Generators.help 'generate'
   exit
 end
 

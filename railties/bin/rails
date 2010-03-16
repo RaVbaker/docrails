@@ -1,27 +1,30 @@
-begin
-  require 'rails/ruby_version_check'
-rescue LoadError
-  # If people are not using gems, the load path must still
-  # be correct.
-  # TODO: Remove the begin / rescue block somehow
-  $:.unshift File.expand_path('../../lib', __FILE__)
-  $:.unshift File.expand_path('../../../activesupport/lib', __FILE__)
-  $:.unshift File.expand_path('../../../actionpack/lib', __FILE__)
-  require 'rails/ruby_version_check'
+require 'rbconfig'
+
+module Rails
+  module ScriptRailsLoader
+    RUBY = File.join(*RbConfig::CONFIG.values_at("bindir", "ruby_install_name")) + RbConfig::CONFIG["EXEEXT"]
+    SCRIPT_RAILS = File.join('script', 'rails')
+
+    def self.exec_script_rails!
+      cwd = Dir.pwd
+      exec RUBY, SCRIPT_RAILS, *ARGV if File.exists?(SCRIPT_RAILS)
+      Dir.chdir("..") do
+        # Recurse in a chdir block: if the search fails we want to be sure
+        # the application is generated in the original working directory.
+        exec_script_rails! unless cwd == Dir.pwd
+      end
+    rescue SystemCallError
+      # could not chdir, no problem just return
+    end
+  end
 end
 
+Rails::ScriptRailsLoader.exec_script_rails!
+
+railties_path = File.expand_path('../../lib', __FILE__)
+$:.unshift(railties_path) if File.directory?(railties_path) && !$:.include?(railties_path)
+
+require 'rails/ruby_version_check'
 Signal.trap("INT") { puts; exit }
 
-require 'rails/version'
-if %w(--version -v).include? ARGV.first
-  puts "Rails #{Rails::VERSION::STRING}"
-  exit(0)
-end
-
-ARGV << "--help" if ARGV.empty?
-
-
-require 'rails/generators'
-require 'generators/rails/app/app_generator'
-
-Rails::Generators::AppGenerator.start
+require 'rails/commands/application'

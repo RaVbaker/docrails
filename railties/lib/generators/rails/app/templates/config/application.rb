@@ -1,5 +1,19 @@
 require File.expand_path('../boot', __FILE__)
 
+<% unless options[:skip_activerecord] -%>
+require 'rails/all'
+<% else -%>
+# Pick the frameworks you want:
+# require "active_record/railtie"
+require "action_controller/railtie"
+require "action_mailer/railtie"
+require "active_resource/railtie"
+require "rails/test_unit/railtie"
+<% end -%>
+
+# Auto-require default libraries and those for the current Rails environment.
+Bundler.require :default, Rails.env
+
 module <%= app_const_base %>
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
@@ -21,7 +35,7 @@ module <%= app_const_base %>
     # config.time_zone = 'Central Time (US & Canada)'
 
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
-    # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}')]
+    # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
     # Configure generators values. Many other options are available, be sure to check the documentation.
@@ -30,5 +44,8 @@ module <%= app_const_base %>
     #   g.template_engine :erb
     #   g.test_framework  :test_unit, :fixture => true
     # end
+
+    # Configure sensitive parameters which will be filtered from the log file.
+    config.filter_parameters << :password
   end
 end

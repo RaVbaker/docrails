@@ -36,9 +36,12 @@ class ViewLoadPathsTest < ActionController::TestCase
     @old_behavior = ActiveSupport::Deprecation.behavior
     @last_message = nil
     ActiveSupport::Deprecation.behavior = Proc.new { |message, callback| @last_message = message }
+
+    @paths = TestController.view_paths
   end
 
   def teardown
+    TestController.view_paths = @paths
     ActiveSupport::Deprecation.behavior = @old_behavior
   end
 
@@ -142,9 +145,9 @@ class ViewLoadPathsTest < ActionController::TestCase
     assert_paths A, "a/path"
     assert_paths A, *B.view_paths
     assert_paths C, *original_load_paths
-    
+
     C.view_paths = []
-    assert_nothing_raised { C.view_paths << 'c/path' }
+    assert_nothing_raised { C.append_view_path 'c/path' }
     assert_paths C, "c/path"
   end
 end

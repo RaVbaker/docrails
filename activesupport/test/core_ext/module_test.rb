@@ -55,28 +55,9 @@ class Name
   end
 end
 
-$nowhere = <<-EOF
-class Name
-  delegate :nowhere
-end
-EOF
-
-$noplace = <<-EOF
-class Name
-  delegate :noplace, :tos => :hollywood
-end
-EOF
-
 class ModuleTest < Test::Unit::TestCase
   def setup
     @david = Someone.new("David", Somewhere.new("Paulina", "Chicago"))
-  end
-
-  def test_included_in_classes
-    assert One.included_in_classes.include?(Ab)
-    assert One.included_in_classes.include?(Xy::Bc)
-    assert One.included_in_classes.include?(Yz::Zy::Cd)
-    assert !One.included_in_classes.include?(De)
   end
 
   def test_delegation_to_methods
@@ -94,8 +75,12 @@ class ModuleTest < Test::Unit::TestCase
   end
 
   def test_missing_delegation_target
-    assert_raise(ArgumentError) { eval($nowhere) }
-    assert_raise(ArgumentError) { eval($noplace) }
+    assert_raise(ArgumentError) do
+      Name.send :delegate, :nowhere
+    end
+    assert_raise(ArgumentError) do
+      Name.send :delegate, :noplace, :tos => :hollywood
+    end
   end
 
   def test_delegation_prefix
@@ -169,11 +154,6 @@ class ModuleTest < Test::Unit::TestCase
 
   def test_local_constants
     assert_equal %w(Constant1 Constant3), Ab.local_constants.sort.map(&:to_s)
-  end
-
-  def test_as_load_path
-    assert_equal 'yz/zy', Yz::Zy.as_load_path
-    assert_equal 'yz', Yz.as_load_path
   end
 end
 

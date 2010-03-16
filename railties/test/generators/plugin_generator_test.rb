@@ -17,11 +17,11 @@ class PluginGeneratorTest < Rails::Generators::TestCase
       vendor/plugins/plugin_fu/uninstall.rb
       vendor/plugins/plugin_fu/lib
       vendor/plugins/plugin_fu/lib/plugin_fu.rb
+      vendor/plugins/plugin_fu/Rakefile
     ).each{ |path| assert_file path }
 
     %w(
       vendor/plugins/plugin_fu/README
-      vendor/plugins/plugin_fu/Rakefile
     ).each{ |path| assert_file path, /PluginFu/ }
 
     %w(
@@ -48,7 +48,7 @@ class PluginGeneratorTest < Rails::Generators::TestCase
 
   def test_creates_tasks_if_required
     run_generator ["plugin_fu", "--tasks"]
-    assert_file "vendor/plugins/plugin_fu/tasks/plugin_fu_tasks.rake"
+    assert_file "vendor/plugins/plugin_fu/lib/tasks/plugin_fu_tasks.rake"
   end
 
   def test_creates_generator_if_required

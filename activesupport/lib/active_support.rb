@@ -53,6 +53,7 @@ module ActiveSupport
     autoload :Deprecation
     autoload :Gzip
     autoload :Inflector
+    autoload :JSON
     autoload :Memoizable
     autoload :MessageEncryptor
     autoload :MessageVerifier
@@ -67,7 +68,8 @@ module ActiveSupport
     autoload :XmlMini
   end
 
+  autoload :SafeBuffer, "active_support/core_ext/string/output_safety"
   autoload :TestCase
 end
 
-require 'active_support/vendor'
+autoload :I18n, "active_support/i18n"

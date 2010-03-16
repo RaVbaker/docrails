@@ -1,7 +1,4 @@
-begin
-  require File.expand_path('../../vendor/gems/environment', __FILE__)
-rescue LoadError
-end
+require File.expand_path('../../load_paths', __FILE__)
 
 require 'rake'
 require 'rake/testtask'
@@ -10,20 +7,6 @@ require 'rake/gempackagetask'
 
 require 'date'
 require 'rbconfig'
-
-$LOAD_PATH.unshift "#{File.dirname(__FILE__)}/lib"
-require 'rails/version'
-
-PKG_BUILD       = ENV['PKG_BUILD'] ? '.' + ENV['PKG_BUILD'] : ''
-PKG_NAME        = 'railties'
-PKG_VERSION     = Rails::VERSION::STRING + PKG_BUILD
-PKG_FILE_NAME   = "#{PKG_NAME}-#{PKG_VERSION}"
-PKG_DESTINATION = ENV["RAILS_PKG_DESTINATION"] || "../#{PKG_NAME}"
-
-RELEASE_NAME  = "REL #{PKG_VERSION}"
-
-RUBY_FORGE_PROJECT = "rails"
-RUBY_FORGE_USER    = "webster132"
 
 task :default => :test
 task :test => 'test:isolated'
@@ -62,6 +45,10 @@ desc 'Generate guides (for authors), use ONLY=foo to process just "foo.textile"'
 task :generate_guides do
   ENV["WARN_BROKEN_LINKS"] = "1" # authors can't disable this
   ruby "guides/rails_guides.rb"
+end
+
+task :update_prototype_ujs do
+  system "curl http://github.com/rails/prototype-ujs/raw/master/src/rails.js > lib/generators/rails/app/templates/public/javascripts/rails.js"
 end
 
 # Generate documentation ------------------------------------------------------------------
@@ -198,11 +185,11 @@ end
 
 # Publishing -------------------------------------------------------
 
-desc "Publish the rails gem"
-task :pgem => [:gem] do
-  require 'rake/contrib/sshpublisher'
-  Rake::SshFilePublisher.new("gems.rubyonrails.org", "/u/sites/gems/gems", "pkg", "#{PKG_FILE_NAME}.gem").upload
-  `ssh gems.rubyonrails.org '/u/sites/gems/gemupdate.sh'`
+desc "Release to gemcutter"
+task :release => :package do
+  require 'rake/gemcutter'
+  Rake::Gemcutter::Tasks.new(spec).define
+  Rake::Task['gem:push'].invoke
 end
 
 desc "Publish the guides"
@@ -212,16 +199,4 @@ task :pguides => :generate_guides do
   `tar -czf pkg/guides.gz guides/output`
   Rake::SshFilePublisher.new("web.rubyonrails.org", "/u/sites/guides.rubyonrails.org/public", "pkg", "guides.gz").upload
   `ssh web.rubyonrails.org 'cd /u/sites/guides.rubyonrails.org/public/ && tar -xvzf guides.gz && mv guides/output/* . && rm -rf guides*'`
-end
-
-desc "Publish the release files to RubyForge."
-task :release => [ :package ] do
-  require 'rake/contrib/rubyforgepublisher'
-  require 'rubyforge'
-
-  packages = %w( gem ).collect{ |ext| "pkg/#{PKG_NAME}-#{PKG_VERSION}.#{ext}" }
-
-  rubyforge = RubyForge.new
-  rubyforge.login
-  rubyforge.add_release(PKG_NAME, PKG_NAME, "REL #{PKG_VERSION}", *packages)
 end

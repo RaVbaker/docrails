@@ -3,14 +3,16 @@ require "rails"
 
 module ActionView
   class Railtie < Rails::Railtie
-    plugin_name :action_view
+    railtie_name :action_view
 
-    require "action_view/railties/subscriber"
-    subscriber ActionView::Railties::Subscriber.new
+    require "action_view/railties/log_subscriber"
+    log_subscriber ActionView::Railties::LogSubscriber.new
 
     initializer "action_view.cache_asset_timestamps" do |app|
       unless app.config.cache_classes
-        ActionView::Helpers::AssetTagHelper.cache_asset_timestamps = false
+        ActionView.base_hook do
+          ActionView::Helpers::AssetTagHelper.cache_asset_timestamps = false
+        end
       end
     end
   end

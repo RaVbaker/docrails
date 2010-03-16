@@ -10,6 +10,11 @@ module ActionView
     # NOTE: The HTML options <tt>disabled</tt>, <tt>readonly</tt>, and <tt>multiple</tt> can all be treated as booleans. So specifying
     # <tt>:disabled => true</tt> will give <tt>disabled="disabled"</tt>.
     module FormTagHelper
+      extend ActiveSupport::Concern
+
+      include UrlHelper
+      include TextHelper
+
       # Starts a form tag that points the action to an url configured with <tt>url_for_options</tt> just like
       # ActionController::Base#url_for. The method for the form defaults to POST.
       #
@@ -19,6 +24,8 @@ module ActionView
       #   If "put", "delete", or another verb is used, a hidden input with name <tt>_method</tt>
       #   is added to simulate the verb over post.
       # * A list of parameters to feed to the URL the form will be posted to.
+      # * <tt>:remote</tt> - If set to true, will allow the Unobtrusive JavaScript drivers to control the 
+      #   submit behaviour. By default this behaviour is an ajax submit.
       #
       # ==== Examples
       #   form_tag('/posts')
@@ -30,10 +37,14 @@ module ActionView
       #   form_tag('/upload', :multipart => true)
       #   # => <form action="/upload" method="post" enctype="multipart/form-data">
       #
-      #   <% form_tag '/posts' do -%>
+      #   <%= form_tag('/posts')do -%>
       #     <div><%= submit_tag 'Save' %></div>
       #   <% end -%>
       #   # => <form action="/posts" method="post"><div><input type="submit" name="submit" value="Save" /></div></form>
+      # 
+      #  <%= form_tag('/posts', :remote => true) %>
+      #   # => <form action="/posts" method="post" data-remote="true">
+      #   
       def form_tag(url_for_options = {}, options = {}, *parameters_for_url, &block)
         html_options = html_options_for_form(url_for_options, options, *parameters_for_url)
         if block_given?
@@ -57,7 +68,7 @@ module ActionView
       # ==== Examples
       #   select_tag "people", options_from_collection_for_select(@people, "name", "id")
       #   # <select id="people" name="people"><option value="1">David</option></select>
-      #   
+      #
       #   select_tag "people", "<option>David</option>"
       #   # => <select id="people" name="people"><option>David</option></select>
       #
@@ -84,9 +95,9 @@ module ActionView
         html_name = (options[:multiple] == true && !name.to_s.ends_with?("[]")) ? "#{name}[]" : name
         if blank = options.delete(:include_blank)
           if blank.kind_of?(String)
-            option_tags = "<option value=\"\">#{blank}</option>" + option_tags
+            option_tags = "<option value=\"\">#{blank}</option>".html_safe + option_tags
           else
-            option_tags = "<option value=\"\"></option>" + option_tags
+            option_tags = "<option value=\"\"></option>".html_safe + option_tags
           end
         end
         content_tag :select, option_tags, { "name" => html_name, "id" => sanitize_to_id(name) }.update(options.stringify_keys)
@@ -128,7 +139,7 @@ module ActionView
 
       # Creates a label field
       #
-      # ==== Options  
+      # ==== Options
       # * Creates standard HTML attributes for the tag.
       #
       # ==== Examples
@@ -273,7 +284,7 @@ module ActionView
         escape = options.key?("escape") ? options.delete("escape") : true
         content = html_escape(content) if escape
 
-        content_tag :textarea, content, { "name" => name, "id" => sanitize_to_id(name) }.update(options)
+        content_tag :textarea, content.html_safe, { "name" => name, "id" => sanitize_to_id(name) }.update(options)
       end
 
       # Creates a check box form input tag.
@@ -323,9 +334,7 @@ module ActionView
       #   radio_button_tag 'color', "green", true, :class => "color_input"
       #   # => <input checked="checked" class="color_input" id="color_green" name="color" type="radio" value="green" />
       def radio_button_tag(name, value, checked = false, options = {})
-        pretty_tag_value = value.to_s.gsub(/\s/, "_").gsub(/(?!-)\W/, "").downcase
-        pretty_name = name.to_s.gsub(/\[/, "_").gsub(/\]/, "")
-        html_options = { "type" => "radio", "name" => name, "id" => "#{pretty_name}_#{pretty_tag_value}", "value" => value }.update(options.stringify_keys)
+        html_options = { "type" => "radio", "name" => name, "id" => "#{sanitize_to_id(name)}_#{sanitize_to_id(value)}", "value" => value }.update(options.stringify_keys)
         html_options["checked"] = "checked" if checked
         tag :input, html_options
       end
@@ -333,12 +342,13 @@ module ActionView
       # Creates a submit button with the text <tt>value</tt> as the caption.
       #
       # ==== Options
-      # * <tt>:confirm => 'question?'</tt> - This will add a JavaScript confirm
-      #   prompt with the question specified. If the user accepts, the form is
-      #   processed normally, otherwise no action is taken.
+      # * <tt>:confirm => 'question?'</tt> - If present the unobtrusive JavaScript 
+      #   drivers will provide a prompt with the question specified. If the user accepts, 
+      #   the form is processed normally, otherwise no action is taken.
       # * <tt>:disabled</tt> - If true, the user will not be able to use this input.
-      # * <tt>:disable_with</tt> - Value of this parameter will be used as the value for a disabled version
-      #   of the submit button when the form is submitted.
+      # * <tt>:disable_with</tt> - Value of this parameter will be used as the value for a 
+      #   disabled version of the submit button when the form is submitted. This feature is 
+      #   provided by the unobtrusive JavaScript driver.
       # * Any other key creates standard HTML options for the tag.
       #
       # ==== Examples
@@ -351,34 +361,31 @@ module ActionView
       #   submit_tag "Save edits", :disabled => true
       #   # => <input disabled="disabled" name="commit" type="submit" value="Save edits" />
       #
+      #
       #   submit_tag "Complete sale", :disable_with => "Please wait..."
-      #   # => <input name="commit" onclick="this.disabled=true;this.value='Please wait...';this.form.submit();"
+      #   # => <input name="commit" data-disable-with="Please wait..."
       #   #    type="submit" value="Complete sale" />
       #
       #   submit_tag nil, :class => "form_submit"
       #   # => <input class="form_submit" name="commit" type="submit" />
       #
       #   submit_tag "Edit", :disable_with => "Editing...", :class => "edit-button"
-      #   # => <input class="edit-button" onclick="this.disabled=true;this.value='Editing...';this.form.submit();"
+      #   # => <input class="edit-button" data-disable_with="Editing..."
       #   #    name="commit" type="submit" value="Edit" />
+      #
+      #   submit_tag "Save", :confirm => "Are you sure?"
+      #   # => <input name='commit' type='submit' value='Save' 
+      #         data-confirm="Are you sure?" />
+      #
       def submit_tag(value = "Save changes", options = {})
         options.stringify_keys!
 
         if disable_with = options.delete("disable_with")
-          disable_with = "this.value='#{disable_with}'"
-          disable_with << ";#{options.delete('onclick')}" if options['onclick']
-          
-          options["onclick"]  = "if (window.hiddenCommit) { window.hiddenCommit.setAttribute('value', this.value); }"
-          options["onclick"] << "else { hiddenCommit = document.createElement('input');hiddenCommit.type = 'hidden';"
-          options["onclick"] << "hiddenCommit.value = this.value;hiddenCommit.name = this.name;this.form.appendChild(hiddenCommit); }"
-          options["onclick"] << "this.setAttribute('originalValue', this.value);this.disabled = true;#{disable_with};"
-          options["onclick"] << "result = (this.form.onsubmit ? (this.form.onsubmit() ? this.form.submit() : false) : this.form.submit());"
-          options["onclick"] << "if (result == false) { this.value = this.getAttribute('originalValue');this.disabled = false; }return result;"
+          options["data-disable-with"] = disable_with if disable_with
         end
 
         if confirm = options.delete("confirm")
-          options["onclick"] ||= 'return true;'
-          options["onclick"] = "if (!#{confirm_javascript_function(confirm)}) return false; #{options['onclick']}"
+          add_confirm_to_attributes!(options, confirm)
         end
 
         tag :input, { "type" => "submit", "name" => "commit", "value" => value }.update(options.stringify_keys)
@@ -411,8 +418,7 @@ module ActionView
         options.stringify_keys!
 
         if confirm = options.delete("confirm")
-          options["onclick"] ||= ''
-          options["onclick"] += "return #{confirm_javascript_function(confirm)};"
+          add_confirm_to_attributes!(options, confirm)
         end
 
         tag :input, { "type" => "image", "src" => path_to_image(source) }.update(options.stringify_keys)
@@ -424,26 +430,26 @@ module ActionView
       # <tt>options</tt> accept the same values as tag.
       #
       # ==== Examples
-      #   <% field_set_tag do %>
+      #   <%= field_set_tag do %>
       #     <p><%= text_field_tag 'name' %></p>
       #   <% end %>
       #   # => <fieldset><p><input id="name" name="name" type="text" /></p></fieldset>
       #
-      #   <% field_set_tag 'Your details' do %>
+      #   <%= field_set_tag 'Your details' do %>
       #     <p><%= text_field_tag 'name' %></p>
       #   <% end %>
       #   # => <fieldset><legend>Your details</legend><p><input id="name" name="name" type="text" /></p></fieldset>
       #
-      #   <% field_set_tag nil, :class => 'format' do %>
+      #   <%= field_set_tag nil, :class => 'format' do %>
       #     <p><%= text_field_tag 'name' %></p>
       #   <% end %>
       #   # => <fieldset class="format"><p><input id="name" name="name" type="text" /></p></fieldset>
       def field_set_tag(legend = nil, options = nil, &block)
         content = capture(&block)
-        concat(tag(:fieldset, options, true))
-        concat(content_tag(:legend, legend)) unless legend.blank?
-        concat(content)
-        concat("</fieldset>".html_safe!)
+        output = tag(:fieldset, options, true)
+        output.safe_concat(content_tag(:legend, legend)) unless legend.blank?
+        output.concat(content)
+        output.safe_concat("</fieldset>")
       end
 
       private
@@ -451,6 +457,7 @@ module ActionView
           returning options.stringify_keys do |html_options|
             html_options["enctype"] = "multipart/form-data" if html_options.delete("multipart")
             html_options["action"]  = url_for(url_for_options, *parameters_for_url)
+            html_options["data-remote"] = true if html_options.delete("remote")
           end
         end
 
@@ -470,14 +477,15 @@ module ActionView
 
         def form_tag_html(html_options)
           extra_tags = extra_tags_for_form(html_options)
-          (tag(:form, html_options, true) + extra_tags).html_safe!
+          (tag(:form, html_options, true) + extra_tags).html_safe
         end
 
         def form_tag_in_block(html_options, &block)
           content = capture(&block)
-          concat(form_tag_html(html_options))
-          concat(content)
-          concat("</form>".html_safe!)
+          output = ActiveSupport::SafeBuffer.new
+          output.safe_concat(form_tag_html(html_options))
+          output << content
+          output.safe_concat("</form>")
         end
 
         def token_tag
@@ -492,7 +500,6 @@ module ActionView
         def sanitize_to_id(name)
           name.to_s.gsub(']','').gsub(/[^-a-zA-Z0-9:.]/, "_")
         end
-
     end
   end
 end

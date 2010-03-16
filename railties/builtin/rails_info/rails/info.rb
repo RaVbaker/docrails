@@ -51,9 +51,12 @@ module Rails
 
       def to_s
         column_width = properties.names.map {|name| name.length}.max
-        ["About your application's environment", *properties.map do |property|
-          "%-#{column_width}s   %s" % property
-        end] * "\n"
+        info = properties.map do |name, value|
+          value = value.join(", ") if value.is_a?(Array)
+          "%-#{column_width}s   %s" % [name, value]
+        end
+        info.unshift "About your application's environment"
+        info * "\n"
       end
 
       alias inspect to_s
@@ -114,7 +117,7 @@ module Rails
     end
 
     property 'Middleware' do
-      Rails.configuration.middleware.active.map { |middle| middle.inspect }
+      Rails.configuration.middleware.active.map(&:inspect)
     end
 
     # The Rails Git revision, if it's checked out into vendor/rails.
