@@ -1,4 +1,4 @@
-require 'active_support/core_ext/object/singleton_class'
+require 'active_support/core_ext/kernel/singleton_class'
 
 module ActiveRecord
   # Exception that can be raised to stop migrations from going backwards.
@@ -374,7 +374,7 @@ module ActiveRecord
       end
 
       def load_migration
-        load(filename)
+        require(File.expand_path(filename))
         name.constantize
       end
 
@@ -384,9 +384,13 @@ module ActiveRecord
     class << self
       def migrate(migrations_path, target_version = nil)
         case
-          when target_version.nil?              then up(migrations_path, target_version)
-          when current_version > target_version then down(migrations_path, target_version)
-          else                                       up(migrations_path, target_version)
+          when target_version.nil?
+            up(migrations_path, target_version)
+          when current_version == 0 && target_version == 0
+          when current_version > target_version
+            down(migrations_path, target_version)
+          else
+            up(migrations_path, target_version)
         end
       end
 

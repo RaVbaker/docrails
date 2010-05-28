@@ -6,7 +6,9 @@ module Notifications
       ActiveSupport::Notifications.notifier = nil
       @notifier = ActiveSupport::Notifications.notifier
       @events = []
+      @named_events = []
       @subscription = @notifier.subscribe { |*args| @events << event(*args) }
+      @named_subscription = @notifier.subscribe("named.subscription") { |*args| @named_events << event(*args) }
     end
 
     private
@@ -28,6 +30,26 @@ module Notifications
       @notifier.publish :foo
       @notifier.wait
       assert_equal [[:foo]], @events
+    end
+
+    def test_unsubscribing_by_name_removes_a_subscription
+      @notifier.publish "named.subscription", :foo
+      @notifier.wait
+      assert_equal [["named.subscription", :foo]], @named_events
+      @notifier.unsubscribe("named.subscription")
+      @notifier.publish "named.subscription", :foo
+      @notifier.wait
+      assert_equal [["named.subscription", :foo]], @named_events
+    end
+
+    def test_unsubscribing_by_name_leaves_the_other_subscriptions
+      @notifier.publish "named.subscription", :foo
+      @notifier.wait
+      assert_equal [["named.subscription", :foo]], @events
+      @notifier.unsubscribe("named.subscription")
+      @notifier.publish "named.subscription", :foo
+      @notifier.wait
+      assert_equal [["named.subscription", :foo], ["named.subscription", :foo]], @events
     end
 
   private
@@ -65,7 +87,7 @@ module Notifications
       assert_equal [[:foo]] * 4, @events
     end
 
-    def test_log_subscriber_with_pattern
+    def test_log_subscriber_with_string
       events = []
       @notifier.subscribe('1') { |*args| events << args }
 
@@ -74,10 +96,10 @@ module Notifications
       @notifier.publish 'a.1'
       @notifier.wait
 
-      assert_equal [['1'], ['1.a']], events
+      assert_equal [['1']], events
     end
 
-    def test_log_subscriber_with_pattern_as_regexp
+    def test_log_subscriber_with_pattern
       events = []
       @notifier.subscribe(/\d/) { |*args| events << args }
 
@@ -146,7 +168,7 @@ module Notifications
       assert_equal Hash[:payload => "notifications"], @events.last.payload
     end
 
-    def test_instrument_does_not_publish_when_exception_is_raised
+    def test_instrument_publishes_when_exception_is_raised
       begin
         instrument(:awesome, :payload => "notifications") do
           raise "FAIL"
@@ -156,7 +178,9 @@ module Notifications
       end
 
       drain
-      assert_equal 0, @events.size
+      assert_equal 1, @events.size
+      assert_equal Hash[:payload => "notifications",
+        :exception => ["RuntimeError", "FAIL"]], @events.last.payload
     end
 
     def test_event_is_pushed_even_without_block

@@ -1,4 +1,6 @@
+require 'active_support/core_ext/hash/conversions'
 require 'action_dispatch/http/request'
+require 'active_support/core_ext/hash/indifferent_access'
 
 module ActionDispatch
   class ParamsParser
@@ -25,7 +27,9 @@ module ActionDispatch
 
         return false if request.content_length.zero?
 
-        mime_type = content_type_from_legacy_post_data_format_header(env) || request.content_type
+        mime_type = content_type_from_legacy_post_data_format_header(env) ||
+          request.content_mime_type
+
         strategy = @parsers[mime_type]
 
         return false unless strategy
@@ -34,17 +38,16 @@ module ActionDispatch
         when Proc
           strategy.call(request.raw_post)
         when :xml_simple, :xml_node
-          request.body.size == 0 ? {} : Hash.from_xml(request.raw_post).with_indifferent_access
+          data = Hash.from_xml(request.body.read) || {}
+          request.body.rewind if request.body.respond_to?(:rewind)
+          data.with_indifferent_access
         when :yaml
           YAML.load(request.raw_post)
         when :json
-          if request.body.size == 0
-            {}
-          else
-            data = ActiveSupport::JSON.decode(request.raw_post)
-            data = {:_json => data} unless data.is_a?(Hash)
-            data.with_indifferent_access
-          end
+          data = ActiveSupport::JSON.decode(request.body)
+          request.body.rewind if request.body.respond_to?(:rewind)
+          data = {:_json => data} unless data.is_a?(Hash)
+          data.with_indifferent_access
         else
           false
         end
@@ -53,7 +56,7 @@ module ActionDispatch
 
         raise
           { "body"           => request.raw_post,
-            "content_type"   => request.content_type,
+            "content_type"   => request.content_mime_type,
             "content_length" => request.content_length,
             "exception"      => "#{e.message} (#{e.class})",
             "backtrace"      => e.backtrace }

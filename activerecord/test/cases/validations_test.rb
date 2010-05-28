@@ -44,7 +44,7 @@ class ValidationsTest < ActiveRecord::TestCase
   def test_error_on_create
     r = WrongReply.new
     r.title = "Wrong Create"
-    assert !r.valid?
+    assert !r.save
     assert r.errors[:title].any?, "A reply with a bad title should mark that attribute as invalid"
     assert_equal ["is Wrong Create"], r.errors[:title], "A reply with a bad content should contain an error"
   end
@@ -60,6 +60,23 @@ class ValidationsTest < ActiveRecord::TestCase
 
     assert r.errors[:title].any?, "A reply with a bad title should mark that attribute as invalid"
     assert_equal ["is Wrong Update"], r.errors[:title], "A reply with a bad content should contain an error"
+  end
+
+  def test_error_on_given_context
+    r = WrongReply.new(:title => "Valid title")
+    assert !r.valid?(:special_case)
+    assert_equal "Invalid", r.errors[:author_name].join
+
+    r.author_name = "secret"
+    r.content = "Good"
+    assert r.valid?(:special_case)
+
+    r.author_name = nil
+    assert !r.save(:context => :special_case)
+    assert_equal "Invalid", r.errors[:author_name].join
+
+    r.author_name = "secret"
+    assert r.save(:context => :special_case)
   end
 
   def test_invalid_record_exception
@@ -133,12 +150,6 @@ class ValidationsTest < ActiveRecord::TestCase
     assert_deprecated do
       assert reply.save(false)
     end
-  end
-
-  def test_create_without_validation_bang
-    count = WrongReply.count
-    assert_nothing_raised { WrongReply.new.save_without_validation! }
-    assert count+1, WrongReply.count
   end
 
   def test_validates_acceptance_of_with_non_existant_table

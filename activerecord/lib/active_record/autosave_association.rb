@@ -130,8 +130,6 @@ module ActiveRecord
     ASSOCIATION_TYPES = %w{ has_one belongs_to has_many has_and_belongs_to_many }
 
     included do
-      alias_method_chain :reload, :autosave_associations
-
       ASSOCIATION_TYPES.each do |type|
         send("valid_keys_for_#{type}_association") << :autosave
       end
@@ -196,9 +194,9 @@ module ActiveRecord
     end
 
     # Reloads the attributes of the object as usual and removes a mark for destruction.
-    def reload_with_autosave_associations(options = nil)
+    def reload(options = nil)
       @marked_for_destruction = false
-      reload_without_autosave_associations(options)
+      super
     end
 
     # Marks this record to be destroyed as part of the parents save transaction.
@@ -216,6 +214,12 @@ module ActiveRecord
       @marked_for_destruction
     end
 
+    # Returns whether or not this record has been changed in any way (including whether
+    # any of its nested autosave associations are likewise changed)
+    def changed_for_autosave?
+      new_record? || changed? || marked_for_destruction? || nested_records_changed_for_autosave?
+    end
+    
     private
 
     # Returns the record for an association collection that should be validated
@@ -225,12 +229,27 @@ module ActiveRecord
       if new_record
         association
       elsif autosave
-        association.target.find_all { |record| record.new_record? || record.changed? || record.marked_for_destruction? }
+        association.target.find_all { |record| record.changed_for_autosave? }
       else
         association.target.find_all { |record| record.new_record? }
       end
     end
 
+    # go through nested autosave associations that are loaded in memory (without loading
+    # any new ones), and return true if is changed for autosave
+    def nested_records_changed_for_autosave?
+      self.class.reflect_on_all_autosave_associations.each do |reflection|
+        if association = association_instance_get(reflection.name)
+          if [:belongs_to, :has_one].include?(reflection.macro)
+            return true if association.target && association.target.changed_for_autosave?
+          else
+            association.target.each {|record| return true if record.changed_for_autosave? }
+          end
+        end
+      end
+      false
+    end
+    
     # Validate the association if <tt>:validate</tt> or <tt>:autosave</tt> is
     # turned on for the association specified by +reflection+.
     def validate_single_association(reflection)

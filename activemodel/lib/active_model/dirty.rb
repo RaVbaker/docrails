@@ -1,3 +1,8 @@
+require 'active_model/attribute_methods'
+require 'active_support/concern'
+require 'active_support/hash_with_indifferent_access'
+require 'active_support/core_ext/object/duplicable'
+
 module ActiveModel
   # <tt>ActiveModel::Dirty</tt> provides a way to track changes in your
   # object in the same way as ActiveRecord does.
@@ -107,7 +112,7 @@ module ActiveModel
     #   person.name = 'bob'
     #   person.changes # => { 'name' => ['bill', 'bob'] }
     def changes
-      changed.inject({}) { |h, attr| h[attr] = attribute_change(attr); h }
+      changed.inject(HashWithIndifferentAccess.new){ |h, attr| h[attr] = attribute_change(attr); h }
     end
 
     # Map of attributes that were changed when the model was saved.
@@ -116,19 +121,15 @@ module ActiveModel
     #   person.save
     #   person.previous_changes # => {'name' => ['bob, 'robert']}
     def previous_changes
-      previously_changed_attributes
+      @previously_changed
+    end
+
+    # Map of change <tt>attr => original value</tt>.
+    def changed_attributes
+      @changed_attributes ||= {}
     end
 
     private
-      # Map of change <tt>attr => original value</tt>.
-      def changed_attributes
-        @changed_attributes ||= {}
-      end
-
-      # Map of fields that were changed when the model was saved
-      def previously_changed_attributes
-        @previously_changed || {}
-      end
 
       # Handle <tt>*_changed?</tt> for +method_missing+.
       def attribute_changed?(attr)

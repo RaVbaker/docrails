@@ -13,17 +13,14 @@ Gem::Specification.new do |s|
   s.homepage          = 'http://www.rubyonrails.org'
   s.rubyforge_project = 'rails'
 
-  s.files              = Dir['CHANGELOG', 'README', 'bin/**/*', 'builtin/**/*', 'guides/**/*', 'lib/**/{*,.[a-z]*}']
+  s.files              = Dir['CHANGELOG', 'README', 'bin/**/*', 'guides/**/*', 'lib/**/{*,.[a-z]*}']
   s.require_path       = 'lib'
-  s.bindir             = 'bin'
-  s.executables        = ['rails']
-  s.default_executable = 'rails'
 
   s.rdoc_options << '--exclude' << '.'
   s.has_rdoc = false
 
   s.add_dependency('rake',          '>= 0.8.3')
-  s.add_dependency('thor',          '~> 0.13.4')
+  s.add_dependency('thor',          '~> 0.13.6')
   s.add_dependency('activesupport', version)
   s.add_dependency('actionpack',    version)
 end

@@ -16,6 +16,9 @@ require 'models/treasure'
 require 'models/matey'
 require 'models/ship'
 require 'models/book'
+require 'models/admin'
+require 'models/admin/account'
+require 'models/admin/user'
 
 class FixturesTest < ActiveRecord::TestCase
   self.use_instantiated_fixtures = true
@@ -26,7 +29,7 @@ class FixturesTest < ActiveRecord::TestCase
   FIXTURES = %w( accounts binaries companies customers
                  developers developers_projects entrants
                  movies projects subscribers topics tasks )
-  MATCH_ATTRIBUTE_NAME = /[a-zA-Z][-_\w]*/
+  MATCH_ATTRIBUTE_NAME = /[a-zA-Z][-\w]*/
 
   def test_clean_fixtures
     FIXTURES.each do |name|
@@ -244,14 +247,19 @@ class FixturesWithoutInstantiationTest < ActiveRecord::TestCase
   fixtures :topics, :developers, :accounts
 
   def test_without_complete_instantiation
-    assert_nil @first
-    assert_nil @topics
-    assert_nil @developers
-    assert_nil @accounts
+    assert !defined?(@first)
+    assert !defined?(@topics)
+    assert !defined?(@developers)
+    assert !defined?(@accounts)
   end
 
   def test_fixtures_from_root_yml_without_instantiation
-    assert_nil @unknown
+    assert !defined?(@unknown), "@unknown is not defined"
+  end
+  
+  def test_visibility_of_accessor_method
+    assert_equal false, respond_to?(:topics, false), "should be private method"
+    assert_equal true, respond_to?(:topics, true), "confirm to respond surely"
   end
 
   def test_accessor_methods
@@ -279,7 +287,7 @@ class FixturesWithoutInstanceInstantiationTest < ActiveRecord::TestCase
   fixtures :topics, :developers, :accounts
 
   def test_without_instance_instantiation
-    assert_nil @first
+    assert !defined?(@first), "@first is not defined"
     assert_not_nil @topics
     assert_not_nil @developers
     assert_not_nil @accounts
@@ -507,7 +515,7 @@ class FasterFixturesTest < ActiveRecord::TestCase
 end
 
 class FoxyFixturesTest < ActiveRecord::TestCase
-  fixtures :parrots, :parrots_pirates, :pirates, :treasures, :mateys, :ships, :computers, :developers
+  fixtures :parrots, :parrots_pirates, :pirates, :treasures, :mateys, :ships, :computers, :developers, :"admin/accounts", :"admin/users"
 
   def test_identifies_strings
     assert_equal(Fixtures.identify("foo"), Fixtures.identify("foo"))
@@ -628,6 +636,11 @@ class FoxyFixturesTest < ActiveRecord::TestCase
   def test_supports_sti
     assert_kind_of DeadParrot, parrots(:polly)
     assert_equal pirates(:blackbeard), parrots(:polly).killer
+  end
+
+  def test_namespaced_models
+    assert admin_accounts(:signals37).users.include?(admin_users(:david))
+    assert_equal 2, admin_accounts(:signals37).users.size
   end
 end
 

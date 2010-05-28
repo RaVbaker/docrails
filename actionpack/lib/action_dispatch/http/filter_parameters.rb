@@ -1,5 +1,6 @@
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/object/duplicable'
 
 module ActionDispatch
   module Http
@@ -25,7 +26,6 @@ module ActionDispatch
     module FilterParameters
       extend ActiveSupport::Concern
 
-      mattr_reader :compiled_parameter_filter_for
       @@compiled_parameter_filter_for = {}
 
       # Return a hash of parameters with all sensitive data replaced.

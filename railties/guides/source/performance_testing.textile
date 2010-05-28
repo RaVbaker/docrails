@@ -213,11 +213,11 @@ h4. Understanding the Output
 
 Performance tests generate different outputs inside +tmp/performance+ directory depending on their mode and metric.
 
-h5. Benchmarking
+h5(#output-benchmarking). Benchmarking
 
 In benchmarking mode, performance tests generate two types of outputs:
 
-h6. Command Line
+h6(#output-command-line). Command Line
 
 This is the primary form of output in benchmarking mode. Example:
 
@@ -246,19 +246,19 @@ Sample output of +BrowsingTest#test_homepage_wall_time.csv+:
 
 <shell>
 measurement,created_at,app,rails,ruby,platform
-0.00738224999999992,2009-01-08T03:40:29Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
-0.00755874999999984,2009-01-08T03:46:18Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
-0.00762099999999993,2009-01-08T03:49:25Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
-0.00603075000000008,2009-01-08T04:03:29Z,,2.3.0.master.0744148,ruby-1.8.6.111,i686-darwin9.1.0
-0.00619899999999995,2009-01-08T04:03:53Z,,2.3.0.master.0744148,ruby-1.8.6.111,i686-darwin9.1.0
-0.00755449999999991,2009-01-08T04:04:55Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
-0.00595999999999997,2009-01-08T04:05:06Z,,2.3.0.master.0744148,ruby-1.8.6.111,i686-darwin9.1.0
-0.00740450000000004,2009-01-09T03:54:47Z,,2.3.0.master.859e150,ruby-1.8.6.110,i686-darwin9.0.0
-0.00603150000000008,2009-01-09T03:54:57Z,,2.3.0.master.859e150,ruby-1.8.6.111,i686-darwin9.1.0
-0.00771250000000012,2009-01-09T15:46:03Z,,2.3.0.master.859e150,ruby-1.8.6.110,i686-darwin9.0.0
+0.00738224999999992,2009-01-08T03:40:29Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00755874999999984,2009-01-08T03:46:18Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00762099999999993,2009-01-08T03:49:25Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00603075000000008,2009-01-08T04:03:29Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00619899999999995,2009-01-08T04:03:53Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00755449999999991,2009-01-08T04:04:55Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00595999999999997,2009-01-08T04:05:06Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00740450000000004,2009-01-09T03:54:47Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00603150000000008,2009-01-09T03:54:57Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00771250000000012,2009-01-09T15:46:03Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
 </shell>
 
-h5. Profiling
+h5(#output-profiling). Profiling
 
 In profiling mode, you can choose from four types of output.
 
@@ -330,7 +330,7 @@ h5. Apply the Patch
 
 h5. Configure and Install
 
-The following will install ruby in your home directory's +/rubygc+ directory. Make sure to replace +<homedir>+ with a full patch to your actual home directory.
+The following will install ruby in your home directory's +/rubygc+ directory. Make sure to replace +&lt;homedir&gt;+ with a full patch to your actual home directory.
 
 <shell>
 [lifo@null ruby-version]$ ./configure --prefix=/<homedir>/rubygc
@@ -517,10 +517,9 @@ h4. Tutorials and Documentation
 
 h3. Commercial Products
 
-Rails has been lucky to have three startups dedicated to Rails specific performance tools:
+Rails has been lucky to have two startups dedicated to Rails specific performance tools:
 
 * "New Relic":http://www.newrelic.com
-* "Fiveruns":http://www.fiveruns.com
 * "Scout":http://scoutapp.com
 
 h3. Changelog

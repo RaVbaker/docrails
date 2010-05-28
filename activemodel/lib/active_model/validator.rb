@@ -1,4 +1,6 @@
+require 'active_support/core_ext/array/wrap'
 require "active_support/core_ext/module/anonymous"
+require 'active_support/core_ext/object/blank'
 
 module ActiveModel #:nodoc:
   # A simple base class that can be used along with 
@@ -86,6 +88,9 @@ module ActiveModel #:nodoc:
   #       klass.send :attr_accessor, :custom_attribute
   #     end
   #   end
+  #
+  # This setup method is only called when used with validation macros or the
+  # class level <tt>validates_with</tt> method.
   # 
   class Validator
     attr_reader :options
@@ -130,7 +135,7 @@ module ActiveModel #:nodoc:
     # +options+ reader, however the <tt>:attributes</tt> option will be removed
     # and instead be made available through the +attributes+ reader.
     def initialize(options)
-      @attributes = Array(options.delete(:attributes))
+      @attributes = Array.wrap(options.delete(:attributes))
       raise ":attributes cannot be blank" if @attributes.empty?
       super
       check_validity!

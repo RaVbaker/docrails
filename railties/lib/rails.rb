@@ -23,9 +23,13 @@ if RUBY_VERSION < '1.9'
   $KCODE='u'
 else
   Encoding.default_external = Encoding::UTF_8
+  Encoding.default_internal = Encoding::UTF_8
 end
 
 module Rails
+  autoload :Info, 'rails/info'
+  autoload :InfoController, 'rails/info_controller'
+
   class << self
     def application
       @@application ||= nil
@@ -76,6 +80,10 @@ module Rails
       @_env ||= ActiveSupport::StringInquirer.new(ENV["RAILS_ENV"] || ENV["RACK_ENV"] || "development")
     end
 
+    def env=(environment)
+      @_env = ActiveSupport::StringInquirer.new(environment)
+    end
+
     def cache
       RAILS_CACHE
     end
@@ -85,11 +93,12 @@ module Rails
     end
 
     def public_path
-      @@public_path ||= self.root ? File.join(self.root, "public") : "public"
+      application && application.paths.public.to_a.first
     end
 
     def public_path=(path)
-      @@public_path = path
+      ActiveSupport::Deprecation.warn "Setting Rails.public_path= is deprecated. " <<
+        "Please set paths.public = in config/application.rb instead.", caller
     end
   end
 end

@@ -11,6 +11,7 @@ require 'active_record/connection_adapters/abstract/quoting'
 require 'active_record/connection_adapters/abstract/connection_pool'
 require 'active_record/connection_adapters/abstract/connection_specification'
 require 'active_record/connection_adapters/abstract/query_cache'
+require 'active_record/connection_adapters/abstract/database_limits'
 
 module ActiveRecord
   module ConnectionAdapters # :nodoc:
@@ -29,6 +30,7 @@ module ActiveRecord
     # notably, the instance methods provided by SchemaStatement are very useful.
     class AbstractAdapter
       include Quoting, DatabaseStatements, SchemaStatements
+      include DatabaseLimits
       include QueryCache
       include ActiveSupport::Callbacks
 
@@ -41,6 +43,7 @@ module ActiveRecord
         @connection, @logger = connection, logger
         @runtime = 0
         @query_cache_enabled = false
+        @query_cache = {}
       end
 
       # Returns the human-readable name of the adapter.  Use mixed case - one
@@ -196,7 +199,7 @@ module ActiveRecord
         def log(sql, name)
           name ||= "SQL"
           result = nil
-          ActiveSupport::Notifications.instrument("active_record.sql",
+          ActiveSupport::Notifications.instrument("sql.active_record",
             :sql => sql, :name => name, :connection_id => self.object_id) do
             @runtime += Benchmark.ms { result = yield }
           end

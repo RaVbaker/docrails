@@ -88,7 +88,7 @@ class DependenciesTest < Test::Unit::TestCase
       old_warnings, ActiveSupport::Dependencies.warnings_on_first_load = ActiveSupport::Dependencies.warnings_on_first_load, true
 
       filename = "check_warnings"
-      expanded = File.expand_path("test/dependencies/#{filename}")
+      expanded = File.expand_path("#{File.dirname(__FILE__)}/dependencies/#{filename}")
       $check_warnings_load_count = 0
 
       assert !ActiveSupport::Dependencies.loaded.include?(expanded)
@@ -371,7 +371,7 @@ class DependenciesTest < Test::Unit::TestCase
   end
 
   def test_custom_const_missing_should_work
-    Object.module_eval <<-end_eval
+    Object.module_eval <<-end_eval, __FILE__, __LINE__ + 1
       module ModuleWithCustomConstMissing
         def self.const_missing(name)
           const_set name, name.to_s.hash

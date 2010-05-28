@@ -14,12 +14,14 @@ module ActiveModel
       def setup(klass)
         # Note: instance_methods.map(&:to_s) is important for 1.9 compatibility
         # as instance_methods returns symbols unlike 1.8 which returns strings.
-        new_attributes = attributes.reject { |name| klass.instance_methods.map(&:to_s).include?("#{name}=") }
-        klass.send(:attr_accessor, *new_attributes)        
+        attr_readers = attributes.reject { |name| klass.attribute_method?(name) }
+        attr_writers = attributes.reject { |name| klass.attribute_method?("#{name}=") }
+        klass.send(:attr_reader, *attr_readers)
+        klass.send(:attr_writer, *attr_writers)
       end
     end
 
-    module ClassMethods
+    module HelperMethods
       # Encapsulates the pattern of wanting to validate the acceptance of a terms of service check box (or similar agreement). Example:
       #
       #   class Person < ActiveRecord::Base

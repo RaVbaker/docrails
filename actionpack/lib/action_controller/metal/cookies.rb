@@ -6,9 +6,8 @@ module ActionController #:nodoc:
 
     included do
       helper_method :cookies
-      cattr_accessor :cookie_verifier_secret
     end
-    
+
     private
       def cookies
         request.cookie_jar

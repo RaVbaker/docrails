@@ -1,17 +1,14 @@
 require 'rack/mount'
 require 'forwardable'
+require 'active_support/core_ext/object/to_query'
 require 'action_dispatch/routing/deprecated_mapper'
 
 module ActionDispatch
   module Routing
     class RouteSet #:nodoc:
-      NotFound = lambda { |env|
-        raise ActionController::RoutingError, "No route matches #{env['PATH_INFO'].inspect}"
-      }
-
       PARAMETERS_KEY = 'action_dispatch.request.path_parameters'
 
-      class Dispatcher
+      class Dispatcher #:nodoc:
         def initialize(options={})
           @defaults = options[:defaults]
           @glob_param = options.delete(:glob)
@@ -65,7 +62,7 @@ module ActionDispatch
       # named routes.
       class NamedRouteCollection #:nodoc:
         include Enumerable
-        attr_reader :routes, :helpers
+        attr_reader :routes, :helpers, :module
 
         def initialize
           clear!
@@ -179,6 +176,7 @@ module ActionDispatch
 
                 url_for(options)
               end
+              protected :#{selector}
             END_EVAL
             helpers << selector
           end
@@ -186,18 +184,19 @@ module ActionDispatch
 
       attr_accessor :routes, :named_routes
       attr_accessor :disable_clear_and_finalize, :resources_path_names
-      attr_accessor :default_url_options
+      attr_accessor :default_url_options, :request_class
 
       def self.default_resources_path_names
         { :new => 'new', :edit => 'edit' }
       end
 
-      def initialize
+      def initialize(request_class = ActionDispatch::Request)
         self.routes = []
         self.named_routes = NamedRouteCollection.new
         self.resources_path_names = self.class.default_resources_path_names.dup
         self.controller_namespaces = Set.new
         self.default_url_options = {}
+        self.request_class = request_class
 
         @disable_clear_and_finalize = false
         clear!
@@ -219,17 +218,21 @@ module ActionDispatch
       end
 
       def finalize!
-        @set.add_route(NotFound)
-        install_helpers
+        return if @finalized
+        @finalized = true
         @set.freeze
       end
 
       def clear!
         # Clear the controller cache so we may discover new ones
         @controller_constraints = nil
+        @finalized = false
         routes.clear
         named_routes.clear
-        @set = ::Rack::Mount::RouteSet.new(:parameters_key => PARAMETERS_KEY)
+        @set = ::Rack::Mount::RouteSet.new(
+          :parameters_key => PARAMETERS_KEY,
+          :request_class  => request_class
+        )
       end
 
       def install_helpers(destinations = [ActionController::Base, ActionView::Base], regenerate_code = false)
@@ -239,21 +242,30 @@ module ActionDispatch
 
       def url_helpers
         @url_helpers ||= begin
-          router = self
+          routes = self
 
-          Module.new do
+          helpers = Module.new do
             extend ActiveSupport::Concern
             include UrlFor
+
+            @routes = routes
+            class << self
+              delegate :url_for, :to => '@routes'
+            end
+            extend routes.named_routes.module
 
             # ROUTES TODO: install_helpers isn't great... can we make a module with the stuff that
             # we can include?
             # Yes plz - JP
             included do
-              router.install_helpers(self)
+              routes.install_helpers(self)
+              singleton_class.send(:define_method, :_router) { routes }
             end
 
-            define_method(:_router) { router }
+            define_method(:_router) { routes }
           end
+
+          helpers
         end
       end
 
@@ -269,7 +281,7 @@ module ActionDispatch
         route
       end
 
-      class Generator
+      class Generator #:nodoc:
         attr_reader :options, :recall, :set, :script_name, :named_route
 
         def initialize(options, recall, set, extras = false)
@@ -406,6 +418,7 @@ module ActionDispatch
       RESERVED_OPTIONS = [:anchor, :params, :only_path, :host, :protocol, :port, :trailing_slash]
 
       def url_for(options)
+        finalize!
         options = default_url_options.merge(options || {})
 
         handle_positional_args(options)
@@ -437,6 +450,7 @@ module ActionDispatch
       end
 
       def call(env)
+        finalize!
         @set.call(env)
       end
 

@@ -255,7 +255,7 @@ class FinderTest < ActiveRecord::TestCase
     assert !topic.attribute_present?("title")
     #assert !topic.respond_to?("title")
     assert topic.attribute_present?("author_name")
-    assert topic.respond_to?("author_name")
+    assert_respond_to topic, "author_name"
   end
 
   def test_find_on_blank_conditions
@@ -502,6 +502,18 @@ class FinderTest < ActiveRecord::TestCase
     assert_kind_of Time, Topic.find(:first, :conditions => ["id = :id", { :id => 1 }]).written_on
   end
 
+  class SimpleEnumerable
+    include Enumerable
+
+    def initialize(ary)
+      @ary = ary
+    end
+
+    def each(&b)
+      @ary.each(&b)
+    end
+  end
+
   def test_bind_enumerable
     quoted_abc = %(#{ActiveRecord::Base.connection.quote('a')},#{ActiveRecord::Base.connection.quote('b')},#{ActiveRecord::Base.connection.quote('c')})
 
@@ -511,12 +523,11 @@ class FinderTest < ActiveRecord::TestCase
     assert_equal '1,2,3', bind(':a', :a => [1, 2, 3])
     assert_equal quoted_abc, bind(':a', :a => %w(a b c)) # '
 
-    require 'set'
-    assert_equal '1,2,3', bind('?', Set.new([1, 2, 3]))
-    assert_equal quoted_abc, bind('?', Set.new(%w(a b c)))
+    assert_equal '1,2,3', bind('?', SimpleEnumerable.new([1, 2, 3]))
+    assert_equal quoted_abc, bind('?', SimpleEnumerable.new(%w(a b c)))
 
-    assert_equal '1,2,3', bind(':a', :a => Set.new([1, 2, 3]))
-    assert_equal quoted_abc, bind(':a', :a => Set.new(%w(a b c))) # '
+    assert_equal '1,2,3', bind(':a', :a => SimpleEnumerable.new([1, 2, 3]))
+    assert_equal quoted_abc, bind(':a', :a => SimpleEnumerable.new(%w(a b c))) # '
   end
 
   def test_bind_empty_enumerable
@@ -555,8 +566,8 @@ class FinderTest < ActiveRecord::TestCase
   end
 
   def test_string_sanitation
-    assert_not_equal "#{ActiveRecord::Base.connection.quoted_string_prefix}'something ' 1=1'", ActiveRecord::Base.sanitize("something ' 1=1")
-    assert_equal "#{ActiveRecord::Base.connection.quoted_string_prefix}'something; select table'", ActiveRecord::Base.sanitize("something; select table")
+    assert_not_equal "'something ' 1=1'", ActiveRecord::Base.sanitize("something ' 1=1")
+    assert_equal "'something; select table'", ActiveRecord::Base.sanitize("something; select table")
   end
 
   def test_count
@@ -711,10 +722,10 @@ class FinderTest < ActiveRecord::TestCase
 
   def test_find_all_by_one_attribute_with_options
     topics = Topic.find_all_by_content("Have a nice day", :order => "id DESC")
-    assert topics(:first), topics.last
+    assert_equal topics(:first), topics.last
 
     topics = Topic.find_all_by_content("Have a nice day", :order => "id")
-    assert topics(:first), topics.first
+    assert_equal topics(:first), topics.first
   end
 
   def test_find_all_by_array_attribute
@@ -829,7 +840,7 @@ class FinderTest < ActiveRecord::TestCase
     assert c.new_record?
   end
 
-  def test_find_or_create_from_one_attribute_should_set_not_attribute_even_when_protected
+  def test_find_or_create_from_one_attribute_should_not_set_attribute_even_when_protected
     c = Company.find_or_create_by_name({:name => "Fortune 1000", :rating => 1000})
     assert_equal "Fortune 1000", c.name
     assert_not_equal 1000, c.rating
@@ -847,6 +858,22 @@ class FinderTest < ActiveRecord::TestCase
 
   def test_find_or_create_from_one_attribute_should_set_attribute_even_when_protected
     c = Company.find_or_create_by_name_and_rating("Fortune 1000", 1000)
+    assert_equal "Fortune 1000", c.name
+    assert_equal 1000, c.rating
+    assert c.valid?
+    assert !c.new_record?
+  end
+
+  def test_find_or_initialize_from_one_attribute_should_set_attribute_even_when_protected_and_also_set_the_hash
+    c = Company.find_or_initialize_by_rating(1000, {:name => "Fortune 1000"})
+    assert_equal "Fortune 1000", c.name
+    assert_equal 1000, c.rating
+    assert c.valid?
+    assert c.new_record?
+  end
+
+  def test_find_or_create_from_one_attribute_should_set_attribute_even_when_protected_and_also_set_the_hash
+    c = Company.find_or_create_by_rating(1000, {:name => "Fortune 1000"})
     assert_equal "Fortune 1000", c.name
     assert_equal 1000, c.rating
     assert c.valid?

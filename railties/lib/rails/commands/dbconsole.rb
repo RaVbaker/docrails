@@ -1,6 +1,7 @@
 require 'erb'
 require 'yaml'
 require 'optparse'
+require 'rbconfig'
 
 module Rails
   class DBConsole
@@ -41,7 +42,7 @@ module Rails
 
       def find_cmd(*commands)
         dirs_on_path = ENV['PATH'].to_s.split(File::PATH_SEPARATOR)
-        commands += commands.map{|cmd| "#{cmd}.exe"} if RUBY_PLATFORM =~ /win32/
+        commands += commands.map{|cmd| "#{cmd}.exe"} if Config::CONFIG['host_os'] =~ /mswin|mingw/
 
         full_path_command = nil
         found = commands.detect do |cmd|
@@ -54,7 +55,7 @@ module Rails
       end
 
       case config["adapter"]
-      when "mysql"
+      when /^mysql/
         args = {
           'host'      => '--host',
           'port'      => '--port',
@@ -91,6 +92,18 @@ module Rails
         args << config['database']
 
         exec(find_cmd('sqlite3'), *args)
+
+      when "oracle", "oracle_enhanced"
+        logon = ""
+
+        if config['username']
+          logon = config['username']
+          logon << "/#{config['password']}" if config['password'] && include_password
+          logon << "@#{config['database']}" if config['database']
+        end
+
+        exec(find_cmd('sqlplus'), logon)
+
       else
         abort "Unknown command-line client for #{config['database']}. Submit a Rails patch to add support!"
       end

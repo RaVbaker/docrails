@@ -1,3 +1,5 @@
+require 'active_support/core_ext/array/wrap'
+
 module ActiveRecord
   module ConnectionAdapters # :nodoc:
     module SchemaStatements
@@ -6,11 +8,6 @@ module ActiveRecord
       # abstract data types.
       def native_database_types
         {}
-      end
-
-      # This is the maximum length a table alias can be
-      def table_alias_length
-        255
       end
 
       # Truncates a table alias according to the limits of the current adapter.
@@ -254,20 +251,34 @@ module ActiveRecord
       # name.
       #
       # ===== Examples
+      #
       # ====== Creating a simple index
       #  add_index(:suppliers, :name)
       # generates
       #  CREATE INDEX suppliers_name_index ON suppliers(name)
+      #
       # ====== Creating a unique index
       #  add_index(:accounts, [:branch_id, :party_id], :unique => true)
       # generates
       #  CREATE UNIQUE INDEX accounts_branch_id_party_id_index ON accounts(branch_id, party_id)
+      #
       # ====== Creating a named index
       #  add_index(:accounts, [:branch_id, :party_id], :unique => true, :name => 'by_branch_party')
       # generates
       #  CREATE UNIQUE INDEX by_branch_party ON accounts(branch_id, party_id)
+      #
+      # ====== Creating an index with specific key length
+      #  add_index(:accounts, :name, :name => 'by_name', :length => 10)
+      # generates
+      #  CREATE INDEX by_name ON accounts(name(10))
+      #
+      #  add_index(:accounts, [:name, :surname], :name => 'by_name_surname', :length => {:name => 10, :surname => 15})
+      # generates
+      #  CREATE INDEX by_name_surname ON accounts(name(10), surname(15))
+      #
+      # Note: SQLite doesn't support index length
       def add_index(table_name, column_name, options = {})
-        column_names = Array(column_name)
+        column_names = Array.wrap(column_name)
         index_name   = index_name(table_name, :column => column_names)
 
         if Hash === options # legacy support, since this param was a string
@@ -276,7 +287,17 @@ module ActiveRecord
         else
           index_type = options
         end
-        quoted_column_names = column_names.map { |e| quote_column_name(e) }.join(", ")
+
+        if index_name.length > index_name_length
+          @logger.warn("Index name '#{index_name}' on table '#{table_name}' is too long; the limit is #{index_name_length} characters. Skipping.")
+          return
+        end
+        if index_exists?(table_name, index_name, false)
+          @logger.warn("Index name '#{index_name}' on table '#{table_name}' already exists. Skipping.")
+          return
+        end
+        quoted_column_names = quoted_columns_for_index(column_names, options).join(", ")
+
         execute "CREATE #{index_type} INDEX #{quote_column_name(index_name)} ON #{quote_table_name(table_name)} (#{quoted_column_names})"
       end
 
@@ -291,13 +312,34 @@ module ActiveRecord
       # Remove the index named by_branch_party in the accounts table.
       #   remove_index :accounts, :name => :by_branch_party
       def remove_index(table_name, options = {})
-        execute "DROP INDEX #{quote_column_name(index_name(table_name, options))} ON #{table_name}"
+        index_name = index_name(table_name, options)
+        unless index_exists?(table_name, index_name, true)
+          @logger.warn("Index name '#{index_name}' on table '#{table_name}' does not exist. Skipping.")
+          return
+        end
+        remove_index!(table_name, index_name)
+      end
+
+      def remove_index!(table_name, index_name) #:nodoc:
+        execute "DROP INDEX #{quote_column_name(index_name)} ON #{table_name}"
+      end
+
+      # Rename an index.
+      #
+      # Rename the index_people_on_last_name index to index_users_on_last_name
+      #   rename_index :people, 'index_people_on_last_name', 'index_users_on_last_name'
+      def rename_index(table_name, old_name, new_name)
+        # this is a naive implementation; some DBs may support this more efficiently (Postgres, for instance)
+        old_index_def = indexes(table_name).detect { |i| i.name == old_name }
+        return unless old_index_def
+        remove_index(table_name, :name => old_name)
+        add_index(table_name, old_index_def.columns, :name => new_name, :unique => old_index_def.unique)
       end
 
       def index_name(table_name, options) #:nodoc:
         if Hash === options # legacy support
           if options[:column]
-            "index_#{table_name}_on_#{Array(options[:column]) * '_and_'}"
+            "index_#{table_name}_on_#{Array.wrap(options[:column]) * '_and_'}"
           elsif options[:name]
             options[:name]
           else
@@ -306,6 +348,15 @@ module ActiveRecord
         else
           index_name(table_name, :column => options)
         end
+      end
+
+      # Verify the existence of an index.
+      #
+      # The default argument is returned if the underlying implementation does not define the indexes method,
+      # as there's no way to determine the correct answer in that case.
+      def index_exists?(table_name, index_name, default)
+        return default unless respond_to?(:indexes)
+        indexes(table_name).detect { |i| i.name == index_name }
       end
 
       # Returns a string of <tt>CREATE TABLE</tt> SQL statement(s) for recreating the
@@ -428,6 +479,11 @@ module ActiveRecord
       end
 
       protected
+        # Overridden by the mysql adapter for supporting index lengths
+        def quoted_columns_for_index(column_names, options = {})
+          column_names.map {|name| quote_column_name(name) }
+        end
+
         def options_include_default?(options)
           options.include?(:default) && !(options[:null] == false && options[:default].nil?)
         end

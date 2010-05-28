@@ -12,12 +12,16 @@ $:.unshift(File.dirname(__FILE__) + '/fixtures/alternate_helpers')
 
 ENV['TMPDIR'] = File.join(File.dirname(__FILE__), 'tmp')
 
+if defined?(Encoding.default_internal)
+  Encoding.default_internal = "UTF-8"
+end
+
 require 'test/unit'
 require 'abstract_controller'
 require 'action_controller'
 require 'action_view'
+require 'action_view/testing/resolvers'
 require 'action_dispatch'
-require 'fixture_template'
 require 'active_support/dependencies'
 require 'active_model'
 
@@ -43,6 +47,31 @@ ORIGINAL_LOCALES = I18n.available_locales.map {|locale| locale.to_s }.sort
 
 FIXTURE_LOAD_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 FIXTURES = Pathname.new(FIXTURE_LOAD_PATH)
+
+module RackTestUtils
+  def body_to_string(body)
+    if body.respond_to?(:each)
+      str = ""
+      body.each {|s| str << s }
+      str
+    else
+      body
+    end
+  end
+  extend self
+end
+
+module RenderERBUtils
+  def render_erb(string)
+    template = ActionView::Template.new(
+      string.strip,
+      "test template",
+      ActionView::Template::Handlers::ERB,
+      {})
+
+    template.render(self, {}).strip
+  end
+end
 
 module SetupOnce
   extend ActiveSupport::Concern
@@ -82,7 +111,7 @@ module ActiveSupport
         map.connect ':controller/:action/:id'
       end
 
-      ActionController::IntegrationTest.app.router.draw do |map|
+      ActionController::IntegrationTest.app.routes.draw do |map|
         # FIXME: match ':controller(/:action(/:id))'
         map.connect ':controller/:action/:id'
       end
@@ -91,12 +120,11 @@ module ActiveSupport
 end
 
 class RoutedRackApp
-  attr_reader :router
-  alias routes router
+  attr_reader :routes
 
-  def initialize(router, &blk)
-    @router = router
-    @stack = ActionDispatch::MiddlewareStack.new(&blk).build(@router)
+  def initialize(routes, &blk)
+    @routes = routes
+    @stack = ActionDispatch::MiddlewareStack.new(&blk).build(@routes)
   end
 
   def call(env)
@@ -119,6 +147,12 @@ class BasicController
   end
 end
 
+class ActionDispatch::IntegrationTest < ActiveSupport::TestCase
+  setup do
+    @routes = SharedTestRoutes
+  end
+end
+
 class ActionController::IntegrationTest < ActiveSupport::TestCase
   def self.build_app(routes = nil)
     RoutedRackApp.new(routes || ActionDispatch::Routing::RouteSet.new) do |middleware|
@@ -128,6 +162,7 @@ class ActionController::IntegrationTest < ActiveSupport::TestCase
       middleware.use "ActionDispatch::Cookies"
       middleware.use "ActionDispatch::Flash"
       middleware.use "ActionDispatch::Head"
+      yield(middleware) if block_given?
     end
   end
 
@@ -168,10 +203,6 @@ end
 
 # Temporary base class
 class Rack::TestCase < ActionController::IntegrationTest
-  setup do
-    ActionController::Base.config.secret = "abc" * 30
-  end
-
   def self.testing(klass = nil)
     if klass
       @testing = "/#{klass.name.underscore}".sub!(/_controller$/, '')
@@ -213,6 +244,14 @@ class Rack::TestCase < ActionController::IntegrationTest
   end
 end
 
+class ActionController::Base
+  def self.test_routes(&block)
+    router = ActionDispatch::Routing::RouteSet.new
+    router.draw(&block)
+    include router.url_helpers
+  end
+end
+
 class ::ApplicationController < ActionController::Base
 end
 
@@ -221,7 +260,7 @@ module ActionView
     # Must repeat the setup because AV::TestCase is a duplication
     # of AC::TestCase
     setup do
-      @router = SharedTestRoutes
+      @routes = SharedTestRoutes
     end
   end
 end
@@ -237,48 +276,7 @@ module ActionController
     include ActionDispatch::TestProcess
 
     setup do
-      @router = SharedTestRoutes
-    end
-
-    def assert_template(options = {}, message = nil)
-      validate_request!
-
-      hax = @controller.view_context.instance_variable_get(:@_rendered)
-
-      case options
-      when NilClass, String
-        rendered = (hax[:template] || []).map { |t| t.identifier }
-        msg = build_message(message,
-                "expecting <?> but rendering with <?>",
-                options, rendered.join(', '))
-        assert_block(msg) do
-          if options.nil?
-            hax[:template].blank?
-          else
-            rendered.any? { |t| t.match(options) }
-          end
-        end
-      when Hash
-        if expected_partial = options[:partial]
-          partials = hax[:partials]
-          if expected_count = options[:count]
-            found = partials.detect { |p, _| p.identifier.match(expected_partial) }
-            actual_count = found.nil? ? 0 : found[1]
-            msg = build_message(message,
-                    "expecting ? to be rendered ? time(s) but rendered ? time(s)",
-                     expected_partial, expected_count, actual_count)
-            assert(actual_count == expected_count.to_i, msg)
-          else
-            msg = build_message(message,
-                    "expecting partial <?> but action rendered <?>",
-                    options[:partial], partials.keys)
-            assert(partials.keys.any? { |p| p.identifier.match(expected_partial) }, msg)
-          end
-        else
-          assert hax[:partials].empty?,
-            "Expected no partials to be rendered"
-        end
-      end
+      @routes = SharedTestRoutes
     end
   end
 end

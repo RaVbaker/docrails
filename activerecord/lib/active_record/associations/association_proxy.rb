@@ -1,3 +1,5 @@
+require 'active_support/core_ext/array/wrap'
+
 module ActiveRecord
   module Associations
     # This is the root class of all association proxies:
@@ -49,12 +51,13 @@ module ActiveRecord
       alias_method :proxy_respond_to?, :respond_to?
       alias_method :proxy_extend, :extend
       delegate :to_param, :to => :proxy_target
-      instance_methods.each { |m| undef_method m unless m =~ /^(?:nil\?|send|object_id|to_a)$|^__|proxy_/ }
+      instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a)$|^__|proxy_/ }
 
       def initialize(owner, reflection)
         @owner, @reflection = owner, reflection
+        @updated = false
         reflection.check_validity!
-        Array(reflection.options[:extend]).each { |ext| proxy_extend(ext) }
+        Array.wrap(reflection.options[:extend]).each { |ext| proxy_extend(ext) }
         reset
       end
 

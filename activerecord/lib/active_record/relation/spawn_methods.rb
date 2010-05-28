@@ -1,32 +1,17 @@
+require 'active_support/core_ext/object/blank'
+
 module ActiveRecord
   module SpawnMethods
     def merge(r)
       merged_relation = clone
       return merged_relation unless r
 
-      merged_relation = merged_relation.eager_load(r.eager_load_values).preload(r.preload_values).includes(r.includes_values)
-
-      merged_relation.readonly_value = r.readonly_value unless r.readonly_value.nil?
-      merged_relation.limit_value = r.limit_value if r.limit_value.present?
-      merged_relation.lock_value = r.lock_value unless merged_relation.lock_value
-      merged_relation.offset_value = r.offset_value if r.offset_value.present?
-
-      merged_relation = merged_relation.
-        joins(r.joins_values).
-        group(r.group_values).
-        select(r.select_values).
-        from(r.from_value).
-        having(r.having_values)
-
-      merged_relation.order_values = r.order_values if r.order_values.present?
-
-      merged_relation.create_with_value = @create_with_value
-
-      if @create_with_value && r.create_with_value
-        merged_relation.create_with_value = @create_with_value.merge(r.create_with_value)
-      else
-        merged_relation.create_with_value = r.create_with_value || @create_with_value
+      (Relation::ASSOCIATION_METHODS + Relation::MULTI_VALUE_METHODS).reject {|m| [:joins, :where].include?(m)}.each do |method|
+        value = r.send(:"#{method}_values")
+        merged_relation.send(:"#{method}_values=", value) if value.present?
       end
+
+      merged_relation = merged_relation.joins(r.joins_values)
 
       merged_wheres = @where_values
 
@@ -39,6 +24,17 @@ module ActiveRecord
       end
 
       merged_relation.where_values = merged_wheres
+
+      Relation::SINGLE_VALUE_METHODS.reject {|m| m == :lock}.each do |method|
+        unless (value = r.send(:"#{method}_value")).nil?
+          merged_relation.send(:"#{method}_value=", value)
+        end
+      end
+
+      merged_relation.lock_value = r.lock_value unless merged_relation.lock_value
+
+      # Apply scope extension modules
+      merged_relation.send :apply_modules, r.extensions
 
       merged_relation
     end
@@ -75,7 +71,7 @@ module ActiveRecord
       result
     end
 
-    VALID_FIND_OPTIONS = [ :conditions, :include, :joins, :limit, :offset,
+    VALID_FIND_OPTIONS = [ :conditions, :include, :joins, :limit, :offset, :extend,
                            :order, :select, :readonly, :group, :having, :from, :lock ]
 
     def apply_finder_options(options)
@@ -84,12 +80,18 @@ module ActiveRecord
 
       options.assert_valid_keys(VALID_FIND_OPTIONS)
 
-      [:joins, :select, :group, :having, :order, :limit, :offset, :from, :lock, :readonly].each do |finder|
+      [:joins, :select, :group, :having, :limit, :offset, :from, :lock, :readonly].each do |finder|
         relation = relation.send(finder, options[finder]) if options.has_key?(finder)
+      end
+
+      # Give precedence to newly-applied orders and groups to play nicely with with_scope
+      [:group, :order].each do |finder|
+        relation.send("#{finder}_values=", Array.wrap(options[finder]) + relation.send("#{finder}_values")) if options.has_key?(finder)
       end
 
       relation = relation.where(options[:conditions]) if options.has_key?(:conditions)
       relation = relation.includes(options[:include]) if options.has_key?(:include)
+      relation = relation.extending(options[:extend]) if options.has_key?(:extend)
 
       relation
     end

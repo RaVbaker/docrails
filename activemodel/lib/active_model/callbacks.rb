@@ -1,3 +1,4 @@
+require 'active_support/core_ext/array/wrap'
 require 'active_support/callbacks'
 
 module ActiveModel
@@ -91,7 +92,7 @@ module ActiveModel
       options = callbacks.extract_options!
       options = { :terminator => "result == false", :scope => [:kind, :name] }.merge(options)
 
-      types = Array(options.delete(:only))
+      types = Array.wrap(options.delete(:only))
       types = [:before, :around, :after] if types.empty?
 
       callbacks.each do |callback|
@@ -104,7 +105,7 @@ module ActiveModel
     end
 
     def _define_before_model_callback(klass, callback) #:nodoc:
-      klass.class_eval <<-CALLBACK, __FILE__, __LINE__
+      klass.class_eval <<-CALLBACK, __FILE__, __LINE__ + 1
         def self.before_#{callback}(*args, &block)
           set_callback(:#{callback}, :before, *args, &block)
         end
@@ -112,7 +113,7 @@ module ActiveModel
     end
 
     def _define_around_model_callback(klass, callback) #:nodoc:
-      klass.class_eval <<-CALLBACK, __FILE__, __LINE__
+      klass.class_eval <<-CALLBACK, __FILE__, __LINE__ + 1
         def self.around_#{callback}(*args, &block)
           set_callback(:#{callback}, :around, *args, &block)
         end
@@ -120,11 +121,11 @@ module ActiveModel
     end
 
     def _define_after_model_callback(klass, callback) #:nodoc:
-      klass.class_eval <<-CALLBACK, __FILE__, __LINE__
+      klass.class_eval <<-CALLBACK, __FILE__, __LINE__ + 1
         def self.after_#{callback}(*args, &block)
           options = args.extract_options!
           options[:prepend] = true
-          options[:if] = Array(options[:if]) << "!halted && value != false"
+          options[:if] = Array.wrap(options[:if]) << "!halted && value != false"
           set_callback(:#{callback}, :after, *(args << options), &block)
         end
       CALLBACK

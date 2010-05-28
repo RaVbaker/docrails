@@ -97,19 +97,17 @@ The *translations load path* (+I18n.load_path+) is just a Ruby Array of paths to
 
 NOTE: The backend will lazy-load these translations when a translation is looked up for the first time. This makes it possible to just swap the backend with something else even after translations have already been announced.
 
-The default +environment.rb+ files has instructions on how to add locales from another directory and how to set a different default locale. Just uncomment and edit the specific lines.
+The default +application.rb+ files has instructions on how to add locales from another directory and how to set a different default locale. Just uncomment and edit the specific lines.
 
 <ruby>
-# The internationalization framework can be changed
-# to have another default locale (standard is :en) or more load paths.
-# All files from config/locales/*.rb,yml are added automatically.
-# config.i18n.load_path << Dir[File.join(RAILS_ROOT, 'my', 'locales', '*.{rb,yml}')]
+# The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
+# config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
 # config.i18n.default_locale = :de
 </ruby>
 
 h4. Optional: Custom I18n Configuration Setup
 
-For the sake of completeness, let's mention that if you do not want to use the +environment.rb+ file for some reason, you can always wire up things manually, too.
+For the sake of completeness, let's mention that if you do not want to use the +application.rb+ file for some reason, you can always wire up things manually, too.
 
 To tell the I18n library where it can find your custom translation files you can specify the load path anywhere in your application - just make sure it gets run before any translations are actually looked up. You might also want to change the default locale. The simplest thing possible is to put the following into an initializer:
 
@@ -117,8 +115,7 @@ To tell the I18n library where it can find your custom translation files you can
 # in config/initializers/locale.rb
 
 # tell the I18n library where to find your translations
-I18n.load_path << Dir[ File.join(RAILS_ROOT, 'lib', 'locale', 
-  '*.{rb,yml}') ]
+I18n.load_path += Dir[Rails.root.join('lib', 'locale', '*.{rb,yml}')]
 
 # set default locale to something other than :en
 I18n.default_locale = :pt
@@ -126,13 +123,13 @@ I18n.default_locale = :pt
 
 h4. Setting and Passing the Locale
 
-If you want to translate your Rails application to a *single language other than English* (the default locale), you can set I18n.default_locale to your locale in +environment.rb+ or an initializer as shown above, and it will persist through the requests.
+If you want to translate your Rails application to a *single language other than English* (the default locale), you can set I18n.default_locale to your locale in +application.rb+ or an initializer as shown above, and it will persist through the requests.
 
 However, you would probably like to *provide support for more locales* in your application. In such case, you need to set and pass the locale between requests.
 
 WARNING: You may be tempted to store the chosen locale in a _session_ or a _cookie_. *Do not do so*. The locale should be transparent and a part of the URL. This way you don't break people's basic assumptions about the web itself: if you send a URL of some page to a friend, she should see the same page, same content. A fancy word for this would be that you're being "_RESTful_":http://en.wikipedia.org/wiki/Representational_State_Transfer. Read more about the RESTful approach in "Stefan Tilkov's articles":http://www.infoq.com/articles/rest-introduction. There may be some exceptions to this rule, which are discussed below.
 
-The _setting part_ is easy. You can set the locale in a +before_filter+ in the ApplicationController like this:
+The _setting part_ is easy. You can set the locale in a +before_filter+ in the +ApplicationController+ like this:
 
 <ruby>
 before_filter :set_locale
@@ -161,7 +158,7 @@ You can implement it like this in your +ApplicationController+:
 before_filter :set_locale
 
 def set_locale
-  I18n.locale = extract_locale_from_uri
+  I18n.locale = extract_locale_from_tld
 end
 
 # Get locale from top-level domain or return nil if such locale is not available
@@ -209,7 +206,7 @@ Getting the locale from +params+ and setting it accordingly is not hard; includi
 
 Rails contains infrastructure for "centralizing dynamic decisions about the URLs" in its "+ApplicationController#default_url_options+":http://api.rubyonrails.org/classes/ActionController/Base.html#M000515, which is useful precisely in this scenario: it enables us to set "defaults" for "+url_for+":http://api.rubyonrails.org/classes/ActionController/Base.html#M000503 and helper methods dependent on it (by implementing/overriding this method).
 
-We can include something like this in our ApplicationController then:
+We can include something like this in our +ApplicationController+ then:
 
 <ruby>
 # app/controllers/application_controller.rb
@@ -227,21 +224,23 @@ You probably want URLs to look like this: +www.example.com/en/books+ (which load
 
 <ruby>
 # config/routes.rb
-map.resources :books, :path_prefix => '/:locale'
+scope "/:locale" do
+  resources :books
+end
 </ruby>
 
 Now, when you call the +books_path+ method you should get +"/en/books"+ (for the default locale). An URL like +http://localhost:3001/nl/books+ should load the Netherlands locale, then, and following calls to +books_path+ should return +"/nl/books"+ (because the locale changed).
 
-Of course, you need to take special care of the root URL (usually "homepage" or "dashboard") of your application. An URL like +http://localhost:3001/nl+ will not work automatically, because the +map.root :controller => "dashboard"+ declaration in your +routes.rb+ doesn't take locale into account. (And rightly so: there's only one "root" URL.)
+Of course, you need to take special care of the root URL (usually "homepage" or "dashboard") of your application. An URL like +http://localhost:3001/nl+ will not work automatically, because the +root :to => "books#index"+ declaration in your +routes.rb+ doesn't take locale into account. (And rightly so: there's only one "root" URL.)
 
 You would probably need to map URLs like these:
 
 <ruby>
 # config/routes.rb
-map.dashboard '/:locale', :controller => "dashboard"
+match '/:locale' => 'dashboard#index'
 </ruby>
 
-Do take special care about the *order of your routes*, so this route declaration does not "eat" other ones. (You may want to add it directly before the +map.root+ declaration.)
+Do take special care about the *order of your routes*, so this route declaration does not "eat" other ones. (You may want to add it directly before the +root :to+ declaration.)
 
 IMPORTANT: This solution has currently one rather big *downside*. Due to the _default_url_options_ implementation, you have to pass the +:id+ option explicitly, like this: +link_to 'Show', book_url(:id => book)+ and not depend on Rails' magic in code like +link_to 'Show', book+. If this should be a problem, have a look at two plugins which simplify work with routes in this way: Sven Fuchs's "routing_filter":http://github.com/svenfuchs/routing-filter/tree/master and Raul Murciano's "translate_routes":http://github.com/raul/translate_routes/tree/master. See also the page "How to encode the current locale in the URL":http://rails-i18n.org/wiki/wikipages/how-to-encode-the-current-locale-in-the-url in the Rails i18n Wiki.
 
@@ -288,8 +287,8 @@ You most probably have something like this in one of your applications:
 
 <ruby>
 # config/routes.rb
-ActionController::Routing::Routes.draw do |map|
-  map.root :controller => 'home', :action => 'index'
+Yourapp::Application.routes.draw do |map|
+  root :to => "home#index"
 end
 
 # app/controllers/home_controller.rb
@@ -422,8 +421,9 @@ This way, you can separate model and model attribute names from text inside view
 NOTE: The default locale loading mechanism in Rails does not load locale files in nested dictionaries, like we have here. So, for this to work, we must explicitly tell Rails to look further:
 
 <ruby>
-  # config/environment.rb
-  config.i18n.load_path += Dir[File.join(RAILS_ROOT, 'config', 'locales', '**', '*.{rb,yml}')]
+  # config/application.rb
+  config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+
 </ruby>
 
 Do check the "Rails i18n Wiki":http://rails-i18n.org/wiki for list of tools available for managing translations.
@@ -531,7 +531,7 @@ In many cases you want to abstract your translations so that *variables can be i
 All options besides +:default+ and +:scope+ that are passed to +#translate+ will be interpolated to the translation:
 
 <ruby>
-I18n.backend.store_translations :en, :thanks => 'Thanks {{name}}!'
+I18n.backend.store_translations :en, :thanks => 'Thanks %{name}!'
 I18n.translate :thanks, :name => 'Jeremy'
 # => 'Thanks Jeremy!'
 </ruby>
@@ -540,14 +540,14 @@ If a translation uses +:default+ or +:scope+ as an interpolation variable, an I+
 
 h4. Pluralization
 
-In English there are only one singular and one plural form for a given string, e.g. "1 message" and "2 messages". Other languages ("Arabic":http://www.unicode.org/cldr/data/charts/supplemental/language_plural_rules.html#ar, "Japanese":http://www.unicode.org/cldr/data/charts/supplemental/language_plural_rules.html#ja, "Russian":http://www.unicode.org/cldr/data/charts/supplemental/language_plural_rules.html#ru and many more) have different grammars that have additional or fewer "plural forms":http://www.unicode.org/cldr/data/charts/supplemental/language_plural_rules.html. Thus, the I18n API provides a flexible pluralization feature.
+In English there are only one singular and one plural form for a given string, e.g. "1 message" and "2 messages". Other languages ("Arabic":http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html#ar, "Japanese":http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html#ja, "Russian":http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html#ru and many more) have different grammars that have additional or fewer "plural forms":http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html. Thus, the I18n API provides a flexible pluralization feature.
 
 The +:count+ interpolation variable has a special role in that it both is interpolated to the translation and used to pick a pluralization from the translations according to the pluralization rules defined by CLDR:
 
 <ruby>
 I18n.backend.store_translations :en, :inbox => {
   :one => '1 message',
-  :other => '{{count}} messages'
+  :other => '%{count} messages'
 }
 I18n.translate :inbox, :count => 2
 # => '2 messages'
@@ -711,7 +711,7 @@ h5. Error Message Interpolation
 
 The translated model name, translated attribute name, and value are always available for interpolation.
 
-So, for example, instead of the default error message +"can not be blank"+ you could use the attribute name like this : +"Please fill in your {{attribute}}"+.
+So, for example, instead of the default error message +"can not be blank"+ you could use the attribute name like this : +"Please fill in your %{attribute}"+.
 
 * +count+, where available, can be used for pluralization if present:
 
@@ -750,8 +750,8 @@ en:
     errors:
       template:
         header:
-          one:   "1 error prohibited this {{model}} from being saved"
-          other: "{{count}} errors prohibited this {{model}} from being saved"
+          one:   "1 error prohibited this %{model} from being saved"
+          other: "%{count} errors prohibited this %{model} from being saved"
         body:    "There were problems with the following fields:"
 </yaml>
 
@@ -769,7 +769,7 @@ h5. Action View Helper Methods
 
 h5. Active Record Methods
 
-* +human_name+ and +human_attribute_name+ use translations for model names and attribute names if available in the "activerecord.models":http://github.com/rails/rails/blob/master/activerecord/lib/active_record/locale/en.yml#L43 scope. They also support translations for inherited class names (e.g. for use with STI) as explained above in "Error message scopes".
+* +human_name+ and +human_attribute_name+ use translations for model names and attribute names if available in the "activerecord.models":http://github.com/rails/rails/blob/master/activerecord/lib/active_record/locale/en.yml#L29 scope. They also support translations for inherited class names (e.g. for use with STI) as explained above in "Error message scopes".
 
 * +ActiveRecord::Errors#generate_message+ (which is used by Active Record validations but may also be used manually) uses +human_name+ and +human_attribute_name+ (see above). It also translates the error message and supports translations for inherited class names as explained above in "Error message scopes".
 

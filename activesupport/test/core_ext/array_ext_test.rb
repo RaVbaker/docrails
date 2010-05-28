@@ -4,6 +4,7 @@ require 'active_support/core_ext/big_decimal'
 require 'active_support/core_ext/object/conversions'
 
 require 'active_support/core_ext' # FIXME: pulling in all to_xml extensions
+require 'active_support/hash_with_indifferent_access'
 
 class ArrayExtAccessTests < Test::Unit::TestCase
   def test_from
@@ -210,7 +211,7 @@ class ArrayToXmlTests < Test::Unit::TestCase
       { :name => "Jason", :age => 31, :age_in_millis => BigDecimal.new('1.0') }
     ].to_xml(:skip_instruct => true, :indent => 0)
 
-    assert_equal '<records type="array"><record>', xml.first(30)
+    assert_equal '<objects type="array"><object>', xml.first(30)
     assert xml.include?(%(<age type="integer">26</age>)), xml
     assert xml.include?(%(<age-in-millis type="integer">820497600000</age-in-millis>)), xml
     assert xml.include?(%(<name>David</name>)), xml
@@ -232,7 +233,7 @@ class ArrayToXmlTests < Test::Unit::TestCase
       { :name => "David", :street_address => "Paulina" }, { :name => "Jason", :street_address => "Evergreen" }
     ].to_xml(:skip_instruct => true, :skip_types => true, :indent => 0)
 
-    assert_equal "<records><record>", xml.first(17)
+    assert_equal "<objects><object>", xml.first(17)
     assert xml.include?(%(<street-address>Paulina</street-address>))
     assert xml.include?(%(<name>David</name>))
     assert xml.include?(%(<street-address>Evergreen</street-address>))
@@ -244,7 +245,7 @@ class ArrayToXmlTests < Test::Unit::TestCase
       { :name => "David", :street_address => "Paulina" }, { :name => "Jason", :street_address => "Evergreen" }
     ].to_xml(:skip_instruct => true, :skip_types => true, :indent => 0, :dasherize => false)
 
-    assert_equal "<records><record>", xml.first(17)
+    assert_equal "<objects><object>", xml.first(17)
     assert xml.include?(%(<street_address>Paulina</street_address>))
     assert xml.include?(%(<street_address>Evergreen</street_address>))
   end
@@ -254,7 +255,7 @@ class ArrayToXmlTests < Test::Unit::TestCase
       { :name => "David", :street_address => "Paulina" }, { :name => "Jason", :street_address => "Evergreen" }
     ].to_xml(:skip_instruct => true, :skip_types => true, :indent => 0, :dasherize => true)
 
-    assert_equal "<records><record>", xml.first(17)
+    assert_equal "<objects><object>", xml.first(17)
     assert xml.include?(%(<street-address>Paulina</street-address>))
     assert xml.include?(%(<street-address>Evergreen</street-address>))
   end
@@ -294,11 +295,44 @@ class ArrayToXmlTests < Test::Unit::TestCase
 end
 
 class ArrayExtractOptionsTests < Test::Unit::TestCase
+  class HashSubclass < Hash
+  end
+
+  class ExtractableHashSubclass < Hash
+    def extractable_options?
+      true
+    end
+  end
+
   def test_extract_options
     assert_equal({}, [].extract_options!)
     assert_equal({}, [1].extract_options!)
     assert_equal({:a=>:b}, [{:a=>:b}].extract_options!)
     assert_equal({:a=>:b}, [1, {:a=>:b}].extract_options!)
+  end
+
+  def test_extract_options_doesnt_extract_hash_subclasses
+    hash = HashSubclass.new
+    hash[:foo] = 1
+    array = [hash]
+    options = array.extract_options!
+    assert_equal({}, options)
+    assert_equal [hash], array
+  end
+  
+  def test_extract_options_extracts_extractable_subclass
+    hash = ExtractableHashSubclass.new
+    hash[:foo] = 1
+    array = [hash]
+    options = array.extract_options!
+    assert_equal({:foo => 1}, options)
+    assert_equal [], array
+  end
+
+  def test_extract_options_extracts_hwia
+    hash = [{:foo => 1}.with_indifferent_access]
+    options = hash.extract_options!
+    assert_equal 1, options[:foo]
   end
 end
 
@@ -324,15 +358,15 @@ class ArrayUniqByTests < Test::Unit::TestCase
   end
 end
 
-class ArrayExtRandomTests < Test::Unit::TestCase
+class ArrayExtRandomTests < ActiveSupport::TestCase
   def test_random_element_from_array
-    assert_nil [].rand
+    assert_nil [].random_element
 
     Kernel.expects(:rand).with(1).returns(0)
-    assert_equal 'x', ['x'].rand
+    assert_equal 'x', ['x'].random_element
 
     Kernel.expects(:rand).with(3).returns(1)
-    assert_equal 2, [1, 2, 3].rand
+    assert_equal 2, [1, 2, 3].random_element
   end
 end
 

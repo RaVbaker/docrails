@@ -1,27 +1,10 @@
 require 'active_support/core_ext/module/attr_internal'
 require 'active_support/core_ext/module/delegation'
 require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/array/wrap'
 
 module ActionView #:nodoc:
-  class ActionViewError < StandardError #:nodoc:
-  end
-
-  class MissingTemplate < ActionViewError #:nodoc:
-    attr_reader :path
-
-    def initialize(paths, path, details, partial)
-      @path = path
-      display_paths = paths.compact.map{ |p| p.to_s.inspect }.join(", ")
-      template_type = if partial
-        "partial"
-      elsif path =~ /layouts/i
-        'layout'
-      else
-        'template'
-      end
-
-      super("Missing #{template_type} #{path} with #{details.inspect} in view paths #{display_paths}")
-    end
+  class NonConcattingString < ActiveSupport::SafeBuffer
   end
 
   # Action View templates can be written in three ways. If the template file has a <tt>.erb</tt> (or <tt>.rhtml</tt>) extension then it uses a mixture of ERb
@@ -41,9 +24,10 @@ module ActionView #:nodoc:
   # The loop is setup in regular embedding tags <% %> and the name is written using the output embedding tag <%= %>. Note that this
   # is not just a usage suggestion. Regular output functions like print or puts won't work with ERb templates. So this would be wrong:
   #
+  #   <%# WRONG %>
   #   Hi, Mr. <% puts "Frodo" %>
   #
-  # If you absolutely must write from within a function, you can use the TextHelper#concat.
+  # If you absolutely must write from within a function use +concat+.
   #
   # <%- and -%> suppress leading and trailing whitespace, including the trailing newline, and can be used interchangeably with <% and %>.
   #
@@ -176,15 +160,16 @@ module ActionView #:nodoc:
     include Helpers, Rendering, Partials, Layouts, ::ERB::Util, Context
     extend  ActiveSupport::Memoizable
 
-    ActionView.run_base_hooks(self)
-
     # Specify whether RJS responses should be wrapped in a try/catch block
     # that alert()s the caught exception (and then re-raises it).
     cattr_accessor :debug_rjs
     @@debug_rjs = false
 
     class_attribute :helpers
+    remove_method :helpers
     attr_reader :helpers
+
+    class_attribute :_router
 
     class << self
       delegate :erb_trim_mode=, :to => 'ActionView::Template::Handlers::ERB'
@@ -192,7 +177,7 @@ module ActionView #:nodoc:
     end
 
     attr_accessor :base_path, :assigns, :template_extension, :lookup_context
-    attr_internal :captures, :request, :layout, :controller, :template, :config
+    attr_internal :captures, :request, :controller, :template, :config
 
     delegate :find_template, :template_exists?, :formats, :formats=, :locale, :locale=,
              :view_paths, :view_paths=, :with_fallbacks, :update_details, :to => :lookup_context
@@ -202,53 +187,32 @@ module ActionView #:nodoc:
 
     delegate :logger, :to => :controller, :allow_nil => true
 
+    # TODO: HACK FOR RJS
+    def view_context
+      self
+    end
+
     def self.xss_safe? #:nodoc:
       true
     end
 
     def self.process_view_paths(value)
-      ActionView::PathSet.new(Array(value))
-    end
-
-    def self.for_controller(controller)
-      @views ||= {}
-
-      # TODO: Decouple this so helpers are a separate concern in AV just like
-      # they are in AC.
-      if controller.class.respond_to?(:_helper_serial)
-        klass = @views[controller.class._helper_serial] ||= Class.new(self) do
-          # Try to make stack traces clearer
-          class_eval <<-ruby_eval, __FILE__, __LINE__ + 1
-            def self.name
-              "ActionView for #{controller.class}"
-            end
-
-            def inspect
-              "#<#{self.class.name}>"
-            end
-          ruby_eval
-
-          if controller.respond_to?(:_helpers)
-            include controller._helpers
-            self.helpers = controller._helpers
-          end
-        end
-      else
-        klass = self
-      end
-
-      klass.new(controller.lookup_context, {}, controller)
+      ActionView::PathSet.new(Array.wrap(value))
     end
 
     def initialize(lookup_context = nil, assigns_for_first_render = {}, controller = nil, formats = nil) #:nodoc:
-      @config = nil
+      @config  = nil
       @assigns = assigns_for_first_render.each { |key, value| instance_variable_set("@#{key}", value) }
       @helpers = self.class.helpers || Module.new
 
-      @_controller   = controller
-      @_config       = ActiveSupport::InheritableOptions.new(controller.config) if controller
+      if @_controller = controller
+        @_request = controller.request if controller.respond_to?(:request)
+      end
+
+      @_config       = ActiveSupport::InheritableOptions.new(controller.config) if controller && controller.respond_to?(:config)
       @_content_for  = Hash.new { |h,k| h[k] = ActiveSupport::SafeBuffer.new }
       @_virtual_path = nil
+      @output_buffer = nil
 
       @lookup_context = lookup_context.is_a?(ActionView::LookupContext) ?
         lookup_context : ActionView::LookupContext.new(lookup_context)
@@ -264,5 +228,7 @@ module ActionView #:nodoc:
       response.body_parts << part
       nil
     end
+
+    ActiveSupport.run_load_hooks(:action_view, self)
   end
 end

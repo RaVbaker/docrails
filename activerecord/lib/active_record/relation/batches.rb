@@ -1,3 +1,5 @@
+require 'active_support/core_ext/object/blank'
+
 module ActiveRecord
   module Batches # :nodoc:
     # Yields each record that was found by the find +options+. The find is
@@ -48,6 +50,10 @@ module ActiveRecord
     def find_in_batches(options = {})
       relation = self
 
+       if orders.present? || taken.present?
+         ActiveRecord::Base.logger.warn("Scoped order and limit are ignored, it's forced to be batch order and batch size")
+       end
+
       if (finder_options = options.except(:start, :batch_size)).present?
         raise "You can't specify an order, it's forced to be #{batch_order}" if options[:order].present?
         raise "You can't specify a limit, it's forced to be the batch_size"  if options[:limit].present?
@@ -65,7 +71,12 @@ module ActiveRecord
         yield records
 
         break if records.size < batch_size
-        records = relation.where(primary_key.gt(records.last.id)).all
+
+        if primary_key_offset = records.last.id
+          records = relation.where(primary_key.gt(primary_key_offset)).all
+        else
+          raise "Primary key not included in the custom select clause"
+        end
       end
     end
 

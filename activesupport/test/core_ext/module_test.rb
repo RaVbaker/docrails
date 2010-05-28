@@ -141,6 +141,20 @@ class ModuleTest < Test::Unit::TestCase
     assert_equal 0.0, nil_project.to_f
   end
 
+  def test_delegation_does_not_raise_error_when_removing_singleton_instance_methods
+    parent = Class.new do
+      def self.parent_method; end
+    end
+
+    assert_nothing_raised do
+      child = Class.new(parent) do
+        class << self
+          delegate :parent_method, :to => :superclass
+        end
+      end
+    end
+  end
+
   def test_parent
     assert_equal Yz::Zy, Yz::Zy::Cd.parent
     assert_equal Yz, Yz::Zy.parent
@@ -211,7 +225,7 @@ class MethodAliasingTest < Test::Unit::TestCase
     FooClassWithBarMethod.class_eval { include BarMethodAliaser }
 
     feature_aliases.each do |method|
-      assert @instance.respond_to?(method)
+      assert_respond_to @instance, method
     end
 
     assert_equal 'bar_with_baz', @instance.bar
@@ -228,7 +242,7 @@ class MethodAliasingTest < Test::Unit::TestCase
       include BarMethodAliaser
       alias_method_chain :quux!, :baz
     end
-    assert @instance.respond_to?(:quux_with_baz!)
+    assert_respond_to @instance, :quux_with_baz!
 
     assert_equal 'quux_with_baz', @instance.quux!
     assert_equal 'quux', @instance.quux_without_baz!
@@ -246,9 +260,9 @@ class MethodAliasingTest < Test::Unit::TestCase
     assert !@instance.respond_to?(:quux_with_baz=)
 
     FooClassWithBarMethod.class_eval { include BarMethodAliaser }
-    assert @instance.respond_to?(:quux_with_baz!)
-    assert @instance.respond_to?(:quux_with_baz?)
-    assert @instance.respond_to?(:quux_with_baz=)
+    assert_respond_to @instance, :quux_with_baz!
+    assert_respond_to @instance, :quux_with_baz?
+    assert_respond_to @instance, :quux_with_baz=
 
 
     FooClassWithBarMethod.alias_method_chain :quux!, :baz

@@ -52,18 +52,6 @@ class AssociationsJoinModelTest < ActiveRecord::TestCase
     assert_equal 1, authors(:mary).unique_categorized_posts.find_all_by_title("So I was thinking").size
   end
 
-  def test_polymorphic_has_many
-    assert posts(:welcome).taggings.include?(taggings(:welcome_general))
-  end
-
-  def test_polymorphic_has_one
-    assert_equal taggings(:welcome_general), posts(:welcome).tagging
-  end
-
-  def test_polymorphic_belongs_to
-    assert_equal posts(:welcome), posts(:welcome).taggings.first.taggable
-  end
-
   def test_polymorphic_has_many_going_through_join_model
     assert_equal tags(:general), tag = posts(:welcome).tags.first
     assert_no_queries do
@@ -292,16 +280,16 @@ class AssociationsJoinModelTest < ActiveRecord::TestCase
 
   def test_has_many_find_conditions
     assert_equal categories(:general), authors(:david).categories.find(:first, :conditions => "categories.name = 'General'")
-    assert_equal nil, authors(:david).categories.find(:first, :conditions => "categories.name = 'Technology'")
+    assert_nil authors(:david).categories.find(:first, :conditions => "categories.name = 'Technology'")
   end
 
   def test_has_many_class_methods_called_by_method_missing
     assert_equal categories(:general), authors(:david).categories.find_all_by_name('General').first
-    assert_equal nil, authors(:david).categories.find_by_name('Technology')
+    assert_nil authors(:david).categories.find_by_name('Technology')
   end
 
   def test_has_many_array_methods_called_by_method_missing
-    assert true, authors(:david).categories.any? { |category| category.name == 'General' }
+    assert authors(:david).categories.any? { |category| category.name == 'General' }
     assert_nothing_raised { authors(:david).categories.sort }
   end
 

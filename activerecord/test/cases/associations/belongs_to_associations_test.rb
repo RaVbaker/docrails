@@ -32,6 +32,17 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
     assert_equal companies(:first_firm).name, client.firm_with_primary_key.name
   end
 
+  def test_belongs_to_with_primary_key_joins_on_correct_column
+    sql = Client.joins(:firm_with_primary_key).to_sql
+    if current_adapter?(:MysqlAdapter)
+      assert_no_match(/`firm_with_primary_keys_companies`\.`id`/, sql)
+      assert_match(/`firm_with_primary_keys_companies`\.`name`/, sql)
+    else
+      assert_no_match(/"firm_with_primary_keys_companies"\."id"/, sql)
+      assert_match(/"firm_with_primary_keys_companies"\."name"/, sql)
+    end
+  end
+
   def test_proxy_assignment
     account = Account.find(1)
     assert_nothing_raised { account.firm = account.firm }
@@ -59,6 +70,13 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
     citibank = Client.create("name" => "Primary key client")
     citibank.firm_with_primary_key = apple
     assert_equal apple.name, citibank.firm_name
+  end
+
+  def test_eager_loading_with_primary_key
+    apple = Firm.create("name" => "Apple")
+    citibank = Client.create("name" => "Citibank", :firm_name => "Apple")
+    citibank_result = Client.find(:first, :conditions => {:name => "Citibank"}, :include => :firm_with_primary_key)
+    assert_not_nil citibank_result.instance_variable_get("@firm_with_primary_key")
   end
 
   def test_no_unexpected_aliasing
@@ -385,7 +403,7 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
     assert_equal saved_member.id, sponsor.sponsorable_id
 
     sponsor.sponsorable = new_member
-    assert_equal nil, sponsor.sponsorable_id
+    assert_nil sponsor.sponsorable_id
   end
 
   def test_polymorphic_assignment_with_primary_key_updates_foreign_id_field_for_new_and_saved_records
@@ -397,7 +415,7 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
     assert_equal saved_writer.name, essay.writer_id
 
     essay.writer = new_writer
-    assert_equal nil, essay.writer_id
+    assert_nil essay.writer_id
   end
 
   def test_belongs_to_proxy_should_not_respond_to_private_methods
@@ -439,9 +457,15 @@ class BelongsToAssociationsTest < ActiveRecord::TestCase
     assert_equal [author_address.id], AuthorAddress.destroyed_author_address_ids
   end
 
-  def test_invalid_belongs_to_dependent_option_raises_exception
+  def test_invalid_belongs_to_dependent_option_nullify_raises_exception
     assert_raise ArgumentError do
       Author.belongs_to :special_author_address, :dependent => :nullify
+    end
+  end
+
+  def test_invalid_belongs_to_dependent_option_restrict_raises_exception
+    assert_raise ArgumentError do
+      Author.belongs_to :special_author_address, :dependent => :restrict
     end
   end
 end

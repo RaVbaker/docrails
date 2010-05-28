@@ -1,6 +1,7 @@
 require 'active_support/duration'
 require 'active_support/core_ext/date/acts_like'
 require 'active_support/core_ext/date/calculations'
+require 'active_support/core_ext/date_time/conversions'
 
 class Time
   COMMON_YEAR_DAYS_IN_MONTH = [nil, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -23,10 +24,11 @@ class Time
     # (i.e., if year is within either 1970..2038 or 1902..2038, depending on system architecture);
     # otherwise returns a DateTime
     def time_with_datetime_fallback(utc_or_local, year, month=1, day=1, hour=0, min=0, sec=0, usec=0)
-      ::Time.send(utc_or_local, year, month, day, hour, min, sec, usec)
+      time = ::Time.send(utc_or_local, year, month, day, hour, min, sec, usec)
+      # This check is needed because Time.utc(y) returns a time object in the 2000s for 0 <= y <= 138.
+      time.year == year ? time : ::DateTime.civil_from_format(utc_or_local, year, month, day, hour, min, sec)
     rescue
-      offset = utc_or_local.to_sym == :local ? ::DateTime.local_offset : 0
-      ::DateTime.civil(year, month, day, hour, min, sec, offset)
+      ::DateTime.civil_from_format(utc_or_local, year, month, day, hour, min, sec)
     end
 
     # Wraps class method +time_with_datetime_fallback+ with +utc_or_local+ set to <tt>:utc</tt>.
@@ -131,7 +133,7 @@ class Time
   end
 
   # Short-hand for years_ago(1)
-  def last_year
+  def prev_year
     years_ago(1)
   end
 
@@ -140,9 +142,8 @@ class Time
     years_since(1)
   end
 
-
   # Short-hand for months_ago(1)
-  def last_month
+  def prev_month
     months_ago(1)
   end
 

@@ -2,22 +2,25 @@ require 'abstract_unit'
 require "fixtures/person"
 require "fixtures/customer"
 require "fixtures/street_address"
+require "fixtures/sound"
 require "fixtures/beast"
 require "fixtures/proxy"
+require 'active_support/json'
 require 'active_support/core_ext/hash/conversions'
 require 'mocha'
 
 class BaseTest < Test::Unit::TestCase
   def setup
-    @matz  = { :id => 1, :name => 'Matz' }.to_xml(:root => 'person')
-    @david = { :id => 2, :name => 'David' }.to_xml(:root => 'person')
-    @greg  = { :id => 3, :name => 'Greg' }.to_xml(:root => 'person')
-    @addy  = { :id => 1, :street => '12345 Street', :country => 'Australia' }.to_xml(:root => 'address')
     @default_request_headers = { 'Content-Type' => 'application/xml' }
-    @rick = { :name => "Rick", :age => 25 }.to_xml(:root => "person")
+    @matz   = { :id => 1, :name => 'Matz' }.to_xml(:root => 'person')
+    @david  = { :id => 2, :name => 'David' }.to_xml(:root => 'person')
+    @greg   = { :id => 3, :name => 'Greg' }.to_xml(:root => 'person')
+    @addy   = { :id => 1, :street => '12345 Street', :country => 'Australia' }.to_xml(:root => 'address')
+    @rick   = { :name => "Rick", :age => 25 }.to_xml(:root => "person")
+    @joe    = { 'person' => { :id => 6, :name => 'Joe' }}.to_json
     @people = [{ :id => 1, :name => 'Matz' }, { :id => 2, :name => 'David' }].to_xml(:root => 'people')
     @people_david = [{ :id => 2, :name => 'David' }].to_xml(:root => 'people')
-    @addresses = [{ :id => 1, :street => '12345 Street', :country => 'Australia' }].to_xml(:root => 'addresses')
+    @addresses    = [{ :id => 1, :street => '12345 Street', :country => 'Australia' }].to_xml(:root => 'addresses')
 
     # - deep nested resource -
     # - Luis (Customer)
@@ -66,6 +69,7 @@ class BaseTest < Test::Unit::TestCase
     ActiveResource::HttpMock.respond_to do |mock|
       mock.get    "/people/1.xml",                {}, @matz
       mock.get    "/people/2.xml",                {}, @david
+      mock.get    "/people/6.json",               {}, @joe
       mock.get    "/people/5.xml",                {}, @marty
       mock.get    "/people/Greg.xml",             {}, @greg
       mock.get    "/people/4.xml",                {'key' => 'value'}, nil, 404
@@ -560,6 +564,10 @@ class BaseTest < Test::Unit::TestCase
     assert_equal '/people/Greg/addresses/1.xml', StreetAddress.element_path(1, 'person_id' => 'Greg')
   end
 
+  def test_module_element_path
+    assert_equal '/sounds/1.xml', Asset::Sound.element_path(1)
+  end
+
   def test_custom_element_path_with_redefined_to_param
     Person.module_eval do
       alias_method :original_to_param_element_path, :to_param
@@ -663,9 +671,9 @@ class BaseTest < Test::Unit::TestCase
   ########################################################################
   def test_respond_to
     matz = Person.find(1)
-    assert matz.respond_to?(:name)
-    assert matz.respond_to?(:name=)
-    assert matz.respond_to?(:name?)
+    assert_respond_to matz, :name
+    assert_respond_to matz, :name=
+    assert_respond_to matz, :name?
     assert !matz.respond_to?(:super_scalable_stuff)
   end
 
@@ -700,7 +708,7 @@ class BaseTest < Test::Unit::TestCase
   def test_id_from_response_without_location
     p = Person.new
     resp = {}
-    assert_equal nil, p.__send__(:id_from_response, resp)
+    assert_nil p.__send__(:id_from_response, resp)
   end
 
   def test_create_with_custom_prefix
@@ -767,7 +775,7 @@ class BaseTest < Test::Unit::TestCase
       mock.post   "/people.xml", {}, nil, 201
     end
     person = Person.create(:name => 'Rick')
-    assert_equal nil, person.id
+    assert_nil person.id
   end
 
   def test_clone
@@ -1006,10 +1014,64 @@ class BaseTest < Test::Unit::TestCase
 
   def test_to_xml
     matz = Person.find(1)
-    xml = matz.encode
+    encode = matz.encode
+    xml = matz.to_xml
+
+    assert_equal encode, xml
     assert xml.include?('<?xml version="1.0" encoding="UTF-8"?>')
     assert xml.include?('<name>Matz</name>')
     assert xml.include?('<id type="integer">1</id>')
+  end
+
+  def test_to_xml_with_element_name
+    old_elem_name = Person.element_name
+    matz = Person.find(1)
+    Person.element_name = 'ruby_creator'
+    encode = matz.encode
+    xml = matz.to_xml
+
+    assert_equal encode, xml
+    assert xml.include?('<?xml version="1.0" encoding="UTF-8"?>')
+    assert xml.include?('<ruby-creator>')
+    assert xml.include?('<name>Matz</name>')
+    assert xml.include?('<id type="integer">1</id>')
+    assert xml.include?('</ruby-creator>')
+  ensure
+    Person.element_name = old_elem_name
+  end
+
+  def test_to_json
+    Person.include_root_in_json = true
+    Person.format = :json
+    joe = Person.find(6)
+    encode = joe.encode
+    json = joe.to_json
+    Person.format = :xml
+
+    assert_equal encode, json
+    assert_match %r{^\{"person":\{"person":\{}, json
+    assert_match %r{"id":6}, json
+    assert_match %r{"name":"Joe"}, json
+    assert_match %r{\}\}\}$}, json
+  end
+
+  def test_to_json_with_element_name
+    old_elem_name = Person.element_name
+    Person.include_root_in_json = true
+    Person.format = :json
+    joe = Person.find(6)
+    Person.element_name = 'ruby_creator'
+    encode = joe.encode
+    json = joe.to_json
+    Person.format = :xml
+
+    assert_equal encode, json
+    assert_match %r{^\{"ruby_creator":\{"person":\{}, json
+    assert_match %r{"id":6}, json
+    assert_match %r{"name":"Joe"}, json
+    assert_match %r{\}\}\}$}, json
+  ensure
+    Person.element_name = old_elem_name
   end
 
   def test_to_param_quacks_like_active_record
@@ -1017,6 +1079,13 @@ class BaseTest < Test::Unit::TestCase
     assert_nil new_person.to_param
     matz = Person.find(1)
     assert_equal '1', matz.to_param
+  end
+
+  def test_to_key_quacks_like_active_record
+    new_person = Person.new
+    assert_nil new_person.to_key
+    matz = Person.find(1)
+    assert_equal [1], matz.to_key
   end
 
   def test_parse_deep_nested_resources

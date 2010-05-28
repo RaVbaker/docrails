@@ -3,25 +3,15 @@ require 'models/topic'
 require 'models/developer'
 require 'models/reply'
 require 'models/minimalistic'
+require 'models/comment'
 
 class SpecialDeveloper < Developer; end
 
-class TopicManualObserver
-  include Singleton
+class SalaryChecker < ActiveRecord::Observer
+  observe :special_developer
 
-  attr_reader :action, :object, :callbacks
-
-  def initialize
-    Topic.add_observer(self)
-    @callbacks = []
-  end
-
-  def update(callback_method, object)
-    @callbacks << { "callback_method" => callback_method, "object" => object }
-  end
-
-  def has_been_notified?
-    !@callbacks.empty?
+  def before_save(developer)
+    return developer.salary > 80000
   end
 end
 
@@ -76,6 +66,28 @@ class MultiObserver < ActiveRecord::Observer
   end
 end
 
+class ValidatedComment < Comment
+  attr_accessor :callers
+
+  before_validation :record_callers
+
+  after_validation do
+    record_callers
+  end
+
+  def record_callers
+    callers << self.class if callers
+  end
+end
+
+class ValidatedCommentObserver < ActiveRecord::Observer
+  attr_accessor :callers
+
+  def after_validation(model)
+    callers << self.class if callers
+  end
+end
+
 class LifecycleTest < ActiveRecord::TestCase
   fixtures :topics, :developers, :minimalistics
 
@@ -83,27 +95,6 @@ class LifecycleTest < ActiveRecord::TestCase
     original_count = Topic.count
     (topic_to_be_destroyed = Topic.find(1)).destroy
     assert_equal original_count - (1 + topic_to_be_destroyed.replies.size), Topic.count
-  end
-
-  def test_after_save
-    ActiveRecord::Base.observers = :topic_manual_observer
-    ActiveRecord::Base.instantiate_observers
-
-    topic = Topic.find(1)
-    topic.title = "hello"
-    topic.save
-
-    assert TopicManualObserver.instance.has_been_notified?
-    assert_equal :after_save, TopicManualObserver.instance.callbacks.last["callback_method"]
-  end
-
-  def test_observer_update_on_save
-    ActiveRecord::Base.observers = TopicManualObserver
-    ActiveRecord::Base.instantiate_observers
-
-    topic = Topic.find(1)
-    assert TopicManualObserver.instance.has_been_notified?
-    assert_equal :after_find, TopicManualObserver.instance.callbacks.first["callback_method"]
   end
 
   def test_auto_observer
@@ -164,5 +155,28 @@ class LifecycleTest < ActiveRecord::TestCase
 
   def test_invalid_observer
     assert_raise(ArgumentError) { Topic.observers = Object.new; Topic.instantiate_observers }
+  end
+
+  test "model callbacks fire before observers are notified" do
+    callers = []
+
+    comment = ValidatedComment.new
+    comment.callers = ValidatedCommentObserver.instance.callers = callers
+
+    comment.valid?
+    assert_equal [ValidatedComment, ValidatedComment, ValidatedCommentObserver], callers,
+      "model callbacks did not fire before observers were notified"
+  end
+
+  test "able to save developer" do
+    SalaryChecker.instance # activate
+    developer = SpecialDeveloper.new :name => 'Roger', :salary => 100000
+    assert developer.save, "developer with normal salary failed to save"
+  end
+
+  test "unable to save developer with low salary" do
+    SalaryChecker.instance # activate
+    developer = SpecialDeveloper.new :name => 'Rookie', :salary => 50000
+    assert !developer.save, "allowed to save a developer with too low salary"
   end
 end

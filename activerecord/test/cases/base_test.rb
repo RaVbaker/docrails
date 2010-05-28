@@ -111,14 +111,14 @@ class BasicsTest < ActiveRecord::TestCase
 
   def test_respond_to?
     topic = Topic.find(1)
-    assert topic.respond_to?("title")
-    assert topic.respond_to?("title?")
-    assert topic.respond_to?("title=")
-    assert topic.respond_to?(:title)
-    assert topic.respond_to?(:title?)
-    assert topic.respond_to?(:title=)
-    assert topic.respond_to?("author_name")
-    assert topic.respond_to?("attribute_names")
+    assert_respond_to topic, "title"
+    assert_respond_to topic, "title?"
+    assert_respond_to topic, "title="
+    assert_respond_to topic, :title
+    assert_respond_to topic, :title?
+    assert_respond_to topic, :title=
+    assert_respond_to topic, "author_name"
+    assert_respond_to topic, "attribute_names"
     assert !topic.respond_to?("nothingness")
     assert !topic.respond_to?(:nothingness)
   end
@@ -579,9 +579,9 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal(topics(:second).title, topics.first.title)
   end
 
-  def test_table_name_guesses
-    classes = [Category, Smarts, CreditCard, CreditCard::PinNumber, CreditCard::PinNumber::CvvCode, CreditCard::SubPinNumber, CreditCard::Brand, MasterCreditCard]
+  GUESSED_CLASSES = [Category, Smarts, CreditCard, CreditCard::PinNumber, CreditCard::PinNumber::CvvCode, CreditCard::SubPinNumber, CreditCard::Brand, MasterCreditCard]
 
+  def test_table_name_guesses
     assert_equal "topics", Topic.table_name
 
     assert_equal "categories", Category.table_name
@@ -592,9 +592,13 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal "credit_card_pin_numbers", CreditCard::SubPinNumber.table_name
     assert_equal "categories", CreditCard::Brand.table_name
     assert_equal "master_credit_cards", MasterCreditCard.table_name
+  ensure
+    GUESSED_CLASSES.each(&:reset_table_name)
+  end
 
+  def test_singular_table_name_guesses
     ActiveRecord::Base.pluralize_table_names = false
-    classes.each(&:reset_table_name)
+    GUESSED_CLASSES.each(&:reset_table_name)
 
     assert_equal "category", Category.table_name
     assert_equal "smarts", Smarts.table_name
@@ -604,10 +608,12 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal "credit_card_pin_number", CreditCard::SubPinNumber.table_name
     assert_equal "category", CreditCard::Brand.table_name
     assert_equal "master_credit_card", MasterCreditCard.table_name
-
+  ensure
     ActiveRecord::Base.pluralize_table_names = true
-    classes.each(&:reset_table_name)
+    GUESSED_CLASSES.each(&:reset_table_name)
+  end
 
+  def test_table_name_guesses_with_prefixes_and_suffixes
     ActiveRecord::Base.table_name_prefix = "test_"
     Category.reset_table_name
     assert_equal "test_categories", Category.table_name
@@ -620,8 +626,15 @@ class BasicsTest < ActiveRecord::TestCase
     ActiveRecord::Base.table_name_suffix = ""
     Category.reset_table_name
     assert_equal "categories", Category.table_name
+  ensure
+    ActiveRecord::Base.table_name_prefix = ""
+    ActiveRecord::Base.table_name_suffix = ""
+    GUESSED_CLASSES.each(&:reset_table_name)
+  end
 
+  def test_singular_table_name_guesses_with_prefixes_and_suffixes
     ActiveRecord::Base.pluralize_table_names = false
+
     ActiveRecord::Base.table_name_prefix = "test_"
     Category.reset_table_name
     assert_equal "test_category", Category.table_name
@@ -634,9 +647,40 @@ class BasicsTest < ActiveRecord::TestCase
     ActiveRecord::Base.table_name_suffix = ""
     Category.reset_table_name
     assert_equal "category", Category.table_name
-
+  ensure
     ActiveRecord::Base.pluralize_table_names = true
-    classes.each(&:reset_table_name)
+    ActiveRecord::Base.table_name_prefix = ""
+    ActiveRecord::Base.table_name_suffix = ""
+    GUESSED_CLASSES.each(&:reset_table_name)
+  end
+
+  def test_table_name_guesses_with_inherited_prefixes_and_suffixes
+    GUESSED_CLASSES.each(&:reset_table_name)
+
+    CreditCard.table_name_prefix = "test_"
+    CreditCard.reset_table_name
+    Category.reset_table_name
+    assert_equal "test_credit_cards", CreditCard.table_name
+    assert_equal "categories", Category.table_name
+    CreditCard.table_name_suffix = "_test"
+    CreditCard.reset_table_name
+    Category.reset_table_name
+    assert_equal "test_credit_cards_test", CreditCard.table_name
+    assert_equal "categories", Category.table_name
+    CreditCard.table_name_prefix = ""
+    CreditCard.reset_table_name
+    Category.reset_table_name
+    assert_equal "credit_cards_test", CreditCard.table_name
+    assert_equal "categories", Category.table_name
+    CreditCard.table_name_suffix = ""
+    CreditCard.reset_table_name
+    Category.reset_table_name
+    assert_equal "credit_cards", CreditCard.table_name
+    assert_equal "categories", Category.table_name
+  ensure
+    CreditCard.table_name_prefix = ""
+    CreditCard.table_name_suffix = ""
+    GUESSED_CLASSES.each(&:reset_table_name)
   end
 
   def test_destroy_all
@@ -674,10 +718,10 @@ class BasicsTest < ActiveRecord::TestCase
 
   def test_decrement_counter
     Topic.decrement_counter("replies_count", 2)
-    assert_equal -1, Topic.find(2).replies_count
+    assert_equal(-1, Topic.find(2).replies_count)
 
     Topic.decrement_counter("replies_count", 2)
-    assert_equal -2, Topic.find(2).replies_count
+    assert_equal(-2, Topic.find(2).replies_count)
   end
 
   def test_reset_counters
@@ -994,9 +1038,9 @@ class BasicsTest < ActiveRecord::TestCase
   def test_mass_assignment_protection_against_class_attribute_writers
     [:logger, :configurations, :primary_key_prefix_type, :table_name_prefix, :table_name_suffix, :pluralize_table_names,
       :default_timezone, :schema_format, :lock_optimistically, :record_timestamps].each do |method|
-      assert  Task.respond_to?(method)
-      assert  Task.respond_to?("#{method}=")
-      assert  Task.new.respond_to?(method)
+      assert_respond_to  Task, method
+      assert_respond_to  Task, "#{method}="
+      assert_respond_to  Task.new, method
       assert !Task.new.respond_to?("#{method}=")
     end
   end
@@ -1325,37 +1369,37 @@ class BasicsTest < ActiveRecord::TestCase
   end
 
   def test_new_record_returns_boolean
-    assert_equal Topic.new.new_record?, true
-    assert_equal Topic.find(1).new_record?, false
+    assert_equal true, Topic.new.new_record?
+    assert_equal false, Topic.find(1).new_record?
   end
 
   def test_destroyed_returns_boolean
     developer = Developer.first
-    assert_equal developer.destroyed?, false
+    assert_equal false, developer.destroyed?
     developer.destroy
-    assert_equal developer.destroyed?, true
+    assert_equal true, developer.destroyed?
 
     developer = Developer.last
-    assert_equal developer.destroyed?, false
+    assert_equal false, developer.destroyed?
     developer.delete
-    assert_equal developer.destroyed?, true
+    assert_equal true, developer.destroyed?
   end
 
   def test_persisted_returns_boolean
     developer = Developer.new(:name => "Jose")
-    assert_equal developer.persisted?, false
+    assert_equal false, developer.persisted?
     developer.save!
-    assert_equal developer.persisted?, true
+    assert_equal true, developer.persisted?
 
     developer = Developer.first
-    assert_equal developer.persisted?, true
+    assert_equal true, developer.persisted?
     developer.destroy
-    assert_equal developer.persisted?, false
+    assert_equal false, developer.persisted?
 
     developer = Developer.last
-    assert_equal developer.persisted?, true
+    assert_equal true, developer.persisted?
     developer.delete
-    assert_equal developer.persisted?, false
+    assert_equal false, developer.persisted?
   end
 
   def test_clone
@@ -1383,7 +1427,7 @@ class BasicsTest < ActiveRecord::TestCase
     # test if saved clone object differs from original
     cloned_topic.save
     assert !cloned_topic.new_record?
-    assert cloned_topic.id != topic.id
+    assert_not_equal cloned_topic.id, topic.id
   end
 
   def test_clone_with_aggregate_of_same_name_as_attribute
@@ -1403,13 +1447,63 @@ class BasicsTest < ActiveRecord::TestCase
 
     assert clone.save
     assert !clone.new_record?
-    assert clone.id != dev.id
+    assert_not_equal clone.id, dev.id
   end
 
   def test_clone_preserves_subtype
     clone = nil
     assert_nothing_raised { clone = Company.find(3).clone }
     assert_kind_of Client, clone
+  end
+
+  def test_clone_of_new_object_with_defaults
+    developer = Developer.new
+    assert !developer.name_changed?
+    assert !developer.salary_changed?
+
+    cloned_developer = developer.clone
+    assert !cloned_developer.name_changed?
+    assert !cloned_developer.salary_changed?
+  end
+
+  def test_clone_of_new_object_marks_attributes_as_dirty
+    developer = Developer.new :name => 'Bjorn', :salary => 100000
+    assert developer.name_changed?
+    assert developer.salary_changed?
+
+    cloned_developer = developer.clone
+    assert cloned_developer.name_changed?
+    assert cloned_developer.salary_changed?
+  end
+
+  def test_clone_of_new_object_marks_as_dirty_only_changed_attributes
+    developer = Developer.new :name => 'Bjorn'
+    assert developer.name_changed?            # obviously
+    assert !developer.salary_changed?         # attribute has non-nil default value, so treated as not changed
+
+    cloned_developer = developer.clone
+    assert cloned_developer.name_changed?
+    assert !cloned_developer.salary_changed?  # ... and cloned instance should behave same
+  end
+
+  def test_clone_of_saved_object_marks_attributes_as_dirty
+    developer = Developer.create! :name => 'Bjorn', :salary => 100000
+    assert !developer.name_changed?
+    assert !developer.salary_changed?
+
+    cloned_developer = developer.clone
+    assert cloned_developer.name_changed?     # both attributes differ from defaults
+    assert cloned_developer.salary_changed?
+  end
+
+  def test_clone_of_saved_object_marks_as_dirty_only_changed_attributes
+    developer = Developer.create! :name => 'Bjorn'
+    assert !developer.name_changed?           # both attributes of saved object should be threated as not changed
+    assert !developer.salary_changed?
+
+    cloned_developer = developer.clone
+    assert cloned_developer.name_changed?     # ... but on cloned object should be
+    assert !cloned_developer.salary_changed?  # ... BUT salary has non-nil default which should be threated as not changed on cloned instance
   end
 
   def test_bignum
@@ -1533,7 +1627,7 @@ class BasicsTest < ActiveRecord::TestCase
   def test_auto_id
     auto = AutoId.new
     auto.save
-    assert (auto.id > 0)
+    assert(auto.id > 0)
   end
 
   def quote_column_name(name)
@@ -1749,6 +1843,18 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal "bar", k.table_name
   end
 
+  def test_quoted_table_name_after_set_table_name
+    klass = Class.new(ActiveRecord::Base)
+
+    klass.set_table_name "foo"
+    assert_equal "foo", klass.table_name
+    assert_equal klass.connection.quote_table_name("foo"), klass.quoted_table_name
+
+    klass.set_table_name "bar"
+    assert_equal "bar", klass.table_name
+    assert_equal klass.connection.quote_table_name("bar"), klass.quoted_table_name
+  end
+
   def test_set_table_name_with_block
     k = Class.new( ActiveRecord::Base )
     k.set_table_name { "ks" }
@@ -1950,6 +2056,16 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal last, Developer.find(:all, :order => 'developers.name, developers.salary DESC').last
   end
 
+  def test_find_keeps_multiple_order_values
+    combined = Developer.find(:all, :order => 'developers.name, developers.salary')
+    assert_equal combined, Developer.find(:all, :order => ['developers.name', 'developers.salary'])
+  end
+
+  def test_find_keeps_multiple_group_values
+    combined = Developer.find(:all, :group => 'developers.name, developers.salary, developers.id, developers.created_at, developers.updated_at')
+    assert_equal combined, Developer.find(:all, :group => ['developers.name', 'developers.salary', 'developers.id', 'developers.created_at', 'developers.updated_at'])
+  end
+
   def test_find_symbol_ordered_last
     last  = Developer.find :last, :order => :salary
     assert_equal last, Developer.find(:all, :order => :salary).last
@@ -2009,6 +2125,10 @@ class BasicsTest < ActiveRecord::TestCase
     assert !SubStiPost.descends_from_active_record?
   end
 
+  def test_base_subclasses_is_public_method
+    assert ActiveRecord::Base.public_methods.map(&:to_sym).include?(:subclasses)
+  end
+
   def test_find_on_abstract_base_class_doesnt_use_type_condition
     old_class = LooseDescendant
     Object.send :remove_const, :LooseDescendant
@@ -2037,6 +2157,7 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal "topic", xml.root.name
     assert_equal "The First Topic" , xml.elements["//title"].text
     assert_equal "David" , xml.elements["//author-name"].text
+    assert_match "Have a nice day", xml.elements["//content"].text
 
     assert_equal "1", xml.elements["//id"].text
     assert_equal "integer" , xml.elements["//id"].attributes['type']
@@ -2046,9 +2167,6 @@ class BasicsTest < ActiveRecord::TestCase
 
     assert_equal written_on_in_current_timezone, xml.elements["//written-on"].text
     assert_equal "datetime" , xml.elements["//written-on"].attributes['type']
-
-    assert_equal "--- Have a nice day\n" , xml.elements["//content"].text
-    assert_equal "yaml" , xml.elements["//content"].attributes['type']
 
     assert_equal "david@loudthinking.com", xml.elements["//author-email-address"].text
 
@@ -2157,14 +2275,6 @@ class BasicsTest < ActiveRecord::TestCase
     assert xml.include?(%(<arbitrary-element>#{value}</arbitrary-element>))
   end
 
-  def test_type_name_with_module_should_handle_beginning
-    ActiveRecord::Base.store_full_sti_class = false
-    assert_equal 'ActiveRecord::Person', ActiveRecord::Base.send(:type_name_with_module, 'Person')
-    assert_equal '::Person', ActiveRecord::Base.send(:type_name_with_module, '::Person')
-  ensure
-    ActiveRecord::Base.store_full_sti_class = true
-  end
-
   def test_to_param_should_return_string
     assert_kind_of String, Client.find(:first).to_param
   end
@@ -2181,7 +2291,7 @@ class BasicsTest < ActiveRecord::TestCase
   end
 
   def test_inspect_new_instance
-    assert_match /Topic id: nil/, Topic.new.inspect
+    assert_match(/Topic id: nil/, Topic.new.inspect)
   end
 
   def test_inspect_limited_select_instance
@@ -2240,9 +2350,9 @@ class BasicsTest < ActiveRecord::TestCase
     ActiveRecord::Base.benchmark("Debug Topic Count", :level => :debug) { Topic.count }
     ActiveRecord::Base.benchmark("Warn Topic Count",  :level => :warn)  { Topic.count }
     ActiveRecord::Base.benchmark("Error Topic Count", :level => :error) { Topic.count }
-    assert_no_match /Debug Topic Count/, log.string
-    assert_match /Warn Topic Count/, log.string
-    assert_match /Error Topic Count/, log.string
+    assert_no_match(/Debug Topic Count/, log.string)
+    assert_match(/Warn Topic Count/, log.string)
+    assert_match(/Error Topic Count/, log.string)
   ensure
     ActiveRecord::Base.logger = original_logger
   end
@@ -2253,8 +2363,8 @@ class BasicsTest < ActiveRecord::TestCase
     ActiveRecord::Base.logger = Logger.new(log)
     ActiveRecord::Base.benchmark("Logging", :level => :debug, :silence => true) { ActiveRecord::Base.logger.debug "Loud" }
     ActiveRecord::Base.benchmark("Logging", :level => :debug, :silence => false)  { ActiveRecord::Base.logger.debug "Quiet" }
-    assert_no_match /Loud/, log.string
-    assert_match /Quiet/, log.string
+    assert_no_match(/Loud/, log.string)
+    assert_match(/Quiet/, log.string)
   ensure
     ActiveRecord::Base.logger = original_logger
   end

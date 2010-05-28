@@ -11,6 +11,13 @@ module DelegatingFixtures
 
   class Mokopuna < Child
   end
+
+  class PercysMom
+    superclass_delegating_accessor :superpower
+  end
+
+  class Percy < PercysMom
+  end
 end
 
 class DelegatingAttributesTest < Test::Unit::TestCase
@@ -25,16 +32,16 @@ class DelegatingAttributesTest < Test::Unit::TestCase
     single_class.superclass_delegating_accessor :both
     # Class should have accessor and mutator
     # the instance should have an accessor only
-    assert single_class.respond_to?(:both)
-    assert single_class.respond_to?(:both=)
+    assert_respond_to single_class, :both
+    assert_respond_to single_class, :both=
     assert single_class.public_instance_methods.map(&:to_s).include?("both")
     assert !single_class.public_instance_methods.map(&:to_s).include?("both=")
   end
 
   def test_simple_accessor_declaration_with_instance_reader_false
     single_class.superclass_delegating_accessor :no_instance_reader, :instance_reader => false
-    assert single_class.respond_to?(:no_instance_reader)
-    assert single_class.respond_to?(:no_instance_reader=)
+    assert_respond_to single_class, :no_instance_reader
+    assert_respond_to single_class, :no_instance_reader=
     assert !single_class.public_instance_methods.map(&:to_s).include?("no_instance_reader")
   end
 
@@ -70,18 +77,17 @@ class DelegatingAttributesTest < Test::Unit::TestCase
   end
 
   def test_delegation_stops_at_the_right_level
-    assert_nil Mokopuna.some_attribute
-    assert_nil Child.some_attribute
-    Child.some_attribute="1"
-    assert_equal "1", Mokopuna.some_attribute
-  ensure
-    Child.some_attribute=nil
+    assert_nil Percy.superpower
+    assert_nil PercysMom.superpower
+
+    PercysMom.superpower = :heatvision
+    assert_equal :heatvision, Percy.superpower
   end
-  
+
   def test_delegation_stops_for_nil
     Mokopuna.some_attribute = nil
     Child.some_attribute="1"
-    
+
     assert_equal "1", Child.some_attribute
     assert_nil Mokopuna.some_attribute
   ensure

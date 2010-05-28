@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.version     = version
   s.summary     = 'Object-relational mapper framework (part of Rails).'
   s.description = 'Databases on Rails. Build a persistent domain model by mapping database tables to Ruby classes. Strong conventions for associations, validations, aggregations, migrations, and testing come baked-in.'
+
   s.required_ruby_version = '>= 1.8.7'
 
   s.author            = 'David Heinemeier Hansson'
@@ -22,5 +23,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency('activesupport', version)
   s.add_dependency('activemodel',   version)
-  s.add_dependency('arel',          '~> 0.3.1')
+  s.add_dependency('arel',          '~> 0.3.3')
 end

@@ -9,24 +9,24 @@ endprologue.
 
 h3. Locations for Initialization Code
 
-Rails offers (at least) five good spots to place initialization code:
+Rails offers (at least) four good spots to place initialization code:
 
-* Preinitializers
-* environment.rb
+* application.rb
 * Environment-specific Configuration Files
 * Initializers (load_application_initializers)
 * After-Initializers
 
-h3. Using a Preinitializer
+h3. Running Code Before Rails
 
-Rails allows you to use a preinitializer to run code before the framework itself is loaded. If you save code in +RAILS_ROOT/config/preinitializer.rb+, that code will be the first thing loaded, before any of the framework components (Active Record, Action Pack, and so on.) If you want to change the behavior of one of the classes that is used in the initialization process, you can do so in this file.
+To run some code before Rails itself is loaded, simply put it above the call to
++require 'rails/all'+ in your +application.rb+.
 
 h3. Configuring Rails Components
 
-In general, the work of configuring Rails means configuring the components of Rails, as well as configuring Rails itself. The +environment.rb+ and environment-specific configuration files (such as +config/environments/production.rb+) allow you to specify the various settings that you want to pass down to all of the components. For example, the default Rails 2.3 +environment.rb+ file includes one setting:
+In general, the work of configuring Rails means configuring the components of Rails, as well as configuring Rails itself. The +application.rb+ and environment-specific configuration files (such as +config/environments/production.rb+) allow you to specify the various settings that you want to pass down to all of the components. For example, the default Rails 2.3 +application.rb+ file includes one setting:
 
 <ruby>
-config.time_zone = 'UTC'
+config.filter_parameters << :password
 </ruby>
 
 This is a setting for Rails itself. If you want to pass settings to individual Rails components, you can do so via the same +config+ object:
@@ -52,8 +52,6 @@ h4. Rails General Configuration
 * +config.dependency_loading+ enables or disables dependency loading during the request cycle. Setting dependency_loading to _true_ will allow new classes to be loaded during a request and setting it to _false_ will disable this behavior.
 
 * +config.eager_load_paths+ accepts an array of paths from which Rails will eager load on boot if cache classes is enabled. All elements of this array must also be in +load_paths+. 
-
-* +config.frameworks+ accepts an array of rails framework components that should be loaded. (Defaults to +:active_record+, +:action_controller+, +:action_view+, +:action_mailer+, and +:active_resource+). 
 
 * +config.load_once_paths+ accepts an array of paths from which Rails will automatically load from only once. All elements of this array must also be in +load_paths+.
 
@@ -133,6 +131,8 @@ h4. Configuring Action Controller
 
 * +config.action_controller.asset_host+ provides a string that is prepended to all of the URL-generating helpers in +AssetHelper+. This is designed to allow moving all javascript, CSS, and image files to a separate asset host.
 
+* +config.action_controller.asset_path+ allows you to override the default asset path generation by providing your own instructions.
+
 * +config.action_controller.consider_all_requests_local+ is generally set to +true+ during development and +false+ during production; if it is set to +true+, then any error will cause detailed debugging information to be dumped in the HTTP response. For finer-grained control, set this to +false+ and implement +local_request?+ to specify which requests should provide debugging information on errors.
 
 * +config.action_controller.allow_concurrency+ should be set to +true+ to allow concurrent (threadsafe) action processing. Set to +false+ by default. You probably don't want to call this one directly, though, because a series of other adjustments need to be made for threadsafe mode to work properly. Instead, you should simply call +config.threadsafe!+ inside your +production.rb+ file, which makes all the necessary adjustments.
@@ -163,7 +163,7 @@ WARNING: Threadsafe operation in incompatible with the normal workings of develo
 
 The caching code adds two additional settings:
 
-* +ActionController::Base.page_cache_directory+ sets the directory where Rails will create cached pages for your web server. The default is +Rails.public_path+ (which is usually set to +RAILS_ROOT + "/public"+).
+* +ActionController::Base.page_cache_directory+ sets the directory where Rails will create cached pages for your web server. The default is +Rails.public_path+ (which is usually set to +Rails.root + "/public"+).
 
 * +ActionController::Base.page_cache_extension+ sets the extension to be used when generating pages for the cache (this is ignored if the incoming request already has an extension). The default is +.html+.
 
@@ -183,7 +183,7 @@ There are only a few configuration options for Action View, starting with four o
 
 * +config.action_view.warn_cache_misses+ tells Rails to display a warning whenever an action results in a cache miss on your view paths. The default is +false+.
 
-* +config.action_view.field_error_proc+ provides an HTML generator for displaying errors that come from Active Record. The default is <tt>Proc.new{ |html_tag, instance| "<div class=\"fieldWithErrors\">#{html_tag}</div>" }</tt>
+* +config.action_view.field_error_proc+ provides an HTML generator for displaying errors that come from Active Record. The default is <tt>Proc.new{ |html_tag, instance| "&lt;div class=\"fieldWithErrors\"&gt;#{html_tag}&lt;/div&gt;" }</tt>
 
 * +config.action_view.default_form_builder+ tells Rails which form builder to use by default. The default is +ActionView::Helpers::FormBuilder+.
 

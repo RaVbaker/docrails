@@ -1,5 +1,5 @@
 require 'generators/generators_test_helper'
-require 'generators/rails/model/model_generator'
+require 'rails/generators/rails/model/model_generator'
 
 class ModelGeneratorTest < Rails::Generators::TestCase
   include GeneratorsTestHelper
@@ -25,6 +25,14 @@ class ModelGeneratorTest < Rails::Generators::TestCase
   def test_model_with_underscored_parent_option
     run_generator ["account", "--parent", "admin/account"]
     assert_file "app/models/account.rb", /class Account < Admin::Account/
+  end
+
+  def test_model_with_namespace
+    run_generator ["admin/account"]
+    assert_file "app/models/admin.rb", /module Admin/
+    assert_file "app/models/admin.rb", /def self\.table_name_prefix/
+    assert_file "app/models/admin.rb", /'admin_'/
+    assert_file "app/models/admin/account.rb", /class Admin::Account < ActiveRecord::Base/
   end
 
   def test_migration

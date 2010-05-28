@@ -44,18 +44,24 @@ module ActionView
 
     autoload :Base
     autoload :LookupContext
-    autoload :MissingTemplate,    'action_view/base'
     autoload :Resolver,           'action_view/template/resolver'
     autoload :PathResolver,       'action_view/template/resolver'
     autoload :FileSystemResolver, 'action_view/template/resolver'
     autoload :PathSet,            'action_view/paths'
 
-    autoload :TemplateError,     'action_view/template/error'
+    autoload :MissingTemplate,    'action_view/template/error'
+    autoload :ActionViewError,    'action_view/template/error'
+    autoload :EncodingError,      'action_view/template/error'
+    autoload :TemplateError,      'action_view/template/error'
+    autoload :WrongEncodingError, 'action_view/template/error'
+
     autoload :TemplateHandler,   'action_view/template'
     autoload :TemplateHandlers,  'action_view/template'
   end
 
   autoload :TestCase, 'action_view/test_case'
+
+  ENCODING_FLAG = '#.*coding[:=]\s*(\S+)[ \t]*'
 end
 
 require 'active_support/i18n'

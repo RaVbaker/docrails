@@ -6,10 +6,12 @@ module Rails
       include Initializable
 
       initializer :load_environment_config do
-        require_environment!
+        environment = config.paths.config.environments.to_a.first
+        require environment if environment
       end
 
-      initializer :load_all_active_support do
+      initializer :load_active_support do
+        require 'active_support/dependencies'
         require "active_support/all" unless config.active_support.bare
       end
 
@@ -17,7 +19,6 @@ module Rails
       # Used by Passenger to ensure everything's loaded before forking and
       # to avoid autoload race conditions in JRuby.
       initializer :preload_frameworks do
-        require 'active_support/dependencies'
         ActiveSupport::Autoload.eager_autoload! if config.preload_frameworks
       end
 
@@ -65,8 +66,8 @@ module Rails
         ActiveSupport::Dependencies.mechanism = config.cache_classes ? :require : :load
       end
 
-      initializer :bootstrap_load_path do
-        # This is just an initializer used as hook so all load paths are loaded together
+      initializer :bootstrap_hook do |app|
+        ActiveSupport.run_load_hooks(:before_initialize, app)
       end
     end
   end

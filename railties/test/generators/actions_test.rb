@@ -1,8 +1,5 @@
 require 'generators/generators_test_helper'
-require 'generators/rails/app/app_generator'
-
-# TODO This line shouldn't be required
-require 'generators/rails/model/model_generator'
+require 'rails/generators/rails/app/app_generator'
 
 class ActionsTest < Rails::Generators::TestCase
   include GeneratorsTestHelper
@@ -89,8 +86,13 @@ class ActionsTest < Rails::Generators::TestCase
       action :gem, 'mislav-will-paginate', :lib => 'will-paginate', :source => 'http://gems.github.com'
     end
 
-    assert_file 'Gemfile', /gem "mislav\-will\-paginate", :require_as => "will\-paginate"/
+    assert_deprecated do
+      action :gem, 'thoughtbot-factory_girl', :require_as => 'factory_girl', :source => 'http://gems.github.com'
+    end    
+
+    assert_file 'Gemfile', /gem "mislav\-will\-paginate", :require => "will\-paginate"/
     assert_file 'Gemfile', /source "http:\/\/gems\.github\.com"/
+    assert_file 'Gemfile', /gem "thoughtbot-factory_girl", :require => "factory_girl"/
   end
 
   def test_gem_with_env_should_include_all_dependencies_in_gemfile
@@ -100,7 +102,12 @@ class ActionsTest < Rails::Generators::TestCase
       action :gem, 'rspec', :env => %w(development test)
     end
 
-    assert_file 'Gemfile', /gem "rspec", :only => \["development", "test"\]/
+    assert_deprecated do
+      action :gem, 'rspec-rails', :only => %w(development test)      
+    end
+
+    assert_file 'Gemfile', /gem "rspec", :group => \["development", "test"\]/
+    assert_file 'Gemfile', /gem "rspec-rails", :group => \["development", "test"\]/
   end
 
   def test_gem_with_version_should_include_version_in_gemfile
@@ -212,7 +219,7 @@ class ActionsTest < Rails::Generators::TestCase
 
   def test_readme
     run_generator
-    Rails::Generators::AppGenerator.expects(:source_root).returns(destination_root)
+    Rails::Generators::AppGenerator.expects(:source_root).times(2).returns(destination_root)
     assert_match(/Welcome to Rails/, action(:readme, "README"))
   end
 

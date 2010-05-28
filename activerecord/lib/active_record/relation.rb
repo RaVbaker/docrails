@@ -1,3 +1,5 @@
+require 'active_support/core_ext/object/blank'
+
 module ActiveRecord
   class Relation
     JoinOperation = Struct.new(:relation, :join_class, :on)
@@ -11,18 +13,19 @@ module ActiveRecord
     delegate :insert, :to => :arel
 
     attr_reader :table, :klass
+    attr_accessor :extensions
 
-    def initialize(klass, table)
+    def initialize(klass, table, &block)
       @klass, @table = klass, table
 
-      @readonly_value    = nil
-      @create_with_value = nil
       @implicit_readonly = nil
-      @limit_value       = nil
-      @offset_value      = nil
       @loaded            = nil
 
+      SINGLE_VALUE_METHODS.each {|v| instance_variable_set(:"@#{v}_value", nil)}
       (ASSOCIATION_METHODS + MULTI_VALUE_METHODS).each {|v| instance_variable_set(:"@#{v}_values", [])}
+      @extensions = []
+
+      apply_modules(Module.new(&block)) if block_given?
     end
 
     def new(*args, &block)
@@ -62,7 +65,7 @@ module ActiveRecord
 
       preload = @preload_values
       preload +=  @includes_values unless eager_loading?
-      preload.each {|associations| @klass.send(:preload_associations, @records, associations) } 
+      preload.each {|associations| @klass.send(:preload_associations, @records, associations) }
 
       # @readonly_value is true only if set explicity. @implicit_readonly is true if there are JOINS and no explicit SELECT.
       readonly = @readonly_value.nil? ? @implicit_readonly : @readonly_value
@@ -308,11 +311,26 @@ module ActiveRecord
       @should_eager_load ||= (@eager_load_values.any? || (@includes_values.any? && references_eager_loaded_tables?))
     end
 
+    def ==(other)
+      case other
+      when Relation
+        other.to_sql == to_sql
+      when Array
+        to_a == other.to_a
+      end
+    end
+
+    def inspect
+      to_a.inspect
+    end
+
     protected
 
     def method_missing(method, *args, &block)
       if Array.method_defined?(method)
         to_a.send(method, *args, &block)
+      elsif @klass.scopes[method]
+        merge(@klass.send(method, *args, &block))
       elsif @klass.respond_to?(method)
         @klass.send(:with_scope, self) { @klass.send(method, *args, &block) }
       elsif arel.respond_to?(method)

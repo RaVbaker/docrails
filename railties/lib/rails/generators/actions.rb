@@ -1,5 +1,6 @@
 require 'open-uri'
 require 'active_support/deprecation'
+require 'rbconfig'
 
 module Rails
   module Generators
@@ -53,7 +54,8 @@ module Rails
         name, version = args
 
         # Deal with deprecated options
-        { :env => :only, :lib => :require_as }.each do |old, new|
+        { :env => :group, :only => :group,
+          :lib => :require, :require_as => :require }.each do |old, new|
           next unless options[old]
           options[new] = options.delete(old)
           ActiveSupport::Deprecation.warn "#{old.inspect} option in gem is deprecated, use #{new.inspect} instead"
@@ -240,7 +242,7 @@ module Rails
       def rake(command, options={})
         log :rake, command
         env  = options[:env] || 'development'
-        sudo = options[:sudo] && RUBY_PLATFORM !~ /mswin|mingw/ ? 'sudo ' : ''
+        sudo = options[:sudo] && Config::CONFIG['host_os'] !~ /mswin|mingw/ ? 'sudo ' : ''
         in_root { run("#{sudo}#{extify(:rake)} #{command} RAILS_ENV=#{env}", :verbose => false) }
       end
 
@@ -307,7 +309,7 @@ module Rails
         # Add an extension to the given name based on the platform.
         #
         def extify(name)
-          if RUBY_PLATFORM =~ /mswin|mingw/
+          if Config::CONFIG['host_os'] =~ /mswin|mingw/
             "#{name}.bat"
           else
             name

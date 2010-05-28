@@ -1,10 +1,18 @@
 require 'abstract_unit'
+
+begin
+  require 'openssl'
+  OpenSSL::Digest::SHA1
+rescue LoadError, NameError
+  $stderr.puts "Skipping MessageEncryptor test: broken OpenSSL install"
+else
+
 require 'active_support/time'
 
 class MessageEncryptorTest < Test::Unit::TestCase
   def setup
     @encryptor = ActiveSupport::MessageEncryptor.new(ActiveSupport::SecureRandom.hex(64))
-    @data = {:some=>"data", :now=>Time.now}
+    @data = { :some => "data", :now => Time.local(2010) }
   end
   
   def test_simple_round_tripping
@@ -44,4 +52,6 @@ class MessageEncryptorTest < Test::Unit::TestCase
       bits.reverse!
       ActiveSupport::Base64.encode64s(bits)
     end
+end
+
 end

@@ -18,7 +18,7 @@ class TestHelperMailerTest < ActionMailer::TestCase
   end
 
   def test_setup_creates_the_expected_mailer
-    assert @expected.is_a?(Mail::Message)
+    assert_kind_of Mail::Message, @expected
     assert_equal "1.0", @expected.mime_version
     assert_equal "text/plain", @expected.mime_type
   end
@@ -34,11 +34,7 @@ class TestHelperMailerTest < ActionMailer::TestCase
   end
   
   def test_charset_is_utf_8
-    assert_equal "utf-8", charset
-  end
-
-  def test_encode
-    assert_equal "=?utf-8?Q?=0Aasdf=0A?=", encode("\nasdf\n")
+    assert_equal "UTF-8", charset
   end
 
   def test_assert_emails
@@ -125,7 +121,7 @@ class AnotherTestHelperMailerTest < ActionMailer::TestCase
   end
 
   def test_setup_shouldnt_conflict_with_mailer_setup
-    assert @expected.is_a?(Mail::Message)
+    assert_kind_of Mail::Message, @expected
     assert_equal 'a value', @test_var
   end
 end

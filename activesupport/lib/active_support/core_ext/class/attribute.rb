@@ -1,5 +1,5 @@
-require 'active_support/core_ext/object/singleton_class'
-require 'active_support/core_ext/module/delegation'
+require 'active_support/core_ext/kernel/singleton_class'
+require 'active_support/core_ext/module/remove_method'
 
 class Class
   # Declare a class-level attribute whose value is inheritable and
@@ -40,19 +40,28 @@ class Class
   def class_attribute(*attrs)
     instance_writer = !attrs.last.is_a?(Hash) || attrs.pop[:instance_writer]
 
-    s = singleton_class
-    attrs.each do |attr|
-      s.send(:define_method, attr) { }
-      s.send(:define_method, :"#{attr}?") { !!send(attr) }
-      s.send(:define_method, :"#{attr}=") do |value|
-        singleton_class.send(:define_method, attr) { value }
-      end
+    attrs.each do |name|
+      class_eval <<-RUBY, __FILE__, __LINE__ + 1
+        def self.#{name}() nil end
+        def self.#{name}?() !!#{name} end
 
-      define_method(attr) { self.class.send(attr) }
-      define_method(:"#{attr}?") { !!send(attr) }
-      define_method(:"#{attr}=") do |value|
-        singleton_class.send(:define_method, attr) { value }
-      end if instance_writer
+        def self.#{name}=(val)
+          singleton_class.class_eval do
+            remove_possible_method(:#{name})
+            define_method(:#{name}) { val }
+          end
+        end
+
+        def #{name}
+          defined?(@#{name}) ? @#{name} : singleton_class.#{name}
+        end
+
+        def #{name}?
+          !!#{name}
+        end
+      RUBY
+
+      attr_writer name if instance_writer
     end
   end
 end

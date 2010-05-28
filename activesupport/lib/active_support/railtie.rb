@@ -3,7 +3,7 @@ require "rails"
 
 module ActiveSupport
   class Railtie < Rails::Railtie
-    railtie_name :active_support
+    config.active_support = ActiveSupport::OrderedOptions.new
 
     # Loads support for "whiny nil" (noisy warnings when methods are invoked
     # on +nil+ values) if Configuration#whiny_nils is true.
@@ -30,14 +30,13 @@ end
 
 module I18n
   class Railtie < Rails::Railtie
-    railtie_name :i18n
-
-    # Initialize I18n load paths to an array
+    config.i18n = ActiveSupport::OrderedOptions.new
     config.i18n.railties_load_path = []
     config.i18n.load_path = []
+    config.i18n.fallbacks = ActiveSupport::OrderedOptions.new
 
     initializer "i18n.initialize" do
-      ActiveSupport.base_hook(:i18n) do
+      ActiveSupport.on_load(:i18n) do
         I18n.reload!
 
         ActionDispatch::Callbacks.to_prepare do
@@ -49,6 +48,8 @@ module I18n
     # Set the i18n configuration from config.i18n but special-case for
     # the load_path which should be appended to what's already set instead of overwritten.
     config.after_initialize do |app|
+      fallbacks = app.config.i18n.delete(:fallbacks)
+
       app.config.i18n.each do |setting, value|
         case setting
         when :railties_load_path
@@ -60,7 +61,40 @@ module I18n
         end
       end
 
+      init_fallbacks(fallbacks) if fallbacks && validate_fallbacks(fallbacks)
       I18n.reload!
+    end
+
+    class << self
+      protected
+
+        def init_fallbacks(fallbacks)
+          include_fallbacks_module
+          args = case fallbacks
+          when ActiveSupport::OrderedOptions
+            [*(fallbacks[:defaults] || []) << fallbacks[:map]].compact
+          when Hash, Array
+            Array.wrap(fallbacks)
+          else # TrueClass
+            []
+          end
+          I18n.fallbacks = I18n::Locale::Fallbacks.new(*args)
+        end
+
+        def include_fallbacks_module
+          I18n.backend.class.send(:include, I18n::Backend::Fallbacks)
+        end
+      
+        def validate_fallbacks(fallbacks)
+          case fallbacks
+          when ActiveSupport::OrderedOptions
+            !fallbacks.empty?
+          when TrueClass, Array, Hash
+            true
+          else
+            raise "Unexpected fallback type #{fallbacks.inspect}"
+          end
+        end
     end
   end
 end

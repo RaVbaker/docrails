@@ -105,7 +105,7 @@ class TestMailer < ActionMailer::Base
     sent_on    Time.local(2004, 12, 12)
     cc         "Foo áëô îü <extended@example.net>"
     bcc        "Foo áëô îü <extended@example.net>"
-    charset    "utf-8"
+    charset    "UTF-8"
     
     body       "åœö blah"
   end
@@ -131,7 +131,7 @@ class TestMailer < ActionMailer::Base
     recipients   recipient
     subject      "Foo áëô îü"
     from         "test@example.com"
-    charset      "utf-8"
+    charset      "UTF-8"
 
     part "text/plain" do |p|
       p.body = "blah"
@@ -281,7 +281,7 @@ class TestMailer < ActionMailer::Base
     from         "One: Two <test@example.com>"
     cc           "Three: Four <test@example.com>"
     bcc          "Five: Six <test@example.com>"
-    body       "testing"
+    body         "testing"
   end
 
   def custom_content_type_attributes
@@ -289,7 +289,7 @@ class TestMailer < ActionMailer::Base
     subject      "custom content types"
     from         "some.one@somewhere.test"
     content_type "text/plain; format=flowed"
-    body       "testing"
+    body         "testing"
   end
 
   def return_path
@@ -297,7 +297,7 @@ class TestMailer < ActionMailer::Base
     subject      "return path test"
     from         "some.one@somewhere.test"
     headers["return-path"] = "another@somewhere.test"
-    body       "testing"
+    body         "testing"
   end
 
   def subject_with_i18n(recipient)
@@ -316,18 +316,15 @@ class TestMailer < ActionMailer::Base
 end
 
 class ActionMailerTest < Test::Unit::TestCase
-  include ActionMailer::Quoting
 
-  def encode( text, charset="utf-8" )
-    quoted_printable( text, charset )
+  def encode( text, charset="UTF-8" )
+    Mail::Encodings.q_value_encode( text, charset )
   end
 
-  def new_mail( charset="utf-8" )
+  def new_mail( charset="UTF-8" )
     mail = Mail.new
+    mail.charset = charset
     mail.mime_version = "1.0"
-    if charset
-      mail.content_type ["text", "plain", { "charset" => charset }]
-    end
     mail
   end
 
@@ -340,6 +337,8 @@ class ActionMailerTest < Test::Unit::TestCase
 
     @original_logger = TestMailer.logger
     @recipient = 'test@localhost'
+
+    TestMailer.delivery_method = :test
   end
 
   def teardown
@@ -356,7 +355,7 @@ class ActionMailerTest < Test::Unit::TestCase
     assert_equal "multipart/mixed", created.mime_type
     assert_equal "multipart/alternative", created.parts[0].mime_type
     assert_equal "bar", created.parts[0].header['foo'].to_s
-    assert_nil created.parts[0].charset
+    assert_not_nil created.parts[0].charset
     assert_equal "text/plain", created.parts[0].parts[0].mime_type
     assert_equal "text/html", created.parts[0].parts[1].mime_type
     assert_equal "application/octet-stream", created.parts[1].mime_type
@@ -418,7 +417,7 @@ class ActionMailerTest < Test::Unit::TestCase
   end
 
   def test_custom_template
-    expected = new_mail
+    expected         = new_mail
     expected.to      = @recipient
     expected.subject = "[Signed up] Welcome #{@recipient}"
     expected.body    = "Hello there, \n\nMr. #{@recipient}"
@@ -437,7 +436,7 @@ class ActionMailerTest < Test::Unit::TestCase
     assert ActionView::Template.template_handler_extensions.include?("haml"), "haml extension was not registered"
 
     # N.b., custom_templating_extension.text.plain.haml is expected to be in fixtures/test_mailer directory
-    expected = new_mail
+    expected         = new_mail
     expected.to      = @recipient
     expected.subject = "[Signed up] Welcome #{@recipient}"
     expected.body    = "Hello there, \n\nMr. #{@recipient}"
@@ -454,7 +453,7 @@ class ActionMailerTest < Test::Unit::TestCase
   end
 
   def test_cancelled_account
-    expected = new_mail
+    expected         = new_mail
     expected.to      = @recipient
     expected.subject = "[Cancelled] Goodbye #{@recipient}"
     expected.body    = "Goodbye, Mr. #{@recipient}"
@@ -478,7 +477,7 @@ class ActionMailerTest < Test::Unit::TestCase
   end
 
   def test_cc_bcc
-    expected = new_mail
+    expected         = new_mail
     expected.to      = @recipient
     expected.subject = "testing bcc/cc"
     expected.body    = "Nothing to see here."
@@ -568,7 +567,6 @@ class ActionMailerTest < Test::Unit::TestCase
 
   def test_iso_charset
     TestMailer.delivery_method = :test
-
     expected = new_mail( "iso-8859-1" )
     expected.to      = @recipient
     expected.subject = encode "testing isø charsets", "iso-8859-1"
@@ -604,7 +602,7 @@ class ActionMailerTest < Test::Unit::TestCase
 
   def test_unencoded_subject
     TestMailer.delivery_method = :test
-    expected = new_mail
+    expected         = new_mail
     expected.to      = @recipient
     expected.subject = "testing unencoded subject"
     expected.body    = "Nothing to see here."
@@ -669,14 +667,14 @@ class ActionMailerTest < Test::Unit::TestCase
   def test_unquote_quoted_printable_subject
     msg = <<EOF
 From: me@example.com
-Subject: =?utf-8?Q?testing_testing_=D6=A4?=
+Subject: =?UTF-8?Q?testing_testing_=D6=A4?=
 Content-Type: text/plain; charset=iso-8859-1
 
 The body
 EOF
     mail = Mail.new(msg)
     assert_equal "testing testing \326\244", mail.subject
-    assert_equal "Subject: =?utf-8?Q?testing_testing_=D6=A4?=\r\n", mail[:subject].encoded
+    assert_equal "Subject: =?UTF-8?Q?testing_testing_=D6=A4?=\r\n", mail[:subject].encoded
   end
 
   def test_unquote_7bit_subject
@@ -717,7 +715,7 @@ The=3Dbody
 EOF
     mail = Mail.new(msg)
     assert_equal "The=body", mail.body.to_s.strip
-    assert_equal "The=3Dbody", mail.body.encoded.strip
+    assert_equal "The=3Dbody=", mail.body.encoded.strip
   end
 
   def test_unquote_base64_body
@@ -738,12 +736,12 @@ EOF
     @recipient = "Grytøyr <test@localhost>"
 
     expected = new_mail "iso-8859-1"
-    expected.to      = quote_address_if_necessary @recipient, "iso-8859-1"
+    expected.to      = @recipient
     expected.subject = "testing extended headers"
     expected.body    = "Nothing to see here."
-    expected.from    = quote_address_if_necessary "Grytøyr <stian1@example.net>", "iso-8859-1"
-    expected.cc      = quote_address_if_necessary "Grytøyr <stian2@example.net>", "iso-8859-1"
-    expected.bcc     = quote_address_if_necessary "Grytøyr <stian3@example.net>", "iso-8859-1"
+    expected.from    = "Grytøyr <stian1@example.net>"
+    expected.cc      = "Grytøyr <stian2@example.net>"
+    expected.bcc     = "Grytøyr <stian3@example.net>"
     expected.date    = Time.local 2004, 12, 12
 
     created = nil
@@ -772,33 +770,36 @@ EOF
 
   def test_utf8_body_is_not_quoted
     @recipient = "Foo áëô îü <extended@example.net>"
-    expected = new_mail "utf-8"
-    expected.to      = quote_address_if_necessary @recipient, "utf-8"
-    expected.subject = "testing utf-8 body"
+    expected = new_mail "UTF-8"
+    expected.to      = @recipient
+    expected.subject = "testing UTF-8 body"
     expected.body    = "åœö blah"
-    expected.from    = quote_address_if_necessary @recipient, "utf-8"
-    expected.cc      = quote_address_if_necessary @recipient, "utf-8"
-    expected.bcc     = quote_address_if_necessary @recipient, "utf-8"
+    expected.from    = @recipient
+    expected.cc      = @recipient
+    expected.bcc     = @recipient
     expected.date    = Time.local 2004, 12, 12
 
     created = TestMailer.utf8_body @recipient
-    assert_match(/åœö blah/, created.encoded)
+    assert_match(/åœö blah/, created.decoded)
   end
 
   def test_multiple_utf8_recipients
     @recipient = ["\"Foo áëô îü\" <extended@example.net>", "\"Example Recipient\" <me@example.com>"]
-    expected = new_mail "utf-8"
-    expected.to      = quote_address_if_necessary @recipient, "utf-8"
-    expected.subject = "testing utf-8 body"
+    expected = new_mail "UTF-8"
+    expected.to      = @recipient
+    expected.subject = "testing UTF-8 body"
     expected.body    = "åœö blah"
-    expected.from    = quote_address_if_necessary @recipient.first, "utf-8"
-    expected.cc      = quote_address_if_necessary @recipient, "utf-8"
-    expected.bcc     = quote_address_if_necessary @recipient, "utf-8"
+    expected.from    = @recipient.first
+    expected.cc      = @recipient
+    expected.bcc     = @recipient
     expected.date    = Time.local 2004, 12, 12
 
     created = TestMailer.utf8_body @recipient
-    assert_match(/\nFrom: =\?utf-8\?Q\?Foo_.*?\?= <extended@example.net>\r/, created.encoded)
-    assert_match(/\nTo: =\?utf-8\?Q\?Foo_.*?\?= <extended@example.net>, \r\n\tExample Recipient <me/, created.encoded)
+    from_regexp = Regexp.escape('From: Foo =?UTF-8?B?w6HDq8O0?= =?UTF-8?B?IMOuw7w=?=')
+    assert_match(/#{from_regexp}/m, created.encoded)
+
+    to_regexp   = Regexp.escape("To: =?UTF-8?B?Rm9vIMOhw6vDtCDDrsO8?= <extended@example.net>")
+    assert_match(/#{to_regexp}/m, created.encoded)
   end
 
   def test_receive_decodes_base64_encoded_mail
@@ -862,12 +863,18 @@ EOF
 
   def test_multipart_with_utf8_subject
     mail = TestMailer.multipart_with_utf8_subject(@recipient)
-    assert_match(/\nSubject: =\?utf-8\?Q\?Foo_.*?\?=/, mail.encoded)
+    regex = Regexp.escape('Subject: =?UTF-8?Q?Foo_=C3=A1=C3=AB=C3=B4_=C3=AE=C3=BC?=')
+    assert_match(/#{regex}/, mail.encoded)
+    string = "Foo áëô îü"
+    assert_match(string, mail.subject)
   end
 
   def test_implicitly_multipart_with_utf8
     mail = TestMailer.implicitly_multipart_with_utf8
-    assert_match(/\nSubject: =\?utf-8\?Q\?Foo_.*?\?=/, mail.encoded)
+    regex = Regexp.escape('Subject: =?UTF-8?Q?Foo_=C3=A1=C3=AB=C3=B4_=C3=AE=C3=BC?=')
+    assert_match(/#{regex}/, mail.encoded)
+    string = "Foo áëô îü"
+    assert_match(string, mail.subject)
   end
 
   def test_explicitly_multipart_messages
@@ -907,11 +914,11 @@ EOF
     assert_equal "1.0", mail.mime_version.to_s
     assert_equal "multipart/alternative", mail.mime_type
     assert_equal "text/plain", mail.parts[0].mime_type
-    assert_equal "utf-8", mail.parts[0].charset
+    assert_equal "UTF-8", mail.parts[0].charset
     assert_equal "text/html", mail.parts[1].mime_type
-    assert_equal "utf-8", mail.parts[1].charset
+    assert_equal "UTF-8", mail.parts[1].charset
     assert_equal "application/x-yaml", mail.parts[2].mime_type
-    assert_equal "utf-8", mail.parts[2].charset
+    assert_equal "UTF-8", mail.parts[2].charset
   end
 
   def test_implicitly_multipart_messages_with_custom_order
@@ -1017,8 +1024,8 @@ EOF
 
   def test_empty_header_values_omitted
     result = TestMailer.unnamed_attachment(@recipient).encoded
-    assert_match %r{Content-Type: application/octet-stream;}, result
-    assert_match %r{Content-Disposition: attachment;}, result
+    assert_match %r{Content-Type: application/octet-stream}, result
+    assert_match %r{Content-Disposition: attachment}, result
   end
 
   def test_headers_with_nonalpha_chars
@@ -1041,14 +1048,15 @@ EOF
   def test_multipart_with_template_path_with_dots
     mail = FunkyPathMailer.multipart_with_template_path_with_dots(@recipient)
     assert_equal 2, mail.parts.length
-    assert "text/plain", mail.parts[1].mime_type
-    assert "utf-8", mail.parts[1].charset
+    assert_equal "text/plain", mail.parts[0].mime_type
+    assert_equal "text/html", mail.parts[1].mime_type
+    assert_equal "UTF-8", mail.parts[1].charset
   end
 
   def test_custom_content_type_attributes
     mail = TestMailer.custom_content_type_attributes
     assert_match %r{format=flowed}, mail.content_type
-    assert_match %r{charset=utf-8}, mail.content_type
+    assert_match %r{charset=UTF-8}, mail.content_type
   end
 
   def test_return_path_with_create
@@ -1143,15 +1151,15 @@ class RespondToTest < Test::Unit::TestCase
   end
 
   def test_should_respond_to_new
-    assert RespondToMailer.respond_to?(:new)
+    assert_respond_to RespondToMailer, :new
   end
 
   def test_should_respond_to_create_with_template_suffix
-    assert RespondToMailer.respond_to?(:create_any_old_template)
+    assert_respond_to RespondToMailer, :create_any_old_template
   end
 
   def test_should_respond_to_deliver_with_template_suffix
-    assert RespondToMailer.respond_to?(:deliver_any_old_template)
+    assert_respond_to RespondToMailer, :deliver_any_old_template
   end
 
   def test_should_not_respond_to_new_with_template_suffix
@@ -1191,6 +1199,6 @@ class RespondToTest < Test::Unit::TestCase
       RespondToMailer.not_a_method
     end
 
-    assert_match(/undefined method.*not_a_method/, error.message)
+    assert_match(/method.*not_a_method/, error.message)
   end
 end

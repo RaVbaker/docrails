@@ -1,3 +1,4 @@
+require 'rbconfig'
 module ActiveSupport
   module Testing
     class RemoteError < StandardError
@@ -33,7 +34,7 @@ module ActiveSupport
 
     module Isolation
       def self.forking_env?
-        !ENV["NO_FORK"] && RUBY_PLATFORM !~ /mswin|mingw|java/
+        !ENV["NO_FORK"] && ((Config::CONFIG['host_os'] !~ /mswin|mingw/) && (RUBY_PLATFORM !~ /java/))
       end
 
       def self.included(base)
@@ -78,8 +79,8 @@ module ActiveSupport
             @@ran_class_setup = true
           end
 
-          serialized = run_in_isolation do |runner|
-            super(runner)
+          serialized = run_in_isolation do |isolated_runner|
+            super(isolated_runner)
           end
 
           retval, proxy = Marshal.load(serialized)

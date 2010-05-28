@@ -159,6 +159,11 @@ module ActiveRecord
             association_proxy.__send__(:set_inverse_instance, associated_record, mapped_record)
           end
         end
+
+        id_to_record_map.each do |id, records|
+          next if seen_keys.include?(id.to_s)
+          records.each {|record| record.send("set_#{reflection_name}_target", nil) }            
+        end
       end
 
       # Given a collection of ActiveRecord objects, constructs a Hash which maps
@@ -324,7 +329,7 @@ module ActiveRecord
           klass = klass_name.constantize
 
           table_name = klass.quoted_table_name
-          primary_key = klass.primary_key
+          primary_key = reflection.options[:primary_key] || klass.primary_key
           column_type = klass.columns.detect{|c| c.name == primary_key}.type
 
           ids = id_map.keys.map do |id|
@@ -373,7 +378,7 @@ module ActiveRecord
 
 
       def interpolate_sql_for_preload(sql)
-        instance_eval("%@#{sql.gsub('@', '\@')}@")
+        instance_eval("%@#{sql.gsub('@', '\@')}@", __FILE__, __LINE__)
       end
 
       def append_conditions(reflection, preload_options)

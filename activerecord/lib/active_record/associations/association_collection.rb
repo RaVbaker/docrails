@@ -1,4 +1,5 @@
 require 'set'
+require 'active_support/core_ext/array/wrap'
 
 module ActiveRecord
   module Associations
@@ -98,13 +99,14 @@ module ActiveRecord
         if @target.is_a?(Array)
           @target.to_ary
         else
-          Array(@target)
+          Array.wrap(@target)
         end
       end
       alias_method :to_a, :to_ary
 
       def reset
         reset_target!
+        reset_named_scopes_cache!
         @loaded = false
       end
 
@@ -146,7 +148,7 @@ module ActiveRecord
       #     has_many :books
       #   end
       #
-      #   Author.find(:first).books.transaction do
+      #   Author.first.books.transaction do
       #     # same effect as calling Book.transaction
       #   end
       def transaction(*args)
@@ -162,6 +164,7 @@ module ActiveRecord
         load_target
         delete(@target)
         reset_target!
+        reset_named_scopes_cache!
       end
       
       # Calculate sum using SQL, not Enumerable
@@ -250,6 +253,7 @@ module ActiveRecord
         load_target
         destroy(@target)
         reset_target!
+        reset_named_scopes_cache!
       end
 
       def create(attrs = {})
@@ -405,6 +409,9 @@ module ActiveRecord
             else
               super
             end
+          elsif @reflection.klass.scopes[method]
+            @_named_scopes_cache ||= {}
+            @_named_scopes_cache[method] ||= with_scope(construct_scope) { @reflection.klass.send(method, *args) }
           else
             with_scope(construct_scope) do
               if block_given?
@@ -425,6 +432,10 @@ module ActiveRecord
           @target = Array.new
         end
 
+        def reset_named_scopes_cache!
+          @_named_scopes_cache = {}
+        end
+
         def find_target
           records =
             if @reflection.options[:finder_sql]
@@ -438,6 +449,16 @@ module ActiveRecord
             set_inverse_instance(record, @owner)
           end
           records
+        end
+
+        def add_record_to_target_with_callbacks(record)
+          callback(:before_add, record)
+          yield(record) if block_given?
+          @target ||= [] unless loaded?
+          @target << record unless @reflection.options[:uniq] && @target.include?(record)
+          callback(:after_add, record)
+          set_inverse_instance(record, @owner)
+          record
         end
 
       private
@@ -462,16 +483,6 @@ module ActiveRecord
           else
             add_record_to_target_with_callbacks(record)
           end
-        end
-
-        def add_record_to_target_with_callbacks(record)
-          callback(:before_add, record)
-          yield(record) if block_given?
-          @target ||= [] unless loaded?
-          @target << record unless @reflection.options[:uniq] && @target.include?(record)
-          callback(:after_add, record)
-          set_inverse_instance(record, @owner)
-          record
         end
 
         def remove_records(*records)

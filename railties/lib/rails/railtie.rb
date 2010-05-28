@@ -1,6 +1,7 @@
 require 'rails/initializable'
 require 'rails/configuration'
 require 'active_support/inflector'
+require 'active_support/deprecation'
 
 module Rails
   # Railtie is the core of the Rails Framework and provides several hooks to extend
@@ -39,7 +40,6 @@ module Rails
   #   # lib/my_gem/railtie.rb
   #   module MyGem
   #     class Railtie < Rails::Railtie
-  #       railtie_name :mygem
   #     end
   #   end
   # 
@@ -51,24 +51,8 @@ module Rails
   # 
   #   module MyGem
   #     class Railtie < Rails::Railtie
-  #       railtie_name :mygem
   #     end
   #   end
-  #   
-  # * Make sure your Gem loads the railtie.rb file if Rails is loaded first, an easy
-  #   way to check is by checking for the Rails constant which will exist if Rails
-  #   has started:
-  # 
-  #   # lib/my_gem.rb
-  #   module MyGem
-  #     require 'lib/my_gem/railtie' if defined?(Rails)
-  #   end
-  # 
-  # * Or instead of doing the require automatically, you can ask your users to require
-  #   it for you in their Gemfile:
-  # 
-  #   # #{USER_RAILS_ROOT}/Gemfile
-  #   gem "my_gem", :require_as => ["my_gem", "my_gem/railtie"]
   #
   # == Initializers
   #
@@ -82,13 +66,11 @@ module Rails
   #   end
   #
   # If specified, the block can also receive the application object, in case you 
-  # need to access some application specific configuration:
+  # need to access some application specific configuration, like middleware:
   #
   #   class MyRailtie < Rails::Railtie
   #     initializer "my_railtie.configure_rails_initialization" do |app|
-  #       if app.config.cache_classes
-  #         # some initialization behavior
-  #       end
+  #       app.middlewares.use MyRailtie::Middleware
   #     end
   #   end
   #
@@ -103,9 +85,6 @@ module Rails
   #   class MyRailtie < Rails::Railtie
   #     # Customize the ORM
   #     config.generators.orm :my_railtie_orm
-  #
-  #     # Add a middleware
-  #     config.middlewares.use MyRailtie::Middleware
   #
   #     # Add a to_prepare block which is executed once in production
   #     # and before which request in development
@@ -160,7 +139,7 @@ module Rails
   # By registering it:
   #
   #   class MyRailtie < Railtie
-  #     subscriber MyRailtie::Subscriber.new
+  #     subscriber :my_gem, MyRailtie::Subscriber.new
   #   end
   #
   # Take a look in Rails::Subscriber docs for more information.
@@ -179,7 +158,7 @@ module Rails
 
     include Initializable
 
-    ABSTRACT_RAILTIES = %w(Rails::Plugin Rails::Engine Rails::Application)
+    ABSTRACT_RAILTIES = %w(Rails::Railtie Rails::Plugin Rails::Engine Rails::Application)
 
     class << self
       def subclasses
@@ -187,23 +166,18 @@ module Rails
       end
 
       def inherited(base)
-        unless abstract_railtie?(base)
+        unless base.abstract_railtie?
           base.send(:include, self::Configurable)
           subclasses << base
         end
       end
 
-      def railtie_name(railtie_name = nil)
-        @railtie_name = railtie_name if railtie_name
-        @railtie_name ||= default_name
+      def railtie_name(*)
+        ActiveSupport::Deprecation.warn "railtie_name is deprecated and has no effect", caller
       end
 
-      def railtie_names
-        subclasses.map { |p| p.railtie_name }
-      end
-
-      def log_subscriber(log_subscriber)
-        Rails::LogSubscriber.add(railtie_name, log_subscriber)
+      def log_subscriber(name, log_subscriber)
+        Rails::LogSubscriber.add(name, log_subscriber)
       end
 
       def rake_tasks(&blk)
@@ -218,15 +192,12 @@ module Rails
         @generators
       end
 
-    protected
-
-      def abstract_railtie?(base)
-        ABSTRACT_RAILTIES.include?(base.name)
+      def abstract_railtie?
+        ABSTRACT_RAILTIES.include?(name)
       end
+    end
 
-      def default_name
-        ActiveSupport::Inflector.underscore(ActiveSupport::Inflector.demodulize(name))
-      end
+    def eager_load!
     end
 
     def rake_tasks

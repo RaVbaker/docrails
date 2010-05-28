@@ -136,7 +136,7 @@ config.logger = Logger.new(STDOUT)
 config.logger = Log4r::Logger.new("Application Log")
 </ruby>
 
-TIP: By default, each log is created under +RAILS_ROOT/log/+ and the log file name is +environment_name.log+.
+TIP: By default, each log is created under +Rails.root/log/+ and the log file name is +environment_name.log+.
 
 h4. Log Levels
 
@@ -286,7 +286,7 @@ condition  down     finish  list    ps    save     thread  var
 continue   edit     frame   method  putl  set      tmate   where
 </shell>
 
-TIP: To view the help menu for any command use +help <command-name>+ in active debug mode. For example: _+help var+_
+TIP: To view the help menu for any command use +help &lt;command-name&gt;+ in active debug mode. For example: _+help var+_
 
 The next command to learn is one of the most useful: +list+. You can also abbreviate ruby-debug commands by supplying just enough letters to distinguish them from other commands, so you can also use +l+ for the +list+ command.
 
@@ -680,7 +680,7 @@ h3. Plugins for Debugging
 
 There are some Rails plugins to help you to find errors and debug your application. Here is a list of useful plugins for debugging:
 
-* "Footnotes":http://github.com/drnic/rails-footnotes/tree/master: Every Rails page has footnotes that give request information and link back to your source via TextMate.
+* "Footnotes":http://github.com/josevalim/rails-footnotes: Every Rails page has footnotes that give request information and link back to your source via TextMate.
 * "Query Trace":http://github.com/ntalbott/query_trace/tree/master: Adds query origin tracing to your logs.
 * "Query Stats":http://github.com/dan-manges/query_stats/tree/master: A Rails plugin to track database queries.
 * "Query Reviewer":http://code.google.com/p/query-reviewer/: This rails plugin not only runs "EXPLAIN" before each of your select queries in development, but provides a small DIV in the rendered output of each page with the summary of warnings for each query that it analyzed.
@@ -704,6 +704,7 @@ h3. Changelog
 
 "Lighthouse ticket":http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/5
 
+* April 4, 2010: Fixed document to validate XHTML 1.0 Strict. "Jaime Iniesta":http://jaimeiniesta.com
 * November 3, 2008: Accepted for publication. Added RJS, memory leaks and plugins chapters by "Emilio Tagua":credits.html#miloops
 * October 19, 2008: Copy editing pass by "Mike Gunderloy":credits.html#mgunderloy
 * September 16, 2008: initial version by "Emilio Tagua":credits.html#miloops

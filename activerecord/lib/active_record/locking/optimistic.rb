@@ -23,6 +23,16 @@ module ActiveRecord
     #   p2.first_name = "should fail"
     #   p2.save # Raises a ActiveRecord::StaleObjectError
     #
+    # Optimistic locking will also check for stale data when objects are destroyed.  Example:
+    #
+    #   p1 = Person.find(1)
+    #   p2 = Person.find(1)
+    #
+    #   p1.first_name = "Michael"
+    #   p1.save
+    #
+    #   p2.destroy # Raises a ActiveRecord::StaleObjectError
+    #
     # You're then responsible for dealing with the conflict by rescuing the exception and either rolling back, merging,
     # or otherwise apply the business logic needed to resolve the conflict.
     #
@@ -38,9 +48,6 @@ module ActiveRecord
         cattr_accessor :lock_optimistically, :instance_writer => false
         self.lock_optimistically = true
 
-        alias_method_chain :update, :lock
-        alias_method_chain :attributes_from_column_definition, :lock
-
         class << self
           alias_method :locking_column=, :set_locking_column
         end
@@ -51,8 +58,8 @@ module ActiveRecord
       end
 
       private
-        def attributes_from_column_definition_with_lock
-          result = attributes_from_column_definition_without_lock
+        def attributes_from_column_definition
+          result = super
 
           # If the locking column has no default value set,
           # start the lock version at zero.  Note we can't use
@@ -66,8 +73,8 @@ module ActiveRecord
           return result
         end
 
-        def update_with_lock(attribute_names = @attributes.keys) #:nodoc:
-          return update_without_lock(attribute_names) unless locking_enabled?
+        def update(attribute_names = @attributes.keys) #:nodoc:
+          return super unless locking_enabled?
           return 0 if attribute_names.empty?
 
           lock_col = self.class.locking_column
@@ -86,9 +93,8 @@ module ActiveRecord
               )
             ).arel.update(arel_attributes_values(false, false, attribute_names))
 
-
             unless affected_rows == 1
-              raise ActiveRecord::StaleObjectError, "Attempted to update a stale object"
+              raise ActiveRecord::StaleObjectError, "Attempted to update a stale object: #{self.class.name}"
             end
 
             affected_rows
@@ -100,14 +106,29 @@ module ActiveRecord
           end
         end
 
+        def destroy #:nodoc:
+          return super unless locking_enabled?
+
+          unless new_record?
+            lock_col = self.class.locking_column
+            previous_value = send(lock_col).to_i
+
+            table = self.class.arel_table
+            predicate = table[self.class.primary_key].eq(id)
+            predicate = predicate.and(table[self.class.locking_column].eq(previous_value))
+
+            affected_rows = self.class.unscoped.where(predicate).delete_all
+
+            unless affected_rows == 1
+              raise ActiveRecord::StaleObjectError, "Attempted to delete a stale object: #{self.class.name}"
+            end
+          end
+
+          freeze
+        end
+
       module ClassMethods
         DEFAULT_LOCKING_COLUMN = 'lock_version'
-
-        def self.extended(base)
-          class <<base
-            alias_method_chain :update_counters, :lock
-          end
-        end
 
         # Is optimistic locking enabled for this table? Returns true if the
         # +lock_optimistically+ flag is set to true (which it is, by default)
@@ -140,9 +161,9 @@ module ActiveRecord
 
         # Make sure the lock version column gets updated when counters are
         # updated.
-        def update_counters_with_lock(id, counters)
+        def update_counters(id, counters)
           counters = counters.merge(locking_column => 1) if locking_enabled?
-          update_counters_without_lock(id, counters)
+          super
         end
       end
     end

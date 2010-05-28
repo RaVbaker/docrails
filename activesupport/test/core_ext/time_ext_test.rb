@@ -1,7 +1,7 @@
 require 'abstract_unit'
 require 'active_support/time'
 
-class TimeExtCalculationsTest < Test::Unit::TestCase
+class TimeExtCalculationsTest < ActiveSupport::TestCase
   def test_seconds_since_midnight
     assert_equal 1,Time.local(2005,1,1,0,0,1).seconds_since_midnight
     assert_equal 60,Time.local(2005,1,1,0,1,0).seconds_since_midnight
@@ -166,8 +166,8 @@ class TimeExtCalculationsTest < Test::Unit::TestCase
     # assert_equal Time.local(2182,6,5,10),  Time.local(2005,6,5,10,0,0).years_since(177)
   end
 
-  def test_last_year
-    assert_equal Time.local(2004,6,5,10),  Time.local(2005,6,5,10,0,0).last_year
+  def test_prev_year
+    assert_equal Time.local(2004,6,5,10),  Time.local(2005,6,5,10,0,0).prev_year
   end
 
   def test_next_year
@@ -587,6 +587,13 @@ class TimeExtCalculationsTest < Test::Unit::TestCase
                    DateTime.civil(2039, 2, 21, 17, 44, 30, 0, 0)
       assert_equal ::Date::ITALY, Time.time_with_datetime_fallback(:utc, 2039, 2, 21, 17, 44, 30, 1).start # use Ruby's default start value
     end
+    silence_warnings do
+      0.upto(138) do |year|
+        [:utc, :local].each do |format|
+          assert_equal year, Time.time_with_datetime_fallback(format, year).year
+        end
+      end
+    end
   end
 
   def test_utc_time
@@ -608,8 +615,8 @@ class TimeExtCalculationsTest < Test::Unit::TestCase
     assert_equal Time.local(2005, 9, 30), Time.local(2005, 8, 31).next_month
   end
 
-  def test_last_month_on_31st
-    assert_equal Time.local(2004, 2, 29), Time.local(2004, 3, 31).last_month
+  def test_prev_month_on_31st
+    assert_equal Time.local(2004, 2, 29), Time.local(2004, 3, 31).prev_month
   end
 
   def test_xmlschema_is_available
@@ -758,33 +765,29 @@ end
 class TimeExtMarshalingTest < Test::Unit::TestCase
   def test_marshaling_with_utc_instance
     t = Time.utc(2000)
-    marshaled = Marshal.dump t
-    unmarshaled = Marshal.load marshaled
+    unmarshaled = Marshal.load(Marshal.dump(t))
+    assert_equal "UTC", unmarshaled.zone
     assert_equal t, unmarshaled
-    assert_equal t.zone, unmarshaled.zone
   end
 
   def test_marshaling_with_local_instance
     t = Time.local(2000)
-    marshaled = Marshal.dump t
-    unmarshaled = Marshal.load marshaled
-    assert_equal t, unmarshaled
+    unmarshaled = Marshal.load(Marshal.dump(t))
     assert_equal t.zone, unmarshaled.zone
+    assert_equal t, unmarshaled
   end
 
   def test_marshaling_with_frozen_utc_instance
     t = Time.utc(2000).freeze
-    marshaled = Marshal.dump t
-    unmarshaled = Marshal.load marshaled
+    unmarshaled = Marshal.load(Marshal.dump(t))
+    assert_equal "UTC", unmarshaled.zone
     assert_equal t, unmarshaled
-    assert_equal t.zone, unmarshaled.zone
   end
 
   def test_marshaling_with_frozen_local_instance
     t = Time.local(2000).freeze
-    marshaled = Marshal.dump t
-    unmarshaled = Marshal.load marshaled
-    assert_equal t, unmarshaled
+    unmarshaled = Marshal.load(Marshal.dump(t))
     assert_equal t.zone, unmarshaled.zone
+    assert_equal t, unmarshaled
   end
 end

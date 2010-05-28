@@ -36,7 +36,7 @@ module ActionController
   #
   #   <% @events.each do |event| -%>
   #     <p>
-  #       <% format_time(event.time, :short, "N/A") %> | <%= event.name %>
+  #       <%= format_time(event.time, :short, "N/A") %> | <%= event.name %>
   #     </p>
   #   <% end -%>
   #
@@ -52,8 +52,8 @@ module ActionController
     include AbstractController::Helpers
 
     included do
-      class_attribute :helpers_path
-      self.helpers_path = []
+      config_accessor :helpers_path
+      self.helpers_path ||= []
     end
 
     module ClassMethods
@@ -104,7 +104,7 @@ module ActionController
         def all_application_helpers
           helpers = []
           helpers_path.each do |path|
-            extract  = /^#{Regexp.quote(path)}\/?(.*)_helper.rb$/
+            extract  = /^#{Regexp.quote(path.to_s)}\/?(.*)_helper.rb$/
             helpers += Dir["#{path}/**/*_helper.rb"].map { |file| file.sub(extract, '\1') }
           end
           helpers.sort!

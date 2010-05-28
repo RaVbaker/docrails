@@ -1,3 +1,5 @@
+require 'active_support/core_ext/object/blank'
+
 module ActionView
   # There's also a convenience method for rendering sub templates within the current controller that depends on a
   # single object (we call this kind of sub templates for partials). It relies on the fact that partials should
@@ -177,7 +179,7 @@ module ActionView
 
       def initialize(view_context, options, block)
         @view           = view_context
-        @partial_names  = PARTIAL_NAMES[@view.controller.class]
+        @partial_names  = PARTIAL_NAMES[@view.controller.class.name]
 
         setup(options, block)
       end
@@ -209,12 +211,12 @@ module ActionView
         identifier = ((@template = find_template) ? @template.identifier : @path)
 
         if @collection
-          ActiveSupport::Notifications.instrument("action_view.render_collection",
+          ActiveSupport::Notifications.instrument("render_collection.action_view",
             :identifier => identifier || "collection", :count => @collection.size) do
             render_collection
           end
         else
-          content = ActiveSupport::Notifications.instrument("action_view.render_partial",
+          content = ActiveSupport::Notifications.instrument("render_partial.action_view",
             :identifier => identifier) do
             render_partial
           end
@@ -239,15 +241,21 @@ module ActionView
       end
 
       def collection_with_template(template = @template)
-        segments, locals, as, template = [], @locals, @options[:as] || @template.variable_name, @template
+        segments, locals, template = [], @locals, @template
 
-        counter_name = template.counter_name
-        locals[counter_name] = -1
+        if @options[:as]
+          as = @options[:as]
+          counter = "#{as}_counter".to_sym
+        else
+          as = template.variable_name
+          counter = template.counter_name
+        end
+
+        locals[counter] = -1
 
         @collection.each do |object|
-          locals[counter_name] += 1
+          locals[counter] += 1
           locals[as] = object
-
           segments << template.render(@view, locals)
         end
 
@@ -255,13 +263,18 @@ module ActionView
       end
 
       def collection_without_template(collection_paths = @collection_paths)
-        segments, locals, as = [], @locals, @options[:as]
-        index, template = -1, nil
+        segments, locals = [], @locals
+        index, template  = -1, nil
+
+        if @options[:as]
+          as = @options[:as]
+          counter = "#{as}_counter"
+        end
 
         @collection.each_with_index do |object, i|
           template = find_template(collection_paths[i])
-          locals[template.counter_name] = (index += 1)
           locals[as || template.variable_name] = object
+          locals[counter || template.counter_name] = (index += 1)
 
           segments << template.render(@view, locals)
         end
@@ -298,7 +311,7 @@ module ActionView
       end
 
       def partial_path(object = @object)
-        @partial_names[object.class] ||= begin
+        @partial_names[object.class.name] ||= begin
           object = object.to_model if object.respond_to?(:to_model)
 
           object.class.model_name.partial_path.dup.tap do |partial|

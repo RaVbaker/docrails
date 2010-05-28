@@ -1,4 +1,6 @@
+require 'active_support/concern'
 require 'active_support/core_ext/object/try'
+require 'active_support/core_ext/object/blank'
 
 module ActionMailer
   module OldApi #:nodoc:
@@ -30,9 +32,6 @@ module ActionMailer
       # Specify the address (if different than the "from" address) to direct
       # replies to this message.
       adv_attr_accessor :reply_to
-
-      # Specify additional headers to be added to the message.
-      adv_attr_accessor :headers
 
       # Specify the order in which parts should be sorted, based on content-type.
       # This defaults to the value for the +default_implicit_parts_order+.
@@ -145,12 +144,12 @@ module ActionMailer
       { :content_type => content_type,
         :content_disposition => content_disposition }.merge(params)
     end
-    
+
     def create_mail 
       m = @_message
 
-      quote_fields!({:subject => subject, :to => recipients, :from => from,
-                    :bcc => bcc, :cc => cc, :reply_to => reply_to}, charset)
+      set_fields!({:subject => subject, :to => recipients, :from => from,
+                   :bcc => bcc, :cc => cc, :reply_to => reply_to}, charset)
 
       m.mime_version = mime_version    unless mime_version.nil?
       m.date         = sent_on.to_time rescue sent_on if sent_on
@@ -207,6 +206,7 @@ module ActionMailer
         @parts.unshift create_inline_part(@body)
       elsif @parts.empty? || @parts.all? { |p| p.content_disposition =~ /^attachment/ }
         lookup_context.find_all(@template, @mailer_name).each do |template|
+          self.formats = template.formats
           @parts << create_inline_part(render(:template => template), template.mime_type)
         end
 
@@ -229,6 +229,17 @@ module ActionMailer
         :content_disposition => "inline",
         :body => body
       )
+    end
+
+    def set_fields!(headers, charset) #:nodoc:
+      m = @_message
+      m.charset = charset
+      m.subject  ||= headers.delete(:subject)  if headers[:subject]
+      m.to       ||= headers.delete(:to)       if headers[:to]
+      m.from     ||= headers.delete(:from)     if headers[:from]
+      m.cc       ||= headers.delete(:cc)       if headers[:cc]
+      m.bcc      ||= headers.delete(:bcc)      if headers[:bcc]
+      m.reply_to ||= headers.delete(:reply_to) if headers[:reply_to]
     end
 
     def split_content_type(ct) 

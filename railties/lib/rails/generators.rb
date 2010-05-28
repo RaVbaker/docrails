@@ -3,7 +3,7 @@ $:.unshift(activesupport_path) if File.directory?(activesupport_path) && !$:.inc
 
 require 'active_support'
 require 'active_support/core_ext/object/blank'
-require 'active_support/core_ext/object/singleton_class'
+require 'active_support/core_ext/kernel/singleton_class'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/module/attribute_accessors'
@@ -42,14 +42,9 @@ module Rails
     }
 
     DEFAULT_OPTIONS = {
-      :erb => {
-        :layout => true
-      },
-
       :rails => {
         :force_plural => false,
         :helper => true,
-        :layout => true,
         :orm => nil,
         :integration_tool => nil,
         :performance_tool => nil,
@@ -171,6 +166,38 @@ module Rails
       end
     end
 
+    def self.hidden_namespaces
+      @hidden_namespaces ||= begin
+        orm      = options[:rails][:orm]
+        test     = options[:rails][:test_framework]
+        template = options[:rails][:template_engine]
+
+        [
+          "rails",
+          "#{orm}:migration",
+          "#{orm}:model",
+          "#{orm}:observer",
+          "#{test}:controller",
+          "#{test}:helper",
+          "#{test}:integration",
+          "#{test}:mailer",
+          "#{test}:model",
+          "#{test}:observer",
+          "#{test}:scaffold",
+          "#{test}:view",
+          "#{template}:controller",
+          "#{template}:scaffold"
+        ]
+      end
+    end
+
+    class << self
+      def hide_namespaces(*namespaces)
+        hidden_namespaces.concat(namespaces)
+      end
+      alias hide_namespace hide_namespaces
+    end
+
     # Show help message with available generators.
     def self.help(command = 'generate')
       lookup!
@@ -202,9 +229,7 @@ module Rails
       rails.delete("app")
       print_list("rails", rails)
 
-      groups.delete("active_record") if options[:rails][:orm] == :active_record
-      groups.delete("test_unit")     if options[:rails][:test_framework] == :test_unit
-      groups.delete("erb")           if options[:rails][:template_engine] == :erb
+      hidden_namespaces.each {|n| groups.delete(n.to_s) }
 
       groups.sort.each { |b, n| print_list(b, n) }
     end
@@ -213,9 +238,17 @@ module Rails
 
       # Prints a list of generators.
       def self.print_list(base, namespaces) #:nodoc:
+        namespaces = namespaces.reject do |n|
+          hidden_namespaces.include?(n)
+        end
+
         return if namespaces.empty?
         puts "#{base.camelize}:"
-        namespaces.each { |namespace| puts("  #{namespace}") }
+
+        namespaces.each do |namespace|
+          puts("  #{namespace}")
+        end
+
         puts
       end
 
@@ -242,7 +275,7 @@ module Rails
         paths = namespaces_to_paths(namespaces)
 
         paths.each do |raw_path|
-          ["rails_generators", "generators"].each do |base|
+          ["rails/generators", "generators"].each do |base|
             path = "#{base}/#{raw_path}_generator"
 
             begin
@@ -265,7 +298,7 @@ module Rails
         load_generators_from_railties!
 
         $LOAD_PATH.each do |base|
-          Dir[File.join(base, "{generators,rails_generators}", "**", "*_generator.rb")].each do |path|
+          Dir[File.join(base, "{rails/generators,generators}", "**", "*_generator.rb")].each do |path|
             begin
               require path
             rescue Exception => e

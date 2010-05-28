@@ -1,5 +1,5 @@
 require 'generators/generators_test_helper'
-require 'generators/rails/scaffold_controller/scaffold_controller_generator'
+require 'rails/generators/rails/scaffold_controller/scaffold_controller_generator'
 
 module Unknown
   module Generators
@@ -66,7 +66,7 @@ class ScaffoldControllerGeneratorTest < Rails::Generators::TestCase
       new
       show
     ).each { |view| assert_file "app/views/users/#{view}.html.erb" }
-    assert_file "app/views/layouts/users.html.erb"
+    assert_no_file "app/views/layouts/users.html.erb"
   end
 
   def test_functional_tests

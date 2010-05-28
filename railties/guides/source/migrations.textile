@@ -82,9 +82,13 @@ On databases that support transactions with statements that change the schema (s
 
 h4. What's in a Name
 
-Migrations are stored in files in +db/migrate+, one for each migration class. The name of the file is of the form +YYYYMMDDHHMMSS_create_products.rb+, that is to say a UTC timestamp identifying the migration followed by an underscore followed by the name of the migration. The migration class' name must match (the camelcased version of) the latter part of the file name. For example +20080906120000_create_products.rb+ should define +CreateProducts+ and +20080906120001_add_details_to_products.rb+ should define +AddDetailsToProducts+. If you do feel the need to change the file name then you <em>have to</em> update the name of the class inside or Rails will complain about a missing class.
+Migrations are stored in files in +db/migrate+, one for each migration class. The name of the file is of the form +YYYYMMDDHHMMSS_create_products.rb+, that is to say a UTC timestamp identifying the migration followed by an underscore followed by the name of the migration. The name of the migration class (CamelCased version) should match the latter part of the file name. For example +20080906120000_create_products.rb+ should define +CreateProducts+ and +20080906120001_add_details_to_products.rb+ should define +AddDetailsToProducts+. If you do feel the need to change the file name then you <em>have to</em> update the name of the class inside or Rails will complain about a missing class.
 
-Internally Rails only uses the migration's number (the timestamp) to identify them. Prior to Rails 2.1 the migration number started at 1 and was incremented each time a migration was generated. With multiple developers it was easy for these to clash requiring you to rollback migrations and renumber them. With Rails 2.1 this is largely avoided by using the creation time of the migration to identify them. You can revert to the old numbering scheme by setting +config.active_record.timestamped_migrations+ to +false+ in +config/environment.rb+.
+Internally Rails only uses the migration's number (the timestamp) to identify them. Prior to Rails 2.1 the migration number started at 1 and was incremented each time a migration was generated. With multiple developers it was easy for these to clash requiring you to rollback migrations and renumber them. With Rails 2.1 this is largely avoided by using the creation time of the migration to identify them. You can revert to the old numbering scheme by adding the following line to +config/application.rb+.
+
+<ruby>
+config.active_record.timestamped_migrations = false
+</ruby>
 
 The combination of timestamps and recording which migrations have been run allows Rails to handle common situations that occur with multiple developers.
 
@@ -568,7 +572,7 @@ In many ways this is exactly what it is. This file is created by inspecting the 
 
 There is however a trade-off: +db/schema.rb+ cannot express database specific items such as foreign key constraints, triggers or stored procedures. While in a migration you can execute custom SQL statements, the schema dumper cannot reconstitute those statements from the database. If you are using features like this then you should set the schema format to +:sql+.
 
-Instead of using Active Record's schema dumper the database's structure will be dumped using a tool specific to that database (via the +db:structure:dump+ Rake task) into +db/#{RAILS_ENV}_structure.sql+. For example for PostgreSQL the +pg_dump+ utility is used and for MySQL this file will contain the output of +SHOW CREATE TABLE+ for the various tables. Loading this schema is simply a question of executing the SQL statements contained inside.
+Instead of using Active Record's schema dumper the database's structure will be dumped using a tool specific to that database (via the +db:structure:dump+ Rake task) into +db/#{Rails.env}_structure.sql+. For example for PostgreSQL the +pg_dump+ utility is used and for MySQL this file will contain the output of +SHOW CREATE TABLE+ for the various tables. Loading this schema is simply a question of executing the SQL statements contained inside.
 
 By definition this will be a perfect copy of the database's structure but this will usually prevent loading the schema into a database other than the one used to create it.
 

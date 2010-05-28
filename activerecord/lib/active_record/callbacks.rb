@@ -1,3 +1,5 @@
+require 'active_support/core_ext/array/wrap'
+
 module ActiveRecord
   # Callbacks are hooks into the lifecycle of an Active Record object that allow you to trigger logic
   # before or after an alteration of the object state. This can be used to make sure that associated and
@@ -15,8 +17,13 @@ module ActiveRecord
   # * (-) <tt>create</tt>
   # * (5) <tt>after_create</tt>
   # * (6) <tt>after_save</tt>
+  # * (7) <tt>after_commit</tt>
   #
-  # That's a total of eight callbacks, which gives you immense power to react and prepare for each state in the
+  # Also, an <tt>after_rollback</tt> callback can be configured to be triggered whenever a rollback is issued.
+  # Check out <tt>ActiveRecord::Transactions</tt> for more details about <tt>after_commit</tt> and
+  # <tt>after_rollback</tt>.
+  #
+  # That's a total of ten callbacks, which gives you immense power to react and prepare for each state in the
   # Active Record lifecycle. The sequence for calling <tt>Base#save</tt> for an existing record is similar, except that each
   # <tt>_on_create</tt> callback is replaced by the corresponding <tt>_on_update</tt> callback.
   #
@@ -205,6 +212,16 @@ module ActiveRecord
   # including <tt>after_*</tt> hooks. Note, however, that in that case the client
   # needs to be aware of it because an ordinary +save+ will raise such exception
   # instead of quietly returning +false+.
+  #
+  # == Debugging callbacks
+  #
+  # To list the methods and procs registered with a particular callback, append <tt>_callback_chain</tt> to the callback name that you wish to list and send that to your class from the Rails console:
+  #
+  #   >> Topic.after_save_callback_chain
+  #   => [#<ActiveSupport::Callbacks::Callback:0x3f6a448
+  #       @method=#<Proc:0x03f9a42c@/Users/foo/bar/app/models/topic.rb:43>, kind:after_save, identifiernil,
+  #       options{}]
+  #
   module Callbacks
     extend ActiveSupport::Concern
 
@@ -216,10 +233,6 @@ module ActiveRecord
     ]
 
     included do
-      [:create_or_update, :valid?, :create, :update, :destroy].each do |method|
-        alias_method_chain method, :callbacks
-      end
-
       extend ActiveModel::Callbacks
 
       define_callbacks :validation, :terminator => "result == false", :scope => [:kind, :name]
@@ -240,7 +253,7 @@ module ActiveRecord
       def before_validation(*args, &block)
         options = args.last
         if options.is_a?(Hash) && options[:on]
-          options[:if] = Array(options[:if])
+          options[:if] = Array.wrap(options[:if])
           options[:if] << "@_on_validate == :#{options[:on]}"
         end
         set_callback(:validation, :before, *args, &block)
@@ -249,45 +262,20 @@ module ActiveRecord
       def after_validation(*args, &block)
         options = args.extract_options!
         options[:prepend] = true
-        options[:if] = Array(options[:if])
+        options[:if] = Array.wrap(options[:if])
         options[:if] << "!halted && value != false"
         options[:if] << "@_on_validate == :#{options[:on]}" if options[:on]
         set_callback(:validation, :after, *(args << options), &block)
       end
     end
 
-    def create_or_update_with_callbacks #:nodoc:
-      _run_save_callbacks do
-        create_or_update_without_callbacks
-      end
-    end
-    private :create_or_update_with_callbacks
-
-    def create_with_callbacks #:nodoc:
-      _run_create_callbacks do
-        create_without_callbacks
-      end
-    end
-    private :create_with_callbacks
-
-    def update_with_callbacks(*args) #:nodoc:
-      _run_update_callbacks do
-        update_without_callbacks(*args)
-      end
-    end
-    private :update_with_callbacks
-
-    def valid_with_callbacks? #:nodoc:
+    def valid?(*) #:nodoc:
       @_on_validate = new_record? ? :create : :update
-      _run_validation_callbacks do
-        valid_without_callbacks?
-      end
+      _run_validation_callbacks { super }
     end
 
-    def destroy_with_callbacks #:nodoc:
-      _run_destroy_callbacks do
-        destroy_without_callbacks
-      end
+    def destroy #:nodoc:
+      _run_destroy_callbacks { super }
     end
 
     def deprecated_callback_method(symbol) #:nodoc:
@@ -295,6 +283,19 @@ module ActiveRecord
         ActiveSupport::Deprecation.warn("Overwriting #{symbol} in your models has been deprecated, please use Base##{symbol} :method_name instead")
         send(symbol)
       end
+    end
+
+  private
+    def create_or_update #:nodoc:
+      _run_save_callbacks { super }
+    end
+
+    def create #:nodoc:
+      _run_create_callbacks { super }
+    end
+
+    def update(*) #:nodoc:
+      _run_update_callbacks { super }
     end
   end
 end

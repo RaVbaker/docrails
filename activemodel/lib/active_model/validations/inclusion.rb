@@ -4,7 +4,7 @@ module ActiveModel
       def check_validity!
          raise ArgumentError, "An object with the method include? is required must be supplied as the " <<
                               ":in option of the configuration hash" unless options[:in].respond_to?(:include?)
-       end
+      end
 
       def validate_each(record, attribute, value)
         return if options[:in].include?(value)
@@ -12,13 +12,13 @@ module ActiveModel
       end
     end
 
-    module ClassMethods
+    module HelperMethods
       # Validates whether the value of the specified attribute is available in a particular enumerable object.
       #
       #   class Person < ActiveRecord::Base
       #     validates_inclusion_of :gender, :in => %w( m f )
       #     validates_inclusion_of :age, :in => 0..99
-      #     validates_inclusion_of :format, :in => %w( jpg gif png ), :message => "extension {{value}} is not included in the list"
+      #     validates_inclusion_of :format, :in => %w( jpg gif png ), :message => "extension %{value} is not included in the list"
       #   end
       #
       # Configuration options:

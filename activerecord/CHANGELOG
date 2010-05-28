@@ -1,9 +1,46 @@
-*Edge*
+*Rails 3.0.0 [beta 4/release candidate] (unreleased)*
+
+* Add index length support for MySQL. #1852 [Emili Parreno, Pratik Naik]
+
+  Example:
+
+    add_index(:accounts, :name, :name => 'by_name', :length => 10)
+    => CREATE INDEX by_name ON accounts(name(10))
+
+    add_index(:accounts, [:name, :surname], :name => 'by_name_surname', :length => {:name => 10, :surname => 15})
+    => CREATE INDEX by_name_surname ON accounts(name(10), surname(15))
+
+* find_or_create_by_attr(value, ...) works when attr is protected.  #4457 [Santiago Pastorino, Marc-André Lafortune]
+
+* New callbacks: after_commit and after_rollback. Do expensive operations like image thumbnailing after_commit instead of after_save.  #2991 [Brian Durand]
+
+* Serialized attributes are not converted to YAML if they are any of the formats that can be serialized to XML (like Hash, Array and Strings). [José Valim]
+
+* Destroy uses optimistic locking. If lock_version on the record you're destroying doesn't match lock_version in the database, a StaleObjectError is raised.  #1966 [Curtis Hawthorne]
+
+* PostgreSQL: drop support for old postgres driver. Use pg 0.9.0 or later.  [Jeremy Kemper]
+
+* Observers can prevent records from saving by returning false, just like before_save and friends.  #4087 [Mislav Marohnić]
+
+
+*Rails 3.0.0 [beta 3] (April 13th, 2010)*
+
+* Add Relation extensions. [Pratik Naik]
+
+  users = User.where(:admin => true).extending(User::AdminPowers)
+
+  latest_users = User.order('created_at DESC') do
+    def posts_count
+      Post.count(:user_id => to_a.map(&:id))
+    end
+  end
+
+* To prefix the table names of all models in a module, define self.table_name_prefix on the module.  #4032 [Andrew White]
 
 * Silenced "SHOW FIELDS" and "SET SQL_AUTO_IS_NULL=0" statements from the MySQL driver to improve log signal to noise ration in development [DHH]
 
 
-*Rails 3.0 [Beta] (February 4th, 2010)*
+*Rails 3.0.0 [Beta 1] (February 4th, 2010)*
 
 * PostgreSQLAdapter: set time_zone to UTC when Base.default_timezone == :utc so that Postgres doesn't incorrectly offset-adjust values inserted into TIMESTAMP WITH TIME ZONE columns. #3777 [Jack Christensen]
 

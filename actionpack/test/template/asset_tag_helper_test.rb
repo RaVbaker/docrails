@@ -34,9 +34,7 @@ class AssetTagHelperTest < ActionView::TestCase
       )
     end
 
-    @controller = Class.new(BasicController) do
-      def url_for(*args) "http://www.example.com" end
-    end.new
+    @controller = BasicController.new
 
     @request = Class.new do
       def protocol() 'http://' end
@@ -47,6 +45,10 @@ class AssetTagHelperTest < ActionView::TestCase
     @controller.request = @request
 
     ActionView::Helpers::AssetTagHelper::reset_javascript_include_default
+  end
+
+  def url_for(*args)
+    "http://www.example.com"
   end
 
   def teardown
@@ -152,7 +154,16 @@ class AssetTagHelperTest < ActionView::TestCase
     %(image_tag(".pdf.png")) => %(<img alt=".pdf" src="/images/.pdf.png" />),
     %(image_tag("http://www.rubyonrails.com/images/rails.png")) => %(<img alt="Rails" src="http://www.rubyonrails.com/images/rails.png" />),
     %(image_tag("mouse.png", :mouseover => "/images/mouse_over.png")) => %(<img alt="Mouse" onmouseover="this.src='/images/mouse_over.png'" onmouseout="this.src='/images/mouse.png'" src="/images/mouse.png" />),
-    %(image_tag("mouse.png", :mouseover => image_path("mouse_over.png"))) => %(<img alt="Mouse" onmouseover="this.src='/images/mouse_over.png'" onmouseout="this.src='/images/mouse.png'" src="/images/mouse.png" />)
+    %(image_tag("mouse.png", :mouseover => image_path("mouse_over.png"))) => %(<img alt="Mouse" onmouseover="this.src='/images/mouse_over.png'" onmouseout="this.src='/images/mouse.png'" src="/images/mouse.png" />),
+    %(image_tag("mouse.png", :alt => nil)) => %(<img src="/images/mouse.png" />)
+  }
+
+  FaviconLinkToTag = {
+    %(favicon_link_tag) => %(<link href="/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />),
+    %(favicon_link_tag 'favicon.ico') => %(<link href="/images/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />),
+    %(favicon_link_tag 'favicon.ico', :rel => 'foo') => %(<link href="/images/favicon.ico" rel="foo" type="image/vnd.microsoft.icon" />),
+    %(favicon_link_tag 'favicon.ico', :rel => 'foo', :type => 'bar') => %(<link href="/images/favicon.ico" rel="foo" type="bar" />),
+    %(favicon_link_tag 'mb-icon.png', :rel => 'apple-touch-icon', :type => 'image/png') => %(<link href="/images/mb-icon.png" rel="apple-touch-icon" type="image/png" />)
   }
 
   VideoPathToTag = {
@@ -329,6 +340,10 @@ class AssetTagHelperTest < ActionView::TestCase
     ImageLinkToTag.each { |method, tag| assert_dom_equal(tag, eval(method)) }
   end
 
+  def test_favicon_link_tag
+    FaviconLinkToTag.each { |method, tag| assert_dom_equal(tag, eval(method)) }
+  end
+
   def test_image_tag_windows_behaviour
     old_asset_id, ENV["RAILS_ASSET_ID"] = ENV["RAILS_ASSET_ID"], "1"
     # This simulates the behaviour of File#exist? on windows when testing a file ending in "."
@@ -371,6 +386,22 @@ class AssetTagHelperTest < ActionView::TestCase
   def test_timebased_asset_id
     expected_time = File.stat(File.expand_path(File.dirname(__FILE__) + "/../fixtures/public/images/rails.png")).mtime.to_i.to_s
     assert_equal %(<img alt="Rails" src="/images/rails.png?#{expected_time}" />), image_tag("rails.png")
+  end
+
+  def test_string_asset_id
+    @controller.config.asset_path = "/assets.v12345%s"
+
+    expected_path = "/assets.v12345/images/rails.png"
+    assert_equal %(<img alt="Rails" src="#{expected_path}" />), image_tag("rails.png")
+  end
+
+  def test_proc_asset_id
+    @controller.config.asset_path = Proc.new do |asset_path|
+      "/assets.v12345#{asset_path}"
+    end
+
+    expected_path = "/assets.v12345/images/rails.png"
+    assert_equal %(<img alt="Rails" src="#{expected_path}" />), image_tag("rails.png")
   end
 
   def test_timebased_asset_id_with_relative_url_root
@@ -877,23 +908,17 @@ class AssetTagHelperNonVhostTest < ActionView::TestCase
 
   def setup
     super
-    @controller = Class.new(BasicController) do
-      def url_for(options)
-        "http://www.example.com/collaboration/hieraki"
-      end
-    end.new
-
+    @controller = BasicController.new
     @controller.config.relative_url_root = "/collaboration/hieraki"
 
-    @request = Class.new do
-      def protocol
-        'gopher://'
-      end
-    end.new
-
+    @request = Struct.new(:protocol).new("gopher://")
     @controller.request = @request
 
     ActionView::Helpers::AssetTagHelper::reset_javascript_include_default
+  end
+
+  def url_for(options)
+    "http://www.example.com/collaboration/hieraki"
   end
 
   def test_should_compute_proper_path

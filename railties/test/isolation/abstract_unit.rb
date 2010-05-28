@@ -100,7 +100,26 @@ module TestHelpers
         end
       end
 
-      add_to_config 'config.cookie_secret = "3b7cd727ee24e8444053437c36cc66c4"; config.session_store :cookie_store, :key => "_myapp_session"'
+      add_to_config 'config.secret_token = "3b7cd727ee24e8444053437c36cc66c4"; config.session_store :cookie_store, :key => "_myapp_session"'
+    end
+
+    def make_basic_app
+      require "rails"
+      require "action_controller/railtie"
+
+      app = Class.new(Rails::Application)
+      app.config.secret_token = "3b7cd727ee24e8444053437c36cc66c4"
+      app.config.session_store :cookie_store, :key => "_myapp_session"
+
+      yield app if block_given?
+      app.initialize!
+
+      app.routes.draw do
+        match "/" => "omg#index"
+      end
+
+      require 'rack/test'
+      extend ::Rack::Test::Methods
     end
 
     class Bukkit
@@ -213,7 +232,7 @@ Module.new do
     require_environment = "-r #{environment}"
   end
 
-  `#{Gem.ruby} #{require_environment} #{RAILS_FRAMEWORK_ROOT}/railties/bin/rails #{tmp_path('app_template')}`
+  `#{Gem.ruby} #{require_environment} #{RAILS_FRAMEWORK_ROOT}/bin/rails #{tmp_path('app_template')}`
   File.open("#{tmp_path}/app_template/config/boot.rb", 'w') do |f|
     if require_environment
       f.puts "Dir.chdir('#{File.dirname(environment)}') do"

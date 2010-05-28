@@ -122,7 +122,7 @@ class RackRequestTest < BaseRackTest
   test "cgi environment variables" do
     assert_equal "Basic", @request.auth_type
     assert_equal 0, @request.content_length
-    assert_equal nil, @request.content_type
+    assert_equal nil, @request.content_mime_type
     assert_equal "CGI/1.1", @request.gateway_interface
     assert_equal "*/*", @request.accept
     assert_equal "UTF-8", @request.accept_charset
@@ -142,7 +142,7 @@ class RackRequestTest < BaseRackTest
     assert_equal "google.com", @request.remote_host
     assert_equal "kevin", @request.remote_ident
     assert_equal "kevin", @request.remote_user
-    assert_equal :get, @request.request_method
+    assert_equal "GET", @request.request_method
     assert_equal "/dispatch.fcgi", @request.script_name
     assert_equal "glu.ttono.us", @request.server_name
     assert_equal 8007, @request.server_port
@@ -177,12 +177,12 @@ end
 class RackRequestContentTypeTest < BaseRackTest
   test "html content type verification" do
     @request.env['CONTENT_TYPE'] = Mime::HTML.to_s
-    assert @request.content_type.verify_request?
+    assert @request.content_mime_type.verify_request?
   end
 
   test "xml content type verification" do
     @request.env['CONTENT_TYPE'] = Mime::XML.to_s
-    assert !@request.content_type.verify_request?
+    assert !@request.content_mime_type.verify_request?
   end
 end
 

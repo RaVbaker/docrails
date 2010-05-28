@@ -1,3 +1,5 @@
+require 'rake/testtask'
+
 TEST_CHANGES_SINCE = Time.now - 600
 
 # Look up tests for recently modified sources.
@@ -30,7 +32,7 @@ end
 module Kernel
   def silence_stderr
     old_stderr = STDERR.dup
-    STDERR.reopen(RUBY_PLATFORM =~ /(:?mswin|mingw)/ ? 'NUL:' : '/dev/null')
+    STDERR.reopen(Config::CONFIG['host_os'] =~ /mswin|mingw/ ? 'NUL:' : '/dev/null')
     STDERR.sync = true
     yield
   ensure
@@ -52,7 +54,11 @@ task :test do
 end
 
 namespace :test do
-  Rake::TestTask.new(:recent => "db:test:prepare") do |t|
+  task :prepare do
+    # Placeholder task for other Railtie and plugins to enhance. See Active Record for an example.
+  end
+
+  Rake::TestTask.new(:recent => "test:prepare") do |t|
     since = TEST_CHANGES_SINCE
     touched = FileList['test/**/*_test.rb'].select { |path| File.mtime(path) > since } +
       recent_tests('app/models/**/*.rb', 'test/unit', since) +
@@ -63,7 +69,7 @@ namespace :test do
   end
   Rake::Task['test:recent'].comment = "Test recent changes"
 
-  Rake::TestTask.new(:uncommitted => "db:test:prepare") do |t|
+  Rake::TestTask.new(:uncommitted => "test:prepare") do |t|
     def t.file_list
       if File.directory?(".svn")
         changed_since_checkin = silence_stderr { `svn status` }.map { |path| path.chomp[7 .. -1] }
@@ -86,32 +92,32 @@ namespace :test do
   end
   Rake::Task['test:uncommitted'].comment = "Test changes since last checkin (only Subversion and Git)"
 
-  Rake::TestTask.new(:units => "db:test:prepare") do |t|
+  Rake::TestTask.new(:units => "test:prepare") do |t|
     t.libs << "test"
     t.pattern = 'test/unit/**/*_test.rb'
   end
   Rake::Task['test:units'].comment = "Run the unit tests in test/unit"
 
-  Rake::TestTask.new(:functionals => "db:test:prepare") do |t|
+  Rake::TestTask.new(:functionals => "test:prepare") do |t|
     t.libs << "test"
     t.pattern = 'test/functional/**/*_test.rb'
   end
   Rake::Task['test:functionals'].comment = "Run the functional tests in test/functional"
 
-  Rake::TestTask.new(:integration => "db:test:prepare") do |t|
+  Rake::TestTask.new(:integration => "test:prepare") do |t|
     t.libs << "test"
     t.pattern = 'test/integration/**/*_test.rb'
   end
   Rake::Task['test:integration'].comment = "Run the integration tests in test/integration"
 
-  Rake::TestTask.new(:benchmark => 'db:test:prepare') do |t|
+  Rake::TestTask.new(:benchmark => 'test:prepare') do |t|
     t.libs << 'test'
     t.pattern = 'test/performance/**/*_test.rb'
     t.options = '-- --benchmark'
   end
   Rake::Task['test:benchmark'].comment = 'Benchmark the performance tests'
 
-  Rake::TestTask.new(:profile => 'db:test:prepare') do |t|
+  Rake::TestTask.new(:profile => 'test:prepare') do |t|
     t.libs << 'test'
     t.pattern = 'test/performance/**/*_test.rb'
   end

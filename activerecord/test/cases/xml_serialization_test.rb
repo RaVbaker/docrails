@@ -4,6 +4,7 @@ require 'models/post'
 require 'models/author'
 require 'models/tagging'
 require 'models/comment'
+require 'models/company_in_module'
 
 class XmlSerializationTest < ActiveRecord::TestCase
   def test_should_serialize_default_root
@@ -78,8 +79,8 @@ class DefaultXmlSerializationTest < ActiveRecord::TestCase
     assert_match %r{<awesome type=\"boolean\">false</awesome>}, @xml
   end
 
-  def test_should_serialize_yaml
-    assert_match %r{<preferences type=\"yaml\">--- \n:gem: ruby\n</preferences>}, @xml
+  def test_should_serialize_hash
+    assert_match %r{<preferences>\s*<gem>ruby</gem>\s*</preferences>}m, @xml
   end
 end
 
@@ -130,10 +131,20 @@ class NilXmlSerializationTest < ActiveRecord::TestCase
 end
 
 class DatabaseConnectedXmlSerializationTest < ActiveRecord::TestCase
-  fixtures :authors, :posts
+  fixtures :authors, :posts, :projects
+
   # to_xml used to mess with the hash the user provided which
   # caused the builder to be reused.  This meant the document kept
   # getting appended to.
+
+  def test_modules
+    projects = MyApplication::Business::Project.all
+    xml = projects.to_xml
+    root = projects.first.class.to_s.underscore.pluralize.tr('/','_').dasherize
+    assert_match "<#{root} type=\"array\">", xml
+    assert_match "</#{root}>", xml
+  end
+
   def test_passing_hash_shouldnt_reuse_builder
     options = {:include=>:posts}
     david = authors(:david)
@@ -221,6 +232,14 @@ class DatabaseConnectedXmlSerializationTest < ActiveRecord::TestCase
     assert types.include?('SpecialPost')
     assert types.include?('Post')
     assert types.include?('StiPost')
+  end
+
+  def test_should_produce_xml_for_methods_returning_array
+    xml = authors(:david).to_xml(:methods => :social)
+    array = Hash.from_xml(xml)['author']['social']
+    assert_equal 2, array.size
+    assert array.include? 'twitter'
+    assert array.include? 'github'
   end
 
 end

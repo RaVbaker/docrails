@@ -29,7 +29,9 @@ activemodel_path = File.expand_path('../../../activemodel/lib', __FILE__)
 $:.unshift(activemodel_path) if File.directory?(activemodel_path) && !$:.include?(activemodel_path)
 
 require 'active_support'
+require 'active_support/i18n'
 require 'active_model'
+require 'arel'
 
 module ActiveRecord
   extend ActiveSupport::Autoload
@@ -59,6 +61,7 @@ module ActiveRecord
 
     autoload :Base
     autoload :Callbacks
+    autoload :CounterCache
     autoload :DynamicFinderMatch
     autoload :DynamicScopeMatch
     autoload :Migration
@@ -66,6 +69,7 @@ module ActiveRecord
     autoload :NamedScope
     autoload :NestedAttributes
     autoload :Observer
+    autoload :Persistence
     autoload :QueryCache
     autoload :Reflection
     autoload :Schema
@@ -111,10 +115,10 @@ module ActiveRecord
 
   autoload :TestCase
   autoload :TestFixtures, 'active_record/fixtures'
+end
 
-  base_hook do
-    Arel::Table.engine = Arel::Sql::Engine.new(self)
-  end
+ActiveSupport.on_load(:active_record) do
+  Arel::Table.engine = Arel::Sql::Engine.new(self)
 end
 
 I18n.load_path << File.dirname(__FILE__) + '/active_record/locale/en.yml'

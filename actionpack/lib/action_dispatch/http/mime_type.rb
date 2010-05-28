@@ -1,5 +1,6 @@
 require 'set'
 require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext/object/blank'
 
 module Mime
   class Mimes < Array
@@ -52,12 +53,6 @@ module Mime
     cattr_reader :browser_generated_types
     attr_reader :symbol
 
-    @@unverifiable_types = Set.new [:text, :json, :csv, :xml, :rss, :atom, :yaml]
-    def self.unverifiable_types
-      ActiveSupport::Deprecation.warn("unverifiable_types is deprecated and has no effect", caller)
-      @@unverifiable_types
-    end
-
     # A simple helper class used in parsing the accept header
     class AcceptItem #:nodoc:
       attr_accessor :order, :name, :q
@@ -100,7 +95,7 @@ module Mime
       end
 
       def register(string, symbol, mime_type_synonyms = [], extension_synonyms = [], skip_lookup = false)
-        Mime.instance_eval { const_set symbol.to_s.upcase, Type.new(string, symbol, mime_type_synonyms) }
+        Mime.const_set(symbol.to_s.upcase, Type.new(string, symbol, mime_type_synonyms))
 
         SET << Mime.const_get(symbol.to_s.upcase)
 

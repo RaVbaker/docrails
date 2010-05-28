@@ -52,6 +52,21 @@ class SchemaTest < ActiveRecord::TestCase
     @connection.execute "DROP SCHEMA #{SCHEMA_NAME} CASCADE"
   end
 
+  def test_table_exists?
+    [Thing1, Thing2, Thing3, Thing4].each do |klass|
+      name = klass.table_name
+      assert @connection.table_exists?(name), "'#{name}' table should exist"
+    end
+  end
+
+  def test_table_exists_wrong_schema
+    assert(!@connection.table_exists?("foo.things"), "table should not exist")
+  end
+
+  def test_table_exists_quoted_table
+    assert(@connection.table_exists?('"things.table"'), "table should exist")
+  end
+
   def test_with_schema_prefixed_table_name
     assert_nothing_raised do
       assert_equal COLUMNS, columns("#{SCHEMA_NAME}.#{TABLE_NAME}")
@@ -137,11 +152,11 @@ class SchemaTest < ActiveRecord::TestCase
 
   def test_with_uppercase_index_name
     ActiveRecord::Base.connection.execute "CREATE INDEX \"things_Index\" ON #{SCHEMA_NAME}.things (name)"
-    assert_nothing_raised { ActiveRecord::Base.connection.remove_index :things, :name => "#{SCHEMA_NAME}.things_Index"}
+    assert_nothing_raised { ActiveRecord::Base.connection.remove_index! "things", "#{SCHEMA_NAME}.things_Index"}
 
     ActiveRecord::Base.connection.execute "CREATE INDEX \"things_Index\" ON #{SCHEMA_NAME}.things (name)"
     ActiveRecord::Base.connection.schema_search_path = SCHEMA_NAME
-    assert_nothing_raised { ActiveRecord::Base.connection.remove_index :things, :name => "things_Index"}
+    assert_nothing_raised { ActiveRecord::Base.connection.remove_index! "things", "things_Index"}
     ActiveRecord::Base.connection.schema_search_path = "public"
   end
 

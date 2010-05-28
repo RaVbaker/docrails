@@ -83,8 +83,8 @@ class NamedScopeTest < ActiveRecord::TestCase
   end
 
   def test_scopes_are_composable
-    assert_equal (approved = Topic.find(:all, :conditions => {:approved => true})), Topic.approved
-    assert_equal (replied = Topic.find(:all, :conditions => 'replies_count > 0')), Topic.replied
+    assert_equal((approved = Topic.find(:all, :conditions => {:approved => true})), Topic.approved)
+    assert_equal((replied = Topic.find(:all, :conditions => 'replies_count > 0')), Topic.replied)
     assert !(approved == replied)
     assert !(approved & replied).empty?
 
@@ -140,6 +140,11 @@ class NamedScopeTest < ActiveRecord::TestCase
     assert !Post.containing_the_letter_a.empty?
 
     assert_equal authors(:david).posts & Post.containing_the_letter_a, authors(:david).posts.containing_the_letter_a
+  end
+
+  def test_named_scope_with_STI
+    assert_equal 3,Post.containing_the_letter_a.count
+    assert_equal 1,SpecialPost.containing_the_letter_a.count
   end
 
   def test_has_many_through_associations_have_access_to_named_scopes
@@ -296,7 +301,7 @@ class NamedScopeTest < ActiveRecord::TestCase
   end
 
   def test_rand_should_select_a_random_object_from_proxy
-    assert_kind_of Topic, Topic.approved.rand
+    assert_kind_of Topic, Topic.approved.random_element
   end
 
   def test_should_use_where_in_query_for_named_scope
@@ -371,8 +376,21 @@ class NamedScopeTest < ActiveRecord::TestCase
   end
 
   def test_named_scopes_with_reserved_names
-    [:where, :with_scope].each do |protected_method|
-      assert_raises(ArgumentError) { Topic.scope protected_method }
+    class << Topic
+      def public_method; end
+      public :public_method
+
+      def protected_method; end
+      protected :protected_method
+
+      def private_method; end
+      private :private_method
+    end
+
+    [:public_method, :protected_method, :private_method].each do |reserved_method|
+      assert Topic.respond_to?(reserved_method, true)
+      ActiveRecord::Base.logger.expects(:warn)
+      Topic.scope(reserved_method)
     end
   end
 
@@ -393,6 +411,31 @@ class NamedScopeTest < ActiveRecord::TestCase
     approved = Topic.approved.order('id ASC')
     assert_equal topics(:second), approved[0]
     assert approved.loaded?
+  end
+
+  def test_nested_named_scopes_queries_size
+    assert_queries(1) do
+      Topic.approved.by_lifo.replied.written_before(Time.now).all
+    end
+  end
+
+  def test_named_scopes_are_cached_on_associations
+    post = posts(:welcome)
+
+    assert_equal post.comments.containing_the_letter_e.object_id, post.comments.containing_the_letter_e.object_id
+
+    post.comments.containing_the_letter_e.all # force load
+    assert_no_queries { post.comments.containing_the_letter_e.all }
+  end
+
+  def test_named_scopes_are_reset_on_association_reload
+    post = posts(:welcome)
+
+    [:destroy_all, :reset, :delete_all].each do |method|
+      before = post.comments.containing_the_letter_e
+      post.comments.send(method)
+      assert before.object_id != post.comments.containing_the_letter_e.object_id, "AssociationCollection##{method} should reset the named scopes cache"
+    end
   end
 end
 

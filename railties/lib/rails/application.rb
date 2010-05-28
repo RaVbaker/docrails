@@ -1,5 +1,5 @@
+require 'active_support/core_ext/hash/reverse_merge'
 require 'fileutils'
-require 'rails/railties_path'
 require 'rails/plugin'
 require 'rails/engine'
 
@@ -12,7 +12,7 @@ module Rails
   # points to it.
   #
   # In other words, Rails::Application is Singleton and whenever you are accessing
-  # Rails::Application.config or YourApplication::Application.config, you are actually 
+  # Rails::Application.config or YourApplication::Application.config, you are actually
   # accessing YourApplication::Application.instance.config.
   #
   # == Initialization
@@ -40,7 +40,7 @@ module Rails
   #
   # The Application is also responsible for building the middleware stack and setting up
   # both application and engines metals.
-  # 
+  #
   class Application < Engine
     autoload :Bootstrap,      'rails/application/bootstrap'
     autoload :Configurable,   'rails/application/configurable'
@@ -69,6 +69,7 @@ module Rails
         raise "You cannot have more than one Rails::Application" if Rails.application
         super
         Rails.application = base.instance
+        ActiveSupport.run_load_hooks(:before_configuration, base.instance)
       end
 
       def respond_to?(*args)
@@ -82,8 +83,10 @@ module Rails
       end
     end
 
+    delegate :middleware, :metal_loader, :to => :config
+
     def require_environment!
-      environment = config.paths.config.environment.to_a.first
+      environment = paths.config.environment.to_a.first
       require environment if environment
     end
 
@@ -110,25 +113,31 @@ module Rails
 
     def load_tasks
       initialize_tasks
-      super
       railties.all { |r| r.load_tasks }
+      super
       self
     end
 
     def load_generators
       initialize_generators
-      super
       railties.all { |r| r.load_generators }
+      super
       self
     end
 
     def app
-      @app ||= middleware.build(routes)
+      @app ||= config.middleware.build(routes)
     end
 
     def call(env)
-      env["action_dispatch.parameter_filter"] = config.filter_parameters
-      app.call(env)
+      app.call(env.reverse_merge!(env_defaults))
+    end
+
+    def env_defaults
+      @env_defaults ||= {
+        "action_dispatch.parameter_filter" => config.filter_parameters,
+        "action_dispatch.secret_token" => config.secret_token
+      }
     end
 
     def initializers
@@ -145,7 +154,7 @@ module Rails
       require "rails/tasks"
       task :environment do
         $rails_rake_task = true
-        initialize!
+        require_environment!
       end
     end
 

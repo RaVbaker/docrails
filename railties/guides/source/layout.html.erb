@@ -1,19 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 <title><%= yield(:page_title) || 'Ruby on Rails guides' %></title>
 
-<link rel="stylesheet" type="text/css" href="files/stylesheets/style.css" />
-<link rel="stylesheet" type="text/css" href="files/stylesheets/syntax.css" />
-<link rel="stylesheet" type="text/css" href="files/stylesheets/print.css" media="print" />
+<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+<link rel="stylesheet" type="text/css" href="stylesheets/syntax.css" />
+<link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
 
-<script type="text/javascript" src="files/javascripts/guides.js"></script>
-<script type="text/javascript" src="files/javascripts/code_highlighter.js"></script>
-<script type="text/javascript" src="files/javascripts/highlighters.js"></script>
+<script type="text/javascript" src="javascripts/guides.js"></script>
+<script type="text/javascript" src="javascripts/code_highlighter.js"></script>
+<script type="text/javascript" src="javascripts/highlighters.js"></script>
 
 </head>
 <body class="guide">
+  <% if @edge %>
+  <div>
+    <img src="images/edge_badge.png" alt="edge-badge" id="edge-badge" />
+  </div>
+  <% end %>
   <div id="topNav">
     <div class="wrapper">
       <strong>More at <a href="http://rubyonrails.org/">rubyonrails.org:</a> </strong>
@@ -60,12 +68,20 @@
               <dd><a href="security.html">Securing Rails Applications</a></dd>
               <dd><a href="debugging_rails_applications.html">Debugging Rails Applications</a></dd>
               <dd><a href="performance_testing.html">Performance Testing Rails Applications</a></dd>
-              <dd><a href="plugins.html">The Basics of Creating Rails Plugins</a></dd>
               <dd><a href="configuring.html">Configuring Rails Applications</a></dd>
-              <dd><a href="rails_on_rack.html">Rails on Rack</a></dd>
               <dd><a href="command_line.html">Rails Command Line Tools and Rake Tasks</a></dd>
               <dd><a href="caching_with_rails.html">Caching with Rails</a></dd>
               <dd><a href="contributing_to_rails.html">Contributing to Rails</a></dd>
+
+              <dt>Extending Rails</dt>
+              <dd><a href="plugins.html">The Basics of Creating Rails Plugins</a></dd>
+              <dd><a href="rails_on_rack.html">Rails on Rack</a></dd>
+              <dd><a href="generators.html">Adding a Generator to Your Plugin</a></dd>
+
+              <dt>Release Notes</dt>
+              <dd><a href="3_0_release_notes.html">Ruby on Rails 3.0 Release Notes</a></dd>
+              <dd><a href="2_3_release_notes.html">Ruby on Rails 2.3 Release Notes</a></dd>
+              <dd><a href="2_2_release_notes.html">Ruby on Rails 2.2 Release Notes</a></dd>
             </dl>
           </div>
         </li>
@@ -95,7 +111,7 @@
   <hr class="hide" />
   <div id="footer">
     <div class="wrapper">
-      <p>This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0</a> License</a></p>
+      <p>This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0</a> License</p>
       <p>"Rails", "Ruby on Rails", and the Rails logo are trademarks of David Heinemeier Hansson. All rights reserved.</p>
     </div>
   </div>

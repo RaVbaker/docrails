@@ -1,3 +1,5 @@
+require 'active_support/json'
+
 module ActionController #:nodoc:
   # Responder is responsible for exposing a resource to different mime requests,
   # usually depending on the HTTP verb. The responder is triggered when
@@ -133,7 +135,6 @@ module ActionController #:nodoc:
     def to_format
       default_render
     rescue ActionView::MissingTemplate => e
-      raise unless resourceful?
       api_behavior(e)
     end
 
@@ -152,6 +153,8 @@ module ActionController #:nodoc:
 
     # This is the common behavior for "API" requests, like :xml and :json.
     def api_behavior(error)
+      raise error unless resourceful?
+
       if get?
         display resource
       elsif has_errors?
@@ -214,7 +217,7 @@ module ActionController #:nodoc:
     # the verb is POST.
     #
     def default_action
-      @action ||= ACTIONS_FOR_VERBS[request.method]
+      @action ||= ACTIONS_FOR_VERBS[request.request_method_symbol]
     end
   end
 end

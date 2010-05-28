@@ -3,6 +3,10 @@ module Rails
     module Finisher
       include Initializable
 
+      initializer :add_generator_templates do
+        config.generators.templates.unshift(*paths.lib.templates.to_a)
+      end
+
       initializer :ensure_load_once_paths_as_subset do
         extra = ActiveSupport::Dependencies.load_once_paths -
                 ActiveSupport::Dependencies.load_paths
@@ -23,7 +27,7 @@ module Rails
 
       initializer :add_builtin_route do |app|
         if Rails.env.development?
-          app.routes_reloader.paths << File.join(RAILTIES_PATH, 'builtin', 'routes.rb')
+          app.routes_reloader.paths << File.expand_path('../../info_routes.rb', __FILE__)
         end
       end
 
@@ -31,10 +35,15 @@ module Rails
         app
       end
 
-      initializer :after_initialize do
-        config.after_initialize_blocks.each do |block|
-          block.call(self)
+      initializer :eager_load! do
+        if config.cache_classes && !$rails_rake_task
+          ActiveSupport.run_load_hooks(:before_eager_load, self)
+          railties.all(&:eager_load!)
         end
+      end
+
+      initializer :finisher_hook do
+        ActiveSupport.run_load_hooks(:after_initialize, self)
       end
 
       # Disable dependency loading during request cycle

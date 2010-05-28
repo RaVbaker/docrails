@@ -1,10 +1,18 @@
-require File.expand_path('../../../load_paths', __FILE__)
+begin
+  old, $VERBOSE = $VERBOSE, nil
+  require File.expand_path('../../../load_paths', __FILE__)
+ensure
+  $VERBOSE = old
+end
 
 lib = File.expand_path("#{File.dirname(__FILE__)}/../lib")
 $:.unshift(lib) unless $:.include?('lib') || $:.include?(lib)
 
 require 'test/unit'
-require 'mocha'
+require 'active_support/core_ext/kernel/reporting'
+require 'empty_bool'
+
+silence_warnings { require 'mocha' }
 
 ENV['NO_RELOAD'] = '1'
 require 'active_support'

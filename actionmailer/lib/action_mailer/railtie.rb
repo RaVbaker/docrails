@@ -3,21 +3,19 @@ require "rails"
 
 module ActionMailer
   class Railtie < Rails::Railtie
-    railtie_name :action_mailer
-
-    initializer "action_mailer.url_for", :before => :load_environment_config do |app|
-      ActionMailer.base_hook { include app.routes.url_helpers }
-    end
+    config.action_mailer = ActiveSupport::OrderedOptions.new
 
     require "action_mailer/railties/log_subscriber"
-    log_subscriber ActionMailer::Railties::LogSubscriber.new
+    log_subscriber :action_mailer, ActionMailer::Railties::LogSubscriber.new
 
     initializer "action_mailer.logger" do
-      ActionMailer.base_hook { self.logger ||= Rails.logger }
+      ActiveSupport.on_load(:action_mailer) { self.logger ||= Rails.logger }
     end
 
     initializer "action_mailer.set_configs" do |app|
-      ActionMailer.base_hook do
+      ActiveSupport.on_load(:action_mailer) do
+        include app.routes.url_helpers
+
         app.config.action_mailer.each do |k,v|
           send "#{k}=", v
         end

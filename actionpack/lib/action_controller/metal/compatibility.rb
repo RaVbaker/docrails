@@ -21,8 +21,8 @@ module ActionController
         delegate :default_charset=, :to => "ActionDispatch::Response"
       end
 
-      # cattr_reader :protected_instance_variables
-      cattr_accessor :protected_instance_variables
+      # TODO: Update protected instance variables list
+      config_accessor :protected_instance_variables
       self.protected_instance_variables = %w(@assigns @performed_redirect @performed_render
                                              @variables_added @request_origin @url
                                              @parent_controller @action_name
@@ -32,22 +32,11 @@ module ActionController
       def rescue_action(env)
         raise env["action_dispatch.rescue.exception"]
       end
-
-      self.page_cache_directory = defined?(Rails.public_path) ? Rails.public_path : ""
     end
 
     # For old tests
     def initialize_template_class(*) end
     def assign_shortcuts(*) end
-
-    def template
-      @template ||= view_context
-    end
-
-    def process_action(*)
-      template
-      super
-    end
 
     def _normalize_options(options)
       if options[:action] && options[:action].to_s.include?(?/)

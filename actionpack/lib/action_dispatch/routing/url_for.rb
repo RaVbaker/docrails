@@ -4,8 +4,7 @@ module ActionDispatch
     # is also possible: an URL can be generated from one of your routing definitions.
     # URL generation functionality is centralized in this module.
     #
-    # See ActionDispatch::Routing and ActionController::Resources for general
-    # information about routing and routes.rb.
+    # See ActionDispatch::Routing for general information about routing and routes.rb.
     #
     # <b>Tip:</b> If you need to generate URLs from your models or some other place,
     # then ActionController::UrlFor is what you're looking for. Read on for
@@ -64,7 +63,7 @@ module ActionDispatch
     # named routes. For example, suppose that you have a 'users' resource in your
     # <b>routes.rb</b>:
     #
-    #   map.resources :users
+    #   resources :users
     #
     # This generates, among other things, the method <tt>users_path</tt>. By default,
     # this method is accessible from your controllers, views and mailers. If you need
@@ -72,7 +71,7 @@ module ActionDispatch
     # you can do that by including ActionController::UrlFor in your class:
     #
     #   class User < ActiveRecord::Base
-    #     include ActionController::UrlFor
+    #     include Rails.application.routes.url_helpers
     #
     #     def base_uri
     #       user_path(self)
@@ -129,7 +128,7 @@ module ActionDispatch
         when String
           options
         when nil, Hash
-          _router.url_for(url_options.merge(options || {}))
+          _router.url_for(url_options.merge((options || {}).symbolize_keys))
         else
           polymorphic_url(options)
         end

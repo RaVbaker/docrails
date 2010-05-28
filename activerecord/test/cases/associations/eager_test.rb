@@ -110,7 +110,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
     author = assert_queries(3) { Author.find(author_id, :include => {:posts_with_comments => :comments}) } # find the author, then find the posts, then find the comments
     author.posts_with_comments.each do |post_with_comments|
       assert_equal post_with_comments.comments.length, post_with_comments.comments.count
-      assert_equal nil, post_with_comments.comments.uniq!
+      assert_nil post_with_comments.comments.uniq!
     end
   end
 
@@ -805,7 +805,7 @@ class EagerAssociationTest < ActiveRecord::TestCase
   end
 
   def test_include_has_many_using_primary_key
-    expected = Firm.find(1).clients_using_primary_key.sort_by &:name
+    expected = Firm.find(1).clients_using_primary_key.sort_by(&:name)
     # Oracle adapter truncates alias to 30 characters
     if current_adapter?(:OracleAdapter)
       firm = Firm.find 1, :include => :clients_using_primary_key, :order => 'clients_using_primary_keys_companies'[0,30]+'.name'
@@ -833,4 +833,10 @@ class EagerAssociationTest < ActiveRecord::TestCase
     end
   end
 
+  def test_preloading_empty_polymorphic_parent
+    t = Tagging.create!(:taggable_type => 'Post', :taggable_id => Post.maximum(:id) + 1, :tag => tags(:general))
+
+    assert_queries(2) { @tagging = Tagging.preload(:taggable).find(t.id) }
+    assert_no_queries { assert ! @tagging.taggable }
+  end
 end

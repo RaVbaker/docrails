@@ -10,32 +10,37 @@ require "action_controller/railtie"
 
 module ActiveRecord
   class Railtie < Rails::Railtie
-    railtie_name :active_record
+    config.active_record = ActiveSupport::OrderedOptions.new
 
     config.generators.orm :active_record, :migration => true,
                                           :timestamps => true
+
+    config.app_middleware.insert_after "::ActionDispatch::Callbacks",
+      "ActiveRecord::QueryCache"
+
+    config.app_middleware.insert_after "::ActionDispatch::Callbacks",
+      "ActiveRecord::ConnectionAdapters::ConnectionManagement"
 
     rake_tasks do
       load "active_record/railties/databases.rake"
     end
 
-    # TODO If we require the wrong file, the error never comes up.
     require "active_record/railties/log_subscriber"
-    log_subscriber ActiveRecord::Railties::LogSubscriber.new
+    log_subscriber :active_record, ActiveRecord::Railties::LogSubscriber.new
 
     initializer "active_record.initialize_timezone" do
-      ActiveRecord.base_hook do
+      ActiveSupport.on_load(:active_record) do
         self.time_zone_aware_attributes = true
         self.default_timezone = :utc
       end
     end
 
     initializer "active_record.logger" do
-      ActiveRecord.base_hook { self.logger ||= ::Rails.logger }
+      ActiveSupport.on_load(:active_record) { self.logger ||= ::Rails.logger }
     end
 
     initializer "active_record.set_configs" do |app|
-      ActiveRecord.base_hook do
+      ActiveSupport.on_load(:active_record) do
         app.config.active_record.each do |k,v|
           send "#{k}=", v
         end
@@ -45,7 +50,7 @@ module ActiveRecord
     # This sets the database configuration from Configuration#database_configuration
     # and then establishes the connection.
     initializer "active_record.initialize_database" do |app|
-      ActiveRecord.base_hook do
+      ActiveSupport.on_load(:active_record) do
         self.configurations = app.config.database_configuration
         establish_connection
       end
@@ -54,40 +59,28 @@ module ActiveRecord
     # Expose database runtime to controller for logging.
     initializer "active_record.log_runtime" do |app|
       require "active_record/railties/controller_runtime"
-      ActionController.base_hook do
+      ActiveSupport.on_load(:action_controller) do
         include ActiveRecord::Railties::ControllerRuntime
       end
     end
 
-    # Setup database middleware after initializers have run
-    initializer "active_record.initialize_database_middleware", :after => "action_controller.set_configs" do |app|
-      middleware = app.config.middleware
-      if middleware.include?("ActiveRecord::SessionStore")
-        middleware.insert_before "ActiveRecord::SessionStore", ActiveRecord::ConnectionAdapters::ConnectionManagement
-        middleware.insert_before "ActiveRecord::SessionStore", ActiveRecord::QueryCache
-      else
-        middleware.use ActiveRecord::ConnectionAdapters::ConnectionManagement
-        middleware.use ActiveRecord::QueryCache
-      end
-    end
-
-    initializer "active_record.load_observers" do
-      ActiveRecord.base_hook { instantiate_observers }
-
-      ActiveRecord.base_hook do
-        ActionDispatch::Callbacks.to_prepare(:activerecord_instantiate_observers) do
-          ActiveRecord::Base.instantiate_observers
-        end
-      end
-    end
-
     initializer "active_record.set_dispatch_hooks", :before => :set_clear_dependencies_hook do |app|
-      ActiveRecord.base_hook do
-        unless app.config.cache_classes
+      unless app.config.cache_classes
+        ActiveSupport.on_load(:active_record) do
           ActionDispatch::Callbacks.after do
             ActiveRecord::Base.reset_subclasses
             ActiveRecord::Base.clear_reloadable_connections!
           end
+        end
+      end
+    end
+
+    config.after_initialize do
+      ActiveSupport.on_load(:active_record) do
+        instantiate_observers
+
+        ActionDispatch::Callbacks.to_prepare(:activerecord_instantiate_observers) do
+          ActiveRecord::Base.instantiate_observers
         end
       end
     end

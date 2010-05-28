@@ -45,7 +45,17 @@ module ActionDispatch
     end
 
     def call(env)
-      @app.call(env)
+      status, headers, body = @app.call(env)
+
+      # Only this middleware cares about RoutingError. So, let's just raise
+      # it here.
+      # TODO: refactor this middleware to handle the X-Cascade scenario without
+      # having to raise an exception.
+      if headers['X-Cascade'] == 'pass'
+        raise ActionController::RoutingError, "No route matches #{env['PATH_INFO'].inspect}"
+      end
+
+      [status, headers, body]
     rescue Exception => exception
       raise exception if env['action_dispatch.show_exceptions'] == false
       render_exception(env, exception)
@@ -123,14 +133,10 @@ module ActionDispatch
         return unless logger
 
         ActiveSupport::Deprecation.silence do
-          if ActionView::Template::Error === exception
-            logger.fatal(exception.to_s)
-          else
-            logger.fatal(
-              "\n#{exception.class} (#{exception.message}):\n  " +
-              clean_backtrace(exception).join("\n  ") + "\n\n"
-            )
-          end
+          message = "\n#{exception.class} (#{exception.message}):\n"
+          message << exception.annoted_source_code if exception.respond_to?(:annoted_source_code)
+          message << exception.backtrace.join("\n  ")
+          logger.fatal("#{message}\n\n")
         end
       end
 

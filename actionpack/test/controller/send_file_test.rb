@@ -25,7 +25,7 @@ class SendFileController < ActionController::Base
   end
 
   def multibyte_text_data
-    send_data("Кирилица\n祝您好運", options)
+    send_data("Кирилица\n祝您好運.", options)
   end
 end
 
@@ -55,8 +55,8 @@ class SendFileTest < ActionController::TestCase
     response = nil
     assert_nothing_raised { response = process('file') }
     assert_not_nil response
-    assert response.body_parts.respond_to?(:each)
-    assert response.body_parts.respond_to?(:to_path)
+    assert_respond_to response.body_parts, :each
+    assert_respond_to response.body_parts, :to_path
 
     require 'stringio'
     output = StringIO.new
@@ -128,7 +128,7 @@ class SendFileTest < ActionController::TestCase
 
     assert_equal 'image/png', @controller.content_type
   end
-  
+
 
   def test_send_file_headers_with_bad_symbol
     options = {

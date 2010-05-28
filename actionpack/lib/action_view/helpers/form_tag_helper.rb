@@ -1,6 +1,7 @@
 require 'cgi'
 require 'action_view/helpers/tag_helper'
 require 'active_support/core_ext/object/returning'
+require 'active_support/core_ext/object/blank'
 
 module ActionView
   module Helpers
@@ -92,6 +93,10 @@ module ActionView
       #   # => <select disabled="disabled" id="destination" name="destination"><option>NYC</option>
       #   #    <option>Paris</option><option>Rome</option></select>
       def select_tag(name, option_tags = nil, options = {})
+        if Array === option_tags
+          ActiveSupport::Deprecation.warn 'Passing an array of option_tags to select_tag implicitly joins them without marking them as HTML-safe. Pass option_tags.join.html_safe instead.', caller
+        end
+
         html_name = (options[:multiple] == true && !name.to_s.ends_with?("[]")) ? "#{name}[]" : name
         if blank = options.delete(:include_blank)
           if blank.kind_of?(String)
@@ -137,7 +142,7 @@ module ActionView
         tag :input, { "type" => "text", "name" => name, "id" => sanitize_to_id(name), "value" => value }.update(options.stringify_keys)
       end
 
-      # Creates a label field
+      # Creates a label element. Accepts a block.
       #
       # ==== Options
       # * Creates standard HTML attributes for the tag.
@@ -151,8 +156,12 @@ module ActionView
       #
       #   label_tag 'name', nil, :class => 'small_label'
       #   # => <label for="name" class="small_label">Name</label>
-      def label_tag(name, text = nil, options = {})
-        content_tag :label, text || name.to_s.humanize, { "for" => sanitize_to_id(name) }.update(options.stringify_keys)
+      def label_tag(name = nil, content_or_options = nil, options = nil, &block)
+        options = content_or_options if block_given? && content_or_options.is_a?(Hash)
+        options ||= {}
+        options.stringify_keys!
+        options["for"] = sanitize_to_id(name) unless name.blank? || options.has_key?("for")
+        content_tag :label, content_or_options || name.to_s.humanize, options, &block
       end
 
       # Creates a hidden form input field used to transmit data that would be lost due to HTTP's statelessness or
@@ -178,7 +187,7 @@ module ActionView
       # Creates a file upload field.  If you are using file uploads then you will also need
       # to set the multipart option for the form tag:
       #
-      #   <% form_tag '/upload', :multipart => true do %>
+      #   <%= form_tag '/upload', :multipart => true do %>
       #     <label for="file">File to Upload</label> <%= file_field_tag "file" %>
       #     <%= submit_tag %>
       #   <% end %>
@@ -194,8 +203,8 @@ module ActionView
       #   file_field_tag 'attachment'
       #   # => <input id="attachment" name="attachment" type="file" />
       #
-      #   file_field_tag 'avatar', :class => 'profile-input'
-      #   # => <input class="profile-input" id="avatar" name="avatar" type="file" />
+      #   file_field_tag 'avatar', :class => 'profile_input'
+      #   # => <input class="profile_input" id="avatar" name="avatar" type="file" />
       #
       #   file_field_tag 'picture', :disabled => true
       #   # => <input disabled="disabled" id="picture" name="picture" type="file" />
@@ -239,8 +248,8 @@ module ActionView
       #   password_field_tag 'confirm_pass', nil, :disabled => true
       #   # => <input disabled="disabled" id="confirm_pass" name="confirm_pass" type="password" />
       #
-      #   password_field_tag 'pin', '1234', :maxlength => 4, :size => 6, :class => "pin-input"
-      #   # => <input class="pin-input" id="pin" maxlength="4" name="pin" size="6" type="password" value="1234" />
+      #   password_field_tag 'pin', '1234', :maxlength => 4, :size => 6, :class => "pin_input"
+      #   # => <input class="pin_input" id="pin" maxlength="4" name="pin" size="6" type="password" value="1234" />
       def password_field_tag(name = "password", value = nil, options = {})
         text_field_tag(name, value, options.update("type" => "password"))
       end
@@ -284,7 +293,7 @@ module ActionView
         escape = options.key?("escape") ? options.delete("escape") : true
         content = html_escape(content) if escape
 
-        content_tag :textarea, content.html_safe, { "name" => name, "id" => sanitize_to_id(name) }.update(options)
+        content_tag :textarea, content.to_s.html_safe, { "name" => name, "id" => sanitize_to_id(name) }.update(options)
       end
 
       # Creates a check box form input tag.
@@ -369,8 +378,8 @@ module ActionView
       #   submit_tag nil, :class => "form_submit"
       #   # => <input class="form_submit" name="commit" type="submit" />
       #
-      #   submit_tag "Edit", :disable_with => "Editing...", :class => "edit-button"
-      #   # => <input class="edit-button" data-disable_with="Editing..."
+      #   submit_tag "Edit", :disable_with => "Editing...", :class => "edit_button"
+      #   # => <input class="edit_button" data-disable_with="Editing..."
       #   #    name="commit" type="submit" value="Edit" />
       #
       #   submit_tag "Save", :confirm => "Are you sure?"
@@ -381,7 +390,7 @@ module ActionView
         options.stringify_keys!
 
         if disable_with = options.delete("disable_with")
-          options["data-disable-with"] = disable_with if disable_with
+          options["data-disable-with"] = disable_with
         end
 
         if confirm = options.delete("confirm")
@@ -393,7 +402,7 @@ module ActionView
 
       # Displays an image which when clicked will submit the form.
       #
-      # <tt>source</tt> is passed to AssetTagHelper#image_path
+      # <tt>source</tt> is passed to AssetTagHelper#path_to_image
       #
       # ==== Options
       # * <tt>:confirm => 'question?'</tt> - This will add a JavaScript confirm
@@ -409,11 +418,11 @@ module ActionView
       #   image_submit_tag("purchase.png", :disabled => true)
       #   # => <input disabled="disabled" src="/images/purchase.png" type="image" />
       #
-      #   image_submit_tag("search.png", :class => 'search-button')
-      #   # => <input class="search-button" src="/images/search.png" type="image" />
+      #   image_submit_tag("search.png", :class => 'search_button')
+      #   # => <input class="search_button" src="/images/search.png" type="image" />
       #
-      #   image_submit_tag("agree.png", :disabled => true, :class => "agree-disagree-button")
-      #   # => <input class="agree-disagree-button" disabled="disabled" src="/images/agree.png" type="image" />
+      #   image_submit_tag("agree.png", :disabled => true, :class => "agree_disagree_button")
+      #   # => <input class="agree_disagree_button" disabled="disabled" src="/images/agree.png" type="image" />
       def image_submit_tag(source, options = {})
         options.stringify_keys!
 
@@ -450,6 +459,69 @@ module ActionView
         output.safe_concat(content_tag(:legend, legend)) unless legend.blank?
         output.concat(content)
         output.safe_concat("</fieldset>")
+      end
+
+      # Creates a text field of type "search".
+      #
+      # ==== Options
+      # * Accepts the same options as text_field_tag.
+      def search_field_tag(name, value = nil, options = {})
+        text_field_tag(name, value, options.stringify_keys.update("type" => "search"))
+      end
+
+      # Creates a text field of type "tel".
+      #
+      # ==== Options
+      # * Accepts the same options as text_field_tag.
+      def telephone_field_tag(name, value = nil, options = {})
+        text_field_tag(name, value, options.stringify_keys.update("type" => "tel"))
+      end
+      alias phone_field_tag telephone_field_tag
+
+      # Creates a text field of type "url".
+      #
+      # ==== Options
+      # * Accepts the same options as text_field_tag.
+      def url_field_tag(name, value = nil, options = {})
+        text_field_tag(name, value, options.stringify_keys.update("type" => "url"))
+      end
+
+      # Creates a text field of type "email".
+      #
+      # ==== Options
+      # * Accepts the same options as text_field_tag.
+      def email_field_tag(name, value = nil, options = {})
+        text_field_tag(name, value, options.stringify_keys.update("type" => "email"))
+      end
+
+      # Creates a number field.
+      #
+      # ==== Options
+      # * <tt>:min</tt> - The minimum acceptable value.
+      # * <tt>:max</tt> - The maximum acceptable value.
+      # * <tt>:in</tt> - A range specifying the <tt>:min</tt> and
+      #   <tt>:max</tt> values.
+      # * <tt>:step</tt> - The acceptable value granularity.
+      # * Otherwise accepts the same options as text_field_tag.
+      #
+      # ==== Examples
+      #   number_field_tag 'quantity', nil, :in => 1...10
+      #   => <input id="quantity" name="quantity" min="1" max="9" />
+      def number_field_tag(name, value = nil, options = {})
+        options = options.stringify_keys
+        options["type"] ||= "number"
+        if range = options.delete("in") || options.delete("within")
+          options.update("min" => range.min, "max" => range.max)
+        end
+        text_field_tag(name, value, options)
+      end
+
+      # Creates a range form element.
+      #
+      # ==== Options
+      # * Accepts the same options as number_field_tag.
+      def range_field_tag(name, value = nil, options = {})
+        number_field_tag(name, value, options.stringify_keys.update("type" => "range"))
       end
 
       private

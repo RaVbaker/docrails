@@ -1,9 +1,15 @@
+require 'active_support/core_ext/hash/keys'
+
 # This class has dubious semantics and we only have it so that
 # people can write params[:key] instead of params['key']
 # and they get the same value for both keys.
 
 module ActiveSupport
   class HashWithIndifferentAccess < Hash
+    def extractable_options?
+      true
+    end
+
     def initialize(constructor = {})
       if constructor.is_a?(Hash)
         super()
@@ -108,7 +114,9 @@ module ActiveSupport
     end
 
     def stringify_keys!; self end
-    def symbolize_keys!; self end
+    def stringify_keys; dup end
+    undef :symbolize_keys!
+    def symbolize_keys; to_hash.symbolize_keys end
     def to_options!; self end
 
     # Convert to a Hash with String keys.

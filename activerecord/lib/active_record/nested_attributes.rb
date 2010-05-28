@@ -1,5 +1,7 @@
 require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/object/try'
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/hash/indifferent_access'
 
 module ActiveRecord
   module NestedAttributes #:nodoc:
@@ -243,11 +245,14 @@ module ActiveRecord
             # def pirate_attributes=(attributes)
             #   assign_nested_attributes_for_one_to_one_association(:pirate, attributes)
             # end
-            class_eval %{
+            class_eval <<-eoruby, __FILE__, __LINE__ + 1
+              if method_defined?(:#{association_name}_attributes=)
+                remove_method(:#{association_name}_attributes=)
+              end
               def #{association_name}_attributes=(attributes)
                 assign_nested_attributes_for_#{type}_association(:#{association_name}, attributes)
               end
-            }, __FILE__, __LINE__
+            eoruby
           else
             raise ArgumentError, "No association found for name `#{association_name}'. Has it been defined yet?"
           end
@@ -344,14 +349,24 @@ module ActiveRecord
         attributes_collection = attributes_collection.sort_by { |index, _| index.to_i }.map { |_, attributes| attributes }
       end
 
+      association = send(association_name)
+
+      existing_records = if association.loaded?
+        association.to_a
+      else
+        attribute_ids = attributes_collection.map {|a| a['id'] || a[:id] }.compact
+        attribute_ids.present? ? association.all(:conditions => {association.primary_key => attribute_ids}) : []
+      end
+
       attributes_collection.each do |attributes|
         attributes = attributes.with_indifferent_access
 
         if attributes['id'].blank?
           unless reject_new_record?(association_name, attributes)
-            send(association_name).build(attributes.except(*UNASSIGNABLE_KEYS))
+            association.build(attributes.except(*UNASSIGNABLE_KEYS))
           end
-        elsif existing_record = send(association_name).detect { |record| record.id.to_s == attributes['id'].to_s }
+        elsif existing_record = existing_records.detect { |record| record.id.to_s == attributes['id'].to_s }
+          association.send(:add_record_to_target_with_callbacks, existing_record) unless association.loaded?
           assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy])
         else
           raise_nested_attributes_record_not_found(association_name, attributes['id'])

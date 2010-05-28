@@ -1,33 +1,16 @@
 module ActionController
   class Base
-    class << self
-      def deprecated_config_accessor(option, message = nil)
-        deprecated_config_reader(option, message)
-        deprecated_config_writer(option, message)
+    # Deprecated methods. Wrap them in a module so they can be overwritten by plugins
+    # (like the verify method.)
+    module DeprecatedBehavior #:nodoc:
+      def relative_url_root
+        ActiveSupport::Deprecation.warn "ActionController::Base.relative_url_root is ineffective. " <<
+          "Please stop using it.", caller
       end
 
-      def deprecated_config_reader(option, message = nil)
-        message ||= "Reading #{option} directly from ActionController::Base is deprecated. " \
-                    "Please read it from config.#{option}"
-
-        self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-          def #{option}
-            ActiveSupport::Deprecation.warn #{message.inspect}, caller
-            config.#{option}
-          end
-        RUBY
-      end
-
-      def deprecated_config_writer(option, message = nil)
-        message ||= "Setting #{option} directly on ActionController::Base is deprecated. " \
-                    "Please set it on config.action_controller.#{option}"
-
-        self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-          def #{option}=(val)
-            ActiveSupport::Deprecation.warn #{message.inspect}, caller
-            config.#{option} = val
-          end
-        RUBY
+      def relative_url_root=
+        ActiveSupport::Deprecation.warn "ActionController::Base.relative_url_root= is ineffective. " <<
+          "Please stop using it.", caller
       end
 
       def consider_all_requests_local
@@ -63,7 +46,16 @@ module ActionController
       def ip_spoofing_check
         ActiveSupport::Deprecation.warn "ActionController::Base.ip_spoofing_check is deprecated. " <<
           "Configuring ip_spoofing_check on the application configures a middleware.", caller
-        Rails.application.config.action_disaptch.ip_spoofing_check
+        Rails.application.config.action_dispatch.ip_spoofing_check
+      end
+
+      def cookie_verifier_secret=(value)
+        ActiveSupport::Deprecation.warn "ActionController::Base.cookie_verifier_secret= is deprecated. " <<
+          "Please configure it on your application with config.secret_token=", caller
+      end
+
+      def cookie_verifier_secret
+        ActiveSupport::Deprecation.warn "ActionController::Base.cookie_verifier_secret is deprecated.", caller
       end
 
       def trusted_proxies=(value)
@@ -116,14 +108,24 @@ module ActionController
       def use_accept_header=(val)
         use_accept_header
       end
+
+      # This method has been moved to ActionDispatch::Request.filter_parameters
+      def filter_parameter_logging(*args, &block)
+        ActiveSupport::Deprecation.warn("Setting filter_parameter_logging in ActionController is deprecated and has no longer effect, please set 'config.filter_parameters' in config/application.rb instead", caller)
+        filter = Rails.application.config.filter_parameters
+        filter.concat(args)
+        filter << block if block
+        filter
+      end
+
+      # This was moved to a plugin
+      def verify(*args)
+        ActiveSupport::Deprecation.warn "verify was removed from Rails and is now available as a plugin. " <<
+          "Please install it with `rails plugin install git://github.com/rails/verification.git`.", caller
+      end
     end
 
-    deprecated_config_writer :session_store
-    deprecated_config_writer :session_options
-    deprecated_config_accessor :relative_url_root, "relative_url_root is ineffective. Please stop using it"
-    deprecated_config_accessor :assets_dir
-    deprecated_config_accessor :javascripts_dir
-    deprecated_config_accessor :stylesheets_dir
+    extend DeprecatedBehavior
 
     delegate :consider_all_requests_local, :consider_all_requests_local=,
              :allow_concurrency, :allow_concurrency=, :to => :"self.class"

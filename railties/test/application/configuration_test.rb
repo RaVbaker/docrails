@@ -109,7 +109,7 @@ module ApplicationTests
       end
     end
 
-    test "Frameworks are not preloaded by default" do
+    test "frameworks are not preloaded by default" do
       require "#{app_path}/config/environment"
 
       assert ActionController.autoload?(:RecordIdentifier)
@@ -140,7 +140,7 @@ module ApplicationTests
         require "#{app_path}/config/environment"
       end
     end
-    
+
     test "filter_parameters should be able to set via config.filter_parameters" do
       add_to_config <<-RUBY
         config.filter_parameters += [ :foo, 'bar', lambda { |key, value|
@@ -172,61 +172,100 @@ module ApplicationTests
       assert $prepared
     end
 
-    test "config.action_dispatch.x_sendfile_header defaults to X-Sendfile" do
-      require "rails"
-      require "action_controller/railtie"
+    test "config.encoding sets the default encoding" do
+      add_to_config <<-RUBY
+        config.encoding = "utf-8"
+      RUBY
 
-      class MyApp < Rails::Application
-        config.cookie_secret = "3b7cd727ee24e8444053437c36cc66c4"
-        config.session_store :cookie_store, :key => "_myapp_session"
+      require "#{app_path}/config/application"
+
+      unless RUBY_VERSION < '1.9'
+        assert_equal Encoding::UTF_8, Encoding.default_external
+        assert_equal Encoding::UTF_8, Encoding.default_internal
       end
-
-      MyApp.initialize!
-
-      class ::OmgController < ActionController::Base
-        def index
-          send_file __FILE__
-        end
-      end
-
-      MyApp.routes.draw do
-        match "/" => "omg#index"
-      end
-
-      require 'rack/test'
-      extend Rack::Test::Methods
-
-      get "/"
-      assert_equal File.expand_path(__FILE__), last_response.headers["X-Sendfile"]
     end
 
-    test "config.action_dispatch.x_sendfile_header is sent to Rack::Sendfile" do
-      require "rails"
-      require "action_controller/railtie"
+    test "config.paths.public sets Rails.public_path" do
+      add_to_config <<-RUBY
+        config.paths.public = "somewhere"
+      RUBY
 
-      class MyApp < Rails::Application
-        config.cookie_secret = "3b7cd727ee24e8444053437c36cc66c4"
-        config.session_store :cookie_store, :key => "_myapp_session"
-        config.action_dispatch.x_sendfile_header = 'X-Lighttpd-Send-File'
+      require "#{app_path}/config/application"
+      assert_equal File.join(app_path, "somewhere"), Rails.public_path
+    end
+
+    test "config.secret_token is sent in env" do
+      make_basic_app do |app|
+        app.config.secret_token = 'b3c631c314c0bbca50c1b2843150fe33'
+        app.config.session_store :disabled
       end
-
-      MyApp.initialize!
 
       class ::OmgController < ActionController::Base
         def index
-          send_file __FILE__
+          cookies.signed[:some_key] = "some_value"
+          render :text => env["action_dispatch.secret_token"]
         end
       end
 
-      MyApp.routes.draw do
-        match "/" => "omg#index"
+      get "/"
+      assert_equal 'b3c631c314c0bbca50c1b2843150fe33', last_response.body
+    end
+
+    test "protect from forgery is the default in a new app" do
+      make_basic_app
+
+      class ::OmgController < ActionController::Base
+        protect_from_forgery
+
+        def index
+          render :inline => "<%= csrf_meta_tag %>"
+        end
       end
 
-      require 'rack/test'
-      extend Rack::Test::Methods
+      get "/"
+      assert last_response.body =~ /csrf\-param/
+    end
+
+    test "config.action_controller.perform_caching = true" do
+      make_basic_app do |app|
+        app.config.action_controller.perform_caching = true
+      end
+
+      class ::OmgController < ActionController::Base
+        @@count = 0
+
+        caches_action :index
+        def index
+          @@count += 1
+          render :text => @@count
+        end
+      end
 
       get "/"
-      assert_equal File.expand_path(__FILE__), last_response.headers["X-Lighttpd-Send-File"]
+      res = last_response.body
+      get "/"
+      assert_equal res, last_response.body # value should be unchanged
+    end
+
+    test "config.action_controller.perform_caching = false" do
+      make_basic_app do |app|
+        app.config.action_controller.perform_caching = false
+      end
+
+      class ::OmgController < ActionController::Base
+        @@count = 0
+
+        caches_action :index
+        def index
+          @@count += 1
+          render :text => @@count
+        end
+      end
+
+      get "/"
+      res = last_response.body
+      get "/"
+      assert_not_equal res, last_response.body
     end
   end
 end

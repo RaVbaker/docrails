@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.version     = version
   s.summary     = 'A toolkit of support libraries and Ruby core extensions extracted from the Rails framework.'
   s.description = 'A toolkit of support libraries and Ruby core extensions extracted from the Rails framework. Rich support for multibyte strings, internationalization, time zones, and testing.'
+
   s.required_ruby_version = '>= 1.8.7'
 
   s.author            = 'David Heinemeier Hansson'
@@ -18,8 +19,8 @@ Gem::Specification.new do |s|
 
   s.has_rdoc = true
 
-  s.add_dependency('i18n',            '~> 0.3.6.pre')
+  s.add_dependency('i18n',            '~> 0.4.0.beta1')
   s.add_dependency('tzinfo',          '~> 0.3.16')
   s.add_dependency('builder',         '~> 2.1.2')
-  s.add_dependency('memcache-client', '~> 1.7.5')
+  s.add_dependency('memcache-client', '>= 1.7.5')
 end

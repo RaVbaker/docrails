@@ -1,3 +1,5 @@
+require "active_support/core_ext/object/blank"
+
 module ActionDispatch
   class Request
     def cookie_jar
@@ -50,18 +52,25 @@ module ActionDispatch
   # * <tt>:httponly</tt> - Whether this cookie is accessible via scripting or
   #   only HTTP. Defaults to +false+.
   class Cookies
+    HTTP_HEADER = "Set-Cookie".freeze
+    TOKEN_KEY   = "action_dispatch.secret_token".freeze
+
+    # Raised when storing more than 4K of session data.
+    class CookieOverflow < StandardError; end
+
     class CookieJar < Hash #:nodoc:
       def self.build(request)
-        new.tap do |hash|
+        secret = request.env[TOKEN_KEY]
+        new(secret).tap do |hash|
           hash.update(request.cookies)
         end
       end
 
-      def initialize
+      def initialize(secret=nil)
+        @secret = secret
         @set_cookies = {}
         @delete_cookies = {}
-
-        super
+        super()
       end
 
       # Returns the value of the cookie by +name+, or +nil+ if no such cookie exists.
@@ -84,6 +93,7 @@ module ActionDispatch
 
         options[:path] ||= "/"
         @set_cookies[key] = options
+        @delete_cookies.delete(key)
         value
       end
 
@@ -110,7 +120,7 @@ module ActionDispatch
       #   cookies.permanent.signed[:remember_me] = current_user.id
       #   # => Set-Cookie: discount=BAhU--848956038e692d7046deab32b7131856ab20e14e; path=/; expires=Sun, 16-Dec-2029 03:24:16 GMT
       def permanent
-        @permanent ||= PermanentCookieJar.new(self)
+        @permanent ||= PermanentCookieJar.new(self, @secret)
       end
 
       # Returns a jar that'll automatically generate a signed representation of cookie value and verify it when reading from
@@ -118,7 +128,7 @@ module ActionDispatch
       # cookie was tampered with by the user (or a 3rd party), an ActiveSupport::MessageVerifier::InvalidSignature exception will
       # be raised.
       #
-      # This jar requires that you set a suitable secret for the verification on ActionController::Base.cookie_verifier_secret.
+      # This jar requires that you set a suitable secret for the verification on your app's config.secret_token.
       #
       # Example:
       #
@@ -127,18 +137,18 @@ module ActionDispatch
       #
       #   cookies.signed[:discount] # => 45
       def signed
-        @signed ||= SignedCookieJar.new(self)
+        @signed ||= SignedCookieJar.new(self, @secret)
       end
 
-      def write(response)
-        @set_cookies.each { |k, v| response.set_cookie(k, v) }
-        @delete_cookies.each { |k, v| response.delete_cookie(k, v) }
+      def write(headers)
+        @set_cookies.each { |k, v| ::Rack::Utils.set_cookie_header!(headers, k, v) }
+        @delete_cookies.each { |k, v| ::Rack::Utils.delete_cookie_header!(headers, k, v) }
       end
     end
 
     class PermanentCookieJar < CookieJar #:nodoc:
-      def initialize(parent_jar)
-        @parent_jar = parent_jar
+      def initialize(parent_jar, secret)
+        @parent_jar, @secret = parent_jar, secret
       end
 
       def []=(key, options)
@@ -153,11 +163,7 @@ module ActionDispatch
       end
 
       def signed
-        @signed ||= SignedCookieJar.new(self)
-      end
-
-      def controller
-        @parent_jar.controller
+        @signed ||= SignedCookieJar.new(self, @secret)
       end
 
       def method_missing(method, *arguments, &block)
@@ -166,19 +172,21 @@ module ActionDispatch
     end
 
     class SignedCookieJar < CookieJar #:nodoc:
-      def initialize(parent_jar)
-        unless ActionController::Base.cookie_verifier_secret
-          raise "You must set ActionController::Base.cookie_verifier_secret to use signed cookies"
-        end
+      MAX_COOKIE_SIZE = 4096 # Cookies can typically store 4096 bytes.
+      SECRET_MIN_LENGTH = 30 # Characters
 
+      def initialize(parent_jar, secret)
+        ensure_secret_secure(secret)
         @parent_jar = parent_jar
-        @verifier = ActiveSupport::MessageVerifier.new(ActionController::Base.cookie_verifier_secret)
+        @verifier   = ActiveSupport::MessageVerifier.new(secret)
       end
 
       def [](name)
-        if value = @parent_jar[name]
-          @verifier.verify(value)
+        if signed_message = @parent_jar[name]
+          @verifier.verify(signed_message)
         end
+      rescue ActiveSupport::MessageVerifier::InvalidSignature
+        nil
       end
 
       def []=(key, options)
@@ -189,11 +197,33 @@ module ActionDispatch
           options = { :value => @verifier.generate(options) }
         end
 
+        raise CookieOverflow if options[:value].size > MAX_COOKIE_SIZE
         @parent_jar[key] = options
       end
 
       def method_missing(method, *arguments, &block)
         @parent_jar.send(method, *arguments, &block)
+      end
+
+    protected
+
+      # To prevent users from using something insecure like "Password" we make sure that the
+      # secret they've provided is at least 30 characters in length.
+      def ensure_secret_secure(secret)
+        if secret.blank?
+          raise ArgumentError, "A secret is required to generate an " +
+            "integrity hash for cookie session data. Use " +
+            "config.secret_token = \"some secret phrase of at " +
+            "least #{SECRET_MIN_LENGTH} characters\"" +
+            "in config/application.rb"
+        end
+
+        if secret.length < SECRET_MIN_LENGTH
+          raise ArgumentError, "Secret should be something secure, " +
+            "like \"#{ActiveSupport::SecureRandom.hex(16)}\".  The value you " +
+            "provided, \"#{secret}\", is shorter than the minimum length " +
+            "of #{SECRET_MIN_LENGTH} characters"
+        end
       end
     end
 
@@ -205,12 +235,13 @@ module ActionDispatch
       status, headers, body = @app.call(env)
 
       if cookie_jar = env['action_dispatch.cookies']
-        response = Rack::Response.new(body, status, headers)
-        cookie_jar.write(response)
-        response.to_a
-      else
-        [status, headers, body]
+        cookie_jar.write(headers)
+        if headers[HTTP_HEADER].respond_to?(:join)
+          headers[HTTP_HEADER] = headers[HTTP_HEADER].join("\n")
+        end
       end
+
+      [status, headers, body]
     end
   end
 end

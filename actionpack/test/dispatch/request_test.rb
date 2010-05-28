@@ -223,10 +223,17 @@ class RequestTest < ActiveSupport::TestCase
     assert request.ssl?
   end
 
-  test "symbolized request methods" do
+  test "String request methods" do
     [:get, :post, :put, :delete].each do |method|
       request = stub_request 'REQUEST_METHOD' => method.to_s.upcase
-      assert_equal method, request.method
+      assert_equal method.to_s.upcase, request.method
+    end
+  end
+
+  test "Symbol forms of request methods via method_symbol" do
+    [:get, :post, :put, :delete].each do |method|
+      request = stub_request 'REQUEST_METHOD' => method.to_s.upcase
+      assert_equal method, request.method_symbol
     end
   end
 
@@ -238,9 +245,9 @@ class RequestTest < ActiveSupport::TestCase
   end
 
   test "allow method hacking on post" do
-    [:get, :options, :put, :post, :delete].each do |method|
+    %w(GET OPTIONS PUT POST DELETE).each do |method|
       request = stub_request "REQUEST_METHOD" => method.to_s.upcase
-      assert_equal(method == :head ? :get : method, request.method)
+      assert_equal(method == "HEAD" ? "GET" : method, request.method)
     end
   end
 
@@ -255,13 +262,14 @@ class RequestTest < ActiveSupport::TestCase
     [:get, :put, :delete].each do |method|
       request = stub_request 'REQUEST_METHOD' => method.to_s.upcase,
         'action_dispatch.request.request_parameters' => { :_method => 'put' }
-      assert_equal method, request.method
+      assert_equal method.to_s.upcase, request.method
     end
   end
 
   test "head masquerading as get" do
     request = stub_request 'REQUEST_METHOD' => 'GET', "rack.methodoverride.original_method" => "HEAD"
-    assert_equal :get, request.method
+    assert_equal "HEAD", request.method
+    assert_equal "GET",  request.request_method
     assert request.get?
     assert request.head?
   end
@@ -295,7 +303,7 @@ class RequestTest < ActiveSupport::TestCase
 
   test "content type" do
     request = stub_request 'CONTENT_TYPE' => 'text/html'
-    assert_equal Mime::HTML, request.content_type
+    assert_equal Mime::HTML, request.content_mime_type
   end
 
   test "can override format with parameter" do
@@ -310,17 +318,17 @@ class RequestTest < ActiveSupport::TestCase
 
   test "no content type" do
     request = stub_request
-    assert_equal nil, request.content_type
+    assert_equal nil, request.content_mime_type
   end
 
   test "content type is XML" do
     request = stub_request 'CONTENT_TYPE' => 'application/xml'
-    assert_equal Mime::XML, request.content_type
+    assert_equal Mime::XML, request.content_mime_type
   end
 
   test "content type with charset" do
     request = stub_request 'CONTENT_TYPE' => 'application/xml; charset=UTF-8'
-    assert_equal Mime::XML, request.content_type
+    assert_equal Mime::XML, request.content_mime_type
   end
 
   test "user agent" do

@@ -210,9 +210,9 @@ String.new.singleton_class # => #<Class:#<String:0x17a1d1c>>
 </ruby>
 
 WARNING: Fixnums and symbols have no singleton classes, +singleton_class+
-raises +TypeError+ on them.
+raises +TypeError+ on them. Moreover, the singleton classes of +nil+, +true+, and +false+, are +NilClass+, +TrueClass+, and +FalseClass+, respectively.
 
-NOTE: Defined in +active_support/core_ext/object/singleton_class.rb+.
+NOTE: Defined in +active_support/core_ext/kernel/singleton_class.rb+.
 
 h4. +class_eval(*args, &block)+
 
@@ -233,7 +233,7 @@ class Proc
 end
 </ruby>
 
-NOTE: Defined in +active_support/core_ext/object/singleton_class.rb+.
+NOTE: Defined in +active_support/core_ext/kernel/singleton_class.rb+.
 
 h4. +acts_like?(duck)+
 
@@ -799,6 +799,25 @@ end
 
 NOTE: Defined in +active_support/core_ext/module/delegation.rb+.
 
+h4. Method Removal
+
+h5. +remove_possible_method+
+
+The method +remove_possible_method+ is like the standard +remove_method+, except it silently returns on failure:
+
+<ruby>
+class A; end
+
+A.class_eval do
+  remove_method(:nonexistent)          # raises NameError
+  remove_possible_method(:nonexistent) # no problem, continue
+end
+</ruby>
+
+This may come in handy if you need to define a method that may already exist, since redefining a method issues a warning "method redefined; discarding old redefined_method_name".
+
+NOTE: Defined in +active_support/core_ext/module/remove_method.rb+.
+
 h4. Parents
 
 h5. +parent+
@@ -847,7 +866,7 @@ WARNING: Note that in that case +parent+ returns +Object+.
 
 NOTE: Defined in +active_support/core_ext/module/introspection.rb+.
 
-h5. +parents+
+h5(#module-parents). +parents+
 
 The method +parents+ calls +parent+ on the receiver and upwards until +Object+ is reached. The chain is returned in an array, from bottom to top:
 
@@ -1875,10 +1894,10 @@ Similarly, +from+ returns the tail from the element at the passed index on:
 
 The methods +second+, +third+, +fourth+, and +fifth+ return the corresponding element (+first+ is builtin). Thanks to social wisdom and positive constructiveness all around, +forty_two+ is also available.
 
-You can pick a random element with +rand+:
+You can pick a random element with +random_element+:
 
 <ruby>
-shape_type = [Circle, Square, Triangle].rand
+shape_type = [Circle, Square, Triangle].random_element
 </ruby>
 
 NOTE: Defined in +active_support/core_ext/array/access.rb+.
@@ -2172,9 +2191,9 @@ NOTE: Defined in +active_support/core_ext/array/grouping.rb+.
 
 h3. Extensions to +Hash+
 
-h4. Conversions
+h4(#hash-conversions). Conversions
 
-h5. +to_xml+
+h5(#hash-to-xml). +to_xml+
 
 The method +to_xml+ returns a string containing an XML representation of its receiver:
 
@@ -2629,21 +2648,128 @@ NOTE: Defined in +active_support/core_ext/proc.rb+.
 
 h3. Extensions to +Date+
 
-...
+h4. Calculations
+
+All the following methods are defined in +active_support/core_ext/date/calculations.rb+.
+
+INFO: The following calculation methods have edge cases in October 1582, since days 5..14 just do not exist. This guide does not document their behavior around those days for brevity, but it is enough to say that they do what you would expect. That is, +Date.new(1582, 10, 4).tomorrow+ returns +Date.new(1582, 10, 15)+ and so on. Please check +test/core_ext/date_ext_test.rb+ in the Active Support test suite for expected behavior.
+
+h5. +Date.current+
+
+Active Support defines +Date.current+ to be today in the current time zone. That's like +Date.today+, except that it honors +Time.zone_default+. It also defines +Date.yesterday+ and +Date.tomorrow+, and the instance predicates +past?+, +today?+, and +future?+, all of them relative to +Date.current+.
+
+h5. Named dates
+
+h6. +prev_year+, +next_year+
+
+In Ruby 1.9 +prev_year+ and +next_year+ return a date with the same day/month in the last or next year:
+
+<ruby>
+d = Date.new(2010, 5, 8) # => Sat, 08 May 2010
+d.prev_year              # => Fri, 08 May 2009
+d.next_year              # => Sun, 08 May 2011
+</ruby>
+
+If date is the 29th of February of a leap year, you obtain the 28th:
+
+<ruby>
+d = Date.new(2000, 2, 29) # => Tue, 29 Feb 2000
+d.prev_year               # => Sun, 28 Feb 1999
+d.next_year               # => Wed, 28 Feb 2001
+</ruby>
+
+Active Support defines these methods as well for Ruby 1.8.
+
+h6. +prev_month+, +next_month+
+
+In Ruby 1.9 +prev_month+ and +next_month+ return the date with the same day in the last or next month:
+
+<ruby>
+d = Date.new(2010, 5, 8) # => Sat, 08 May 2010
+d.prev_month             # => Thu, 08 Apr 2010
+d.next_month             # => Tue, 08 Jun 2010
+</ruby>
+
+If such a day does not exist, the last day of the corresponding month is returned:
+
+<ruby>
+Date.new(2000, 5, 31).prev_month # => Sun, 30 Apr 2000
+Date.new(2000, 3, 31).prev_month # => Tue, 29 Feb 2000
+Date.new(2000, 5, 31).next_month # => Fri, 30 Jun 2000
+Date.new(2000, 1, 31).next_month # => Tue, 29 Feb 2000
+</ruby>
+
+Active Support defines these methods as well for Ruby 1.8.
+
+h6. +beginning_of_week+, +end_of_week+
+
+The methods +beginning_of_week+ and +end_of_week+ return the dates for the beginning and end of week, assuming weeks start on Monday:
+
+<ruby>
+d = Date.new(2010, 5, 8) # => Sat, 08 May 2010
+d.beginning_of_week      # => Mon, 03 May 2010
+d.end_of_week            # => Sun, 09 May 2010
+</ruby>
+
++beginning_of_week+ is aliased to +monday+ and +at_beginning_of_week+. +end_of_week+ is aliased to +sunday+ and +at_end_of_week+.
+
+h6. +next_week+
+
++next_week+ receives a symbol with a day name in English (in lowercase, default is +:monday+) and it returns the date corresponding to that day in the next week:
+
+<ruby>
+d = Date.new(2010, 5, 9) # => Sun, 09 May 2010
+d.next_week              # => Mon, 10 May 2010
+d.next_week(:saturday)   # => Sat, 15 May 2010
+</ruby>
+
+h6. +beginning_of_month+, +end_of_month+
+
+The methods +beginning_of_month+ and +end_of_month+ return the dates for the beginning and end of the month:
+
+<ruby>
+d = Date.new(2010, 5, 9) # => Sun, 09 May 2010
+d.beginning_of_month     # => Sat, 01 May 2010
+d.end_of_month           # => Mon, 31 May 2010
+</ruby>
+
++beginning_of_month+ is aliased to +at_beginning_of_month+, and +end_of_month+ is aliased to +at_end_of_month+.
+
+h6. +beginning_of_quarter+, +end_of_quarter+
+
+The methods +beginning_of_quarter+ and +end_of_quarter+ return the dates for the beginning and end of the quarter of the receiver's calendar year:
+
+<ruby>
+d = Date.new(2010, 5, 9) # => Sun, 09 May 2010
+d.beginning_of_quarter   # => Thu, 01 Apr 2010
+d.end_of_quarter         # => Wed, 30 Jun 2010
+</ruby>
+
++beginning_of_quarter+ is aliased to +at_beginning_of_quarter+, and +end_of_quarter+ is aliased to +at_end_of_quarter+.
+
+h6. +beginning_of_year+, +end_of_year+
+
+The methods +beginning_of_year+ and +end_of_year+ return the dates for the beginning and end of the year:
+
+<ruby>
+d = Date.new(2010, 5, 9) # => Sun, 09 May 2010
+d.beginning_of_year      # => Fri, 01 Jan 2010
+d.end_of_year            # => Fri, 31 Dec 2010
+</ruby>
+
++beginning_of_year+ is aliased to +at_beginning_of_year+, and +end_of_year+ is aliased to +at_end_of_year+.
+
+h4. Conversions
 
 h3. Extensions to +DateTime+
 
-...
+NOTE TO SELF: Since +DateTime+ is a subclass of +Date+, you get inherited methods that return +DateTime+ objects.
 
 h3. Extensions to +Time+
 
 ...
 
 h3. Extensions to +Process+
-
-...
-
-h3. Extensions to +Pathname+
 
 ...
 

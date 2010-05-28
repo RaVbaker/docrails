@@ -1,13 +1,10 @@
 # encoding: utf-8
 require 'cases/helper'
-require 'cases/tests_database'
 
 require 'models/topic'
-require 'models/developer'
 require 'models/person'
 
 class NumericalityValidationTest < ActiveModel::TestCase
-  include ActiveModel::TestsDatabase
 
   def teardown
     Topic.reset_callbacks(:validate)
@@ -21,7 +18,7 @@ class NumericalityValidationTest < ActiveModel::TestCase
   FLOATS = [0.0, 10.0, 10.5, -10.5, -0.0001] + FLOAT_STRINGS
   INTEGERS = [0, 10, -10] + INTEGER_STRINGS
   BIGDECIMAL = BIGDECIMAL_STRINGS.collect! { |bd| BigDecimal.new(bd) }
-  JUNK = ["not a number", "42 not a number", "0xdeadbeef", "00-1", "--3", "+-3", "+3-1", "-+019.0", "12.12.13.12", "123\nnot a number"]
+  JUNK = ["not a number", "42 not a number", "0xdeadbeef", "0xinvalidhex", "0Xdeadbeef", "00-1", "--3", "+-3", "+3-1", "-+019.0", "12.12.13.12", "123\nnot a number"]
   INFINITY = [1.0/0.0]
 
   def test_default_validates_numericality_of
@@ -33,8 +30,8 @@ class NumericalityValidationTest < ActiveModel::TestCase
   def test_validates_numericality_of_with_nil_allowed
     Topic.validates_numericality_of :approved, :allow_nil => true
 
-    invalid!(JUNK)
-    valid!(NIL + BLANK + FLOATS + INTEGERS + BIGDECIMAL + INFINITY)
+    invalid!(JUNK + BLANK)
+    valid!(NIL + FLOATS + INTEGERS + BIGDECIMAL + INFINITY)
   end
 
   def test_validates_numericality_of_with_integer_only
@@ -47,8 +44,8 @@ class NumericalityValidationTest < ActiveModel::TestCase
   def test_validates_numericality_of_with_integer_only_and_nil_allowed
     Topic.validates_numericality_of :approved, :only_integer => true, :allow_nil => true
 
-    invalid!(JUNK + FLOATS + BIGDECIMAL + INFINITY)
-    valid!(NIL + BLANK + INTEGERS)
+    invalid!(JUNK + BLANK + FLOATS + BIGDECIMAL + INFINITY)
+    valid!(NIL + INTEGERS)
   end
 
   def test_validates_numericality_with_greater_than
@@ -126,13 +123,13 @@ class NumericalityValidationTest < ActiveModel::TestCase
   end
 
   def test_validates_numericality_with_numeric_message
-    Topic.validates_numericality_of :approved, :less_than => 4, :message => "smaller than {{count}}"
+    Topic.validates_numericality_of :approved, :less_than => 4, :message => "smaller than %{count}"
     topic = Topic.new("title" => "numeric test", "approved" => 10)
 
     assert !topic.valid?
     assert_equal ["smaller than 4"], topic.errors[:approved]
 
-    Topic.validates_numericality_of :approved, :greater_than => 4, :message => "greater than {{count}}"
+    Topic.validates_numericality_of :approved, :greater_than => 4, :message => "greater than %{count}"
     topic = Topic.new("title" => "numeric test", "approved" => 1)
 
     assert !topic.valid?
@@ -166,7 +163,7 @@ class NumericalityValidationTest < ActiveModel::TestCase
 
   def invalid!(values, error = nil)
     with_each_topic_approved_value(values) do |topic, value|
-      assert !topic.valid?, "#{value.inspect} not rejected as a number"
+      assert topic.invalid?, "#{value.inspect} not rejected as a number"
       assert topic.errors[:approved].any?, "FAILED for #{value.inspect}"
       assert_equal error, topic.errors[:approved].first if error
     end

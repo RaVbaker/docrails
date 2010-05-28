@@ -1,3 +1,5 @@
+require 'active_support/core_ext/array/wrap'
+
 module ActiveRecord
   module Validations
     class UniquenessValidator < ActiveModel::EachValidator
@@ -19,7 +21,7 @@ module ActiveRecord
 
         relation = table.where(sql, *params)
 
-        Array(options[:scope]).each do |scope_item|
+        Array.wrap(options[:scope]).each do |scope_item|
           scope_value = record.send(scope_item)
           relation = relation.where(scope_item => scope_value)
         end
@@ -67,13 +69,11 @@ module ActiveRecord
 
         if value.nil? || (options[:case_sensitive] || !column.text?)
           sql = "#{sql_attribute} #{operator}"
-          params = [value]
         else
-          sql = "LOWER(#{sql_attribute}) #{operator}"
-          params = [value.mb_chars.downcase]
+          sql = "LOWER(#{sql_attribute}) = LOWER(?)"
         end
 
-        [sql, params]
+        [sql, [value]]
       end
     end
 

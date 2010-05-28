@@ -9,6 +9,7 @@ require 'active_support/core_ext/module/aliasing'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/object/misc'
 require 'active_support/core_ext/object/to_query'
+require 'active_support/core_ext/object/duplicable'
 require 'set'
 require 'uri'
 
@@ -550,11 +551,9 @@ module ActiveResource
         @headers ||= {}
       end
 
-      # Do not include any modules in the default element name. This makes it easier to seclude ARes objects
-      # in a separate namespace without having to set element_name repeatedly.
-      attr_accessor_with_default(:element_name)    { ActiveSupport::Inflector.underscore(to_s.split("::").last) } #:nodoc:
-
+      attr_accessor_with_default(:element_name)    { model_name.element } #:nodoc:
       attr_accessor_with_default(:collection_name) { ActiveSupport::Inflector.pluralize(element_name) } #:nodoc:
+
       attr_accessor_with_default(:primary_key, 'id') #:nodoc:
 
       # Gets the \prefix for a resource's nested URL (e.g., <tt>prefix/collectionname/1.xml</tt>)
@@ -583,12 +582,13 @@ module ActiveResource
         # Clear prefix parameters in case they have been cached
         @prefix_parameters = nil
 
-        # Redefine the new methods.
-        code = <<-end_code
-          def prefix_source() "#{value}" end
-          def prefix(options={}) "#{prefix_call}" end
-        end_code
-        silence_warnings { instance_eval code, __FILE__, __LINE__ }
+        silence_warnings do
+          # Redefine the new methods.
+          instance_eval <<-RUBY_EVAL, __FILE__, __LINE__ + 1
+            def prefix_source() "#{value}" end
+            def prefix(options={}) "#{prefix_call}" end
+          RUBY_EVAL
+        end
       rescue
         logger.error "Couldn't set prefix: #{$!}\n  #{code}" if logger
         raise
@@ -625,6 +625,22 @@ module ActiveResource
         "#{prefix(prefix_options)}#{collection_name}/#{id}.#{format.extension}#{query_string(query_options)}"
       end
 
+      # Gets the new element path for REST resources.
+      #
+      # ==== Options
+      # * +prefix_options+ - A hash to add a prefix to the request for nested URLs (e.g., <tt>:account_id => 19</tt>
+      #   would yield a URL like <tt>/accounts/19/purchases/new.xml</tt>).
+      #
+      # ==== Examples
+      #   Post.new_element_path
+      #   # => /posts/new.xml
+      #
+      #   Comment.collection_path(:post_id => 5)
+      #   # => /posts/5/comments/new.xml
+      def new_element_path(prefix_options = {})
+        "#{prefix(prefix_options)}#{collection_name}/new.#{format.extension}"
+      end
+
       # Gets the collection path for the REST resources.  If the +query_options+ parameter is omitted, Rails
       # will split from the +prefix_options+.
       #
@@ -652,6 +668,19 @@ module ActiveResource
       end
 
       alias_method :set_primary_key, :primary_key=  #:nodoc:
+
+      # Builds a new, unsaved record using the default values from the remote server so
+      # that it can be used with RESTful forms.
+      #
+      # ==== Options
+      # * +attributes+ - A hash that overrides the default values from the server.
+      #
+      # Returns the new resource instance.
+      #
+      def build(attributes = {})
+        attrs = connection.get("#{new_element_path}").merge(attributes)
+        self.new(attrs)
+      end
 
       # Creates a new resource instance and makes a request to the remote service
       # that it be saved, making it equivalent to the following simultaneous calls:
@@ -989,6 +1018,22 @@ module ActiveResource
     end
     alias :new_record? :new?
 
+    # Returns +true+ if this object has been saved, otherwise returns +false+.
+    #
+    # ==== Examples
+    #   persisted = Computer.create(:brand => 'Apple', :make => 'MacBook', :vendor => 'MacMall')
+    #   persisted.persisted? # => true
+    #
+    #   not_persisted = Computer.new(:brand => 'IBM', :make => 'Thinkpad', :vendor => 'IBM')
+    #   not_persisted.persisted? # => false
+    #
+    #   not_persisted.save
+    #   not_persisted.persisted? # => true
+    #
+    def persisted?
+      !new?
+    end
+
     # Gets the <tt>\id</tt> attribute of the resource.
     def id
       attributes[self.class.primary_key]
@@ -997,11 +1042,6 @@ module ActiveResource
     # Sets the <tt>\id</tt> attribute of the resource.
     def id=(id)
       attributes[self.class.primary_key] = id
-    end
-
-    # Allows Active Resource objects to be used as parameters in Action Pack URL generation.
-    def to_param
-      id && id.to_s
     end
 
     # Test for equality.  Resource are equal if and only if +other+ is the same object or
@@ -1130,73 +1170,11 @@ module ActiveResource
       !new? && self.class.exists?(to_param, :params => prefix_options)
     end
 
-    # Converts the resource to an XML string representation.
-    #
-    # ==== Options
-    # The +options+ parameter is handed off to the +to_xml+ method on each
-    # attribute, so it has the same options as the +to_xml+ methods in
-    # Active Support.
-    #
-    # * <tt>:indent</tt> - Set the indent level for the XML output (default is +2+).
-    # * <tt>:dasherize</tt> - Boolean option to determine whether or not element names should
-    #   replace underscores with dashes (default is <tt>false</tt>).
-    # * <tt>:skip_instruct</tt> - Toggle skipping the +instruct!+ call on the XML builder
-    #   that generates the XML declaration (default is <tt>false</tt>).
-    #
-    # ==== Examples
-    #   my_group = SubsidiaryGroup.find(:first)
-    #   my_group.to_xml
-    #   # => <?xml version="1.0" encoding="UTF-8"?>
-    #   #    <subsidiary_group> [...] </subsidiary_group>
-    #
-    #   my_group.to_xml(:dasherize => true)
-    #   # => <?xml version="1.0" encoding="UTF-8"?>
-    #   #    <subsidiary-group> [...] </subsidiary-group>
-    #
-    #   my_group.to_xml(:skip_instruct => true)
-    #   # => <subsidiary_group> [...] </subsidiary_group>
-    def to_xml(options={})
-      attributes.to_xml({:root => self.class.element_name}.merge(options))
-    end
-
-    # Coerces to a hash for JSON encoding.
-    #
-    # ==== Options
-    # The +options+ are passed to the +to_json+ method on each
-    # attribute, so the same options as the +to_json+ methods in
-    # Active Support.
-    #
-    # * <tt>:only</tt> - Only include the specified attribute or list of
-    #   attributes in the serialized output. Attribute names must be specified
-    #   as strings.
-    # * <tt>:except</tt> - Do not include the specified attribute or list of
-    #   attributes in the serialized output. Attribute names must be specified
-    #   as strings.
-    #
-    # ==== Examples
-    #   person = Person.new(:first_name => "Jim", :last_name => "Smith")
-    #   person.to_json
-    #   # => {"first_name": "Jim", "last_name": "Smith"}
-    #
-    #   person.to_json(:only => ["first_name"])
-    #   # => {"first_name": "Jim"}
-    #
-    #   person.to_json(:except => ["first_name"])
-    #   # => {"last_name": "Smith"}
-    def as_json(options = nil)
-      attributes.as_json(options)
-    end
-
     # Returns the serialized string representation of the resource in the configured
     # serialization format specified in ActiveResource::Base.format. The options
     # applicable depend on the configured encoding format.
     def encode(options={})
-      case self.class.format
-        when ActiveResource::Formats::XmlFormat
-          self.class.format.encode(attributes, {:root => self.class.element_name}.merge(options))
-        else
-          self.class.format.encode(attributes, options)
-      end
+      send("to_#{self.class.format.extension}", options)
     end
 
     # A method to \reload the attributes of this object from the remote web service.
@@ -1311,6 +1289,14 @@ module ActiveResource
       end
     end
 
+    def to_json(options={})
+      super({ :root => self.class.element_name }.merge(options))
+    end
+
+    def to_xml(options={})
+      super({ :root => self.class.element_name }.merge(options))
+    end
+
     protected
       def connection(refresh = false)
         self.class.connection(refresh)
@@ -1344,6 +1330,10 @@ module ActiveResource
 
       def element_path(options = nil)
         self.class.element_path(to_param, options || prefix_options)
+      end
+
+      def new_element_path
+        self.class.new_element_path(prefix_options)
       end
 
       def collection_path(options = nil)
@@ -1416,5 +1406,8 @@ module ActiveResource
   class Base
     extend ActiveModel::Naming
     include CustomMethods, Observing, Validations
+    include ActiveModel::Conversion
+    include ActiveModel::Serializers::JSON
+    include ActiveModel::Serializers::Xml
   end
 end

@@ -1,4 +1,10 @@
 class Post < ActiveRecord::Base
+  module NamedExtension
+    def author
+      'lifo'
+    end
+  end
+
   scope :containing_the_letter_a, where("body LIKE '%a%'")
   scope :ranked_by_comments, order("comments_count DESC")
   scope :limit_by, lambda {|l| limit(l) }
@@ -63,6 +69,7 @@ class Post < ActiveRecord::Base
   has_many :authors, :through => :categorizations
 
   has_many :readers
+  has_many :readers_with_person, :include => :person, :class_name => "Reader"
   has_many :people, :through => :readers
   has_many :people_with_callbacks, :source=>:person, :through => :readers,
               :before_add    => lambda {|owner, reader| log(:added,   :before, reader.first_name) },

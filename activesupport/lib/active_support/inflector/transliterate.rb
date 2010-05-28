@@ -1,31 +1,66 @@
 # encoding: utf-8
-require 'iconv'
 require 'active_support/core_ext/string/multibyte'
 
 module ActiveSupport
   module Inflector
-    extend self
-    
-    # Replaces accented characters with their ascii equivalents.
-    def transliterate(string)
-      Iconv.iconv('ascii//ignore//translit', 'utf-8', string).to_s
-    end
 
-    if RUBY_VERSION >= '1.9'
-      undef_method :transliterate
-      def transliterate(string)
-        warn "Ruby 1.9 doesn't support Unicode normalization yet"
-        string.dup
-      end
-
-    # The iconv transliteration code doesn't function correctly
-    # on some platforms, but it's very fast where it does function.
-    elsif "foo" != (Inflector.transliterate("föö") rescue nil)
-      undef_method :transliterate
-      def transliterate(string)
-        string.mb_chars.normalize(:kd). # Decompose accented characters
-          gsub(/[^\x00-\x7F]+/, '')     # Remove anything non-ASCII entirely (e.g. diacritics).
-      end
+    # Replaces non-ASCII characters with an ASCII approximation, or if none
+    # exists, a replacement character which defaults to "?".
+    #
+    #    transliterate("Ærøskøbing")
+    #    # => "AEroskobing"
+    #
+    # Default approximations are provided for Western/Latin characters,
+    # e.g, "ø", "ñ", "é", "ß", etc.
+    #
+    # This method is I18n aware, so you can set up custom approximations for a
+    # locale. This can be useful, for example, to transliterate German's "ü"
+    # and "ö" to "ue" and "oe", or to add support for transliterating Russian
+    # to ASCII.
+    #
+    # In order to make your custom transliterations available, you must set
+    # them as the <tt>i18n.transliterate.rule</tt> i18n key:
+    #
+    #   # Store the transliterations in locales/de.yml
+    #   i18n:
+    #     transliterate:
+    #       rule:
+    #         ü: "ue"
+    #         ö: "oe"
+    #
+    #   # Or set them using Ruby
+    #   I18n.backend.store_translations(:de, :i18n => {
+    #     :transliterate => {
+    #       :rule => {
+    #         "ü" => "ue",
+    #         "ö" => "oe"
+    #       }
+    #     }
+    #   })
+    #
+    # The value for <tt>i18n.transliterate.rule</tt> can be a simple Hash that maps
+    # characters to ASCII approximations as shown above, or, for more complex
+    # requirements, a Proc:
+    #
+    #   I18n.backend.store_translations(:de, :i18n => {
+    #     :transliterate => {
+    #       :rule => lambda {|string| MyTransliterator.transliterate(string)}
+    #     }
+    #   })
+    #
+    # Now you can have different transliterations for each locale:
+    #
+    #   I18n.locale = :en
+    #   transliterate("Jürgen")
+    #   # => "Jurgen"
+    #
+    #   I18n.locale = :de
+    #   transliterate("Jürgen")
+    #   # => "Juergen"
+    def transliterate(string, replacement = "?")
+      I18n.transliterate(ActiveSupport::Multibyte::Unicode.normalize(
+        ActiveSupport::Multibyte::Unicode.tidy_bytes(string), :c),
+          :replacement => replacement)
     end
 
     # Replaces special characters in a string so that it may be used as part of a 'pretty' URL.
@@ -56,6 +91,7 @@ module ActiveSupport
         parameterized_string.gsub!(/^#{re_sep}|#{re_sep}$/i, '')
       end
       parameterized_string.downcase
-    end    
+    end
+
   end
 end

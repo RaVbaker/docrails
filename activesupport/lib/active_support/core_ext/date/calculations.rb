@@ -4,15 +4,33 @@ require 'active_support/core_ext/time/zones'
 require 'active_support/core_ext/object/acts_like'
 
 class Date
+  if RUBY_VERSION < '1.9'
+    undef :>>
+    
+    # Backported from 1.9. The one in 1.8 leads to incorrect next_month and
+    # friends for dates where the calendar reform is involved. It additionally
+    # prevents an infinite loop fixed in r27013.
+    def >>(n)
+      y, m = (year * 12 + (mon - 1) + n).divmod(12)
+      m,   = (m + 1)                    .divmod(1)
+      d = mday
+      until jd2 = self.class.valid_civil?(y, m, d, start)
+        d -= 1
+        raise ArgumentError, 'invalid date' unless d > 0
+      end
+      self + (jd2 - jd)
+    end
+  end
+
   class << self
     # Returns a new Date representing the date 1 day ago (i.e. yesterday's date).
     def yesterday
-      ::Date.today.yesterday
+      ::Date.current.yesterday
     end
 
     # Returns a new Date representing the date 1 day after today (i.e. tomorrow's date).
     def tomorrow
-      ::Date.today.tomorrow
+      ::Date.current.tomorrow
     end
 
     # Returns Time.zone.today when config.time_zone is set, otherwise just returns Date.today.
@@ -128,20 +146,20 @@ class Date
     advance(:years => years)
   end
 
-  # Short-hand for years_ago(1)
-  def last_year
+  # Shorthand for years_ago(1)
+  def prev_year
     years_ago(1)
-  end
+  end unless method_defined?(:prev_year)
 
   # Short-hand for years_since(1)
   def next_year
     years_since(1)
   end unless method_defined?(:next_year)
-
+  
   # Short-hand for months_ago(1)
-  def last_month
+  def prev_month
     months_ago(1)
-  end
+  end unless method_defined?(:prev_month)
 
   # Short-hand for months_since(1)
   def next_month
@@ -163,6 +181,7 @@ class Date
     result = self + days_to_sunday.days
     self.acts_like?(:time) ? result.end_of_day : result
   end
+  alias :sunday :end_of_week
   alias :at_end_of_week :end_of_week
 
   # Returns a new Date/DateTime representing the start of the given day in next week (default is Monday).

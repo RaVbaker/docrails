@@ -6,6 +6,7 @@ class ModuleAttributeAccessorTest < Test::Unit::TestCase
     m = @module = Module.new do
       mattr_accessor :foo
       mattr_accessor :bar, :instance_writer => false
+      mattr_reader   :shaq, :instance_reader => false
     end
     @class = Class.new
     @class.instance_eval { include m }
@@ -26,9 +27,14 @@ class ModuleAttributeAccessorTest < Test::Unit::TestCase
   end
 
   def test_should_not_create_instance_writer
-    assert @module.respond_to?(:foo)
-    assert @module.respond_to?(:foo=)
-    assert @object.respond_to?(:bar)
+    assert_respond_to @module, :foo
+    assert_respond_to @module, :foo=
+    assert_respond_to @object, :bar
     assert !@object.respond_to?(:bar=)
+  end
+  
+  def test_should_not_create_instance_reader
+    assert_respond_to @module, :shaq
+    assert !@object.respond_to?(:shaq)
   end
 end

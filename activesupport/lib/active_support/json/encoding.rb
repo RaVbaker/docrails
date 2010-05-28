@@ -1,5 +1,7 @@
 # encoding: utf-8
+require 'bigdecimal'
 require 'active_support/core_ext/array/wrap'
+require 'active_support/core_ext/big_decimal/conversions' # for #to_s
 require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/hash/slice'
 require 'active_support/core_ext/module/delegation'
@@ -102,7 +104,9 @@ module ActiveSupport
         end
 
         def escape(string)
-          string = string.dup.force_encoding(::Encoding::BINARY) if string.respond_to?(:force_encoding)
+          if string.respond_to?(:force_encoding)
+            string = string.encode(::Encoding::UTF_8, :undef => :replace).force_encoding(::Encoding::BINARY)
+          end
           json = string.
             gsub(escape_regex) { |s| ESCAPED_CHARS[s] }.
             gsub(/([\xC0-\xDF][\x80-\xBF]|
@@ -110,7 +114,9 @@ module ActiveSupport
                    [\xF0-\xF7][\x80-\xBF]{3})+/nx) { |s|
             s.unpack("U*").pack("n*").unpack("H*")[0].gsub(/.{4}/n, '\\\\u\&')
           }
-          %("#{json}")
+          json = %("#{json}")
+          json.force_encoding(::Encoding::UTF_8) if json.respond_to?(:force_encoding)
+          json
         end
       end
 
@@ -128,7 +134,13 @@ class Object
     ActiveSupport::JSON.encode(self, options)
   end
 
-  def as_json(options = nil) instance_values end #:nodoc:
+  def as_json(options = nil) #:nodoc:
+    if respond_to?(:to_hash)
+      to_hash
+    else
+      instance_values
+    end
+  end
 end
 
 # A string that returns itself as its JSON-encoded form.
@@ -166,9 +178,20 @@ class Numeric
   def encode_json(encoder) to_s end #:nodoc:
 end
 
+class BigDecimal
+  # A BigDecimal would be naturally represented as a JSON number. Most libraries,
+  # however, parse non-integer JSON numbers directly as floats. Clients using
+  # those libraries would get in general a wrong number and no way to recover
+  # other than manually inspecting the string with the JSON code itself.
+  #
+  # That's why a JSON string is returned. The JSON literal is not numeric, but if
+  # the other end knows by contract that the data is supposed to be a BigDecimal,
+  # it still has the chance to post-process the string and get the real value.
+  def as_json(options = nil) to_s end #:nodoc:
+end
+
 class Regexp
-  def as_json(options = nil) self end #:nodoc:
-  def encode_json(encoder) inspect end #:nodoc:
+  def as_json(options = nil) to_s end #:nodoc:
 end
 
 module Enumerable

@@ -40,6 +40,11 @@ class DateTimeExtCalculationsTest < Test::Unit::TestCase
     assert_equal DateTime.new(2005, 2, 21, 10, 11, 12, Rational(-5, 24)), DateTime.new(2005, 2, 21, 10, 11, 12, Rational(-5, 24)).to_time
   end
 
+  def test_civil_from_format
+    assert_equal DateTime.civil(2010, 5, 4, 0, 0, 0, DateTime.local_offset), DateTime.civil_from_format(:local, 2010, 5, 4)
+    assert_equal DateTime.civil(2010, 5, 4, 0, 0, 0, 0), DateTime.civil_from_format(:utc, 2010, 5, 4)
+  end
+
   def test_seconds_since_midnight
     assert_equal 1,DateTime.civil(2005,1,1,0,0,1).seconds_since_midnight
     assert_equal 60,DateTime.civil(2005,1,1,0,1,0).seconds_since_midnight
@@ -122,8 +127,8 @@ class DateTimeExtCalculationsTest < Test::Unit::TestCase
     assert_equal DateTime.civil(2005,2,28,10), DateTime.civil(2004,2,29,10,0,0).years_since(1) # 1 year since leap day
   end
 
-  def test_last_year
-    assert_equal DateTime.civil(2004,6,5,10),  DateTime.civil(2005,6,5,10,0,0).last_year
+  def test_prev_year
+    assert_equal DateTime.civil(2004,6,5,10),  DateTime.civil(2005,6,5,10,0,0).prev_year
   end
 
   def test_next_year
@@ -195,8 +200,8 @@ class DateTimeExtCalculationsTest < Test::Unit::TestCase
     assert_equal DateTime.civil(2005, 9, 30), DateTime.civil(2005, 8, 31).next_month
   end
 
-  def test_last_month_on_31st
-    assert_equal DateTime.civil(2004, 2, 29), DateTime.civil(2004, 3, 31).last_month
+  def test_prev_month_on_31st
+    assert_equal DateTime.civil(2004, 2, 29), DateTime.civil(2004, 3, 31).prev_month
   end
 
   def test_xmlschema
@@ -270,12 +275,12 @@ class DateTimeExtCalculationsTest < Test::Unit::TestCase
   end
 
   def test_current_without_time_zone
-    assert DateTime.current.is_a?(DateTime)
+    assert_kind_of DateTime, DateTime.current
   end
 
   def test_current_with_time_zone
     with_env_tz 'US/Eastern' do
-      assert DateTime.current.is_a?(DateTime)
+      assert_kind_of DateTime, DateTime.current
     end
   end
 

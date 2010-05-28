@@ -1,4 +1,5 @@
 require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/object/blank'
 
 module ActionController
   def self.add_renderer(key, &block)
@@ -70,7 +71,7 @@ module ActionController
     end
 
     add :json do |json, options|
-      json = ActiveSupport::JSON.encode(json) unless json.respond_to?(:to_str)
+      json = ActiveSupport::JSON.encode(json, options) unless json.respond_to?(:to_str)
       json = "#{options[:callback]}(#{json})" unless options[:callback].blank?
       self.content_type ||= Mime::JSON
       self.response_body  = json
@@ -78,16 +79,16 @@ module ActionController
 
     add :js do |js, options|
       self.content_type ||= Mime::JS
-      self.response_body  = js.respond_to?(:to_js) ? js.to_js : js
+      self.response_body  = js.respond_to?(:to_js) ? js.to_js(options) : js
     end
 
     add :xml do |xml, options|
       self.content_type ||= Mime::XML
-      self.response_body  = xml.respond_to?(:to_xml) ? xml.to_xml : xml
+      self.response_body  = xml.respond_to?(:to_xml) ? xml.to_xml(options) : xml
     end
 
     add :update do |proc, options|
-      _evaluate_assigns(view_context)
+      view_context = self.view_context
       generator = ActionView::Helpers::PrototypeHelper::JavaScriptGenerator.new(view_context, &proc)
       self.content_type  = Mime::JS
       self.response_body = generator.to_s

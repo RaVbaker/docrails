@@ -1,6 +1,7 @@
 require 'cases/helper'
 require 'models/contact'
 require 'active_support/core_ext/object/instance_variables'
+require 'ostruct'
 
 class Contact
   extend ActiveModel::Naming
@@ -16,6 +17,9 @@ module Admin
   end
 end
 
+class Customer < Struct.new(:name)
+end
+
 class XmlSerializationTest < ActiveModel::TestCase
   def setup
     @contact = Contact.new
@@ -23,7 +27,9 @@ class XmlSerializationTest < ActiveModel::TestCase
     @contact.age = 25
     @contact.created_at = Time.utc(2006, 8, 1)
     @contact.awesome = false
-    @contact.preferences = { :gem => 'ruby' }
+    customer = Customer.new
+    customer.name = "John"
+    @contact.preferences = customer
   end
 
   test "should serialize default root" do
@@ -34,8 +40,8 @@ class XmlSerializationTest < ActiveModel::TestCase
 
   test "should serialize namespaced root" do
     @xml = Admin::Contact.new(@contact.attributes).to_xml
-    assert_match %r{^<admin-contact>},  @xml
-    assert_match %r{</admin-contact>$}, @xml
+    assert_match %r{^<contact>},  @xml
+    assert_match %r{</contact>$}, @xml
   end
 
   test "should serialize default root with namespace" do
@@ -66,7 +72,7 @@ class XmlSerializationTest < ActiveModel::TestCase
 
   test "should allow skipped types" do
     @xml = @contact.to_xml :skip_types => true
-    assert %r{<age>25</age>}.match(@xml)
+    assert_match %r{<age>25</age>}, @xml
   end
 
   test "should include yielded additions" do
@@ -92,8 +98,16 @@ class XmlSerializationTest < ActiveModel::TestCase
     assert_match %r{<awesome type=\"boolean\">false</awesome>}, @contact.to_xml
   end
 
+  test "should serialize array" do
+    assert_match %r{<social type=\"array\">\s*<social>twitter</social>\s*<social>github</social>\s*</social>}, @contact.to_xml(:methods => :social)
+  end
+
+  test "should serialize hash" do
+    assert_match %r{<network>\s*<git type=\"symbol\">github</git>\s*</network>}, @contact.to_xml(:methods => :network)
+  end
+
   test "should serialize yaml" do
-    assert_match %r{<preferences type=\"yaml\">--- \n:gem: ruby\n</preferences>}, @contact.to_xml
+    assert_match %r{<preferences type=\"yaml\">--- !ruby/struct:Customer \nname: John\n</preferences>}, @contact.to_xml
   end
 
   test "should call proc on object" do

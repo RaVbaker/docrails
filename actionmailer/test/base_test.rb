@@ -39,8 +39,15 @@ class BaseTest < ActiveSupport::TestCase
     end
 
     def attachment_with_hash
-      attachments['invoice.jpg'] = { :data => "you smiling", :mime_type => "image/x-jpg",
-        :transfer_encoding => "base64" }
+      attachments['invoice.jpg'] = { :data => "\312\213\254\232)b",
+                                     :mime_type => "image/x-jpg",
+                                     :transfer_encoding => "base64" }
+      mail
+    end
+
+    def attachment_with_hash_default_encoding
+      attachments['invoice.jpg'] = { :data => "\312\213\254\232)b",
+                                     :mime_type => "image/x-jpg" }
       mail
     end
 
@@ -74,10 +81,17 @@ class BaseTest < ActiveSupport::TestCase
       end
     end
 
-    def custom_block(include_html=false)
+    def explicit_multipart_with_options(include_html = false)
       mail do |format|
         format.text(:content_transfer_encoding => "base64"){ render "welcome" }
         format.html{ render "welcome" } if include_html
+      end
+    end
+
+    def explicit_multipart_with_one_template(hash = {})
+      mail(hash) do |format|
+        format.html
+        format.text
       end
     end
 
@@ -98,6 +112,23 @@ class BaseTest < ActiveSupport::TestCase
         format.html { render :layout => layout_name }
       end
     end
+  end
+  
+  class ProcMailer < ActionMailer::Base
+    default :to => 'system@test.lindsaar.net',
+            'X-Proc-Method' => Proc.new { Time.now.to_i.to_s },
+            :subject => Proc.new { give_a_greeting }
+
+    def welcome
+      mail
+    end
+    
+    private
+    
+    def give_a_greeting
+      "Thanks for signing up this afternoon"
+    end
+    
   end
 
   test "method call to mail does not raise error" do
@@ -128,13 +159,13 @@ class BaseTest < ActiveSupport::TestCase
                                :mime_version => '2.0',
                                :reply_to => 'reply-to@test.lindsaar.net',
                                :date => @time)
-    assert_equal(['bcc@test.lindsaar.net'],      email.bcc)
-    assert_equal(['cc@test.lindsaar.net'],       email.cc)
-    assert_equal('multipart/mixed',              email.content_type)
-    assert_equal('iso-8559-1',                   email.charset)
-    assert_equal('2.0',                          email.mime_version)
-    assert_equal(['reply-to@test.lindsaar.net'], email.reply_to)
-    assert_equal(@time,                          email.date)
+    assert_equal(['bcc@test.lindsaar.net'],             email.bcc)
+    assert_equal(['cc@test.lindsaar.net'],              email.cc)
+    assert_equal('multipart/mixed; charset=iso-8559-1', email.content_type)
+    assert_equal('iso-8559-1',                          email.charset)
+    assert_equal('2.0',                                 email.mime_version)
+    assert_equal(['reply-to@test.lindsaar.net'],        email.reply_to)
+    assert_equal(@time,                                 email.date)
   end
 
   test "mail() renders the template using the method being processed" do
@@ -146,6 +177,13 @@ class BaseTest < ActiveSupport::TestCase
     email = BaseMailer.welcome(:body => "Hello there")
     assert_equal("text/plain", email.mime_type)
     assert_equal("Hello there", email.body.encoded)
+  end
+
+  test "should set template content type if mail has only one part" do
+    mail = BaseMailer.html_only
+    assert_equal('text/html', mail.mime_type)
+    mail = BaseMailer.plain_text_only
+    assert_equal('text/plain', mail.mime_type)
   end
 
   # Custom headers
@@ -162,7 +200,7 @@ class BaseTest < ActiveSupport::TestCase
     assert_equal('1234@mikel.me.com', mail['In-Reply-To'].decoded)
   end
 
-  test "can pass random headers in as a hash" do
+  test "can pass random headers in as a hash to headers" do
     hash = {'X-Special-Domain-Specific-Header' => "SecretValue",
             'In-Reply-To' => '1234@mikel.me.com' }
     mail = BaseMailer.welcome_with_headers(hash)
@@ -185,6 +223,15 @@ class BaseTest < ActiveSupport::TestCase
 
   test "attachment with hash" do
     email = BaseMailer.attachment_with_hash
+    assert_equal(1, email.attachments.length)
+    assert_equal('invoice.jpg', email.attachments[0].filename)
+    expected = "\312\213\254\232)b"
+    expected.force_encoding(Encoding::BINARY) if '1.9'.respond_to?(:force_encoding)
+    assert_equal expected, email.attachments['invoice.jpg'].decoded
+  end
+
+  test "attachment with hash using default mail encoding" do
+    email = BaseMailer.attachment_with_hash_default_encoding
     assert_equal(1, email.attachments.length)
     assert_equal('invoice.jpg', email.attachments[0].filename)
     expected = "\312\213\254\232)b"
@@ -366,6 +413,11 @@ class BaseTest < ActiveSupport::TestCase
     assert_equal("HTML Explicit Multipart", email.parts[1].body.encoded)
   end
 
+  test "explicit multipart have a boundary" do
+    mail = BaseMailer.explicit_multipart
+    assert_not_nil(mail.content_type_parameters[:boundary])
+  end
+
   test "explicit multipart does not sort order" do
     order = ["text/html", "text/plain"]
     with_default BaseMailer, :parts_order => order do
@@ -399,7 +451,7 @@ class BaseTest < ActiveSupport::TestCase
     assert_equal("TEXT Explicit Multipart Templates", email.parts[1].body.encoded)
   end
 
-  test "explicit multipart with any" do
+  test "explicit multipart with format.any" do
     email = BaseMailer.explicit_multipart_with_any
     assert_equal(2, email.parts.size)
     assert_equal("multipart/alternative", email.mime_type)
@@ -409,8 +461,8 @@ class BaseTest < ActiveSupport::TestCase
     assert_equal("Format with any!", email.parts[1].body.encoded)
   end
 
-  test "explicit multipart with options" do
-    email = BaseMailer.custom_block(true)
+  test "explicit multipart with format(Hash)" do
+    email = BaseMailer.explicit_multipart_with_options(true)
     email.ready_to_send!
     assert_equal(2, email.parts.size)
     assert_equal("multipart/alternative", email.mime_type)
@@ -420,32 +472,27 @@ class BaseTest < ActiveSupport::TestCase
     assert_equal("7bit", email.parts[1].content_transfer_encoding)
   end
 
-  test "explicit multipart should be multipart" do
-    mail = BaseMailer.explicit_multipart
-    assert_not_nil(mail.content_type_parameters[:boundary])
-  end
-
-  test "should set a content type if only has an html part" do
-    mail = BaseMailer.html_only
-    assert_equal('text/html', mail.mime_type)
-  end
-  
-  test "should set a content type if only has an plain text part" do
-    mail = BaseMailer.plain_text_only
-    assert_equal('text/plain', mail.mime_type)
-  end
-
-  test "explicit multipart with one part is rendered as body" do
-    email = BaseMailer.custom_block
+  test "explicit multipart with one part is rendered as body and options are merged" do
+    email = BaseMailer.explicit_multipart_with_options
     assert_equal(0, email.parts.size)
     assert_equal("text/plain", email.mime_type)
     assert_equal("base64", email.content_transfer_encoding)
   end
 
+  test "explicit multipart with one template has the expected format" do
+    email = BaseMailer.explicit_multipart_with_one_template
+    assert_equal(2, email.parts.size)
+    assert_equal("multipart/alternative", email.mime_type)
+    assert_equal("text/html", email.parts[0].mime_type)
+    assert_equal("[:html]", email.parts[0].body.encoded)
+    assert_equal("text/plain", email.parts[1].mime_type)
+    assert_equal("[:text]", email.parts[1].body.encoded)
+  end
+
   # Class level API with method missing
   test "should respond to action methods" do
-    assert BaseMailer.respond_to?(:welcome)
-    assert BaseMailer.respond_to?(:implicit_multipart)
+    assert_respond_to BaseMailer, :welcome
+    assert_respond_to BaseMailer, :implicit_multipart
     assert !BaseMailer.respond_to?(:mail)
     assert !BaseMailer.respond_to?(:headers)
   end
@@ -480,28 +527,28 @@ class BaseTest < ActiveSupport::TestCase
 
   # Rendering
   test "you can specify a different template for implicit render" do
-    mail = BaseMailer.implicit_different_template('implicit_multipart')
+    mail = BaseMailer.implicit_different_template('implicit_multipart').deliver
     assert_equal("HTML Implicit Multipart", mail.html_part.body.decoded)
     assert_equal("TEXT Implicit Multipart", mail.text_part.body.decoded)
   end
 
   test "you can specify a different template for explicit render" do
-    mail = BaseMailer.explicit_different_template('explicit_multipart_templates')
+    mail = BaseMailer.explicit_different_template('explicit_multipart_templates').deliver
     assert_equal("HTML Explicit Multipart Templates", mail.html_part.body.decoded)
     assert_equal("TEXT Explicit Multipart Templates", mail.text_part.body.decoded)
   end
 
   test "you can specify a different layout" do
-    mail = BaseMailer.different_layout('different_layout')
+    mail = BaseMailer.different_layout('different_layout').deliver
     assert_equal("HTML -- HTML", mail.html_part.body.decoded)
     assert_equal("PLAIN -- PLAIN", mail.text_part.body.decoded)
   end
 
   test "you can specify the template path for implicit lookup" do
-    mail = BaseMailer.welcome_from_another_path('another.path/base_mailer')
+    mail = BaseMailer.welcome_from_another_path('another.path/base_mailer').deliver
     assert_equal("Welcome from another path", mail.body.encoded)
 
-    mail = BaseMailer.welcome_from_another_path(['unknown/invalid', 'another.path/base_mailer'])
+    mail = BaseMailer.welcome_from_another_path(['unknown/invalid', 'another.path/base_mailer']).deliver
     assert_equal("Welcome from another path", mail.body.encoded)
   end
   
@@ -529,6 +576,19 @@ class BaseTest < ActiveSupport::TestCase
     mail = BaseMailer.welcome
     MyInterceptor.expects(:delivering_email).with(mail)
     mail.deliver
+  end
+  
+  test "being able to put proc's into the defaults hash and they get evaluated on mail sending" do
+    mail1 = ProcMailer.welcome
+    yesterday = 1.day.ago
+    Time.stubs(:now).returns(yesterday)
+    mail2 = ProcMailer.welcome
+    assert(mail1['X-Proc-Method'].to_s.to_i > mail2['X-Proc-Method'].to_s.to_i)
+  end
+  
+  test "we can call other defined methods on the class as needed" do
+    mail = ProcMailer.welcome
+    assert_equal("Thanks for signing up this afternoon", mail.subject)
   end
 
   protected

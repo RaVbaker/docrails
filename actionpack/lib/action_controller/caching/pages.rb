@@ -38,23 +38,23 @@ module ActionController #:nodoc:
       extend ActiveSupport::Concern
 
       included do
-        @@page_cache_directory = defined?(Rails.public_path) ? Rails.public_path : ""
         ##
         # :singleton-method:
         # The cache directory should be the document root for the web server and is set using <tt>Base.page_cache_directory = "/document/root"</tt>.
-        # For Rails, this directory has already been set to Rails.public_path (which is usually set to <tt>RAILS_ROOT + "/public"</tt>). Changing
+        # For Rails, this directory has already been set to Rails.public_path (which is usually set to <tt>Rails.root + "/public"</tt>). Changing
         # this setting can be useful to avoid naming conflicts with files in <tt>public/</tt>, but doing so will likely require configuring your
         # web server to look in the new location for cached files.
-        cattr_accessor :page_cache_directory
+        config_accessor :page_cache_directory
+        self.page_cache_directory ||= ''
 
-        @@page_cache_extension = '.html'
         ##
         # :singleton-method:
         # Most Rails requests do not have an extension, such as <tt>/weblog/new</tt>. In these cases, the page caching mechanism will add one in
         # order to make it easy for the cached files to be picked up properly by the web server. By default, this cache extension is <tt>.html</tt>.
         # If you want something else, like <tt>.php</tt> or <tt>.shtml</tt>, just set Base.page_cache_extension. In cases where a request already has an
         # extension, such as <tt>.xml</tt> or <tt>.rss</tt>, page caching will not add an extension. This allows it to work well with RESTful apps.
-        cattr_accessor :page_cache_extension
+        config_accessor :page_cache_extension
+        self.page_cache_extension ||= '.html'
       end
 
       module ClassMethods
@@ -109,14 +109,14 @@ module ActionController #:nodoc:
           end
 
           def instrument_page_cache(name, path)
-            ActiveSupport::Notifications.instrument("action_controller.#{name}", :path => path){ yield }
+            ActiveSupport::Notifications.instrument("#{name}.action_controller", :path => path){ yield }
           end
       end
 
       # Expires the page that was cached with the +options+ as a key. Example:
       #   expire_page :controller => "lists", :action => "show"
       def expire_page(options = {})
-        return unless perform_caching
+        return unless self.class.perform_caching
 
         if options.is_a?(Hash)
           if options[:action].is_a?(Array)
@@ -135,7 +135,7 @@ module ActionController #:nodoc:
       # If no options are provided, the requested url is used. Example:
       #   cache_page "I'm the cached content", :controller => "lists", :action => "show"
       def cache_page(content = nil, options = nil)
-        return unless perform_caching && caching_allowed
+        return unless self.class.perform_caching && caching_allowed
 
         path = case options
           when Hash

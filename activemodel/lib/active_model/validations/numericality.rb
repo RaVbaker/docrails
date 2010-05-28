@@ -25,9 +25,16 @@ module ActiveModel
 
         return if options[:allow_nil] && raw_value.nil?
 
-        unless value = parse_raw_value(raw_value, options)
+        unless value = parse_raw_value_as_a_number(raw_value)
           record.errors.add(attr_name, :not_a_number, :value => raw_value, :default => options[:message])
           return
+        end
+
+        if options[:only_integer]
+          unless value = parse_raw_value_as_an_integer(raw_value)
+            record.errors.add(attr_name, :not_an_integer, :value => raw_value, :default => options[:message])
+            return
+          end
         end
 
         options.slice(*CHECKS.keys).each do |option, option_value|
@@ -44,14 +51,15 @@ module ActiveModel
               record.errors.add(attr_name, option, :default => options[:message], :value => value, :count => option_value)
             end
           end
-        end      
+        end
       end
 
     protected
 
-      def parse_raw_value(raw_value, options)
-        if options[:only_integer]
-          raw_value.to_i if raw_value.to_s =~ /\A[+-]?\d+\Z/
+      def parse_raw_value_as_a_number(raw_value)
+        case raw_value
+        when /\A0[xX]/
+          nil
         else
           begin
             Kernel.Float(raw_value)
@@ -61,9 +69,13 @@ module ActiveModel
         end
       end
 
+      def parse_raw_value_as_an_integer(raw_value)
+        raw_value.to_i if raw_value.to_s =~ /\A[+-]?\d+\Z/
+      end
+
     end
 
-    module ClassMethods
+    module HelperMethods
       # Validates whether the value of the specified attribute is numeric by trying to convert it to
       # a float with Kernel.Float (if <tt>only_integer</tt> is false) or applying it to the regular expression
       # <tt>/\A[\+\-]?\d+\Z/</tt> (if <tt>only_integer</tt> is set to true).

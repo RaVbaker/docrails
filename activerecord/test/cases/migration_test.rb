@@ -92,6 +92,14 @@ if ActiveRecord::Base.connection.supports_migrations?
         assert_nothing_raised { Person.connection.remove_index("people", "last_name_and_first_name") }
         assert_nothing_raised { Person.connection.add_index("people", ["last_name", "first_name"]) }
         assert_nothing_raised { Person.connection.remove_index("people", ["last_name", "first_name"]) }
+        assert_nothing_raised { Person.connection.add_index("people", ["last_name"], :length => 10) }
+        assert_nothing_raised { Person.connection.remove_index("people", "last_name") }
+        assert_nothing_raised { Person.connection.add_index("people", ["last_name"], :length => {:last_name => 10}) }
+        assert_nothing_raised { Person.connection.remove_index("people", ["last_name"]) }
+        assert_nothing_raised { Person.connection.add_index("people", ["last_name", "first_name"], :length => 10) }
+        assert_nothing_raised { Person.connection.remove_index("people", ["last_name", "first_name"]) }
+        assert_nothing_raised { Person.connection.add_index("people", ["last_name", "first_name"], :length => {:last_name => 10, :first_name => 20}) }
+        assert_nothing_raised { Person.connection.remove_index("people", ["last_name", "first_name"]) }
       end
 
       # quoting
@@ -108,6 +116,40 @@ if ActiveRecord::Base.connection.supports_migrations?
       unless current_adapter?(:SybaseAdapter, :OpenBaseAdapter)
         assert_nothing_raised { Person.connection.add_index("people", %w(last_name first_name administrator), :name => "named_admin") }
         assert_nothing_raised { Person.connection.remove_index("people", :name => "named_admin") }
+      end
+    end
+
+    def test_add_index_length_limit
+      good_index_name = 'x' * Person.connection.index_name_length
+      too_long_index_name = good_index_name + 'x'
+      assert_nothing_raised { Person.connection.add_index("people", "first_name", :name => too_long_index_name) }
+      assert !Person.connection.index_exists?("people", too_long_index_name, false)
+      assert_nothing_raised { Person.connection.add_index("people", "first_name", :name => good_index_name) }
+      assert Person.connection.index_exists?("people", good_index_name, false)
+    end
+
+    def test_remove_nonexistent_index
+      # we do this by name, so OpenBase is a wash as noted above
+      unless current_adapter?(:OpenBaseAdapter)
+        assert_nothing_raised { Person.connection.remove_index("people", "no_such_index") }
+      end
+    end
+
+    def test_rename_index
+      unless current_adapter?(:OpenBaseAdapter)
+        # keep the names short to make Oracle and similar behave
+        Person.connection.add_index('people', [:first_name], :name => 'old_idx')
+        assert_nothing_raised { Person.connection.rename_index('people', 'old_idx', 'new_idx') }
+        # if the adapter doesn't support the indexes call, pick defaults that let the test pass
+        assert !Person.connection.index_exists?('people', 'old_idx', false)
+        assert Person.connection.index_exists?('people', 'new_idx', true)
+      end
+    end
+
+    def test_double_add_index
+      unless current_adapter?(:OpenBaseAdapter)
+        Person.connection.add_index('people', [:first_name], :name => 'some_idx')
+        assert_nothing_raised { Person.connection.add_index('people', [:first_name], :name => 'some_idx') }
       end
     end
 
@@ -477,13 +519,13 @@ if ActiveRecord::Base.connection.supports_migrations?
             assert_not_equal "Z", bob.moment_of_truth.zone
             # US/Eastern is -5 hours from GMT
             assert_equal Rational(-5, 24), bob.moment_of_truth.offset
-            assert_match /\A-05:?00\Z/, bob.moment_of_truth.zone #ruby 1.8.6 uses HH:MM, prior versions use HHMM
+            assert_match(/\A-05:?00\Z/, bob.moment_of_truth.zone) #ruby 1.8.6 uses HH:MM, prior versions use HHMM
             assert_equal DateTime::ITALY, bob.moment_of_truth.start
           end
         end
       end
 
-      assert_equal TrueClass, bob.male?.class
+      assert_instance_of TrueClass, bob.male?
       assert_kind_of BigDecimal, bob.wealth
     end
 
@@ -493,7 +535,7 @@ if ActiveRecord::Base.connection.supports_migrations?
 
         ActiveRecord::Migration.add_column :people, :intelligence_quotient, :tinyint
         Person.reset_column_information
-        assert_match /tinyint/, Person.columns_hash['intelligence_quotient'].sql_type
+        assert_match(/tinyint/, Person.columns_hash['intelligence_quotient'].sql_type)
       ensure
         ActiveRecord::Migration.remove_column :people, :intelligence_quotient rescue nil
       end
@@ -1104,13 +1146,25 @@ if ActiveRecord::Base.connection.supports_migrations?
       assert_equal migrations[0].name, 'InnocentJointable'
     end
 
+    def test_relative_migrations
+      $".delete_if do |fname|
+        fname == (MIGRATIONS_ROOT + "/valid/1_people_have_last_names.rb")
+      end
+      Object.send(:remove_const, :PeopleHaveLastNames)
+
+      Dir.chdir(MIGRATIONS_ROOT) do
+        ActiveRecord::Migrator.up("valid/", 1)
+      end
+
+      assert defined?(PeopleHaveLastNames)
+    end
+
     def test_only_loads_pending_migrations
       # migrate up to 1
       ActiveRecord::Migrator.up(MIGRATIONS_ROOT + "/valid", 1)
 
       # now unload the migrations that have been defined
-      PeopleHaveLastNames.unloadable
-      ActiveSupport::Dependencies.remove_unloadable_constants!
+      Object.send(:remove_const, :PeopleHaveLastNames)
 
       ActiveRecord::Migrator.migrate(MIGRATIONS_ROOT + "/valid", nil)
 
@@ -1124,19 +1178,23 @@ if ActiveRecord::Base.connection.supports_migrations?
       load(MIGRATIONS_ROOT + "/valid/1_people_have_last_names.rb")
     end
 
-    def test_migrator_interleaved_migrations
-      ActiveRecord::Migrator.up(MIGRATIONS_ROOT + "/interleaved/pass_1")
+    def test_target_version_zero_should_run_only_once
+      # migrate up to 1
+      ActiveRecord::Migrator.migrate(MIGRATIONS_ROOT + "/valid", 1)
 
-      assert_nothing_raised do
-        ActiveRecord::Migrator.up(MIGRATIONS_ROOT + "/interleaved/pass_2")
-      end
+      # migrate down to 0
+      ActiveRecord::Migrator.migrate(MIGRATIONS_ROOT + "/valid", 0)
 
-      Person.reset_column_information
-      assert Person.column_methods_hash.include?(:last_name)
+      # now unload the migrations that have been defined
+      PeopleHaveLastNames.unloadable
+      ActiveSupport::Dependencies.remove_unloadable_constants!
 
-      assert_nothing_raised do
-        ActiveRecord::Migrator.down(MIGRATIONS_ROOT + "/interleaved/pass_3")
-      end
+      # migrate down to 0 again
+      ActiveRecord::Migrator.migrate(MIGRATIONS_ROOT + "/valid", 0)
+
+      assert !defined? PeopleHaveLastNames
+    ensure
+      load(MIGRATIONS_ROOT + "/valid/1_people_have_last_names.rb")
     end
 
     def test_migrator_db_has_no_schema_migrations_table
@@ -1350,16 +1408,6 @@ if ActiveRecord::Base.connection.supports_migrations?
       end
     end
 
-    def test_migration_should_be_run_without_logger
-      previous_logger = ActiveRecord::Base.logger
-      ActiveRecord::Base.logger = nil
-      assert_nothing_raised do
-        ActiveRecord::Migrator.migrate(MIGRATIONS_ROOT + "/valid")
-      end
-    ensure
-      ActiveRecord::Base.logger = previous_logger
-    end
-
     protected
       def with_env_tz(new_tz = 'US/Eastern')
         old_tz, ENV['TZ'] = ENV['TZ'], new_tz
@@ -1444,6 +1492,45 @@ if ActiveRecord::Base.connection.supports_migrations?
     end
 
   end # SexyMigrationsTest
+
+  class MigrationLoggerTest < ActiveRecord::TestCase
+    def setup
+      Object.send(:remove_const, :InnocentJointable)
+    end
+
+    def test_migration_should_be_run_without_logger
+      previous_logger = ActiveRecord::Base.logger
+      ActiveRecord::Base.logger = nil
+      assert_nothing_raised do
+        ActiveRecord::Migrator.migrate(MIGRATIONS_ROOT + "/valid")
+      end
+    ensure
+      ActiveRecord::Base.logger = previous_logger
+    end
+  end
+
+  class InterleavedMigrationsTest < ActiveRecord::TestCase
+    def setup
+      Object.send(:remove_const, :PeopleHaveLastNames)
+    end
+
+    def test_migrator_interleaved_migrations
+      ActiveRecord::Migrator.up(MIGRATIONS_ROOT + "/interleaved/pass_1")
+
+      assert_nothing_raised do
+        ActiveRecord::Migrator.up(MIGRATIONS_ROOT + "/interleaved/pass_2")
+      end
+
+      Person.reset_column_information
+      assert Person.column_methods_hash.include?(:last_name)
+
+      Object.send(:remove_const, :PeopleHaveLastNames)
+      Object.send(:remove_const, :InnocentJointable)
+      assert_nothing_raised do
+        ActiveRecord::Migrator.down(MIGRATIONS_ROOT + "/interleaved/pass_3")
+      end
+    end
+  end
 
   class ChangeTableMigrationsTest < ActiveRecord::TestCase
     def setup

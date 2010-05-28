@@ -31,12 +31,12 @@ class MultibyteCharsTest < Test::Unit::TestCase
   end
 
   def test_forwarded_method_calls_should_return_new_chars_instance
-    assert @chars.__method_for_multibyte_testing.kind_of?(@proxy_class)
+    assert_kind_of @proxy_class, @chars.__method_for_multibyte_testing
     assert_not_equal @chars.object_id, @chars.__method_for_multibyte_testing.object_id
   end
 
   def test_forwarded_bang_method_calls_should_return_the_original_chars_instance
-    assert @chars.__method_for_multibyte_testing!.kind_of?(@proxy_class)
+    assert_kind_of @proxy_class, @chars.__method_for_multibyte_testing!
     assert_equal @chars.object_id, @chars.__method_for_multibyte_testing!.object_id
   end
 
@@ -65,33 +65,32 @@ class MultibyteCharsTest < Test::Unit::TestCase
   end
 
   def test_unpack_utf8_strings
-    assert_equal 4, @proxy_class.u_unpack(UNICODE_STRING).length
-    assert_equal 5, @proxy_class.u_unpack(ASCII_STRING).length
+    assert_equal 4, ActiveSupport::Multibyte::Unicode.u_unpack(UNICODE_STRING).length
+    assert_equal 5, ActiveSupport::Multibyte::Unicode.u_unpack(ASCII_STRING).length
   end
 
   def test_unpack_raises_encoding_error_on_broken_strings
     assert_raise(ActiveSupport::Multibyte::EncodingError) do
-      @proxy_class.u_unpack(BYTE_STRING)
+      ActiveSupport::Multibyte::Unicode.u_unpack(BYTE_STRING)
     end
   end
 
-  if RUBY_VERSION < '1.9'
-    def test_concatenation_should_return_a_proxy_class_instance
-      assert_equal ActiveSupport::Multibyte.proxy_class, ('a'.mb_chars + 'b').class
-      assert_equal ActiveSupport::Multibyte.proxy_class, ('a'.mb_chars << 'b').class
-    end
-
-    def test_ascii_strings_are_treated_at_utf8_strings
-      assert_equal ActiveSupport::Multibyte.proxy_class, ASCII_STRING.mb_chars.class
-    end
-
-    def test_concatenate_should_return_proxy_instance
-      assert(('a'.mb_chars + 'b').kind_of?(@proxy_class))
-      assert(('a'.mb_chars + 'b'.mb_chars).kind_of?(@proxy_class))
-      assert(('a'.mb_chars << 'b').kind_of?(@proxy_class))
-      assert(('a'.mb_chars << 'b'.mb_chars).kind_of?(@proxy_class))
-    end
+  def test_concatenation_should_return_a_proxy_class_instance
+    assert_equal ActiveSupport::Multibyte.proxy_class, ('a'.mb_chars + 'b').class
+    assert_equal ActiveSupport::Multibyte.proxy_class, ('a'.mb_chars << 'b').class
   end
+
+  def test_ascii_strings_are_treated_at_utf8_strings
+    assert_equal ActiveSupport::Multibyte.proxy_class, ASCII_STRING.mb_chars.class
+  end
+
+  def test_concatenate_should_return_proxy_instance
+    assert(('a'.mb_chars + 'b').kind_of?(@proxy_class))
+    assert(('a'.mb_chars + 'b'.mb_chars).kind_of?(@proxy_class))
+    assert(('a'.mb_chars << 'b').kind_of?(@proxy_class))
+    assert(('a'.mb_chars << 'b'.mb_chars).kind_of?(@proxy_class))
+  end
+
 end
 
 class MultibyteCharsUTF8BehaviourTest < Test::Unit::TestCase
@@ -105,41 +104,39 @@ class MultibyteCharsUTF8BehaviourTest < Test::Unit::TestCase
       @whitespace = "\n\t#{[32, 8195].pack('U*')}"
     else
       # Ruby 1.9 only supports basic whitespace
-      @whitespace = "\n\t ".force_encoding(Encoding::UTF_8)
+      @whitespace = "\n\t "
     end
-    
+
     @byte_order_mark = [65279].pack('U')
   end
 
-  if RUBY_VERSION < '1.9'
-    def test_split_should_return_an_array_of_chars_instances
-      @chars.split(//).each do |character|
-        assert character.kind_of?(ActiveSupport::Multibyte.proxy_class)
-      end
+  def test_split_should_return_an_array_of_chars_instances
+    @chars.split(//).each do |character|
+      assert_kind_of ActiveSupport::Multibyte.proxy_class, character
     end
+  end
 
-    def test_indexed_insert_accepts_fixnums
-      @chars[2] = 32
-      assert_equal 'こに わ', @chars
-    end
+  def test_indexed_insert_accepts_fixnums
+    @chars[2] = 32
+    assert_equal 'こに わ', @chars
+  end
 
-    def test_overridden_bang_methods_return_self
-      [:rstrip!, :lstrip!, :strip!, :reverse!, :upcase!, :downcase!, :capitalize!].each do |method|
-        assert_equal @chars.object_id, @chars.send(method).object_id
-      end
+  def test_overridden_bang_methods_return_self
+    [:rstrip!, :lstrip!, :strip!, :reverse!, :upcase!, :downcase!, :capitalize!].each do |method|
+      assert_equal @chars.object_id, @chars.send(method).object_id
     end
+  end
 
-    def test_overridden_bang_methods_change_wrapped_string
-      [:rstrip!, :lstrip!, :strip!, :reverse!, :upcase!, :downcase!].each do |method|
-        original = ' Café '
-        proxy = chars(original.dup)
-        proxy.send(method)
-        assert_not_equal original, proxy.to_s
-      end
-      proxy = chars('òu')
-      proxy.capitalize!
-      assert_equal 'Òu', proxy.to_s
+  def test_overridden_bang_methods_change_wrapped_string
+    [:rstrip!, :lstrip!, :strip!, :reverse!, :upcase!, :downcase!].each do |method|
+      original = ' Café '
+      proxy = chars(original.dup)
+      proxy.send(method)
+      assert_not_equal original, proxy.to_s
     end
+    proxy = chars('òu')
+    proxy.capitalize!
+    assert_equal 'Òu', proxy.to_s
   end
 
   if RUBY_VERSION >= '1.9'
@@ -151,11 +148,7 @@ class MultibyteCharsUTF8BehaviourTest < Test::Unit::TestCase
   def test_identity
     assert_equal @chars, @chars
     assert @chars.eql?(@chars)
-    if RUBY_VERSION <= '1.9'
-      assert !@chars.eql?(UNICODE_STRING)
-    else
-      assert @chars.eql?(UNICODE_STRING)
-    end
+    assert !@chars.eql?(UNICODE_STRING)
   end
 
   def test_string_methods_are_chainable
@@ -207,7 +200,7 @@ class MultibyteCharsUTF8BehaviourTest < Test::Unit::TestCase
     assert_equal 'こわにちわ', @chars.insert(1, 'わ')
     assert_equal 'こわわわにちわ', @chars.insert(2, 'わわ')
     assert_equal 'わこわわわにちわ', @chars.insert(0, 'わ')
-    assert_equal 'わこわわわにちわ', @chars.wrapped_string if RUBY_VERSION < '1.9'
+    assert_equal 'わこわわわにちわ', @chars.wrapped_string
   end
 
   def test_insert_should_be_destructive
@@ -330,7 +323,7 @@ class MultibyteCharsUTF8BehaviourTest < Test::Unit::TestCase
     assert_raise(ArgumentError) { @chars.center }
   end
 
-  def test_center_should_count_charactes_instead_of_bytes
+  def test_center_should_count_characters_instead_of_bytes
     assert_equal UNICODE_STRING, @chars.center(-3)
     assert_equal UNICODE_STRING, @chars.center(0)
     assert_equal UNICODE_STRING, @chars.center(4)
@@ -468,14 +461,6 @@ end
 class MultibyteCharsExtrasTest < Test::Unit::TestCase
   include MultibyteTestHelpers
 
-  if RUBY_VERSION >= '1.9'
-    def test_tidy_bytes_is_broken_on_1_9_0
-      assert_raise(ArgumentError) do
-        assert_equal_codepoints [0xfffd].pack('U'), chars("\xef\xbf\xbd").tidy_bytes
-      end
-    end
-  end
-
   def test_upcase_should_be_unicode_aware
     assert_equal "АБВГД\0F", chars("аБвгд\0f").upcase
     assert_equal 'こにちわ', chars('こにちわ').upcase
@@ -504,7 +489,7 @@ class MultibyteCharsExtrasTest < Test::Unit::TestCase
   def test_limit_should_work_on_a_multibyte_string
     example = chars(UNICODE_STRING)
     bytesize = UNICODE_STRING.respond_to?(:bytesize) ? UNICODE_STRING.bytesize : UNICODE_STRING.size
-    
+
     assert_equal UNICODE_STRING, example.limit(bytesize)
     assert_equal '', example.limit(0)
     assert_equal '', example.limit(1)
@@ -531,7 +516,7 @@ class MultibyteCharsExtrasTest < Test::Unit::TestCase
       assert example.limit(limit).to_s.length <= limit
     end
   end
-  
+
   def test_composition_exclusion_is_set_up_properly
     # Normalization of DEVANAGARI LETTER QA breaks when composition exclusion isn't used correctly
     qa = [0x915, 0x93c].pack('U*')
@@ -607,27 +592,56 @@ class MultibyteCharsExtrasTest < Test::Unit::TestCase
   end
 
   def test_tidy_bytes_should_tidy_bytes
+
+    single_byte_cases = {
+      "\x21" => "!",   # Valid ASCII byte, low
+      "\x41" => "A",   # Valid ASCII byte, mid
+      "\x7E" => "~",   # Valid ASCII byte, high
+      "\x80" => "€",   # Continuation byte, low (cp125)
+      "\x94" => "”",   # Continuation byte, mid (cp125)
+      "\x9F" => "Ÿ",   # Continuation byte, high (cp125)
+      "\xC0" => "À",   # Overlong encoding, start of 2-byte sequence, but codepoint < 128
+      "\xC1" => "Á",   # Overlong encoding, start of 2-byte sequence, but codepoint < 128
+      "\xC2" => "Â",   # Start of 2-byte sequence, low
+      "\xC8" => "È",   # Start of 2-byte sequence, mid
+      "\xDF" => "ß",   # Start of 2-byte sequence, high
+      "\xE0" => "à",   # Start of 3-byte sequence, low
+      "\xE8" => "è",   # Start of 3-byte sequence, mid
+      "\xEF" => "ï",   # Start of 3-byte sequence, high
+      "\xF0" => "ð",   # Start of 4-byte sequence
+      "\xF1" => "ñ",   # Unused byte
+      "\xFF" => "ÿ",   # Restricted byte
+      "\x00" => "\x00" # null char
+    }
+
+    single_byte_cases.each do |bad, good|
+      assert_equal good, chars(bad).tidy_bytes.to_s
+      assert_equal "#{good}#{good}", chars("#{bad}#{bad}").tidy_bytes
+      assert_equal "#{good}#{good}#{good}", chars("#{bad}#{bad}#{bad}").tidy_bytes
+      assert_equal "#{good}a", chars("#{bad}a").tidy_bytes
+      assert_equal "#{good}á", chars("#{bad}á").tidy_bytes
+      assert_equal "a#{good}a", chars("a#{bad}a").tidy_bytes
+      assert_equal "á#{good}á", chars("á#{bad}á").tidy_bytes
+      assert_equal "a#{good}", chars("a#{bad}").tidy_bytes
+      assert_equal "á#{good}", chars("á#{bad}").tidy_bytes
+    end
+
     byte_string = "\270\236\010\210\245"
     tidy_string = [0xb8, 0x17e, 0x8, 0x2c6, 0xa5].pack('U*')
-    ascii_padding = 'aa'
-    utf8_padding = 'éé'
-
     assert_equal_codepoints tidy_string, chars(byte_string).tidy_bytes
-
-    assert_equal_codepoints ascii_padding.dup.insert(1, tidy_string),
-      chars(ascii_padding.dup.insert(1, byte_string)).tidy_bytes
-    assert_equal_codepoints utf8_padding.dup.insert(2, tidy_string),
-      chars(utf8_padding.dup.insert(2, byte_string)).tidy_bytes
     assert_nothing_raised { chars(byte_string).tidy_bytes.to_s.unpack('U*') }
 
-    assert_equal_codepoints "\xC3\xA7", chars("\xE7").tidy_bytes # iso_8859_1: small c cedilla
-    assert_equal_codepoints "\xE2\x80\x9C", chars("\x93").tidy_bytes # win_1252: left smart quote
-    assert_equal_codepoints "\xE2\x82\xAC", chars("\x80").tidy_bytes # win_1252: euro
-    assert_equal_codepoints "\x00", chars("\x00").tidy_bytes # null char
-    assert_equal_codepoints [0xfffd].pack('U'), chars("\xef\xbf\xbd").tidy_bytes # invalid char
-  rescue ArgumentError => e
-    raise e if RUBY_VERSION < '1.9'
+    # UTF-8 leading byte followed by too few continuation bytes
+    assert_equal_codepoints "\xc3\xb0\xc2\xa5\xc2\xa4\x21", chars("\xf0\xa5\xa4\x21").tidy_bytes
   end
+
+  def test_tidy_bytes_should_forcibly_tidy_bytes_if_specified
+    byte_string = "\xF0\xA5\xA4\xA4" # valid as both CP-1252 and UTF-8, but with different interpretations.
+    assert_not_equal "ð¥¤¤", chars(byte_string).tidy_bytes
+    # Forcible conversion to UTF-8
+    assert_equal "ð¥¤¤", chars(byte_string).tidy_bytes(true)
+  end
+
 
   private
 

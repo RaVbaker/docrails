@@ -1,3 +1,5 @@
+require "active_support/core_ext/module/remove_method"
+
 module AbstractController
   # Layouts reverse the common pattern of including shared headers and footers in many templates to isolate changes in
   # repeated setups. The inclusion pattern has pages that look like this:
@@ -182,7 +184,9 @@ module AbstractController
         #
         # ==== Returns
         # Boolean:: True if the action has a layout, false otherwise.
-        def _action_has_layout?
+        def action_has_layout?
+          return unless super
+
           conditions = _layout_conditions
 
           if only = conditions[:only]
@@ -237,9 +241,11 @@ module AbstractController
       # name, return that string. Otherwise, use the superclass'
       # layout (which might also be implied)
       def _write_layout_method
+        remove_possible_method(:_layout)
+
         case defined?(@_layout) ? @_layout : nil
         when String
-          self.class_eval %{def _layout; #{@_layout.inspect} end}
+          self.class_eval %{def _layout; #{@_layout.inspect} end}, __FILE__, __LINE__
         when Symbol
           self.class_eval <<-ruby_eval, __FILE__, __LINE__ + 1
             def _layout
@@ -253,9 +259,9 @@ module AbstractController
           ruby_eval
         when Proc
           define_method :_layout_from_proc, &@_layout
-          self.class_eval %{def _layout; _layout_from_proc(self) end}
+          self.class_eval %{def _layout; _layout_from_proc(self) end}, __FILE__, __LINE__
         when false
-          self.class_eval %{def _layout; end}
+          self.class_eval %{def _layout; end}, __FILE__, __LINE__
         when true
           raise ArgumentError, "Layouts must be specified as a String, Symbol, false, or nil"
         when nil
@@ -284,13 +290,18 @@ module AbstractController
         layout = options.key?(:layout) ? options.delete(:layout) : :default
         value = _layout_for_option(layout)
         options[:layout] = (value =~ /\blayouts/ ? value : "layouts/#{value}") if value
-
-        # TODO Layout for partials should be handled here, because inside the
-        # partial renderer it looks for the layout as a partial.
-        if options.key?(:partial) && options[:layout]
-          options[:layout] = view_context.find_layout(options[:layout])
-        end
       end
+    end
+
+    attr_writer :action_has_layout
+
+    def initialize(*)
+      @action_has_layout = true
+      super
+    end
+
+    def action_has_layout?
+      @action_has_layout
     end
 
   private
@@ -332,13 +343,13 @@ module AbstractController
     # Template:: The template object for the default layout (or nil)
     def _default_layout(require_layout = false)
       begin
-        layout_name = _layout if _action_has_layout?
+        layout_name = _layout if action_has_layout?
       rescue NameError => e
         raise NoMethodError,
           "You specified #{@_layout.inspect} as the layout, but no such method was found"
       end
 
-      if require_layout && _action_has_layout? && !layout_name
+      if require_layout && action_has_layout? && !layout_name
         raise ArgumentError,
           "There was no default layout for #{self.class} in #{view_paths.inspect}"
       end
@@ -348,10 +359,6 @@ module AbstractController
 
     def _include_layout?(options)
       (options.keys & [:text, :inline, :partial]).empty? || options.key?(:layout)
-    end
-
-    def _action_has_layout?
-      true
     end
   end
 end

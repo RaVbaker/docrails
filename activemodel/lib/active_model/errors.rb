@@ -1,4 +1,8 @@
+# -*- coding: utf-8 -*-
+
+require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/string/inflections'
+require 'active_support/core_ext/object/blank'
 require 'active_support/ordered_hash'
 
 module ActiveModel
@@ -138,6 +142,11 @@ module ActiveModel
       to_a.size
     end
 
+    # Returns true if there are any errors, false if not.
+    def empty?
+      all? { |k, v| v && v.empty? }
+    end
+
     # Returns an xml formatted representation of the Errors hash.
     # 
     #   p.errors.add(:name, "can't be blank")
@@ -206,7 +215,7 @@ module ActiveModel
       full_messages = []
 
       each do |attribute, messages|
-        messages = Array(messages)
+        messages = Array.wrap(messages)
         next if messages.empty?
 
         if attribute == :base
@@ -214,7 +223,7 @@ module ActiveModel
         else
           attr_name = attribute.to_s.gsub('.', '_').humanize
           attr_name = @base.class.human_attribute_name(attribute, :default => attr_name)
-          options = { :default => "{{attribute}} {{message}}", :attribute => attr_name }
+          options = { :default => "%{attribute} %{message}", :attribute => attr_name }
 
           messages.each do |m|
             full_messages << I18n.t(:"errors.format", options.merge(:message => m))

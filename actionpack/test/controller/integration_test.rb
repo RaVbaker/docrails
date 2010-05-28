@@ -173,14 +173,12 @@ class IntegrationTestTest < Test::Unit::TestCase
   end
 
   def test_opens_new_session
-    @test.class.expects(:fixture_table_names).times(2).returns(['foo'])
-
     session1 = @test.open_session { |sess| }
     session2 = @test.open_session # implicit session
 
-    assert_kind_of ::ActionController::Integration::Session, session1
-    assert_kind_of ::ActionController::Integration::Session, session2
-    assert_not_equal session1, session2
+    assert_respond_to session1, :assert_template, "open_session makes assert_template available"
+    assert_respond_to session2, :assert_template, "open_session makes assert_template available"
+    assert !session1.equal?(session2)
   end
 
   # RSpec mixes Matchers (which has a #method_missing) into
@@ -238,13 +236,22 @@ class IntegrationProcessTest < ActionController::IntegrationTest
     end
 
     def method
-      render :text => "method: #{request.method}"
+      render :text => "method: #{request.method.downcase}"
     end
 
     def cookie_monster
       cookies["cookie_1"] = nil
       cookies["cookie_3"] = "chocolate"
       render :text => "Gone", :status => 410
+    end
+
+    def set_cookie
+      cookies["foo"] = 'bar'
+      head :ok
+    end
+
+    def get_cookie
+      render :text => cookies["foo"]
     end
 
     def redirect
@@ -291,6 +298,42 @@ class IntegrationProcessTest < ActionController::IntegrationTest
       get '/cookie_monster'
       assert_equal "cookie_1=; path=/\ncookie_3=chocolate; path=/", headers["Set-Cookie"]
       assert_equal({"cookie_1"=>"", "cookie_2"=>"oatmeal", "cookie_3"=>"chocolate"}, cookies.to_hash)
+    end
+  end
+
+  test 'cookie persist to next request' do
+    with_test_route_set do
+      get '/set_cookie'
+      assert_response :success
+
+      assert_equal "foo=bar; path=/", headers["Set-Cookie"]
+      assert_equal({"foo"=>"bar"}, cookies.to_hash)
+
+      get '/get_cookie'
+      assert_response :success
+      assert_equal "bar", body
+
+      assert_equal nil, headers["Set-Cookie"]
+      assert_equal({"foo"=>"bar"}, cookies.to_hash)
+    end
+  end
+
+  test 'cookie persist to next request on another domain' do
+    with_test_route_set do
+      host! "37s.backpack.test"
+
+      get '/set_cookie'
+      assert_response :success
+
+      assert_equal "foo=bar; path=/", headers["Set-Cookie"]
+      assert_equal({"foo"=>"bar"}, cookies.to_hash)
+
+      get '/get_cookie'
+      assert_response :success
+      assert_equal "bar", body
+
+      assert_equal nil, headers["Set-Cookie"]
+      assert_equal({"foo"=>"bar"}, cookies.to_hash)
     end
   end
 
@@ -430,5 +473,52 @@ class MetalIntegrationTest < ActionController::IntegrationTest
 
   def test_generate_url_without_controller
     assert_equal 'http://www.example.com/foo', url_for(:controller => "foo")
+  end
+end
+
+class ApplicationIntegrationTest < ActionController::IntegrationTest
+  class TestController < ActionController::Base
+    def index
+      render :text => "index"
+    end
+  end
+
+  def self.call(env)
+    routes.call(env)
+  end
+
+  def self.routes
+    @routes ||= ActionDispatch::Routing::RouteSet.new
+  end
+
+  routes.draw do
+    match 'foo', :to => 'application_integration_test/test#index', :as => :foo
+    match 'bar', :to => 'application_integration_test/test#index', :as => :bar
+  end
+
+  def app
+    self.class
+  end
+
+  test "includes route helpers" do
+    assert_equal '/foo', foo_path
+    assert_equal '/bar', bar_path
+  end
+
+  test "route helpers after controller access" do
+    get '/foo'
+    assert_equal '/foo', foo_path
+
+    get '/bar'
+    assert_equal '/bar', bar_path
+  end
+
+  test "missing route helper before controller access" do
+    assert_raise(NameError) { missing_path }
+  end
+
+  test "missing route helper after controller access" do
+    get '/foo'
+    assert_raise(NameError) { missing_path }
   end
 end

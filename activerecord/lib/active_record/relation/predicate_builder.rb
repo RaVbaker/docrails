@@ -20,19 +20,16 @@ module ActiveRecord
             table = Arel::Table.new(table_name, :engine => @engine)
           end
 
-          attribute = table[column]
+          unless attribute = table[column]
+            raise StatementInvalid, "No attribute named `#{column}` exists for table `#{table.name}`"
+          end
 
           case value
-          when Array, ActiveRecord::Associations::AssociationCollection, ActiveRecord::NamedScope::Scope
+          when Array, ActiveRecord::Associations::AssociationCollection, ActiveRecord::Relation
             values = value.to_a
             attribute.in(values)
           when Range
-            # TODO : Arel should handle ranges with excluded end.
-            if value.exclude_end?
-              [attribute.gteq(value.begin), attribute.lt(value.end)]
-            else
-              attribute.in(value)
-            end
+            attribute.in(value)
           else
             attribute.eq(value)
           end
