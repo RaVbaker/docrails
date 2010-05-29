@@ -95,7 +95,7 @@ class Post < ActiveRecord::Base
 end 
 </ruby>
 
-H5. Przykładowy Kontroler
+h5. Przykładowy Kontroler
 
 Ponieważ wyniki badań są specjalnym rodzajem testów integracji, można w nich użyć metod +get+ i +post+.
 
@@ -121,7 +121,7 @@ class PostPerformanceTest < ActionController::PerformanceTest
 end
 </ruby>
 
-Więcej szczegółów na temat metod +get+ i +post+ możesz znaleźć w przewodniku "Testowanie Aplikacji Rails": testing.html
+Więcej szczegółów na temat metod +get+ i +post+ możesz znaleźć w przewodniku "Testowanie Aplikacji Rails":testing.html
 
 h5. Przykładowy Model 
 
@@ -179,7 +179,7 @@ Czas zegarowy mierzy upływ czasu rzeczywistego podczas badania. Dotyczy to rów
 
 Tryb: Benchmarking 
 
-H5. Czas procesu
+h5. Czas procesu
 
 Czas procesu mierzy czas wykorzystany przez proces. Jest niezależny od innych procesów uruchomionych równocześnie na tym samym systemie. Dlatego też czas procesu może być stały dla danego badania skuteczności, niezależnie od obciążenia maszyny.
 
@@ -337,7 +337,7 @@ Poniższy kod zainstaluje rubiego w twoim katalogu domowym w folderze +/rubygc+.
 [lifo@null ruby-version]$ make && make install
 </shell>
 
-H5. Przygotowanie Aliasów
+h5. Przygotowanie Aliasów
 
 Najwygodniej będzie dodać następujące wiersze w +~/.profile+:
 
