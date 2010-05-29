@@ -140,21 +140,21 @@ h3. Jednostkowe testowanie modeli
 
 W Railsach testy jednostki (unit tests) to te testy, które piszemy aby przetestować modele.
 
-W tym przewodniku będziemy używać Railsowego _scaffolding_. Polecenie to stworzy model, migrację, kontroler oraz widoki dla nowego zasobu pojedynczej operacji. Stworzy także pełny komplet testowy zgodnie z najlepszymi praktykami Rails. Przykłady będziemy czerpać z wygenerowanego kodu oraz kiedy to potrzebne, wzbogacać go dodatkowymi.
+W tym przewodniku będziemy używać Railsowego <em>scaffolding</em>. Polecenie to stworzy model, migrację, kontroler oraz widoki dla nowego zasobu pojedynczej operacji. Stworzy także pełny komplet testowy zgodnie z najlepszymi praktykami Rails. Przykłady będziemy czerpać z wygenerowanego kodu oraz kiedy to potrzebne, wzbogacać go dodatkowymi.
 
 
-NOTE: Po więcej informacji na temat polecenia _scaffolding_, zapraszamy do lektury rozdziału "Początki w Rails":getting_started.html
+NOTE: Po więcej informacji na temat polecenia <em>scaffolding</em>, zapraszamy do lektury rozdziału "Początki w Rails":getting_started.html
 
 Gdy używamy polecenia +script/generate scaffold+ stworzony zostaje odcinek w folderze +test/unit+:
 
-<pre>
+<shell>
 $ script/generate scaffold post title:string body:text
 ...
 create  app/models/post.rb
 create  test/unit/post_test.rb
 create  test/fixtures/posts.yml
 ...
-</pre>
+</shell>
 
 Domyślny testowy odcinek w folderze +test/unit/post_test.rb+ wygląda tak:
 
@@ -257,7 +257,7 @@ To polecenie uruchomi wszystkie metody testów z przypadku testów (test case).
 
 Możemy także uruchomić poszczególny test z przypadku testów poprzez dodanie -n do +test method name+.
 
-<pre>
+<shell>
 $ ruby unit/post_test.rb -n test_truth
 
 Loaded suite unit/post_test
@@ -266,7 +266,7 @@ Started
 Finished in 0.023513 seconds.
 
 1 tests, 1 assertions, 0 failures, 0 errors
-</pre>
+</shell>
 
 Kropka (+.+) oznacza zdany test. W przeciwnym wypadku zobaczymy +F+, zaś kiedy test wyrzuci błąd zobaczymy +E+ w tym samym miejscu. Ostatnia linijka to podsumowanie.
 
@@ -281,7 +281,7 @@ end
 
 Teraz urchomimy nowo dodany test.
 
-<pre>
+<shell>
 $ ruby unit/post_test.rb -n test_should_not_save_post_without_title
 Loaded suite -e
 Started
@@ -293,7 +293,7 @@ test_should_not_save_post_without_title(PostTest) [/test/unit/post_test.rb:6]:
 <false> is not true.
 
 1 tests, 1 assertions, 1 failures, 0 errors
-</pre>
+</shell>
 
 +F+ na wyjściu oznacza nie zdanie testu. Możemy zobaczyć odpowiedni ślad pokazany pod numerem +1)+ razem z nazwą danego testu. Następne pare linijek zawiera stos śladów razem z wiadomością dotyczącą aktualnej wartości oraz wartości oczekiwanej przez dowodzenie (assertion).
 
@@ -306,12 +306,12 @@ end
 
 Uruchomienie tego testu pokazuje wiadomość dowodzenia w bardziej przyjazny sposób:
 
-<pre>
+<shell>
   1) Failure:
 test_should_not_save_post_without_title(PostTest) [/test/unit/post_test.rb:6]:
 Saved the post without a title.
 <false> is not true.
-</pre>
+</shell>
 
 Aby sprawić, że test ten zostanie przeprowadzony poprawnie możemy dodać walidację poziomu modelu dla pola _title_.
 
@@ -323,7 +323,7 @@ end
 
 Teraz test powinien się powieść. Zweryfikujmy to poprzez ponowne uruchomienie.
 
-<pre>
+<shell>
 $ ruby unit/post_test.rb -n test_should_not_save_post_without_title
 Loaded suite unit/post_test
 Started
@@ -331,7 +331,7 @@ Started
 Finished in 0.193608 seconds.
 
 1 tests, 1 assertions, 0 failures, 0 errors
-</pre>
+</shell>
 
 Teraz, jeżeli zauważyłeś na początku napisaliśmy test, który nie powiódł się dla danej funkcjonalności, zaś potem dopisaliśmy kod, który dodaje funkcjonalność i finalnie test powiódł się. To podejście do tworzenia oprogramowania jest określane mianem _Test-Driven Development_ (TDD) (Rozwój poprzez testowanie).
 
@@ -349,7 +349,7 @@ end
 
 Teraz możesz zobaczyć jeszcze wiecej danych wyjściowych w konsoli po uruchomieniu testu:
 
-<pre>
+<shell>
 $ ruby unit/post_test.rb -n test_should_report_error
 Loaded suite -e
 Started
@@ -362,17 +362,17 @@ NameError: undefined local variable or method `some_undefined_variable' for #<Po
     /test/unit/post_test.rb:6:in `test_should_report_error'
 
 1 tests, 0 assertions, 0 failures, 1 errors
-</pre>
+</shell>
 
 Zauważ 'E' na wyjściu. Oznacza to test z błędem.
 
 NOTE: Wykonywanie danej metody testu jest zatrzymywane jak tylko jakikolwiek błąd lub niepowodzenie dowodzenia zostanie napotkane. Komplet testów kontynuuje wtedy wykonywanie od następnej metody. Wszystkie metody testowe są wykonywane w kolejności alfabetycznej.
 
-h4. Co zawrzeć w testach jednostki (unit tests)
+h4. Co zawrzeć w testach jednostkowych 
 
 Idealnie chcielibyśmy mieć test na wszystko co może potencjalnie się zepsuć. Dobrą praktyką jest posiadać przynajmniej jeden test dla każdej walidacji i co najmniej jeden test dla każdej metody w modelu.
 
-h4. Dostępne metody dowodzenia (assertion methods)
+h4. Dostępne asercje 
 
 Teraz już znasz niektóre dostępne metody dowodzenia. Metody te są pszczołami robotnicami testowania. To właśnie one dokonują sprawdzania aby upewnić się, że wszystko odbywa się zgodnie z planem.
 
@@ -740,7 +740,7 @@ Nie musisz konfigurować i uruchamiać każdego osobnego testu. Railsy posiadaj�
 
 h3. Szybka notka o +Test::Unit+
 
-Ruby posiada wiele bibliotek. Jeden mały gem należący do biblioteki to +Test::Unit+, framework do testowania jednostki w Ruby. Wszystkie podstawowe metody dowodzenia przedyskutowane wyżek są zdefiniowane w +Test::Unit::Assertions+. Klasa +ActiveSupport::TestCase+, której używaliśmy w testach jednostki bądź funkcjonalności jest rozwinięta poprzez +Test::Unit::TestCase+. Dzięki temu możemy używać wszystkich podstawowych metod dowodzenia w naszych testach.
+Ruby posiada wiele bibliotek. Jeden mały gem należący do biblioteki to +Test::Unit+, framework do testowania jednostki w Ruby. Wszystkie podstawowe metody dowodzenia przedyskutowane wyżek są zdefiniowane w +Test::Unit::Assertions+. Klasa +ActiveSupport::TestCase+, której używaliśmy w testach jednostkowych bądź funkcjonalności jest rozwinięta poprzez +Test::Unit::TestCase+. Dzięki temu możemy używać wszystkich podstawowych metod dowodzenia w naszych testach.
 
 NOTE: Po więcej informacji na temat +Test::Unit+, odsyłam do lektury "dokumentacja test/unit":http://ruby-doc.org/stdlib/libdoc/test/unit/rdoc/
 
@@ -857,7 +857,7 @@ Celem testowania klas +ActionMailer+ jest zapewnienie:
 
 h5. Ze wszystkich stron
 
-Istnieją dea aspekty testowania mailera - testy jednostki oraz funkcjonalne. W testach jednostki uruchamiamy mailera w izolacji z ściśle kontrolowanymi danymi wejściowymi oraz porównujemy dane wyjściowe do znanej wartości (fixtures - yay! więcej fixtures). W testach funkcjonalnych nie testujemy detali produkowanych przez mailera ale czy kontrolery oraz modele używają go w odpowiedni sposób. Testujemy aby dowieść że wyznaczony e-mail został wysłany w wyznaczonym czasie.
+Istnieją dea aspekty testowania mailera - testy jednostki oraz funkcjonalne. W testach jednostkowych uruchamiamy mailera w izolacji z ściśle kontrolowanymi danymi wejściowymi oraz porównujemy dane wyjściowe do znanej wartości (fixtures - yay! więcej fixtures). W testach funkcjonalnych nie testujemy detali produkowanych przez mailera ale czy kontrolery oraz modele używają go w odpowiedni sposób. Testujemy aby dowieść że wyznaczony e-mail został wysłany w wyznaczonym czasie.
 
 h4. Testowanie jednostki
 
@@ -938,7 +938,7 @@ Testowanie bazujące na wbudowanym +test/unit+ nie jest jedynym sposobem testowa
 * "Shoulda":http://www.thoughtbot.com/projects/shoulda, rozszerzenie do +test/unit+ z dodatkowymi narzędzami pomocniczymi, makrami oraz mechanizmami dowodzenia.
 * "RSpec":http://rspec.info/, framework kierowany zachowaniami.
 
-h3. Dziennik zmian
+h3. Changelog
 
 "Lighthouse ticket":http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/8
 
