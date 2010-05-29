@@ -1,105 +1,105 @@
-h2. Performance Testing Rails Applications
+h2. Badanie osiągnięć aplikacji Rails
 
-This guide covers the various ways of performance testing a Ruby on Rails application. By referring to this guide, you will be able to:
+Niniejszy przewodnik obejmuje różne sposoby testowania wydajności aplikacji Ruby on Rails. Odwołując się do zawartych w nim instrukcji, będziesz w stanie:
 
-* Understand the various types of benchmarking and profiling metrics
-* Generate performance and benchmarking tests
-* Use a GC-patched Ruby binary to measure memory usage and object allocation
-* Understand the benchmarking information provided by Rails inside the log files
-* Learn about various tools facilitating benchmarking and profiling
+* Poznać różne rodzaje benchmarkingu (analizy porównawczej) i metryk profilowania
+* Generować i porównywać wyniki badań
+* Używać wersji Rubiego ze spachowanym Garbage collectorem do pomiaru zużycia pamięci i alokowania obiektów (GC-patched Ruby binary)
+* Analizować porównawcze informacje dostarczone przez Railsy w plikach log (dziennikach)
+* Dowiedzieć się więcej na temat różnych narzędzi ułatwiających benchmarking i profilowanie
 
-Performance testing is an integral part of the development cycle. It is very important that you don't make your end users wait for too long before the page is completely loaded. Ensuring a pleasant browsing experience for end users and cutting the cost of unnecessary hardware is important for any non-trivial web application.
+Testowanie wydajności jest integralną częścią cyklu rozwoju. Bardzo ważne jest, aby nie kazać zbyt długo czekać użytkownikom na pełne załadowanie strony. Zapewnienie przyjemnego przeglądania i cięcie kosztów niepotrzebnego sprzętu jest ważne dla każdej nietrywialnej aplikacji internetowej.
 
 endprologue.
 
-h3. Performance Test Cases
+h3. Przypadki testów wydajności
 
-Rails performance tests are a special type of integration tests, designed for benchmarking and profiling the test code. With performance tests, you can determine where your application's memory or speed problems are coming from, and get a more in-depth picture of those problems.
+Testy wydajności Railsów to specjalny rodzaj testów integracji, przeznaczonych do benchmarkingu i profilowania kodu testowego. Wyniki badań pomagają zdiagnozować, skąd wynikają problemy z pamięcią lub prędkością aplikacji i pozwalają uzyskać głębszy obraz tych problemów.
 
-In a freshly generated Rails application, +test/performance/browsing_test.rb+ contains an example of a performance test:
+W świeżo wygenerowanej aplikacji Rails, +test/performance/browsing_test.rb+ zawiera przykładowy test sprawności:
 
 <ruby>
 require 'test_helper'
-require 'performance_test_help'
+require 'performance_test_help' 
 
-# Profiling results for each test method are written to tmp/performance.
+# Profilowanie wyników dla każdej z metod badań jest zapisywane w tmp/performance.
 class BrowsingTest < ActionController::PerformanceTest
   def test_homepage
     get '/'
   end
 end
-</ruby>
+</ruby> 
 
-This example is a simple performance test case for profiling a GET request to the application's homepage.
+Powyższy przykład to prosty przypadek testu skuteczności dla profilowania żądania GET do strony głównej aplikacji.
 
-h4. Generating Performance Tests
+h4. Tworzenie testów wydajnościowych
 
-Rails provides a generator called +performance_test+ for creating new performance tests:
+Railsy udostępniają generator o nazwie +performance_test+ dla tworzenia nowych testów wydajności: 
 
 <shell>
-rails generate performance_test homepage
+script/generate performance_test homepage
 </shell>
 
-This generates +homepage_test.rb+ in the +test/performance+ directory:
+To tworzy +homepage_test.rb+ w katalogu +test/performance+:
 
 <ruby>
 require 'test_helper'
 require 'performance_test_help'
 
 class HomepageTest < ActionController::PerformanceTest
-  # Replace this with your real tests.
+  # Zastąp swoim prawdziwym testem.
   def test_homepage
     get '/'
   end
 end
 </ruby>
 
-h4. Examples
+h4. Przykłady 
 
-Let's assume your application has the following controller and model:
+Załóżmy, że aplikacja posiada następujący kontroler i model:
 
-<ruby>
-# routes.rb
-map.root :controller => 'home'
-map.resources :posts
+<ruby> 
+# routes.rb 
+map.root :controller => 'home' 
+map.resources :posts 
 
-# home_controller.rb
-class HomeController < ApplicationController
-  def dashboard
-    @users = User.last_ten(:include => :avatars)
-    @posts = Post.all_today
-  end
-end
+# home_controller.rb 
+class HomeController < ApplicationController 
+  def dashboard 
+    @users = User.last_ten(:include => :avatars) 
+    @posts = Post.all_today 
+  end 
+end 
 
-# posts_controller.rb
-class PostsController < ApplicationController
-  def create
-    @post = Post.create(params[:post])
-    redirect_to(@post)
-  end
-end
+# posts_controller.rb 
+class PostsController < ApplicationController 
+  def create 
+    @post = Post.create(params[:post]) 
+    redirect_to(@post) 
+  end 
+end 
 
-# post.rb
-class Post < ActiveRecord::Base
-  before_save :recalculate_costly_stats
+# post.rb 
+class Post < ActiveRecord::Base 
+  before_save :recalculate_costly_stats 
 
-  def slow_method
-    # I fire gallzilion queries sleeping all around
-  end
+  def slow_method 
+    # tu odpalamy miliardy bilionów zapytań, zanudzając wszystkich wkoło
+  end 
 
-  private
+  private 
 
-  def recalculate_costly_stats
-    # CPU heavy calculations
-  end
-end
+  def recalculate_costly_stats 
+    # ciężkie obliczenia CPU
+  end 
+end 
 </ruby>
 
-h5. Controller Example
+H5. Przykładowy Kontroler
 
-Because performance tests are a special kind of integration test, you can use the +get+ and +post+ methods in them.
+Ponieważ wyniki badań są specjalnym rodzajem testów integracji, można w nich użyć metod +get+ i +post+.
 
-Here's the performance test for +HomeController#dashboard+ and +PostsController#create+:
+Oto test wydajności dla +HomeController#dashboard+ i +PostsController#create+:
 
 <ruby>
 require 'test_helper'
@@ -107,7 +107,7 @@ require 'performance_test_help'
 
 class PostPerformanceTest < ActionController::PerformanceTest
   def setup
-    # Application requires logged-in user
+    # Applikacja wymaga zalogowanego użytkownika
     login_as(:lifo)
   end
 
@@ -121,13 +121,13 @@ class PostPerformanceTest < ActionController::PerformanceTest
 end
 </ruby>
 
-You can find more details about the +get+ and +post+ methods in the "Testing Rails Applications":testing.html guide.
+Więcej szczegółów na temat metod +get+ i +post+ możesz znaleźć w przewodniku "Testowanie Aplikacji Rails": testing.html
 
-h5. Model Example
+h5. Przykładowy Model 
 
-Even though the performance tests are integration tests and hence closer to the request/response cycle by nature, you can still performance test pure model code.
+Choć testy wydajności są testami integracyjnymi, przez co są bliżej naturalnego cyklu żądanie/odpowiedź, można dodatkowo przetestować sprawność czystego kodu modelu.
 
-Performance test for +Post+ model:
+Test wydajności dla modelu +Post+:
 
 <ruby>
 require 'test_helper'
@@ -139,87 +139,87 @@ class PostModelTest < ActionController::PerformanceTest
   end
 
   def test_slow_method
-    # Using posts(:awesome) fixture
+    # używając fixture'a posts(:awesome)
     posts(:awesome).slow_method
   end
 end
 </ruby>
 
-h4. Modes
+h4. Tryby 
 
-Performance tests can be run in two modes: Benchmarking and Profiling.
+Testy wydajności mogą być prowadzone w dwóch trybach: benchmarkingu i profilowania.
 
-h5. Benchmarking
+h5. Benchmarking (Analiza Porównawcza)
 
-Benchmarking helps find out how fast each performance test runs. Each test case is run +4 times+ in benchmarking mode.
+Benchmarking pomaga dowiedzieć się, jak szybko przebiega każdy test wydajności. Każdy przypadek badania przeprowadzany jest +4 razy+ w trybie analizy porównawczej.
 
-To run performance tests in benchmarking mode:
+Aby uruchomić test wydajności w trybie benchmarkingu:
 
 <shell>
 $ rake test:benchmark
 </shell>
 
-h5. Profiling
+h5. Profilowanie 
 
-Profiling helps you see the details of a performance test and provide an in-depth picture of the slow and memory hungry parts. Each test case is run +1 time+ in profiling mode.
+Profilowanie pozwala zobaczyć szczegóły testu wydajności i zapewnieni szersze spojrzenie na części zbyt wolne i potrzebujące większej pamięci. Każdy przypadek badania przeprowadzany jest +1 raz+ w trybie profilowania.
 
-To run performance tests in profiling mode:
+Aby uruchomić test wydajności w trybie profilowania: 
 
 <shell>
 $ rake test:profile
 </shell>
 
-h4. Metrics
+h4. Metryki
 
-Benchmarking and profiling run performance tests in various modes described below.
+Benchmarking i profilowanie uruchamiają testy wydajności w różnych trybach opisanych poniżej. 
 
-h5. Wall Time
+h5. Czas zegarowy
 
-Wall time measures the real world time elapsed during the test run. It is affected by any other processes concurrently running on the system.
+Czas zegarowy mierzy upływ czasu rzeczywistego podczas badania. Dotyczy to również wszelkich procesów jednocześnie uruchomionych na tym samym systemie.
 
-Mode: Benchmarking
+Tryb: Benchmarking 
 
-h5. Process Time
+H5. Czas procesu
 
-Process time measures the time taken by the process. It is unaffected by any other processes running concurrently on the same system. Hence, process time is likely to be constant for any given performance test, irrespective of the machine load.
+Czas procesu mierzy czas wykorzystany przez proces. Jest niezależny od innych procesów uruchomionych równocześnie na tym samym systemie. Dlatego też czas procesu może być stały dla danego badania skuteczności, niezależnie od obciążenia maszyny.
 
-Mode: Profiling
+Tryb: Profilowanie
 
-h5. Memory
+h5. Pamięć
 
-Memory measures the amount of memory used for the performance test case.
+Pamięć mierzy ilość zużywanej pamięci dla danego przypadku testu wydajności.
 
-Mode: Benchmarking, Profiling "Requires GC Patched Ruby":#installing-gc-patched-ruby
+Tryb: Benchmarking, profilowanie "wymaga poprawionego GC Ruby":#installing-gc-patched-ruby
 
-h5. Objects
+h5. Obiekty 
 
-Objects measures the number of objects allocated for the performance test case.
+Obiekty zliczają liczbę alokowanych obiektów dla danego przypadku testu wydajności.
 
-Mode: Benchmarking, Profiling "Requires GC Patched Ruby":#installing-gc-patched-ruby
+Tryb: Benchmarking, profilowanie "wymaga poprawionego GC Ruby":#installing-gc-patched-ruby
 
 h5. GC Runs
 
-GC Runs measures the number of times GC was invoked for the performance test case.
+GC Runs zliczają ilość wywołań GC dla danego przypadku testu wydajności.
 
-Mode: Benchmarking "Requires GC Patched Ruby":#installing-gc-patched-ruby
+Tryb: Benchmarking "wymaga poprawionego GC Ruby":#installing-gc-patched-ruby
 
 h5. GC Time
 
-GC Time measures the amount of time spent in GC for the performance test case.
+GC Time mierzy upływ czasu  spędzonego w GC dla danego przypadku testu wydajności.
 
-Mode: Benchmarking "Requires GC Patched Ruby":#installing-gc-patched-ruby
+Tryb: Benchmarking "wymaga poprawionego GC Ruby":#installing-gc-patched-ruby
 
-h4. Understanding the Output
+h4. Analizowanie Wyjścia 
 
-Performance tests generate different outputs inside +tmp/performance+ directory depending on their mode and metric.
+Testy wydajności generują różne wyjścia w katalogu +tmp/performance+ w zależności od trybu i metryki. 
 
-h5(#output-benchmarking). Benchmarking
+h5. Benchmarking
 
-In benchmarking mode, performance tests generate two types of outputs:
+W trybie benchmarkingu testy wydajności generują dwa rodzaje wyjść:
 
-h6(#output-command-line). Command Line
+h6. Wiersz poleceń
 
-This is the primary form of output in benchmarking mode. Example:
+Jest to podstawowa forma wyjścia w trybie analizy porównawczej. Przykład: 
 
 <shell>
 BrowsingTest#test_homepage (31 ms warmup)
@@ -230,9 +230,9 @@ BrowsingTest#test_homepage (31 ms warmup)
              gc_time: 19 ms
 </shell>
 
-h6. CSV Files
+h6. Pliki CSV
 
-Performance test results are also appended to +.csv+ files inside +tmp/performance+. For example, running the default +BrowsingTest#test_homepage+ will generate following five files:
+Wyniki testów wydajności mogą był również dołączone do plików +.csv+ wewnątrz +tmp/performance+. Dla przykładu, uruchomienie domyślnego +BrowsingTest#test_homepage+ wygeneruje pięć następujących plików: 
 
 * BrowsingTest#test_homepage_gc_runs.csv
 * BrowsingTest#test_homepage_gc_time.csv
@@ -240,31 +240,31 @@ Performance test results are also appended to +.csv+ files inside +tmp/performan
 * BrowsingTest#test_homepage_objects.csv
 * BrowsingTest#test_homepage_wall_time.csv
 
-As the results are appended to these files each time the performance tests are run in benchmarking mode, you can collect data over a period of time. This can be very helpful in analyzing the effects of code changes.
+Wyniki są dopisywane do tych plików każdorazowo gdy test porównawczy zostanie uruchomiony w trybie benchmarkingu, można zatem zbierać dane przez pewien okres czasu. Może być to bardzo pomocne przy analizowaniu efektów zmian w kodu.
 
-Sample output of +BrowsingTest#test_homepage_wall_time.csv+:
+Przykładowe wyjście z +BrowsingTest#test_homepage_wall_time.csv+:
 
 <shell>
 measurement,created_at,app,rails,ruby,platform
-0.00738224999999992,2009-01-08T03:40:29Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00755874999999984,2009-01-08T03:46:18Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00762099999999993,2009-01-08T03:49:25Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00603075000000008,2009-01-08T04:03:29Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00619899999999995,2009-01-08T04:03:53Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00755449999999991,2009-01-08T04:04:55Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00595999999999997,2009-01-08T04:05:06Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00740450000000004,2009-01-09T03:54:47Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00603150000000008,2009-01-09T03:54:57Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
-0.00771250000000012,2009-01-09T15:46:03Z,,3.0.0,ruby-1.8.7.249,x86_64-linux
+0.00738224999999992,2009-01-08T03:40:29Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
+0.00755874999999984,2009-01-08T03:46:18Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
+0.00762099999999993,2009-01-08T03:49:25Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
+0.00603075000000008,2009-01-08T04:03:29Z,,2.3.0.master.0744148,ruby-1.8.6.111,i686-darwin9.1.0
+0.00619899999999995,2009-01-08T04:03:53Z,,2.3.0.master.0744148,ruby-1.8.6.111,i686-darwin9.1.0
+0.00755449999999991,2009-01-08T04:04:55Z,,2.3.0.master.0744148,ruby-1.8.6.110,i686-darwin9.0.0
+0.00595999999999997,2009-01-08T04:05:06Z,,2.3.0.master.0744148,ruby-1.8.6.111,i686-darwin9.1.0
+0.00740450000000004,2009-01-09T03:54:47Z,,2.3.0.master.859e150,ruby-1.8.6.110,i686-darwin9.0.0
+0.00603150000000008,2009-01-09T03:54:57Z,,2.3.0.master.859e150,ruby-1.8.6.111,i686-darwin9.1.0
+0.00771250000000012,2009-01-09T15:46:03Z,,2.3.0.master.859e150,ruby-1.8.6.110,i686-darwin9.0.0
 </shell>
 
-h5(#output-profiling). Profiling
+h5. Profilowanie
 
-In profiling mode, you can choose from four types of output.
+W trybie profilowania, można wybrać jeden z czterech rodzajów wyjść. 
 
-h6. Command Line
+h6. Wiersz poleceń 
 
-This is a very basic form of output in profiling mode:
+Jest to bardzo podstawowy rodzaj wyjścia w trybie profilu: 
 
 <shell>
 BrowsingTest#test_homepage (58 ms warmup)
@@ -273,27 +273,27 @@ BrowsingTest#test_homepage (58 ms warmup)
              objects: 7882
 </shell>
 
-h6. Flat
+h6. Proste (Flat)
 
-Flat output shows the total amount of time spent in each method. "Check ruby prof documentation for a better explanation":http://ruby-prof.rubyforge.org/files/examples/flat_txt.html.
+Wyjście proste (Flat) pokazuje całkowity czas spędzony w każdej metodzie. "Sprawdź dokumentację ruby prof dla dokładniejszych wyjaśnień":http://ruby-prof.rubyforge.org/files/examples/flat_txt.html.
 
-h6. Graph
+h6. Wykres (Graph)
 
-Graph output shows how long each method takes to run, which methods call it and which methods it calls. "Check ruby prof documentation for a better explanation":http://ruby-prof.rubyforge.org/files/examples/graph_txt.html.
+Wyjście w postaci wykresu pokazuje, jak długo zajmuje uruchomienie każdej metody, jakie metody wywołują i jakie metody są wywoływane. "Sprawdź dokumentację ruby prof dla dokładniejszych wyjaśnień":http://ruby-prof.rubyforge.org/files/examples/flat_txt.html.
 
-h6. Tree
+h6. Wyjście w postaci drzewka (Tree)
 
-Tree output is profiling information in calltree format for use by "kcachegrind":http://kcachegrind.sourceforge.net/html/Home.html and similar tools.
+Wyjście w postaci drzewka to profilowanie informacji w formacie drzewa wywołań (calltree) wykorzystanym przez "kcachegrind":http://kcachegrind.sourceforge.net/html/Home.html i podobne narzędzia.
 
-h4. Tuning Test Runs
+h4. Tuning uruchamiania testów
 
-By default, each performance test is run +4 times+ in benchmarking mode and +1 time+ in profiling. However, test runs can easily be configured.
+Domyślnie, w trybie analizy porównawczej każdy test porównawczy jest uruchamiany +4 razy+ i +1 raz+ w trybie profilowania. Jednakże, uruchamianie testów może być łatwo skonfigurowane.
 
-WARNING: Performance test configurability is not yet enabled in Rails. But it will be soon.
+WARNING: konfiguracja testu wydajności nie jest jeszcze aktywna w Railsach. Jednak wkrótce się to zmieni.
 
-h4. Performance Test Environment
+h4. Test wydajności Środowiska
 
-Performance tests are run in the +test+ environment. But running performance tests will set the following configuration parameters:
+Testy wydajności są uruchamiane w środowisku +test+. Jednak przeprowadzania testów wydajności ustawi następujące parametry konfiguracyjne:
 
 <shell>
 ActionController::Base.perform_caching = true
@@ -301,19 +301,19 @@ ActiveSupport::Dependencies.mechanism = :require
 Rails.logger.level = ActiveSupport::BufferedLogger::INFO
 </shell>
 
-As +ActionController::Base.perform_caching+ is set to +true+, performance tests will behave much as they do in the +production+ environment.
+Podczas gdy +ActionController::Base.perform_caching+ jest ustawione na +true+, testy wydajności będą się zachowywać podobnie jak robią to w środowisku +production+ (produkcji).
 
-h4. Installing GC-Patched Ruby
+h4. Instalacja poprawionego GC Ruby (GC-Patched Ruby)
 
-To get the best from Rails performance tests, you need to build a special Ruby binary with some super powers - "GC patch":http://rubyforge.org/tracker/download.php/1814/7062/17676/3291/ruby186gc.patch for measuring GC Runs/Time and memory/object allocation.
+Aby w pełni korzystać z Railsowych testów wydajności, trzeba zbudować specjalne binaria Ruby z wykorzystaniem niektórych specjalnych uprawnień z dodatku - „GC patch":http://rubyforge.org/tracker/download.php/1814/7062/17676/3291/ruby186gc.patch do pomiaru ilości uruchomień garbage collectora/czasu i pamięci/alokacji obiektów.
 
-The process is fairly straightforward. If you've never compiled a Ruby binary before, follow these steps to build a ruby binary inside your home directory:
+Proces ten jest bardzo prosty. Jeśli nigdy wcześniej kompilowałeś binariów Ruby, podążaj za następującymi krokami, aby zbudować binaria rubiego w katalogu domowym:
 
-h5. Installation
+h5. Instalacja
 
-Compile Ruby and apply this "GC Patch":http://rubyforge.org/tracker/download.php/1814/7062/17676/3291/ruby186gc.patch.
+Skompiluj Ruby i zastosuj następujący "GC Patch": http://rubyforge.org/tracker/download.php/1814/7062/17676/3291/ruby186gc.patch.
 
-h5. Download and Extract
+h5. Pobranie i wypakowanie
 
 <shell>
 [lifo@null ~]$ mkdir rubygc
@@ -322,24 +322,24 @@ h5. Download and Extract
 [lifo@null ~]$ cd <ruby-version>
 </shell>
 
-h5. Apply the Patch
+h5. Zastosowanie Patcha
 
 <shell>
 [lifo@null ruby-version]$ curl http://rubyforge.org/tracker/download.php/1814/7062/17676/3291/ruby186gc.patch | patch -p0
 </shell>
 
-h5. Configure and Install
+h5. Konfiguracja i instalacja 
 
-The following will install ruby in your home directory's +/rubygc+ directory. Make sure to replace +&lt;homedir&gt;+ with a full patch to your actual home directory.
+Poniższy kod zainstaluje rubiego w twoim katalogu domowym w folderze +/rubygc+. Upewnij się, że +<homedir>+ zostanie zastąpione przez pełną ścieżkę do dotychczasowego katalogu domowego. 
 
 <shell>
 [lifo@null ruby-version]$ ./configure --prefix=/<homedir>/rubygc
 [lifo@null ruby-version]$ make && make install
 </shell>
 
-h5. Prepare Aliases
+H5. Przygotowanie Aliasów
 
-For convenience, add the following lines in your +~/.profile+:
+Najwygodniej będzie dodać następujące wiersze w +~/.profile+:
 
 <shell>
 alias gcruby='~/rubygc/bin/ruby'
@@ -349,11 +349,11 @@ alias gcirb='~/rubygc/bin/irb'
 alias gcrails='~/rubygc/bin/rails'
 </shell>
 
-h5. Install Rubygems and Dependency Gems
+h5. Instalacja Rubygems i Gemów Zależnych
 
-Download "Rubygems":http://rubyforge.org/projects/rubygems and install it from source. Rubygem's README file should have necessary installation instructions.
+Pobierz "Rubygems":http://rubyforge.org/projects/rubygems i zainstaluj je ze źródła. Plik README dla Rubygem powinien zawierać niezbędne instrukcje instalacyjne.
 
-Additionally, install the following gems:
+Dodatkowo, należy zainstalować następujące gemy: 
 
 * +rake+
 * +rails+
@@ -361,76 +361,76 @@ Additionally, install the following gems:
 * +rack+
 * +mysql+
 
-If installing +mysql+ fails, you can try to install it manually:
+Jeśli nie powiedzie się instalacja +mysql+, można spróbować zainstalować go ręcznie: 
 
 <shell>
 [lifo@null mysql]$ gcruby extconf.rb --with-mysql-config
 [lifo@null mysql]$ make && make install
 </shell>
 
-And you're ready to go. Don't forget to use +gcruby+ and +gcrake+ aliases when running the performance tests.
+Możesz zabierać się do pracy. Nie zapomnij użyć aliasów +gcruby+ i +gcrake+ przy uruchamianiu testów wydajności.
 
-h3. Command Line Tools
+h3. Narzędzia wiersza poleceń
 
-Writing performance test cases could be an overkill when you are looking for one time tests. Rails ships with two command line tools that enable quick and dirty performance testing:
+Pisanie przypadków testów wydajności może wydawać się przesadą, jeśli potrzebujesz jednorazowego testu. Railsy zapewniają dwa narzędzia linii komend, które umożliwiają szybkie i nieco niechlujne testy wydajności:
 
 h4. +benchmarker+
 
-+benchmarker+ is a wrapper around Ruby's "Benchmark":http://ruby-doc.org/core/classes/Benchmark.html standard library.
++benchmarker+ jest spakowany w standardowej bibliotece Ruby "Benchmark":http://ruby-doc.org/core/classes/Benchmark.html
 
-Usage:
+Zastosowanie: 
 
 <shell>
-$ rails benchmarker [times] 'Person.expensive_way' 'Person.another_expensive_way' ...
+$ script/performance/benchmarker [times] 'Person.expensive_way' 'Person.another_expensive_way' ...
 </shell>
 
-Examples:
+Przykłady:
 
 <shell>
-$ rails benchmarker 10 'Item.all' 'CouchItem.all'
+$ script/performance/benchmarker 10 'Item.all' 'CouchItem.all'
 </shell>
 
-If the +[times]+ argument is omitted, supplied methods are run just once:
+Jeśli argument +[times]+ został pominięty, dostarczone metody będą uruchomione tylko raz:
 
 <shell>
-$ rails benchmarker 'Item.first' 'Item.last'
+$ script/performance/benchmarker 'Item.first' 'Item.last'
 </shell>
 
 h4. +profiler+
 
-+profiler+ is a wrapper around http://ruby-prof.rubyforge.org/[ruby-prof] gem.
++profiler+ jest spakowany w gemie http://ruby-prof.rubyforge.org/[ruby-prof]
 
-Usage:
-
-<shell>
-$ rails profiler 'Person.expensive_method(10)' [times] [flat|graph|graph_html]
-</shell>
-
-Examples:
+Zastosowanie: 
 
 <shell>
-$ rails profiler 'Item.all'
+$ script/performance/profiler 'Person.expensive_method(10)' [times] [flat|graph|graph_html]
 </shell>
 
-This will profile +Item.all+ in +RubyProf::WALL_TIME+ measure mode. By default, it prints flat output to the shell.
+Przykłady: 
 
 <shell>
-$ rails profiler 'Item.all' 10 graph
+$ script/performance/profiler 'Item.all'
 </shell>
 
-This will profile +10.times { Item.all }+ with +RubyProf::WALL_TIME+ measure mode and print graph output to the shell.
-
-If you want to store the output in a file:
+To sprofiluje +Item.all+ w trybie działania +RubyProf::WALL_TIME+. Domyślnie, wypisuje na płaskie wyjście (flat uotput) do powłoki (shella).
 
 <shell>
-$ rails profiler 'Item.all' 10 graph 2> graph.txt
+$ script/performance/profiler 'Item.all' 10 graph
 </shell>
 
-h3. Helper Methods
+To sprofiluje +10.times { Item.all }+ z trybem działania +RubyProf::WALL_TIME+ i wypisze wyjście w postaci wykresu (graph output) do powłoki (shella).
 
-Rails provides various helper methods inside Active Record, Action Controller and Action View to measure the time taken by a given piece of code. The method is called +benchmark()+ in all the three components.
+Jeśli chcesz zachować dane wyjściowe w pliku: 
 
-h4. Model
+<shell>
+$ script/performance/profiler 'Item.all' 10 graph 2> graph.txt
+</shell>
+
+h3. Metody Helpera
+
+Railsy zapewniają rozmaite metody helpera wewnątrz modułów Active Record, Action Controllera i Action View dla pomiaru czasu wykorzystanego przez dany fragment kodu. Metoda nazywa się +benchmark()+ we wszystkich trzech komponentach.
+
+h4. Model 
 
 <ruby>
 Project.benchmark("Creating project") do
@@ -440,17 +440,17 @@ Project.benchmark("Creating project") do
 end
 </ruby>
 
-This benchmarks the code enclosed in the +Project.benchmark("Creating project") do...end+ block and prints the result to the log file:
+Taki kod benchmark załączony w bloku +Project.benchmark("Creating project") do...end+  i wypisuje wynik do pliku dziennika:
 
 <ruby>
 Creating project (185.3ms)
 </ruby>
 
-Please refer to the "API docs":http://api.rubyonrails.org/classes/ActiveRecord/Base.html#M001336 for additional options to +benchmark()+
+Dla dodatkowych opcji +benchmark()+ należy odnieść się do "API docs":http://api.rubyonrails.org/classes/ActiveRecord/Base.html#M001336
 
-h4. Controller
+h4. Kontroler (Controller)
 
-Similarly, you could use this helper method inside "controllers":http://api.rubyonrails.org/classes/ActionController/Benchmarking/ClassMethods.html#M000715
+Można użyć tej metody helpera analogicznie wewnątrz "controllers":http://api.rubyonrails.org/classes/ActionController/Benchmarking/ClassMethods.html#M000715
 
 <ruby>
 def process_projects
@@ -461,11 +461,11 @@ def process_projects
 end
 </ruby>
 
-NOTE: +benchmark+ is a class method inside controllers
+UWAGA: +benchmark+ jest metoda klasową wewnątrz kontrolerów
 
-h4. View
+h4. Widok
 
-And in "views":http://api.rubyonrails.org/classes/ActionController/Benchmarking/ClassMethods.html#M000715:
+Oraz w "views":http://api.rubyonrails.org/classes/ActionController/Benchmarking/ClassMethods.html#M000715:
 
 <erb>
 <% benchmark("Showing projects partial") do %>
@@ -473,9 +473,9 @@ And in "views":http://api.rubyonrails.org/classes/ActionController/Benchmarking/
 <% end %>
 </erb>
 
-h3. Request Logging
+h3. Żądanie zapisywania do logu (rejestracji)
 
-Rails log files contain very useful information about the time taken to serve each request. Here's a typical log file entry:
+Railsowe pliki log zawierają bardzo użyteczne informacje na temat czasu potrzebnego do obsłużenia każdego żądania. Oto typowy wpis do logu (pliku dziennika):
 
 <shell>
 Processing ItemsController#index (for 127.0.0.1 at 2009-01-08 03:06:39) [GET]
@@ -484,47 +484,48 @@ Rendering items/index
 Completed in 5ms (View: 2, DB: 0) | 200 OK [http://0.0.0.0/items]
 </shell>
 
-For this section, we're only interested in the last line:
+W tej części interesujący jest tylko ostatni wiersz:
 
 <shell>
 Completed in 5ms (View: 2, DB: 0) | 200 OK [http://0.0.0.0/items]
 </shell>
 
-This data is fairly straightforward to understand. Rails uses millisecond(ms) as the metric to measure the time taken. The complete request spent 5 ms inside Rails, out of which 2 ms were spent rendering views and none was spent communication with the database. It's safe to assume that the remaining 3 ms were spent inside the controller.
+Dane te są dość proste do zrozumienia. Rails używa milisekund (ms) jako parametru do pomiaru czasu. Całe żądanie zajmuje 5 ms wewnątrz Rails, z czego 2 ms spędza na renderowaniu widoków i ani jedna milisekunda nie została poświęcona na komunikację z bazą danych. Można bezpieczne założyć, że pozostałe 3 ms zostały spędzone wewnątrz kontrolera.
 
-Michael Koziarski has an "interesting blog post":http://www.therailsway.com/2009/1/6/requests-per-second explaining the importance of using milliseconds as the metric.
+Michał Koziarski wyjaśnia znaczenie milisekund jako parametru na "interesting blog post":http://www.therailsway.com/2009/1/6/requests-per-second
 
-h3. Useful Links
+h3. Przydatne linki
 
-h4. Rails Plugins and Gems
+h4. Railsowe Wtyczki i Gemy
 
 * "Rails Analyzer":http://rails-analyzer.rubyforge.org
 * "Palmist":http://www.flyingmachinestudios.com/projects/
 * "Rails Footnotes":http://github.com/josevalim/rails-footnotes/tree/master
 * "Query Reviewer":http://github.com/dsboulder/query_reviewer/tree/master
 
-h4. Generic Tools
+h4. Podstawowe narzędzia
 
 * "httperf":http://www.hpl.hp.com/research/linux/httperf/
 * "ab":http://httpd.apache.org/docs/2.2/programs/ab.html
 * "JMeter":http://jakarta.apache.org/jmeter/
 * "kcachegrind":http://kcachegrind.sourceforge.net/html/Home.html
 
-h4. Tutorials and Documentation
+h4. Poradniki i dokumentacja
 
-* "ruby-prof API Documentation":http://ruby-prof.rubyforge.org
-* "Request Profiling Railscast":http://railscasts.com/episodes/98-request-profiling - Outdated, but useful for understanding call graphs
+* "ruby-prof API Documentation":http://ruby-prof.rubyforge.org 
+* "Request Profiling Railscast":http://railscasts.com/episodes/98-request-profiling - nieco przestarzałe, ale również przydatne dla zrozumienia wykresów. 
 
-h3. Commercial Products
+h3. Produkty Komercyjne
 
-Rails has been lucky to have two startups dedicated to Rails specific performance tools:
+Railsy mają szczęście posiadaać trzy startupy poświęcone konkretnym narzędziom działania Railsów:
 
 * "New Relic":http://www.newrelic.com
+* "Fiveruns":http://www.fiveruns.com
 * "Scout":http://scoutapp.com
 
-h3. Changelog
+h3. Changelog 
 
 "Lighthouse ticket":http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/4
 
-* January 9, 2009: Complete rewrite by "Pratik":credits.html#lifo
-* September 6, 2008: Initial version by Matthew Bergman
+* 9 stycznia 2009: Kompletne przepisanie przez "Pratik":credits.html#lifo
+* 6 września 2008: Wstępna wersja Matthew Bergmana

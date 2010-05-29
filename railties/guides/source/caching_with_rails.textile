@@ -1,31 +1,31 @@
-h2. Caching with Rails: An overview
+h2. Cache'owanie w Rails: Omówienie
 
-This guide will teach you what you need to know about avoiding that expensive round-trip to your database and returning what you need to return to the web clients in the shortest time possible.
+Ten podręcznik nauczy Cię wszystkiego, czego potrzebujesz, aby uniknąć kosztownego i czasochłonnego wnikania do bazy danych oraz zwracania tego co chcesz zwrócić przez web klienta w jak najkrótszym czasie. 
 
-After reading this guide, you should be able to use and configure:
+Po przeczytaniu tego przewodnika powinieneś być w stanie użyć i skonfigurować: 
 
-* Page, action, and fragment caching
-* Sweepers
-* Alternative cache stores
-* Conditional GET support
+* Cache'owanie stron, akcji oraz fragmentów
+* Sweepersy
+* Alternatywne magazyny cache
+* Wsparcie dla warunkowego GETa
 
-endprologue.
+endprologue. 
 
-h3. Basic Caching
+h3. Podstawowe Cache'owanie
 
-This is an introduction to the three types of caching techniques that Rails provides by default without the use of any third party plugins.
+Jest to wprowadzenie do trzech rodzajów technik cache'owania, które domyślnie oferuje Rails, bez użycia jakichkolwiek wtyczek. 
 
-To start playing with testing you'll want to ensure that +config.action_controller.perform_caching+ is set to +true+ if you're running in development mode. This flag is normally set in the corresponding +config/environments/*.rb+ and caching is disabled by default for development and test, and enabled for production.
+Jeśli pracujemy w trybie developerskim i chcemy rozpocząć testowanie będziemy musieli upewnić się, że zmienna +config.action_controller.perform_caching+ jest ustawiony na wartość +true+. Ta flaga jest zazwyczaj ustawiona w odpowiednich plikach +config/environments/*.rb+. Cache'owanie jest domyślnie wyłączone dla trybów developerskiego i testowania, a włączone w trybie produkcji. 
 
 <ruby>
 config.action_controller.perform_caching = true
-</ruby>
+</ruby> 
 
-h4. Page Caching
+h4. Cache'owanie strony 
 
-Page caching is a Rails mechanism which allows the request for a generated page to be fulfilled by the webserver (i.e. apache or nginx), without ever having to go through the Rails stack at all. Obviously, this is super-fast. Unfortunately, it can't be applied to every situation (such as pages that need authentication) and since the webserver is literally just serving a file from the filesystem, cache expiration is an issue that needs to be dealt with.
+Cache'owanie strony to mechanizm Rails, który pozwala serwerowi WWW (np. Apache lub nginx) wypełnić żądanie dla generowanej strony, bez konieczności przechodzenia przez stos Rails. Oczywiście jest to bardzo szybkie rozwiązanie. Niestety, nie można zastosować go do każdej sytuacji (np. dla stron wymagających autoryzacji). Utrata możliwości cache'owania to zagadnienie, z którym trzeba sobie poradzić, szczególnie od czasu gdy webserwer tak naprawdę udostępnia tylko pliki z systemu. 
 
-So, how do you enable this super-fast cache behavior?  Simple, let's say you have a controller called +ProductsController+ and an +index+ action that lists all the products
+Zatem, jak włączyć to superszybkie zachowanie cache? Jest to proste. Powiedzmy, że masz kontroler działania zwany +ProductsController+ oraz +index+, który zawiera wszystkie produkty. 
 
 <ruby>
 class ProductsController < ActionController
@@ -39,13 +39,14 @@ class ProductsController < ActionController
 end
 </ruby>
 
-The first time anyone requests +/products+, Rails will generate a file called +products.html+ and the webserver will then look for that file before it passes the next request for +/products+ to your Rails application.
+Przy pierwszym wywołaniu +/products+ Rails zawsze wygeneruje plik o nazwie +products.html+. Natomiast serwer będzie szukać tego pliku, zanim przejdzie do zapytania o +/products+ do Twojej aplikacji Rails.
 
-By default, the page cache directory is set to +Rails.public_path+ (which is usually set to the +public+ folder) and this can be configured by changing the configuration setting +config.action_controller.page_cache_directory+. Changing the default from +public+ helps avoid naming conflicts, since you may want to put other static html in +public+, but changing this will require web server reconfiguration to let the web server know where to serve the cached files from.
+Domyślnie, katalog stron cache jest ustawiony na +Rails.public_path+ (który zwykle jest ustawiony jako folder +public+) i może być skonfigurowany poprzez zmianę ustawień konfiguracyjnych +config.action_controller.page_cache_directory+.
+Od momentu, gdy zechcesz umieszczać w folderze +public+ inne statyczne pliki HTML, zmiana domyślnego ustawienia +public+ pomaże Ci uniknąć konfliktów nazw. Jednak będzie to wymagać rekonfiguracji serwera, aby poinformować go, gdzie przechować pliki z pamięci cache. 
 
-The Page Caching mechanism will automatically add a +.html+ extension to requests for pages that do not have an extension to make it easy for the webserver to find those pages and this can be configured by changing the configuration setting +config.action_controller.page_cache_extension+.
+Na żądanie stron, które nie mają rozszerzenia, mechanizm cache'owania stron automatycznie doda rozszerzenie +.html+, aby ułatwić serwerowi ich znalezienie. Możemy to zmienić poprzez zmianę ustawień konfiguracyjnych +config.action_controller.page_cache_extension+. 
 
-In order to expire this page when a new product is added we could extend our example controller like this:
+W przypadku wygaśnięcia strony, kiedy nowy produkt zostaje dodany, możemy rozszerzyć nasz przykładowy kontroler w taki oto sposób: 
 
 <ruby>
 class ProductsController < ActionController
@@ -57,25 +58,25 @@ class ProductsController < ActionController
   end
 
   def create
-    expire_page :action => :index
+    expire_page :action => :list
   end
 
 end
 </ruby>
 
-If you want a more complicated expiration scheme, you can use cache sweepers to expire cached objects when things change. This is covered in the section on Sweepers.
+Jeśli potrzebujesz bardziej zaawansowanego systemu ważności, możesz użyć sweeperów cache do automatycznego czyszczenia bufora, kiedy elementy ulegają zmianie. Tę funkcję obejmuje sekcja dotycząca sweeperów.
 
-Note: Page caching ignores all parameters. For example +/products?page=1+ will be written out to the filesystem as +products.html+ with no reference to the +page+ parameter. Thus, if someone requests +/products?page=2+ later, they will get the cached first page. Be careful when page caching GET parameters in the URL!
+Uwaga: Cache'owanie strony ignoruje wszystkie parametry. Na przykład strona
++/products?page=1+ zostanie zapisana w systemie plików jako +products.html+ bez żadnego odniesienia do parametru +page+. Tak więc, jeśli ktoś wywoła później stronę +/products?page=2+, otrzyma zachowaną pierwszą stronę. Należy być bardzo ostrożnym, gdy cache'ujemy strony z parametrami GET w adresach URL! 
 
-INFO: Page caching runs in an after filter. Thus, invalid requests won't generate spurious cache entries as long as you halt them. Typically, a redirection in some before filter that checks request preconditions does the job.
+INFO: Cache'owanie stron przebiega po filtrowaniu. Tak więc, błędne zapytania nie będą generować fałszywych wpisów w pamięci cache, dopóki ich nie zatrzymamy. Zazwyczaj całą pracę wykonują przekierowania, które sprawdzają warunki zapytania. W niektórych przypadkach następuje to przed filtrowaniem. 
 
-h4. Action Caching
+h4. Cache'owanie akcji
 
-One of the issues with Page Caching is that you cannot use it for pages that require to restrict access somehow. This is where Action Caching comes in. Action Caching works like Page Caching except for the fact that the incoming web request does go from the webserver to the Rails stack and Action Pack so that before filters can be run on it before the cache is served. This allows authentication and other restriction to be run while still serving the result of the output from a cached copy.
+Jednym z problemów, związanych z cache'owaniem stron jest to, że nie można użyć go do stron, które w jakiś sposób ograniczają do nich dostęp. W tym właśnie momencie używanye jest Cache'owanie akcji. Działa ono jak Cache'owanie stron z wyjątkiem faktu, że przychodzące żądania webowe wychodzą z serwera i są rozpatrywane wewnątrz Railsów oraz w module Action Pack, tak aby filtr wstępny mógł zostać uruchomiony zanim obsłużymy cache. Umożliwia to uruchomienie uwierzytelniania i innych ograniczeń w trakcie zapisywania wyników wyjścia z cache'owanej kopii. 
 
-Clearing the cache works in the exact same way as with Page Caching.
-
-Let's say you only wanted authenticated users to call actions on +ProductsController+.
+Wyczyszczenie pamięci cache działa dokładnie tak samo jak w cache'owaniu stron. 
+Powiedzmy, że chcemy, aby tylko uwierzytelnieni użytkownicy mogli wywołać akcje na kontrolerze +ProductsController+.
 
 <ruby>
 class ProductsController < ActionController
@@ -94,21 +95,21 @@ class ProductsController < ActionController
 end
 </ruby>
 
-You can also use +:if+ (or +:unless+) to pass a Proc that specifies when the action should be cached. Also, you can use +:layout => false+ to cache without layout so that dynamic information in the layout such as logged in user info or the number of items in the cart can be left uncached. This feature is available as of Rails 2.2.
+Można również użyć metody +:if+ (lub +:unless+), aby przejść Proc, która określa kiedy działania powinny być cache'owane. W dodatku możemy użyć do cache'owania, kodu bez layoutów +:layout => false+, tak aby informacje dynamiczne znajdujące się w layoucie, takie jak informacje o zalogowanym użytkowniku lub liczba przedmiotów w koszyku, mogły być niecache'owane. Funkcja ta jest dostępna w Rails 2.2.
 
-You can modify the default action cache path by passing a +:cache_path+ option. This will be passed directly to +ActionCachePath.path_for+. This is handy for actions with multiple possible routes that should be cached differently. If a block is given, it is called with the current controller instance.
+Można również zmodyfikować domyślną ścieżkę ActionCache dodając opcję +:cache_path+. Są one przekazywane bezpośrednio do +ActionCachePath.path_for+. Jest to przydatne w przypadku działań z wielu możliwych tras, które powinny być cache'owane w różny sposób. Jeśli blok jest podany, to wywoływany jest z bieżącej instancji kontrolera. 
 
-Finally, if you are using memcached, you can also pass +:expires_in+. In fact, all parameters not used by +caches_action+ are sent to the underlying cache store. 
+Wreszcie, jeśli używamy memcached, możemy także przekazać parametr  +:expires_in+. W rzeczywistości wszystkie parametry, które nie są wykorzystywane przez +caches_action+ wysyłane zostają do podstawowego magazynu cache. 
 
-INFO: Action caching runs in an after filter. Thus, invalid requests won't generate spurious cache entries as long as you halt them. Typically, a redirection in some before filter that checks request preconditions does the job.
+INFO: cache'owanie stron przebiega po filtrowaniu. Tak więc, błędne zapytania nie będą generować fałszywych wpisów w pamięci cache, dopóki ich nie zatrzymamy. Zazwyczaj całą pracę wykonują przekierowania, w niektórych przypadkach przed filtrowaniem, które sprawdzają warunki zapytania.
 
-h4. Fragment Caching
+h4. Cache'owanie fragmentów
 
-Life would be perfect if we could get away with caching the entire contents of a page or action and serving it out to the world. Unfortunately, dynamic web applications usually build pages with a variety of components not all of which have the same caching characteristics. In order to address such a dynamically created page where different parts of the page need to be cached and expired differently Rails provides a mechanism called Fragment Caching.
+Życie byłoby idealnie, gdybyśmy mogli cache'ować całą zawartość strony lub działań i serwerujących ją na świat. Niestety, dynamiczne aplikacje WWW zwykle budowane są z różnych komponentów, z których nie wszystkie mają takie same cechy cache'owania. W celu zaadresowania tych dynamicznie tworzonych stron, gdzie poszczególne części strony muszą być cache'owane i wygaszane w inny sposób, Rails dostarcza mechanizm zwany cache'owaniem fragmentów (Fragment Caching). 
 
-Fragment Caching allows a fragment of view logic to be wrapped in a cache block and served out of the cache store when the next request comes in.
+Cache'owanie fragmentów pozwala, aby fragment widoku logicznego został zapakowany w bloku cache i przechowywany w magazynie cache w momencie gdy nadchodzi następne wywołanie.
 
-As an example, if you wanted to show all the orders placed on your website in real time and didn't want to cache that part of the page, but did want to cache the part of the page which lists all products available, you could use this piece of code:
+Na przykład, jeśli chcemy pokazać wszystkie zamówienia złożone na swojej stronie www w czasie rzeczywistym i nie chcemy cache'ować tej części naszej strony, natomiast cache'ować chcemy część zawierającą pełną listę dostępnych produktów, powinniśmy użyć tego fragmentu kodu: 
 
 <ruby>
 <% Order.find_recent.each do |o| %>
@@ -123,20 +124,20 @@ As an example, if you wanted to show all the orders placed on your website in re
 <% end %>
 </ruby>
 
-The cache block in our example will bind to the action that called it and is written out to the same place as the Action Cache, which means that if you want to cache multiple fragments per action, you should provide an +action_suffix+ to the cache call:
+W naszym przykładzie, blok pamięci będzie dotyczył akcji, które wywołują go i zapisują w tym samym miejscu jako Action Cache, co oznacza, że jeśli chcesz cache'ować różnorodne fragmenty danej akcji, to należy dodać metodę +action_suffix+ do wywołania cache: 
 
 <ruby>
 <% cache(:action => 'recent', :action_suffix => 'all_products') do %>
   All available products:
 </ruby>
 
-and you can expire it using the +expire_fragment+ method, like so:
+Za pomocą metody +expire_fragment+ można wyłączyć je tak jak poniżej: 
 
 <ruby>
 expire_fragment(:controller => 'products', :action => 'recent', :action_suffix => 'all_products')
 </ruby>
 
-If you don't want the cache block to bind to the action that called it, You can also use globally keyed fragments by calling the +cache+ method with a key, like so:
+Jeśli nie chcesz blokować cache do wiązania się z akcjami, które go wywołują, można również używać globalnie zakodowanych fragmentów wywołując metodę z kluczem +cache+ tak jak poniżej: 
 
 <ruby>
 <% cache('all_available_products') do %>
@@ -144,17 +145,17 @@ If you don't want the cache block to bind to the action that called it, You can 
 <% end %>
 </ruby>
 
-This fragment is then available to all actions in the +ProductsController+ using the key and can be expired the same way:
+Fragment ten jest dostępny przy użyciu klucza, dla wszystkich działań w kontrolerze +ProductsController+ i można go wyłączyć w ten sam sposób:
 
 <ruby>
 expire_fragment('all_available_products')
 </ruby>
 
-h4. Sweepers
+h4. Sweepers 
 
-Cache sweeping is a mechanism which allows you to get around having a ton of +expire_{page,action,fragment}+ calls in your code.  It does this by moving all the work required to expire cached content into an +ActionController::Caching::Sweeper+ subclass.  This class is an observer and looks for changes to an object via callbacks, and when a change occurs it expires the caches associated with that object in an around or after filter.
+Cache Sweepers to mechanizm, który pozwala poruszać się po kodzie mimo bardzo dużej ilości wywołań +expire_{page,action,fragment}+. Czyni to poprzez przeniesienie do klasy +ActionController::Caching::Sweeper+ wszystkich działań  niezbędnych do wygaśnięcia cache'owanej zawartości. Klasa ta jest obserwatorem i poprzez wywołania zwrotne szuka zmian w obiekcie, a gdy jakąś znajdzie - usuwa cache związany z obiektem podczas filtrowania, w trakcie lub po nim. 
 
-Continuing with our Product controller example, we could rewrite it with a sweeper like this:
+Kontynuując nasz przykład kontrolera produktu, moglibyśmy przepisać go z sweeperem w taki oto sposób: 
 
 <ruby>
 class ProductSweeper < ActionController::Caching::Sweeper
@@ -186,13 +187,13 @@ class ProductSweeper < ActionController::Caching::Sweeper
 end
 </ruby>
 
-You may notice that the actual product gets passed to the sweeper, so if we were caching the edit action for each product, we could add an expire method which specifies the page we want to expire:
+Można zauważyć, że bieżący produkt zostanie przekazany do sweepera, tak jakbyśmy cache'owali edytowaną akcję dla każdego produktu, zatem moglibyśmy dodać metodę wygaszającą, która określałaby stronę, którą to chcemy wygasić: 
 
 <ruby>
   expire_action(:controller => 'products', :action => 'edit', :id => product)
 </ruby>
 
-Then we add it to our controller to tell it to call the sweeper when certain actions are called. So, if we wanted to expire the cached content for the list and edit actions when the create action was called, we could do the following:
+Następnie dodamy ją do naszego kontrolera, aby wywołał on sweeper, w przypadku wywołania pewnych działań. Zatem, jeśli chcielibyśmy usunąć cache'owaną zawartość z listy i edytować akcje w chwili wywołania tworzenia akcji, możemy wykonać następujące czynności: 
 
 <ruby>
 class ProductsController < ActionController
@@ -208,11 +209,11 @@ class ProductsController < ActionController
 end
 </ruby>
 
-h4. SQL Caching
+h4. Cache'owanie SQL 
 
-Query caching is a Rails feature that caches the result set returned by each query so that if Rails encounters the same query again for that request, it will use the cached result set as opposed to running the query against the database again.
+Cache'owanie zapytań sql jest funkcją Railsów, która cache'uje wyniki zwracane przez każde zapytanie tak, że jeśli Rails napotyka ponownie takie samo zapytanie do tego wywołania, to będzie korzystał z pamięci podręcznej zestawu wyników, a nie będzie ponownie uruchamiał wywołania w bazie danych. 
 
-For example:
+Na przykład: 
 
 <ruby>
 class ProductsController < ActionController
@@ -230,87 +231,89 @@ class ProductsController < ActionController
 end
 </ruby>
 
-The second time the same query is run against the database, it's not actually going to hit the database.  The first time the result is returned from the query it is stored in the query cache (in memory) and the second time it's pulled from memory.
+Po raz drugi to samo zapytanie zostało wysłane do bazy danych, jednak w rzeczywistości nie dojdzie ono do bazy. Za pierwszym razem wynik jest zwracany przez zapytanie i przechowywany w pamięci podręcznej zapytań, zaś drugi raz jest ono wyciągane z pamięci. 
 
-However, it's important to note that query caches are created at the start of an action and destroyed at the end of that action and thus persist only for the duration of the action.  If you'd like to store query results in a more persistent fashion, you can in Rails by using low level caching.
+Warto jednak pamiętać, że cache'owanie zapytań jest tworzone na początku działania i niszczone pod jego koniec - tym samym zapytania zapamiętywane są tylko na czas działania. Jeśli chcesz przechowywać wyniki zapytań w sposób bardziej trwały, można używać w Rails cache'owania niskiego poziomu. 
 
-h3. Cache Stores
+h3. Sposoby przechowywania cache'u – Cache Store
 
-Rails provides different stores for the cached data created by action and fragment caches. Page caches are always stored on disk.
+Railsy przewidują różne sposoby przechowywania cache'owanych danych utworzonych przez cache'owanie fragmentów i akcji. Cache'owane strony przechowywane są zawsze na dysku. 
 
-Rails 2.1 and above provide +ActiveSupport::Cache::Store+ which can be used to cache strings. Some cache store implementations, like +MemoryStore+, are able to cache arbitrary Ruby objects, but don't count on every cache store to be able to do that.
+Railsy w wersji 2.1 i wyższych zapewniają sposoby przechowywania cache'u 
++ActiveSupport::Cache::Store+, które mogą zostać wykorzystane do łańcuchów cache. Implementacje niektórych sposobów, takich jak +MemoryStore+, mogą cache'ować dowolne obiekty Rubiego, ale nie licz, że każdy sposób przechowywania będzie w stanie to zrobić.
 
-The default cache stores provided with Rails include:
+Domyślne sposoby przechowywania cache'u dostarczane przez Rails obejmują: 
 
-1) +ActiveSupport::Cache::MemoryStore+: A cache store implementation which stores everything into memory in the same process. If you're running multiple Ruby on Rails server processes (which is the case if you're using mongrel_cluster or Phusion Passenger), then this means that your Rails server process instances won't be able to share cache data with each other. If your application never performs manual cache item expiry (e.g. when you‘re using generational cache keys), then using +MemoryStore+ is ok. Otherwise, consider carefully whether you should be using this cache store.  
+1) +ActiveSupport::Cache::MemoryStore+: wdrożenie sposobu przechowywania cache'u, który przechowuje wszystko w swojej pamięci w tym samym procesie. Jeśli uruchomiłeś  wiele procesów serwera Ruby on Rails (co ma miejsce, jeśli korzystasz z mongrel_cluster lub Phusion Passenger), to oznacza to, że Twoje instancje procesów serwera Rails nie będą mogły dzielić się ze sobą danymi cache. Jeśli Twoja aplikacja nie wykonuje instrukcji wygaśnięcia pozycji cache (np. gdy używasz generowanych kluczy cache), wtedy użycie +MemoryStore+ jest właściwe.
+W przeciwnym razie, starannie rozważ, czy należy używać tego sposobu.
 
-+MemoryStore+  is not only able to store strings, but also arbitrary Ruby objects.
++MemoryStore+ jest zdolny do przechowywania nie tylko łancuchów znaków, ale i dowolnych obiektów Ruby. 
 
-+MemoryStore+  is not thread-safe. Use +SynchronizedMemoryStore+ instead if you need thread-safety.
-                                      
++MemoryStore+ nie jest bezpieczno-wątkowy. Jeśli potrzebujesz takiego bezpieczeństwa użyj magazynu +SynchronizedMemoryStore+. 
+
 <ruby>
 ActionController::Base.cache_store = :memory_store
 </ruby>
 
-2) +ActiveSupport::Cache::FileStore+: Cached data is stored on the disk, this is the default store and the default path for this store is +tmp/cache+. Works well for all types of environments and allows all processes running from the same application directory to access the cached content. If +tmp/cache+ does not exist, the default store becomes +MemoryStore+.
+2) +ActiveSupport::Cache::FileStore+: cache'owane dane są przechowywane na dysku, jest to domyślny sposób przechowywania cache'u, domyślna ścieżka to +tmp/cache+. Pracuje on również dla wszystkich typów środowisk i pozwala, aby wszystkie procesy z tego samego katalogu aplikacji miały dostęp do zawartości pamięci podręcznej. Jeśli katalog +tmp/cache+ nie istnieje, domyślnym sposobem staje się +MemoryStore+. 
 
 <ruby>
 ActionController::Base.cache_store = :file_store, "/path/to/cache/directory"
 </ruby>
 
-3) +ActiveSupport::Cache::DRbStore+: Cached data is stored in a separate shared DRb process that all servers communicate with. This works for all environments and only keeps one cache around for all processes, but requires that you run and manage a separate DRb process.
+3) +ActiveSupport::Cache::DRbStore+: cache'owane dane są przechowywane w oddzielnych procesach DRb, które komunikują się z wszystkimi serwerami. Cache'owanie to działa we wszystkich środowiskach i zachowuje jeden cache dla wszystkich procesów, ale wymaga uruchomienia i zarządzania na oddzielnych procesach DRb. 
 
 <ruby>
 ActionController::Base.cache_store = :drb_store, "druby://localhost:9192"
 </ruby>
 
-4) +ActiveSupport::Cache::MemCacheStore+: Works like +DRbStore+, but uses Danga's +memcached+ instead. Rails uses the bundled +memcached-client+ gem by default. This is currently the most popular cache store for production websites.
+4) +ActiveSupport::Cache::MemCacheStore+: ten sposób przechowywania działa podobnie do +DRbStore+, ale zamiast niego używa +memcached+ Dangi. Rails wykorzystuje domyślnie instalowany gem +memcached-client+. Jest to obecnie najbardziej popularny sposób przechpwywania cache'u dla produkcji stron www.
 
-Special features:
+Cechy szczególne:
 
-* Clustering and load balancing. One can specify multiple memcached servers, and +MemCacheStore+ will load balance between all available servers. If a server goes down, then +MemCacheStore+ will ignore it until it goes back online.
-* Time-based expiry support. See +write+ and the +:expires_in+ option.
-* Per-request in memory cache for all communication with the +memcached+ server(s).
+* Klastrowanie i równoważenie obciążenia. Pierwszy może określać wiele serwerów  memcache, zaś +MemCacheStore+ będzie równoważył obciążenie między wszystkimi dostępnymi serwerami. Jeśli serwer przestanie działać, to +MemCacheStore+ zignoruje go, dopóki nie powróci do trybu on-line. 
+* Time-based expiry support – czasowe wygaśnięcie wsparcia. Zobacz opcje +write+ i +:expires_in+.
+* Tworzony per żądanie cache przechowywany w pamięci dla całej komunikacji 
+z swerwerami +memcached+. 
 
-It also accepts a hash of additional options:
+Sposób ten akceptuje również mieszanie dodatkowych opcji: 
 
-* +:namespace+: specifies a string that will automatically be prepended to keys when accessing the memcached store.
-* +:readonly+: a boolean value that when set to true will make the store read-only, with an error raised on any attempt to write.
-* +:multithread+: a boolean value that adds thread safety to read/write operations - it is unlikely you'll need to use this option as the Rails threadsafe! method offers the same functionality.
+* +:namespace+: określa ciąg znaków, który będzie automatycznie dodawany do kluczy podczas dostępu do memcached. 
+* +:readonly+: wartość logiczna, gdy jest ustawiona na true uznaje cach jako  tylko do odczytu (read-only), wyrzuci błąd podczas wszelkich prób pisania. 
++:multithread+: wartość logiczna, która podnosi bezpieczeństwo wątku podczas operacji odczytu/zapisu - jest mało prawdopodobne, że będziemy potrzebowali użyć tej opcji jako Rails threadsafe (Railsy w wersji wielowątkowej). Metoda ta oferuje taką samą funkcjonalność. 
 
-The read and write methods of the +MemCacheStore+ accept an options hash too. When reading you can specify +:raw => true+ to prevent the object being marshaled (by default this is false which means the raw value in the cache is passed to +Marshal.load+ before being returned to you.)
+Metody read i write w sposobie +MemCacheStore+ akceptują również tablicę asocjacyjną opcji. Przy odczytywaniu możesz sprecyzować +:raw => true+, aby zapobiec przyporządkowaniu obiektu (domyślnie jest to false, co oznacza, że wartość raw w cache jest przekazywana do +Marshal.load+ zanim zostanie zwrócona.) 
 
-When writing to the cache it is also possible to specify +:raw => true+ means the value is not passed to +Marshal.dump+ before being stored in the cache (by default this is false). 
-
-The write method also accepts an +:unless_exist+ flag which determines whether the memcached add (when true) or set (when false) method is used to store the item in the cache and an +:expires_in+ option that specifies the time-to-live for the cached item in seconds.
-
+Przy zapisywaniu do cache można również sprecyzować +:raw => true+, aby nie przekazywać do +Marshal.dump+ przed złożeniem w cache (domyślnie jest to false). 
+Metoda write akceptuje również flagę +:unless_exist+, która określa, czy użyć metody memcached add (gdy true), czy set (gdy false) do przechowania elementu w cache i opcji +:expires_in+, która określa długość życia cachowanego elementu w sekundach.
+ 
 <ruby>
 ActionController::Base.cache_store = :mem_cache_store, "localhost"
 </ruby>
 
-5) +ActiveSupport::Cache::SynchronizedMemoryStore+: Like +MemoryStore+ but thread-safe.
+5) +ActiveSupport::Cache::SynchronizedMemoryStore+: taki sam sposób przechowywania cache'u jak +MemoryStore+, ale bezpieczno-wątkowy. 
 
 <ruby>
 ActionController::Base.cache_store = :synchronized_memory_store
 </ruby>
 
-6) +ActiveSupport::Cache::CompressedMemCacheStore+: Works just like the regular +MemCacheStore+ but uses GZip to decompress/compress on read/write.
+6) +ActiveSupport::Cache::CompressedMemCacheStore+: działa podobnie jak regularny +MemCacheStore+, ale używa GZip do rozpakowywania/pakowania podczas odczytu/zapisu. 
 
 <ruby>
 ActionController::Base.cache_store = :compressed_mem_cache_store, "localhost"
 </ruby>
 
-7) Custom store: You can define your own cache store (new in Rails 2.1).
+7) Przechowywanie niestandardowe: Możesz określić swój własny sposób przechowywania pamięci cache (nowość w Rails 2.1). 
 
 <ruby>
 ActionController::Base.cache_store = MyOwnStore.new("parameter")
 </ruby>
 
-NOTE: +config.cache_store+ can be used in place of +ActionController::Base.cache_store+ in your +Rails::Initializer.run+ block in +environment.rb+
+UWAGA: +config.cache_store+ może być używany w miejsce +ActionController::Base.cache_store+ w Twoim bloku +Rails::Initializer.run+ w pliku +environment.rb+ 
 
-In addition to all of this, Rails also adds the +ActiveRecord::Base#cache_key+ method that generates a key using the class name, +id+ and +updated_at+ timestamp (if available).
+Poza tym, Rails dodaje także metodę +ActiveRecord::Base#cache_key+, która generuje klucz używając nazwy klasy, +id+ oraz znacznik czasu +updated_at+ (jeżeli jest dostępny).
 
-You can access these cache stores at a low level for storing queries and other objects. Here's an example:
+Możesz również uzyskać dostęp do cache store o niskim poziomie, dla przechowywania zapytań i innych obiektów. Oto przykład: 
 
 <ruby>
 Rails.cache.read("city")   # => nil
@@ -318,13 +321,13 @@ Rails.cache.write("city", "Duckburgh")
 Rails.cache.read("city")   # => "Duckburgh"
 </ruby>
 
-h3. Conditional GET support
+h3. Wsparcie dla warunkowego GETa
 
-Conditional GETs are a feature of the HTTP specification that provide a way for web servers to tell browsers that the response to a GET request hasn't changed since the last request and can be safely pulled from the browser cache.
+Warunkowe GETy są elementami specyfikacji protokołu HTTP, które zapewniają webserwerom sposób na dostarczenie przeglądarkom informacji, że odpowiedź na żądanie GET nie została zmieniona od czasu ostatniego żądania i może być bezpiecznie wyciągnięta z pamięci cache przeglądarki. 
 
-They work by using the +HTTP_IF_NONE_MATCH+ and +HTTP_IF_MODIFIED_SINCE+ headers to pass back and forth both a unique content identifier and the timestamp of when the content was last changed. If the browser makes a request where the content identifier (etag) or last modified since timestamp matches the server’s version then the server only needs to send back an empty response with a not modified status.
+Pracują one przy użyciu nagłówków +HTTP_IF_NONE_MATCH+ i +HTTP_IF_MODIFIED_SINCE+, aby przesyłać tam i z powrotem, zarówno unikatowy identyfikator zawartości jak i znacznik czasu, kiedy zawartość została zmieniona. Jeśli przeglądarka wysyła żądanie gdzie identyfikator zawartości(etag) lub ostatnia modyfikacja znacznika czasu pasuje do wersji serwera, to serwer musi jedynie odesłać pustą wiadomość z niezmodyfikowanym statusem. 
 
-It is the server's (i.e. our) responsibility to look for a last modified timestamp and the if-none-match header and determine whether or not to send back the full response. With conditional-get support in Rails this is a pretty easy task:
+Odpowiedzialnością serwera (czyli de facto naszą) jest znalezienie ostatnio zmodyfikowanego znacznika czasu i - jeśli nie został on dopasowany - nagłówka oraz określenie czy odesłać pełną odpowiedź, czy nie. Z wsparciem warunkowego GETa w Railsach jest to całkiem proste zadanie:
 
 <ruby>
 class ProductsController < ApplicationController
@@ -345,9 +348,9 @@ class ProductsController < ApplicationController
     # used in the previous call to stale? and will automatically send a
     # :not_modified.  So that's it, you're done.
 end
-</ruby>
+</ruby> 
 
-If you don't have any special response processing and are using the default rendering mechanism (i.e. you're not using respond_to or calling render yourself) then you’ve got an easy helper in fresh_when:
+Jeżeli używamy domyślnego mechanizmu renderowania (czyli nie używamy metody respond_to lub nie wywołujemy renderowania samoistnego) oraz nie mamy żadnego przetwarzania specjalnych odpowiedzi, to mamy możliwość skorzystania z łatwego helpera fresh_when: 
 
 <ruby>
 class ProductsController < ApplicationController
@@ -362,29 +365,29 @@ class ProductsController < ApplicationController
 end
 </ruby>
 
-h3. Advanced Caching
+h3. Zaawansowane Cache'owanie
 
-Along with the built-in mechanisms outlined above, a number of excellent plugins exist to help with finer grained control over caching. These include Chris Wanstrath's excellent cache_fu plugin (more info "here": http://errtheblog.com/posts/57-kickin-ass-w-cachefu) and Evan Weaver's interlock plugin (more info "here": http://blog.evanweaver.com/articles/2007/12/13/better-rails-caching/). Both of these plugins play nice with memcached and are a must-see for anyone
-seriously considering optimizing their caching needs.
+Wraz z wbudowanymi mechanizmami opisanymi powyżej, istnieje wiele świetnych wtyczek pomagających w kontroli nad cache'owaniem. Są to doskonałe pluginy cache_fu stworzone przez Chrisa Wanstratha(więcej informacji "tutaj": http://errtheblog.com/posts/57-kickin-ass-w-cachefu) i interlock plugin stworzony przez Evana Tkacza (więcej informacji "tutaj": http:// blog.evanweaver.com/articles/2007/12/13/better-rails-caching/). Obie te wtyczki dobrze współdziałają z memcached, dlatego każdy kto poważnie myśli o zoptymalizowaniu swojego cache'owania musi je zobaczyć i przeanalizować.
 
-Also the new "Cache money":http://github.com/nkallen/cache-money/tree/master plugin is supposed to be mad cool. 
+Także nowy plugin "Cache money": http://github.com/nkallen/cache-money/tree/master prawdopodobnie będzie bardzo interesujący. 
 
-h3. References
+h3. Referencje 
 
-* "Scaling Rails Screencasts":http://railslab.newrelic.com/scaling-rails
-* "RailsEnvy, Rails Caching Tutorial, Part 1":http://www.railsenvy.com/2007/2/28/rails-caching-tutorial
-* "RailsEnvy, Rails Caching Tutorial, Part 2":http://www.railsenvy.com/2007/3/20/ruby-on-rails-caching-tutorial-part-2
-* "ActiveSupport::Cache documentation":http://api.rubyonrails.org/classes/ActiveSupport/Cache.html
-* "Rails 2.1 integrated caching tutorial":http://thewebfellas.com/blog/2008/6/9/rails-2-1-now-with-better-integrated-caching
-
+* "Scaling Rails Screencasts": http://railslab.newrelic.com/scaling-rails 
+* "RailsEnvy, Rails Caching Tutorial Part 1": http://www.railsenvy.com/2007/2/28/rails-caching-tutorial 
+* "RailsEnvy, Rails Caching Tutorial Part 2": http://www.railsenvy.com/2007/3/20/ruby-on-rails-caching-tutorial-part-2 
+* "ActiveSupport: dokumentacja Cache": http://api.rubyonrails.org/classes/ActiveSupport/Cache.html 
+* "Rails 2.1 zintegrowane Cachowanie tutorial": http://thewebfellas.com/blog/2008/6/9/rails-2-1-now-with-better-integrated-caching 
 
 h3. Changelog
-"Lighthouse ticket":http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/10-guide-to-caching
+ 
+"Bilet Lighthouse": http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/10-guide-to-caching 
 
-* May       02, 2009: Formatting cleanups
-* April     26, 2009: Clean up typos in submitted patch
-* April      1, 2009: Made a bunch of small fixes
-* February  22, 2009: Beefed up the section on cache_stores
-* December  27, 2008: Typo fixes
-* November  23, 2008: Incremental updates with various suggested changes and formatting cleanup
-* September 15, 2008: Initial version by Aditya Chadha
+* 02 maja 2009: Formatowanie. 
+* 26 kwietnia 2009: Czyszczenie i poprawa literówek w zaproponowanych patchach. 
+* 1  kwietnia 2009: Kilka drobnych poprawek. 
+* 22 lutego 2009: Poprawienie sekcji cache_stores. 
+* 27 grudnia 2008: Poprawa literówek. 
+* 23 listopada 2008: Przyrostowe aktualizacje z różnych propozycji zmian oraz formatowanie.
+* 15 września 2008: Wersja wstępna, stworzona przez Aditya Chadha.
+

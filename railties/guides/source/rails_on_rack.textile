@@ -1,40 +1,44 @@
 h2. Rails on Rack
 
-This guide covers Rails integration with Rack and interfacing with other Rack components. By referring to this guide, you will be able to:
+Ten przewodnik opisuje integrację Railsów z interfejsem serwera webowego Rack oraz komunikację z wykorzystaniem innych komponentów frameworka Rack. Zapoznanie się z tym przewodnikiem pozwoli ci na:
 
-* Create Rails Metal applications
-* Use Rack Middlewares in your Rails applications
-* Understand Action Pack's internal Middleware stack
-* Define a custom Middleware stack
+* Tworzenie Metalowych aplikacji Railsowych
+* Korzystanie z obiektów Middleware interfejsu Rack w aplikacjach Railsowych
+* Zrozumienie wewnętrznego stosu middleware modułu Action Pack
+* Definiowanie własnego stosu middleware
 
 endprologue.
 
-WARNING: This guide assumes a working knowledge of Rack protocol and Rack concepts such as middlewares, url maps and +Rack::Builder+.
+WARNING: Ten przewodnik zakłada praktyczną znajomość założeń frameworka Rack i związanych z nim pojęć takich jak obiekty middleware, mapowanie url (url maps), czy obiekt +Rack::Builder+.
 
-h3. Introduction to Rack
+h3. Wprowadzenie do Rack
 
 bq. Rack provides a minimal, modular and adaptable interface for developing web applications in Ruby. By wrapping HTTP requests and responses in the simplest way possible, it unifies and distills the API for web servers, web frameworks, and software in between (the so-called middleware) into a single method call.
 
-- "Rack API Documentation":http://rack.rubyforge.org/doc/
+bq. Rack dostarcza minimalnego, modułowego i adaptowalnego interfejsu do rozwijania aplikacji webowych w Rubym. Poprzez żądania i odpowiedzi HTTP w najprostszej możliwej postaci unifikuje i łączy w sobie API dla serwerów WWW, frameworków webowych i oprogramowania pośredniczącego (tzw. middleware software) w jedną metodę zapytania.
 
-Explaining Rack is not really in the scope of this guide. In case you are not familiar with Rack's basics, you should check out the following links:
+- "Dokumentacja Rack API":http://rack.rubyforge.org/doc/
 
-* "Official Rack Website":http://rack.github.com
+Note: Interfejs serwera webowego umożliwia komunikację (ang. interfacing) aplikacji webowej z serwerem WWW, inną aplikacją lub frameworkiem webowym. Przyjęło się *mylne* utożsamianie interfejsu z węższym pojęciem interfejsu użytkownika (komunikacja aplikacja-użytkownik). -przypis tłumacza
+
+Wyjaśnienie czym dokładnie jest Rack nie jest zadaniem tego przewodnika. Jeśli nie jest ci on jeszcze znany, sięgnij po któreś z tych źródeł :
+
+* "Oficjalna strona projektu (w języku angielskim)":http://rack.github.com
 * "Introducing Rack":http://chneukirchen.org/blog/archive/2007/02/introducing-rack.html
 * "Ruby on Rack #1 - Hello Rack!":http://m.onkey.org/2008/11/17/ruby-on-rack-1
 * "Ruby on Rack #2 - The Builder":http://m.onkey.org/2008/11/18/ruby-on-rack-2-rack-builder
 
 h3. Rails on Rack
 
-h4. Rails Application's Rack Object
+h4. Obiekty Rack w Aplikacjach Railsowych
 
-<tt>ActionController::Dispatcher.new</tt> is the primary Rack application object of a Rails application. Any Rack compliant web server should be using +ActionController::Dispatcher.new+ object to serve a Rails application.
+<tt>ActionController::Dispatcher.new</tt> to podstawowy obiekt aplikacji Rack występujący w aplikacjach Railsowych. Każdy z serwerów WWW zgodnych z Rack powinien posłużyć się tym obiektem, aby obsłużyć aplikację Railsową.
 
-h4. +rails server+
+h4. +script/server+
 
-<tt>rails server</tt> does the basic job of creating a +Rack::Builder+ object and starting the webserver. This is Rails' equivalent of Rack's +rackup+ script.
+<tt>script/server</tt> stanowi Railsowy odpowiednik skryptu Rack +rackup+. Jego zadaniem jest stworzenie obiektu +Rack::Builder+ i uruchomienie serwer WWW. 
 
-Here's how +rails server+ creates an instance of +Rack::Builder+
+Oto jak +script/server+ tworzy instancję +Rack::Builder+:
 
 <ruby>
 app = Rack::Builder.new {
@@ -45,19 +49,19 @@ app = Rack::Builder.new {
 }.to_app
 </ruby>
 
-Middlewares used in the code above are primarily useful only in the development environment. The following table explains their usage:
+Obiekty middleware zastosowane w powyższym kodzie przydają się praktycznie tylko w środowisku rozwojowym. Poniższa tabela opisuje ich użycie:
 
-|_.Middleware|_.Purpose|
-|+Rails::Rack::LogTailer+|Appends log file output to console|
-|+ActionDispatch::Static+|Serves static files inside +Rails.root/public+ directory|
-|+Rails::Rack::Debugger+|Starts Debugger|
+|_.Middleware|_.Zastosowanie|
+|+Rails::Rack::LogTailer+|Dołącza zawartość logu do konsoli|
+|+ActionDispatch::Static+|Zapisuje statystyki serwera w katalogu +RAILS_ROOT/public+|
+|+Rails::Rack::Debugger+|Uruchamia Debuggera|
 
 h4. +rackup+
 
-To use +rackup+ instead of Rails' +rails server+, you can put the following inside +config.ru+ of your Rails application's root directory:
+Aby stosować skrypt +rackup+ zamiast Railsowego +script/server+, możesz umieścić następujący kod w pliku +config.ru+ w katalogu głównym aplikacji:
 
 <ruby>
-# Rails.root/config.ru
+# RAILS_ROOT/config.ru
 require "config/environment"
 
 use Rails::Rack::LogTailer
@@ -65,33 +69,33 @@ use ActionDispatch::Static
 run ActionController::Dispatcher.new
 </ruby>
 
-And start the server:
+Następnie uruchomić serwer:
 
 <shell>
 [lifo@null application]$ rackup config.ru
 </shell>
 
-To find out more about different +rackup+ options:
+Aby sprawdzić dostępne opcje +rackup+ wywołaj:
 
 <shell>
 [lifo@null application]$ rackup --help
 </shell>
 
-h3. Action Controller Middleware Stack
+h3. Stos middleware modułu Action Controller
 
-Many of Action Controller's internal components are implemented as Rack middlewares. +ActionController::Dispatcher+ uses +ActionController::MiddlewareStack+ to combine various internal and external middlewares to form a complete Rails Rack application.
+Wiele komponentów modułu Action Controller jest zaimplementowanych jako obiekty middleware Rack. +ActionController::Dispatcher+ używa +ActionController::MiddlewareStack+, aby łącząc różne wewnętrzne i zewnętrzne obiekty middleware stworzyć kompletną Railsową aplikację Rack.
 
-NOTE: +ActionController::MiddlewareStack+ is Rails' equivalent of +Rack::Builder+, but built for better flexibility and more features to meet Rails' requirements.
+NOTE: +ActionController::MiddlewareStack+ stanowi Railsowy odpowiednik obiektu +Rack::Builder+, ale nieco bardziej elastyczniejszy i dostosowany do wymagań Railsów.
 
-h4. Inspecting Middleware Stack
+h4. Podgląd stosu middleware
 
-Rails has a handy rake task for inspecting the middleware stack in use:
+Aby wyświetlić zawartość stosu middleware, który jest aktualnie w użyciu posłużymy się zadaniem rake:
 
 <shell>
 $ rake middleware
 </shell>
 
-For a freshly generated Rails application, this might produce something like:
+Oto jak mógłby wyglądać rezultat tego zapytania dla świeżo wygenerowanej aplikacji:
 
 <ruby>
 use Rack::Lock
@@ -106,81 +110,81 @@ use ActiveRecord::QueryCache
 run ActionController::Dispatcher.new
 </ruby>
 
-Purpose of each of this middlewares is explained in the "Internal Middlewares":#internal-middleware-stack section.
+Zadania poszczególnych obiektów middleware objaśnione zostały w sekcji "Stos wewnętrznych obiektów Middleware":#stos-wenetrznych-obiektow-middleware.
 
-h4. Configuring Middleware Stack
+h4. Konfiguracja stosu middleware
 
-Rails provides a simple configuration interface +config.middleware+ for adding, removing and modifying the middlewares in the middleware stack via +environment.rb+ or the environment specific configuration file <tt>environments/&lt;environment&gt;.rb</tt>.
+Railsy dostarczają nam prostego interfejsu konfiguracyjnego +config.middleware+ dzięki któremu dodamy, usuniemy i zmodyfikujemy obiekty ze stosu poprzez +environment.rb+ lub plik konfiguracji określonego środowiska <tt>environments/&lt;environment&gt;.rb</tt>.
 
-h5. Adding a Middleware
+h5. Dodanie obiektu middleware
 
-You can add a new middleware to the middleware stack using any of the following methods:
+Aby dodać obiekt middleware do stosu możesz posłużyć się dowolną z poniższych metod:
 
-* +config.middleware.use(new_middleware, args)+ - Adds the new middleware at the bottom of the middleware stack.
+* +config.middleware.use(new_middleware, args)+ - Dodaje nowy obiekt middleware na dnie stosu.
 
-* +config.middleware.insert_before(existing_middleware, new_middleware, args)+ - Adds the new middleware before the specified existing middleware in the middleware stack.
+* +config.middleware.insert_before(existing_middleware, new_middleware, args)+ - Dodaje nowy obiekt middleware przed wskazanym, istniejącym obiektem middleware.
 
-* +config.middleware.insert_after(existing_middleware, new_middleware, args)+ - Adds the new middleware after the specified existing middleware in the middleware stack.
+* +config.middleware.insert_after(existing_middleware, new_middleware, args)+ - Dodaje nowy obiekt middleware za wskazanym, istniejącym obiektem middleware.
 
-<strong>Example:</strong>
+<strong>Przykład:</strong>
 
 <ruby>
 # config/environment.rb
 
-# Push Rack::BounceFavicon at the bottom
+# Odłóż Rack::BounceFavicon na dno stosu
 config.middleware.use Rack::BounceFavicon
 
-# Add Lifo::Cache after ActiveRecord::QueryCache.
-# Pass { :page_cache => false } argument to Lifo::Cache.
+# Dodaj Lifo::Cache za ActiveRecord::QueryCache.
+# Przekaż argument { :page_cache => false } do Lifo::Cache.
 config.middleware.insert_after ActiveRecord::QueryCache, Lifo::Cache, :page_cache => false
 </ruby>
 
-h5. Swapping a Middleware
+h5. Zamiana obiektów middleware
 
-You can swap an existing middleware in the middleware stack using +config.middleware.swap+.
+Możesz podmienić istniejący obiekt ze stosu middleware za pomocą +config.middleware.swap+.
 
-<strong>Example:</strong>
+<strong>Przykład:</strong>
 
 <ruby>
 # config/environment.rb
 
-# Replace ActionController::Failsafe with Lifo::Failsafe
+# Zamień ActionController::Failsafe na Lifo::Failsafe
 config.middleware.swap ActionController::Failsafe, Lifo::Failsafe
 </ruby>
 
-h5. Middleware Stack is an Array
+h5. Stos middleware jest tablicą
 
-The middleware stack behaves just like a normal +Array+. You can use any +Array+ methods to insert, reorder, or remove items from the stack. Methods described in the section above are just convenience methods.
+Stos middleware zachowuje się jak zwykła +tablica+. Możesz posłużyć się metodami odpowiednimi dla +tablic+, aby dodać, zmienić kolejność lub usunąć elementy stosu. Metody przestawione powyżej są po prostu wygodniejsze.
 
-For example, the following removes the middleware matching the supplied class name:
+Przykładowo, poniższe polecenie usunie obiekty middleware odpowiadające podanej nazwie klasy:
 
 <ruby>
 config.middleware.delete(middleware)
 </ruby>
 
-h4. Internal Middleware Stack
+h4. Stos wewnętrznych obiektów Middleware
 
-Much of Action Controller's functionality is implemented as Middlewares. The following table explains the purpose of each of them:
+Znaczna część funkcjonalności modułu Action Controller opiera sie na stosowaniu obiektów middleware. Poniższa tabela przedstawia ich użycie: 
 
-|_.Middleware|_.Purpose|
-|+Rack::Lock+|Sets +env["rack.multithread"]+ flag to +true+ and wraps the application within a Mutex.|
-|+ActionController::Failsafe+|Returns HTTP Status +500+ to the client if an exception gets raised while dispatching.|
-|+ActiveRecord::QueryCache+|Enable the Active Record query cache.|
-|+ActionController::Session::CookieStore+|Uses the cookie based session store.|
-|+ActionController::Session::MemCacheStore+|Uses the memcached based session store.|
-|+ActiveRecord::SessionStore+|Uses the database based session store.|
-|+Rack::MethodOverride+|Sets HTTP method based on +_method+ parameter or +env["HTTP_X_HTTP_METHOD_OVERRIDE"]+.|
-|+Rack::Head+|Discards the response body if the client sends a +HEAD+ request.|
+|_.Middleware|_.Zastosowanie|
+|+Rack::Lock+|Podnosi flagę +env["rack.multithread"]+ i przełącza aplikację w tryb Mutex.|
+|+ActionController::Failsafe+|Zwraca klientowi status HTTP +500+ jeśli podczas wysyłania wystąpiły jakieś wyjątki.|
+|+ActiveRecord::QueryCache+|Aktywuje cache dla zapytań w module Active Record.|
+|+ActionController::Session::CookieStore+|Przełącza na użycie cookie do przechowywania sesji.|
+|+ActionController::Session::MemCacheStore+|Przełącza na użycie pamięci memcached do przechowywania sesji.|
+|+ActiveRecord::SessionStore+|Użycie bazy danych do przechowywania sesji.|
+|+Rack::MethodOverride+|Ustanawia metodę HTTP na podstawie parametru +_method+ lub +env["HTTP_X_HTTP_METHOD_OVERRIDE"]+.|
+|+Rack::Head+|Odrzuca wartość body odpowiedzi, jeśli klient przesłał żądanie +HEAD+.|
 
-TIP: It's possible to use any of the above middlewares in your custom Rack stack.
+TIP: Możesz użyć powyższych obiektów middleware w stworzonym przez siebie stosie Rack.
 
-h4. Customizing Internal Middleware Stack
+h4. Dostosowanie wewnętrznego stosu middleware
 
-It's possible to replace the entire middleware stack with a custom stack using +ActionController::Dispatcher.middleware=+.
+Możesz zamienić cały stos middleware przy pomocy +ActionController::Dispatcher.middleware=+.
 
-<strong>Example:</strong>
+<strong>Przykład:</strong>
 
-Put the following in an initializer:
+Umieść następujący kod w +initializers+:
 
 <ruby>
 # config/initializers/stack.rb
@@ -191,7 +195,7 @@ ActionController::Dispatcher.middleware = ActionController::MiddlewareStack.new 
 end
 </ruby>
 
-And now inspecting the middleware stack:
+Podgląd stosu middleware:
 
 <shell>
 $ rake middleware
@@ -202,11 +206,11 @@ use Rack::Head
 run ActionController::Dispatcher.new
 </shell>
 
-h4. Using Rack Builder
+h4. Stosowanie obiektu Rack Builder
 
-The following shows how to replace use +Rack::Builder+ instead of the Rails supplied +MiddlewareStack+.
+Oto sposób, na to by zamiast Railsowego +MiddlewareStack+ stosować +Rack::Builder+
 
-<strong>Clear the existing Rails middleware stack</strong>
+<strong>Wyczyść istniejący stos middleware</strong>
 
 <ruby>
 # environment.rb
@@ -214,7 +218,7 @@ config.middleware.clear
 </ruby>
 
 <br />
-<strong>Add a +config.ru+ file to +Rails.root+</strong>
+<strong>Umieść plik +config.ru+ w katalogu +RAILS_ROOT+</strong>
 
 <ruby>
 # config.ru
@@ -222,21 +226,21 @@ use MyOwnStackFromStratch
 run ActionController::Dispatcher.new
 </ruby>
 
-h3. Rails Metal Applications
+h3. Metalowe aplikacje Railsowe 
 
-Rails Metal applications are minimal Rack applications specially designed for integrating with a typical Rails application. As Rails Metal Applications skip all of the Action Controller stack, serving a request has no overhead from the Rails framework itself. This is especially useful for infrequent cases where the performance of the full stack Rails framework is an issue.
+Metalowe aplikacje Railsowe to minimalne aplikacje Rack, zaprojektowane tak, aby ściśle łączyły się z typowymi aplikacjami Railsowymi. Jako że Metalowe aplikacje Railsowe pomijają cały stos modułu Action Controller, obsługa żądania nie obciąża w ogóle samych Railsów. Może to być istotne w szczególnych przypadkach, kiedy wydajność stosu frameworka Rails sprawia problemy.
 
-Ryan Bates' "Railscast on Rails Metal":http://railscasts.com/episodes/150-rails-metal provides a nice walkthrough generating and using Rails Metal.
+Ryan Bates stworzył interesujący "screencast (w języku angielskim)":http://railscasts.com/episodes/150-rails-metal, w którym omawia generowanie i stosowanie Metalowych aplikacji Railsowych.
 
-h4. Generating a Metal Application
+h4. Generowanie Metalowej aplikacji Railsowej
 
-Rails provides a generator called +metal+ for creating a new Metal application:
+Railsy dostarczają generatora +metal+, który umożliwia tworzenie tego typu aplikacji:
 
 <shell>
-$ rails generate metal poller
+$ script/generate metal poller
 </shell>
 
-This generates +poller.rb+ in the +app/metal+ directory:
+Zawartość pliku +poller.rb+ wygenerowanego w katalogu +app/metal+:
 
 <ruby>
 # Allow the metal piece to run in isolation
@@ -247,42 +251,54 @@ class Poller
     if env["PATH_INFO"] =~ /^\/poller/
       [200, {"Content-Type" => "text/html"}, ["Hello, World!"]]
     else
-      [404, {"Content-Type" => "text/html", "X-Cascade" => "pass"}, ["Not Found"]]
+      [404, {"Content-Type" => "text/html"}, ["Not Found"]]
     end
   end
 end
 </ruby>
 
-Metal applications within +app/metal+ folders in plugins will also be discovered and added to the list.
+Aplikacje znajdujące się w +app/metal+ w katalogu wtyczek również zostaną odnalezione i dodane do listy.
 
-Metal applications are an optimization. You should make sure to "understand the related performance implications":http://weblog.rubyonrails.org/2008/12/20/performance-of-rails-metal before using it.
+Celem aplikacji Metalowych jest optymalizacja. Zanim zdecydujesz się na ich stosowanie upewnij się, że pojąłeś konsekwencje stosowania powiązanego działania. Zacznij od przeczytania postu "Performance of Rails Metal":http://weblog.rubyonrails.org/2008/12/20/performance-of-rails-metal na weblogu projektu.
 
-WARNING: To continue the Metal chain execution, return an +X-Cascade+ HTTP header with a value of +pass+.
+h4. Kolejność wykonania
 
-h4. Execution Order
+Wszystkie aplikacje Metalowe uruchamiane są przez obiekt middleware +Rails::Rack::Metal+, który jest częścią łańcucha +ActionController::MiddlewareStack+.
 
-All Metal Applications are executed in alphabetical order of their filenames, so +aaa.rb+ will come before +bbb.rb+ in the metal chain.
+Oto podstawowa metoda odpowiedzialna za działanie aplikacji Metalowej:
 
-You can override the default ordering in your environment. Simply add a line like the following to +config/application.rb+
+<ruby>
+def call(env)
+  @metals.keys.each do |app|
+    result = app.call(env)
+    return result unless result[0].to_i == 404
+  end
+  @app.call(env)
+end
+</ruby>
 
-It is, however, possible to override the default ordering in your environment. Simply add a line like the following to +config/environment.rb+
+Zmienna +@metals+ w powyższym kodzie to posortowana tablica asocjacyjna. Ze względu na domyślne sortowanie alfabetyczne plik +aaa.rb+ znajdzie się przed +bbb.rb+ w łańcuchu.
+
+Można zastąpić domyślne sortowanie w twoim środowisku. Wystarczy dodać następującą linijkę do pliku +config/environment.rb+
 
 <ruby>
 config.metals = ["Bbb", "Aaa"]
 </ruby>
 
-Each string in the array should be the name of your metal class. If you do this then be warned that any metal applications not listed will not be loaded.
+Każdy łańcuch w tej tablicy powinien odpowiadać nazwie twojej metalowej klasy. Pamiętaj, że aplikacje Metalowe, które nie znajdą się na tej liście nie zostaną wczytane.
 
-h3. Resources
+WARNING: Aplikacje metalowe nie mogą zwracać statusu HTTP +404+, ponieważ jest on używany przy wywoływaniu łańcucha Metalowego. Jeśli zajdzie taka konieczność posłuż się standardowym kontrolerem, lub odpowiednio zaadaptowanym obiektem middleware.
 
-h4. Learning Rack
+h3. Źródła
+
+h4. Nauka Rack
 
 * "Official Rack Website":http://rack.github.com
 * "Introducing Rack":http://chneukirchen.org/blog/archive/2007/02/introducing-rack.html
 * "Ruby on Rack #1 - Hello Rack!":http://m.onkey.org/2008/11/17/ruby-on-rack-1
 * "Ruby on Rack #2 - The Builder":http://m.onkey.org/2008/11/18/ruby-on-rack-2-rack-builder
 
-h4. Understanding Middlewares
+h4. Objaśnienie zasad działnia obiektów Midlleware
 
 * "Railscast on Rack Middlewares":http://railscasts.com/episodes/151-rack-middleware
 
