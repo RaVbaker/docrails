@@ -184,7 +184,7 @@ Istnieje tylko kilka opcji konfiguracyjnych modułu Action View, poczynając od 
 * +config.action_view.warn_cache_misses+ mówi Railsom czy wyświetlać ostrzeżenie o każdym wyniku działań bufora na ścieżkach widoków. Domyślnie +false+.
 
 * +config.action_view.field_error_proc+ zapewnia generator HTML do wyświetlania błędów pochodzących z Active Record.
-Domyślnie <tt>Proc.new{ |html_tag, instance| "<div class=\"fieldWithErrors\">#{html_tag}</div>" }</tt>
+Domyślnie <tt>Proc.new{ |html_tag, instance| "&lt;div class=\"fieldWithErrors\"&gt;#{html_tag}&lt;/div&gt;" }</tt>
 
 * +config.action_view.default_form_builder+ mówi Railsom, który builder ma być używany domyślnie. Domyślnym jest +ActionView::Helpers::FormBuilder+.
 
