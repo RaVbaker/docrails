@@ -14,34 +14,35 @@ Po przeczytaniu tego przewodnika i wypróbowaniu przedstawionych koncepcji, mamy
 
 endprologue.
 
-h3. 1 Cykl życia obiektu
+h3. Cykl życia obiektu
+
+h3. Cykl 
 
 Podczas normalnego użytkowania aplikacji Railsowej obiekty mogą być tworzone, aktualizowane oraz niszczone. Moduł Active Record oferuje zakotwiczenia do poszczególnych cyklów życia obiektu tak abyś mógł kontrolować aplikację i jej dane.
 
 Walidacje zapewniają, że tylko poprawne dane są przechowywane w bazie danych. Callbacks i observers pozwalają wywołać logikę przed lub po zmianach stanu obiektu.
 
-h3. 2 Przegląd walidacji
+h3. Przegląd walidacji
 
 Zanim się zagłębisz w szczegóły walidacji Railsów, powinieneś zrozumieć jak wpisują się one w szerszy obraz.
 
-h4. 2.1 Po co używać walidacji?
+h4. Po co używać walidacji?
 
 Walidacje są stosowane w celu zapewnienia, że tylko prawidłowe dane są zapisywane w bazie danych. Na przykład, ważne dla twojej aplikacji może być upewnienie się, że każdy użytkownik poda prawidłowy adres e-mail i adres pocztowy.
 
 Istnieje kilka sposobów sprawdzenia danych zanim zostaną zapisane w bazie danych, są to: własne ograniczenia bazy danych, walidacje po stronie klienta, walidacje z poziomu kontrolera oraz walidacje z poziomu modelu.
 
-* +Ograniczenia bazy danych i/lub przechowywane procedury sprawiają, że mechanizmy walidacji są zależne od bazy danych i mogą utrudniać testowanie i utrzymanie bazy. Jeśli jednak baza danych jest wykorzystywana przez inne aplikacje, dobrym pomysłem może być używanie ograniczeń na poziomie bazy danych. 
-
+* Ograniczenia bazy danych i/lub przechowywane procedury sprawiają, że mechanizmy walidacji są zależne od bazy danych i mogą utrudniać testowanie i utrzymanie bazy. Jeśli jednak baza danych jest wykorzystywana przez inne aplikacje, dobrym pomysłem może być używanie ograniczeń na poziomie bazy danych. 
 Dodatkowo, walidacje na poziomie bazy danych mogą bezpiecznie obsługiwać pewne rzeczy (takie jak wyjątkowość w często używanych tabelach), które mogą być trudne do wykonywania w inny sposób.
 
-* +Walidacja po stronie klienta może być przydatna, ale ogólnie jest niewiarygodna jeśli jest stosowana sama. Jeżeli są one realizowane z wykorzystaniem Java Scriptu, mogą być pominięte, jeśli użytkownik ma wyłączoną obsługę Java Script w swojej przeglądarce. Jednak w połączeniu z innymi technikami, walidacja po stronie klienta może być wygodnym sposobem do zapewnienia użytkownikom natychmiastowej odpowiedzi podczas przeglądania twojej strony.
+* Walidacja po stronie klienta może być przydatna, ale ogólnie jest niewiarygodna jeśli jest stosowana sama. Jeżeli są one realizowane z wykorzystaniem Java Scriptu, mogą być pominięte, jeśli użytkownik ma wyłączoną obsługę Java Script w swojej przeglądarce. Jednak w połączeniu z innymi technikami, walidacja po stronie klienta może być wygodnym sposobem do zapewnienia użytkownikom natychmiastowej odpowiedzi podczas przeglądania twojej strony.
 
-* +Walidacja na poziomie kontrolera może być kusząca w użyciu, ale często staje się niewygodna i trudna do testowania i utrzymania. Jeśli to możliwe, dobrym pomysłem jest utrzymanie jak "najchudszych" kontrolerów, co zwiększy przyjemność pracowania w dłuższej perspektywie.
+* Walidacja na poziomie kontrolera może być kusząca w użyciu, ale często staje się niewygodna i trudna do testowania i utrzymania. Jeśli to możliwe, dobrym pomysłem jest utrzymanie jak "najchudszych" kontrolerów, co zwiększy przyjemność pracowania w dłuższej perspektywie.
 
-* +Walidacja na poziomie modelu jest najlepszym sposobem zapewnienia, że tylko prawidłowe dane są zapisywane w bazie danych. Są one agnostycznymi bazami danych, które nie mogą być pomijane przez użytkowników końcowych i są wygodne do testowania i utrzymania. Railsy sprawiają, że są one łatwe w użyciu, oferując wbudowane helpery dla powszechnych potrzeb i pozwalają również na tworzenie własnych metod walidacji.
+* Walidacja na poziomie modelu jest najlepszym sposobem zapewnienia, że tylko prawidłowe dane są zapisywane w bazie danych. Są one agnostycznymi bazami danych, które nie mogą być pomijane przez użytkowników końcowych i są wygodne do testowania i utrzymania. Railsy sprawiają, że są one łatwe w użyciu, oferując wbudowane helpery dla powszechnych potrzeb i pozwalają również na tworzenie własnych metod walidacji.
 
 
-h4. 2.2 Kiedy zachodzi walidacja?
+h4. Kiedy zachodzi walidacja?
 
 Istnieją dwa rodzaje obiektów modułu Active Record: te które odpowiadają oraz te, które nie odpowiadają rzędowi wewnątrz twojej bazy danych. Podczas tworzenia nowego obiektu, na przykład za pomocą nowej metody, obiekt nie należy jeszcze do nowej bazy danych. Kiedy zrobisz +save+ na obiekcie, to zostanie on zapisany w odpowiedniej tabeli bazy danych.
  Moduł Active Record używa metody instancji +new_record?+ w celu ustalenia czy obiekt jest już w bazie danych, czy nie. Rozważmy następującą, prostą klasę modułu Active Record:
@@ -70,34 +71,34 @@ Możesz uruchomić różne walidacje kiedy obiekt jest stworzony, zapisany lub z
 Istnieje wiele sposobów, aby zmienić stan obiektów w bazie danych. Niektóre sposoby spowodują walidację, ale niektóre nie. Oznacza to, że możliwe jest zapisanie obiektu w bazie danych w nieprawidłowym stanie, jeśli nie jesteś ostrożny.
 Następujące metody spowodują walidację i zapiszą obiekt do bazy danych, tylko jeśli jest on poprawny:
 
-* ++create+
-* ++create!+
-* ++save+
-* ++save!+
-* ++update+
-* ++update_attributes+
-* ++update_attributes!+
+* +create+
+* +create!+
+* +save+
+* +save!+
+* +update+
+* +update_attributes+
+* +update_attributes!+
 
 Wersje z wykrzyknikiem (+e.g.save!+) zgłaszają zastrzeżenia jeśli rekord jest niepoprawny. Wersje bez wykrzykników The non-bang versions don’t: save and update_attributes return false, create and update just return the object/s.
 
-.h4 2.3 Pomijanie walidacji
+h4. Pomijanie walidacji
 
 Następujące metody pominą walidację i zapiszą obiekt w bazie danych niezależnie od ich poprawności. Należy je stosować z ostrożnością.
 
-* ++decrement!+
-* ++decrement_counter+
-* ++increment!+
-* ++increment_counter+
-* ++toggle!+
-* ++update_all+
-* ++update_attribute+
-* ++update_counters+
+* +decrement!+
+* +decrement_counter+
+* +increment!+
+* +increment_counter+
+* +toggle!+
+* +update_all+
+* +update_attribute+
+* +update_counters+
 
 Należy pamiętać, że +save+ ma również możliwość pomijania walidacji jeśli opuścimy +false+ jako argument. Tą technikę należy stosować z ostrożnością.
 
-* ++save(false)+
+* +save(false)+
 
-.h4 2.4 +valid?+ i +invalid?+
+h4. +valid?+ i +invalid?+
 
 Do sprawdzenia czy obiekt jest prawidłowy, Railsy używają metody +valid?+. Możesz również użyć tej metody na własną rękę. +valid?+ powoduje walidację i zwraca prawdę jeśli żadne błędy nie były dodane do obiektu, lub fałsz jeśli były dodane jakieś błędy.
 
@@ -146,7 +147,7 @@ end
 
 +invalid?+ jest po prostu odwrotnością +valid?+. Komenda +invalid?+ włącza walidacje i powraca prawdziwa jeśli jakiekolwiek błędy zostały dodane do obiektu, a powraca fałszywa jeśli jest inaczej.
 
-.h4 2.5 +errors.invalid?+
+h4. +errors.invalid?+
 
 Aby sprawdzić czy jakiś konkretny atrybut obiektu jest poprawny, można użyć metody +errors.invalid?+. Ta metoda jest użyteczna jedynie PO przeprowadzeniu walidacji, ponieważ sprawdza ona jedynie zbiory błędów a nie włącza procesu walidacji. Jest to inny sposób od omówionego wcześniej +ActiveRecord: :Base#invalid?+ , ponieważ nie potwierdza walidacji obiektu jako całości, a sprawdza jedynie czy znaleziono błędy w pojedynczych atrybutach obiektu.
 
@@ -161,7 +162,7 @@ end
 
 Dokładniej problem walidacji błędów zostanie omówiony w części Praca z Walidacjami Błędów. Na razie wrócimy do wbudowanych pomocy walidacji które są domyślne dla Railsów.
 
-h3. 3 Helpery walidacji
+h3. Helpery walidacji
 
 Moduł Active Record oferuje wiele zdefiniowanych helperów walidacji których można użyć bezpośrednio w twoich definicjach klasy(class definitions). Helpery te działają według wspólnych zasad walidacji. Za każdym razem kiedy walidacja zawodzi, wiadomość błędu jest dodawana do zbioru +errors+ obiektu, a sama wiadomość jest powiązana z polem podlegającym walidacji.
 
@@ -169,7 +170,7 @@ Każdy helper akceptuje arbitralny numer imion atrybutu, tak że w jednej linii 
 
 Wszystkie one akceptują opcje +:on+ oraz +:message+ , które definiują kiedy walidacja powinna zostać uruchomiona i jaka wiadomość powinna być dodana do zbioru +errors+ jeśli zakończy się niepowodzeniem. Opcja +:on+ przyjmuje jedną z wartości +:save+ (domyślna), +:create+, lub +:update+. Dla każdego helpera walidacji jest domyślna wiadomość błędu. Wiadomości te są używane kiedy opcja +:message+ nie jest sprecyzowana. Spójrzmy na każdą z dostępnych opcji helperów.
 
-.h4 3.1 +validates_acceptance_of+
+h4. +validates_acceptance_of+
 
 Walidacje które w polu interfejsu użytkownika były sprawdzone kiedy forma została wysłana. Typowy przypadek użycia tej komendy to kiedy użytkownik potrzebuje wyrazić zgodę na warunki aplikacji usługi, potwierdzić przeczytania jakiegoś tekstu, lub jakieś innej podobnej czynności. Ta walidacja jest specyficzna dla aplikacji sieciowych i jej "akceptacja" nie musi zostać zapisana gdziekolwiek w bazie danych (jeśli nie ma na nią miejsca,  pomoc po prostu stworzy wirtualny atrybut).
 
@@ -189,7 +190,7 @@ class Person < ActiveRecord: :Base
 end
 </ruby>
 
-.h4 3.2 +validates_associated+
+h4. +validates_associated+
 
 Z tego helpera należy skorzystać gdy twój model ma powiązania z innymi modelami które również muszą zostać zwalidowane. Gdy spróbujesz zachować swój obiekt, komenda   +valid?+  zostanie uruchomiona dla każdego z powiązanych obiektów.
 
@@ -206,7 +207,7 @@ Nie używaj +validates_associated+ przy obu końcach powiązania, każde wtedy z
 
 Domyślna wiadomość błędu dla +validates_associated+ to "niepoprawny" ("is invalid"). Zauważ że każdy z powiązanych obiektów będzie zawierał swój własny zbiór +errors+; błędy nie gromadzą się w danym modelu.
 
-.h4 3.3 +validates_confirmation_of+
+h4. +validates_confirmation_of+
 
 Z tego helpera powinno się korzystać gdy dwa pola tekstowe powinny wypełniać ta sama zawartość. Na przykład, dla potwierdzenia hasła lub adresu mailowego. Ta walidacja tworzy wirtualny atrybut którego nazwa to nazwa pola które ma być potwierdzone załącznikiem "_potwierdzenie" ("_confirmation").
 
@@ -234,7 +235,7 @@ end
 
 Domyślna wiadomość błędu dla +validates_confirmation_of+ to "nie ma potwierdzenia" ("doesn't match confirmation").
 
-.h4 3.4 +validates_exclusion_of+
+h4. +validates_exclusion_of+
 
 Ten helper waliduje czy wartości atrybutów są zawarte w danym zestawie. Właściwie tym zestawem może być każdy przeliczalny obiekt.
 
@@ -248,7 +249,7 @@ Helper +validates_exclusion_of+ ma opcję +:in+ która otrzymuje zestaw wartośc
 
 Domyślna wiadomość błędu dla +validates_exclusion_of+ to "lista nie zawiera" ("is not included in the list").
 
-.h4 3.5 +validates_format_of+
+h4. +validates_format_of+
 
 Ten helper waliduje czy wartości atrybutów poprzez testowanie pasują do danej regularnej linii kodu która jest sprecyzowana poprzez użycie opcji +:with+
 
@@ -261,7 +262,7 @@ end
 
 Domyślna wiadomość błędu dla +validates_format_of+ to "nieprawidłowe" ("is invalid").
 
-.h4 3.6 +validates_incusion_of+
+h4. +validates_incusion_of+
 
 Ten helper waliduje czy wartości atrybutów są zawarte w danym zestawie. Zestawem tym może być jakikolwiek przeliczalny obiekt.
 
@@ -276,7 +277,7 @@ Helper +validates_inclusion_of+ posiada opcję +:in+ która otrzymuje zestaw war
 
 Domyślna wiadomość błędu dla +validates_inclusion_of+ to "nie jest na liście" ("is not included in the list").
 
-.h4 3.7 +validates_length_of+
+h4. +validates_length_of+
 
 Ten helper waliduje długość wartości atrybutów. Przewiduje mnogość opcji, tak że można sprecyzować długość ograniczeń na wiele sposobów.
 
@@ -296,12 +297,12 @@ Możliwe opcje ograniczenia długości to:
 * +:in+ (lub +:within+) - wartość atrybutu musi się zawierać w danym interwale. Wartość dla tej opcji może mieć dużą rozpiętość.
 * +:is+ - wartość atrybutu musi być równa dla danej wartości.
 
-Domyślną wiadomością błędu zależy od typu dla jakiej przeprowadzana jest walidacja długości. Można tym wiadomościom nadać cechy osobiste używając +:wrong_length+, +:too_long+ lub +:too_short+ oraz +{{count}}+ jako numer zastępczy zgodny z wykorzystywaną długością ograniczenia. Wciąż można używać opcji +:message+ dla specyfikacji wiadomości błędu.
+Domyślną wiadomością błędu zależy od typu dla jakiej przeprowadzana jest walidacja długości. Można tym wiadomościom nadać cechy osobiste używając +:wrong_length+, +:too_long+ lub +:too_short+ oraz <tt>%{count}</tt> jako numer zastępczy zgodny z wykorzystywaną długością ograniczenia. Wciąż można używać opcji +:message+ dla specyfikacji wiadomości błędu.
 
 <ruby>
 class Person < ActiveRecord: :Base
    validates_length_of :bio, :maximum => 1000,
-      :too_long => "{{count}} characters is the maximum allowed"
+      :too_long => "%{count} characters is the maximum allowed"
 end
 </ruby>
 
@@ -320,7 +321,7 @@ end
 
 Helper +validates_size_of+ jest równoznaczny helperowi +validates_length_of+
 
-.h4 3.8 +validates_numericality_of+
+h4. +validates_numericality_of+
 
 Ten helper waliduje czy atrybuty mają po jednej wartości numerycznej. Domyślnie porówna znaki opcjonalne podążające za całkowitymi lub rzeczywistymi liczbami. Aby sprecyzować że tylko liczby całkowite są dozwolone należy ustawić  +:only_integer+ na +true+.
 
@@ -342,7 +343,7 @@ end
 
 Poza +:only_integer+, helper +validates_umericality_of+ akceptuje również następujące opcje do dodania ograniczeń dla akceptowanych wartości:
 
-* +:greater_than+ - określa że wartość musi być większa niż dostarczona wartość. Domyślna wiadomość błędu dla tej opcji to "musi być większa niż {{liczba}}" ("must be greater than {{count}}").
+* +:greater_than+ - określa że wartość musi być większa niż dostarczona wartość. Domyślna wiadomość błędu dla tej opcji to "must be greater than %{count}"  ("musi być większa niż %{count}" ).
 * +:greater_than_or_equal_to+ - określa że wartość musi być większa lub równa dostarczonej liczby. Domyślna wiadomość błędu dla tej opcji to "_musi być większa lub równa {{liczba}}" ("_must be greater than or equal to {{count}}").
 * +:equal_to+ - określa że wartość musi być równa dostarczonej liczbie. Domyślna wiadomość błędu dla tej opcji to "musi być równa {{liczba}}" ("must be equal to {{count}}").
 * +:less_than+ - określa ze wartość musi być mniejsza niż dostarczona liczba. Domyślna wiadomość błędu tej opcji to "musi być mniejsza niż {{liczba}}" ("must be less than {{count}}").
@@ -352,7 +353,7 @@ Poza +:only_integer+, helper +validates_umericality_of+ akceptuje również nast
 
 Domyślna wiadomość błędu dla +validates_numericality_of+ to "to nie liczba" ("is not a number").
 
-.h4 3.9 +validates_presence_of+
+h4. +validates_presence_of+
 
 Ten helper waliduje czy określone atrybuty są puste. Używa on metody +blank?+ aby sprawdzić czy wartość to +nil+ lub pusty łańcuch znaków albo łańcucha znaków który składa się z pustej przestrzeni.
 
@@ -375,7 +376,7 @@ Kiedy +false.blank?+ jest +true+, a chcemy zwalidować obecność typu logiczneg
 
 Domyślna wiadomość błędu dla +validates_presence_of+ to "nie może być pusty" ("can't be empty").
 
-.h4 3.10 +validates_uniqueness_of+
+h4. +validates_uniqueness_of+
 
 Ten helper waliduje czy atrybut obiektu jest  unikatowy tuż przed zapisaniem obiektu. To nie wymusza unikatowości w bazie danych, może się wiec zdarzyć że w dwóch różnych połączeniach tworzą się dwa zapisy o tej samej wartości która miała być wyjątkowa. Aby tego uniknąć, trzeba stworzyć unikatowy wskaźnik w bazie danych.
 
@@ -408,7 +409,7 @@ Zauważ że niektóre bazy danych są tak skonfigurowane aby przeprowadzać rów
 
 Domyślna wiadomość błędu dla +validates_uniqueness_of+ to "już jest zajęty/-a" ("has already been taken").
 
-.h4 3.11 +validates_each+
+h4. +validates_each+
 
 Ten helper waliduje atrybuty przez blok. Nie ma zdefiniowanej funkcji walidacji. Trzeba ją stworzyć używając bloków, i każdy zawarty atrybut w +validates_each+ zostanie przetestowany. W tym przypadku, nie chcemy nazwisk i imion zaczynających się małymi literami.
 
@@ -422,11 +423,11 @@ end
 
 Blok otrzymuje model, nazwę atrybutu i jego wartość. Można zrobić wszystko aby poszukać poprawnych danych wewnątrz bloku. Jeśli walidacja zawiedzie, można dodać wiadomość błędu do modelu, czyniąc go niepoprawnym.
 
-.h3 4 Wspólne opcje walidacji
+.h3 Wspólne opcje walidacji
 
 Są pewne wspólne opcje których mogą używać wszystkie helpery walidacji. Wszystkie są tu omówione prócz +:if+ oraz +:unless+, które omówione są później w rozdziale Walidacja warunkowa.
 
-.h4 4.1 +:allow_nil+
+h4. +:allow_nil+
 
 Opcja +:allow_nil+ opuszcza walidację gdy wartość która jest walidowana to +nil+. Używanie opcji +:allow_nil+ wraz z +validates_presence_of+ pozwala na walidację +nil+, ale każda wartość +blank?+ będzie odrzucona.
 
@@ -437,7 +438,7 @@ class Coffee < ActiveRecord: :Base
 end
 </ruby>
 
-.h4 4.2 +:allow_blank+
+h4. +:allow_blank+
 
 +:allow_blank+ jest opcją podobną do +:allow_nil+. Ta opcja pozwoli na walidację jeśli wartość atrybutu to +blank?+, podobnie jak +nil+ lub pusty łańcuch znaków.
 
@@ -450,11 +451,11 @@ end
 Topic.create("title" => "").valid # => true
 Topic.create("title" => nil).valid # => true
 
-.h4 4.3 +:message+
+h4. +:message+
 
 Jak już wcześniej pokazano, opcja +:message+ pozwala na sprecyzowanie wiadomości która zostanie dodana do zbioru +errors+ kiedy walidacja zawiedzie. Kiedy ta opcja nie jest używana, moduł Active Record użyje domyślnej wiadomości błędu dla każdego helpera walidacji.
 
-.h4 4.4 +:on+
+h4. +:on+
 
 Opcja +:on+ pozwala na precyzyjne określenie kiedy walidacja powinna nastąpić. Domyślnie zachowanie wbudowanych helperów walidacji jest uruchomienie tuż przed zapisaniem (w obu przypadkach kiedy tworzy się nowy zapis jak i aktualizuje zapis). Chcąc to zmienić, można użyć opcji +:on => :create+ aby uruchomić walidację tylko w momencie tworzenia nowego zapisu lub opcji +:on => :update+ aby uruchomić walidację w momencie aktualizacji już istniejącego zapisu.
 
@@ -471,11 +472,11 @@ class Person < ActiveRecord: :Base
 end
 </ruby>
 
-.h3 5 Walidacja Warunkowa
+.h3 Walidacja Warunkowa
 
 Czasami dobrze jest przeprowadzić walidację obiektu nawet gdy dane twierdzenie jest spełnione. Można to zrobić używając opcji +:if+ oraz +:unless+, które mogą przyjąć symbol, łańcuch znaków lub +Proc+. Można użyć +:if+ kiedy chcemy sprecyzować kiedy walidacja powinna nastąpić. Precyzując kiedy walidacja nie powinna następować używamy opcji +:unless+.
 
-.h4 5.1 Użycie symbolu w opcjach +:if+ oraz +:unless+
+h4. Użycie symbolu w opcjach +:if+ oraz +:unless+
 
 Można powiązać opcje +:if+ oraz +:unless+ z symbolem odpowiadającym nazwie metody która zostanie wymieniona tuż przed walidacją. Ta opcja jest najczęściej używana.
 
@@ -489,7 +490,7 @@ class Order < ActiveRecord: :Base
 end
 </ruby>
 
-.h4 5.2 Użycie łańcucha znaków w opcjach +:if+ oraz +:unless+
+h4. Użycie łańcucha znaków w opcjach +:if+ oraz +:unless+
 
 Można również użyć łańcucha znaków który zostanie oceniony korzystając z +eval+ i potrzebuje zawierać kod Ruby. Tę opcję powinno się używać kiedy łańcuch znaków reprezentuje bardzo krótki warunek.
 <ruby>
@@ -498,7 +499,7 @@ class Person < ActiveRecord: :Base
 end
 </ruby>
 
-.h4 5.3 Używanie +Proc+ w opcjach +:if= oraz +:unless+
+h4. Używanie +Proc+ w opcjach +:if= oraz +:unless+
 
 Na koniec można powiązać opcje +:if+ oraz +:unless+ z wymienionym obiektem +Proc+. Używając obiektu +Proc+ można napisać warunek w linii kodu zamiast korzystać z osobnej metody. Ta opcja jest idealna dla jedno liniowych kodów.
 
@@ -509,7 +510,7 @@ class Account < ActiveRecord: :Base
 end
 </ruby>
 
-.h3 6 Tworzenie Standardowych Metod Walidacji
+.h3 Tworzenie Standardowych Metod Walidacji
 
 Kiedy wbudowane helpery walidacji już nie są wystarczające, można stworzyć własne metody walidacji.
 
@@ -551,13 +552,13 @@ class Movie < ActiveRecord: :Base
 end
 </ruby>
 
-.h3 7 Praca z Błędami Walidacji
+.h3 Praca z Błędami Walidacji
 
 Dodatkowo dla metod +valid?+ i +invalid?+ omówionych wcześniej, Railsy przewidują wiele metod pracy ze zbiorami +errors+ i badania walidacji obiektów.
 
 Tu następuje lista najczęściej używanych metod. Proszę się odnosić do dokumentacji +ActiveRecord: :Errors+ dla pełnej listy dostępnych metod.
 
-.h4 7.1 +errors.add_to_base+
+h4. +errors.add_to_base+
 
 Metoda +add_to_base+ pozwala na dodawanie wiadomości błędów które odnoszą się do obiektu jako całości, w przeciwieństwie do odnoszenia się do poszczególnych atrybutów. Tej metody można użyć do stwierdzenia że obiekt jest nieprawidłowy, niezależnie do wartości jego atrybutów. +add_to_base+ po prostu otrzymuje łańcuch znaków i używa go jako wiadomości błędu.
 
@@ -570,7 +571,7 @@ end
 </ruby>
 
 
-.h4 7.2 +errors.add+
+h4. +errors.add+
 
 Metoda +add+ pozwala na ręczne dodawanie wiadomości które odnoszą się do konkretnych atrybutów. Można użyć opcji =full_messages+ aby zobaczyć wiadomości w takiej formie w jakiej ukazałyby się użytkownikowi. Te konkretne wiadomości poprzedzają nazwy atrybutów. Opcja +add+ otrzymuje nazwę atrybutu do którego chcemy dodać wiadomość, i samą wiadomość.
 
@@ -590,7 +591,7 @@ person.errors.full_messages
    # => ["Name cannot contain the characters !@#%*()_-+="]
 </ruby>
 
-.h4 7.3 +errors.on+
+h4. +errors.on+
 
 Metoda +on+ jest używana gdy chce się sprawdzić wiadomość błędu dla konkretnego atrybutu. Zwraca to różne rodzaje obiektów w zależności od stanu zbioru +errors+ dla danego atrybutu. Gdy nie ma żadnych wiadomości błędu dla danego atrybutu opcja +on+ powraca z +nil+. Jeśli jest tylko jedna wiadomość błędu +on+  powraca z łańcuchem znaków w wiadomości. Kiedy +errors+ posiada dwie lub więcej wiadomości dal atrybutu +on+ powraca z szykiem łańcucha znaków, dla każdego z jedną wiadomością błędu.
 
@@ -615,7 +616,7 @@ person.errors.on(:name)
    # => ["can't be blank", "is too short (minimum is 3 characters)"]
 </ruby>
 
-.h4 7.4 +errors.clear+
+h4. +errors.clear+
 
 Metoda +clear+ używana jest gdy świadomie chce się wyczyścić zbiór +errors+. Włączenie +errors.clear+ dla nieprawidłowego obiektu nie uczyni go poprawnym: zbiór +errors+ będzie po prostu pusty, i następnym razem przy komendzie +valid?+ lub jakiejkolwiek innej która spróbuje zapisać obiekt w bazie danych sprawi ponowne uruchomienie walidacji. Jeśli jakaś walidacja zawiedzie, zbiór +errors+ będzie znów zapełniony.
 
@@ -639,7 +640,7 @@ p.errors.on(:name)
    # => ["can't be blank", "is too short (minimum is 3 characters)"]
 </ruby>
 
-.h4 7.5 +errors.size+
+h4. +errors.size+
 
 Metoda +size+ powraca z całkowitym numerem wiadomości błędów dla danego obiektu.
 

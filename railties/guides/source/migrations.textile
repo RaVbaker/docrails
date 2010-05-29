@@ -1,23 +1,26 @@
-h2. Migrations
+h2. Migracje
 
-Migrations are a convenient way for you to alter your database in a structured and organized manner. You could edit fragments of SQL by hand but you would then be responsible for telling other developers that they need to go and run it. You'd also have to keep track of which changes need to be run against the production machines next time you deploy.
+Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę
+danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś
+potem samemu zatroszczyć się o to, by poinformować innych projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia +rake db:migrate+. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
 
-Active Record tracks which migrations have already been run so all you have to do is update your source and run +rake db:migrate+. Active Record will work out which migrations should be run. It will also update your +db/schema.rb+ file to match the structure of your database.
+Migracje pozwalają na opisanie zmian bazy danych w Rubim. Dzięki temu,
+podobnie jak większość funkcji modułu Active Record, nie zależą one od
+używanego przez Ciebie systemu zarządzania bazą danych. Nie musisz więc martwić się o dokładną składnię komendy CREATE TABLE ani zastanawiać się nad różnymi wariacjami polecenia SELECT *. Możesz na przykład użyć SQLite3 podczas tworzenia, a MySQL w gotowym, udostępnionym serwisie.
 
-Migrations also allow you to describe these transformations using Ruby. The great thing about this is that (like most of Active Record's functionality) it is database independent: you don't need to worry about the precise syntax of +CREATE TABLE+ any more than you worry about variations on +SELECT *+ (you can drop down to raw SQL for database specific features). For example you could use SQLite3 in development, but MySQL in production.
+W poniższym przewodniku dowiesz się wszystkiego o migracjach. W szczególności, tekst opisuje:
 
-You'll learn all about migrations including:
-
-* The generators you can use to create them
-* The methods Active Record provides to manipulate your database
-* The Rake tasks that manipulate them
-* How they relate to +schema.rb+
+* generatory używane przy tworzeniu migracji
+* metody modułu Active Record służące do modyfikacji bazy danych
+* zadania Rake działające na migracjach
+* powiązania między migracjami a plikiem schema.rb
 
 endprologue.
 
-h3. Anatomy of a Migration
 
-Before I dive into the details of a migration, here are a few examples of the sorts of things you can do:
+h3. Anatomia migracji łłł
+
+Zanim zagłębimy się w detale migracji, przedstawiam kilka przykładów ilustrujących ich możliwości:
 
 <ruby>
 class CreateProducts < ActiveRecord::Migration
@@ -36,9 +39,9 @@ class CreateProducts < ActiveRecord::Migration
 end
 </ruby>
 
-This migration adds a table called +products+ with a string column called +name+ and a text column called +description+. A primary key column called +id+ will also be added, however since this is the default we do not need to ask for this. The timestamp columns +created_at+ and +updated_at+ which Active Record populates automatically will also be added. Reversing this migration is as simple as dropping the table.
+Ta migracja tworzy tabelę +products+ z kolumną o nazwie +name+ typu string oraz kolumną tekstową +description+. Zostanie również utworzona domyślna kolumna ID, bedąca kluczem głównym tabeli, ale ponieważ jest to domyślna kolumna każdej tabeli, nie musimy jej nawet definiować. Kolumny zawierające znaczniki czasu (timestamp) +created_at+ i +updated_at+ również zostaną automatycznie dodane przez moduł Active Record. Odwrócenie takiej migracji to po prostu usunięcie tabeli.
 
-Migrations are not limited to changing the schema. You can also use them to fix bad data in the database or populate new fields:
+Możliwości migracji nie ograniczają się do zmiany schematu bazy danych. Przy ich pomocy można także poprawić błędne dane lub uzupełniać nowe pola:
 
 <ruby>
 class AddReceiveNewsletterToUsers < ActiveRecord::Migration
@@ -55,64 +58,73 @@ class AddReceiveNewsletterToUsers < ActiveRecord::Migration
 end
 </ruby>
 
-This migration adds a +receive_newsletter+ column to the +users+ table. We want it to default to +false+ for new users, but existing users are considered
-to have already opted in, so we use the User model to set the flag to +true+ for existing users.
+Ta migracja dodaje kolumnę +receive_newsletter+ do tabeli +users+. Pole to
+mówi nam o przypisaniu użytkownika na listę odbiorców aktualności. Chcemy, by
+domyślnie zawierało ono wartość false dla nowych użytkowników, ale użytkownicy
+juz zarejestrowani są zgłoszeni do otrzymywania aktualności, więc możemy użyć
+modelu +User+ do ustawienia dla nich flagi +reveive_newsletter+ jako +true+.
+ 
+NOTE: <<models,Ostrzeżenie>> dotyczące używania modeli w migracjach.
 
-NOTE: Some "caveats":#using-models-in-your-migrations apply to using models in your migrations.
+h4. Migracje są klasami
+Migracja jest podklasą klasy ActiveRecord::Migration, która posiada
+zaimplementowane dwie metody: +up+ (wykonaj żądane transformacje) i +down+
+(wycofaj je).
 
-h4. Migrations are Classes
-
-A migration is a subclass of <tt>ActiveRecord::Migration</tt> that implements two class methods: +up+ (perform the required transformations) and +down+ (revert them).
-
-Active Record provides methods that perform common data definition tasks in a database independent way (you'll read about them in detail later):
+Moduł Active Record udostępnia metody, służące do typowych operacji na bazach danych w sposób niezależny od typu używanej bazy (ich dokładniejszy opis będzie zamieszczony w dalszej części):
 
 * +create_table+
 * +change_table+
 * +drop_table+
 * +add_column+
-* +change_column+
-* +rename_column+
 * +remove_column+
+* +change_column+
+* +rename_column+ 
 * +add_index+
 * +remove_index+
 
-If you need to perform tasks specific to your database (for example create a "foreign key":#active-record-and-referential-integrity constraint) then the +execute+ function allows you to execute arbitrary SQL. A migration is just a regular Ruby class so you're not limited to these functions. For example after adding a column you could write code to set the value of that column for existing records (if necessary using your models).
 
-On databases that support transactions with statements that change the schema (such as PostgreSQL or SQLite3), migrations are wrapped in a transaction. If the database does not support this (for example MySQL) then when a migration fails the parts of it that succeeded will not be rolled back. You will have to unpick the changes that were made by hand.
+Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych
+(np. utworzyć <<foreign_key,klucz obcy>>), możesz do tego celu wykorzystać
+funkcję +execute+, która umożliwia Ci wykonanie kodu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.
 
-h4. What's in a Name
+W bazach danych obsługujących transakcje zmieniające schemat bazy danych
+(takich jak PostgreSQL), migracje są realizowane jako transakcje. Jeśli baza
+danych nie posiada takiej funkcjonalności (np. MySQL i SQLite), w przypadku
+niepowodzenia migracji, etapy już wykonane nie zostaną automatycznie wycofane. 
+Wymaga to ręcznego usunięcia już wprowadzonych zmian.
 
-Migrations are stored in files in +db/migrate+, one for each migration class. The name of the file is of the form +YYYYMMDDHHMMSS_create_products.rb+, that is to say a UTC timestamp identifying the migration followed by an underscore followed by the name of the migration. The name of the migration class (CamelCased version) should match the latter part of the file name. For example +20080906120000_create_products.rb+ should define +CreateProducts+ and +20080906120001_add_details_to_products.rb+ should define +AddDetailsToProducts+. If you do feel the need to change the file name then you <em>have to</em> update the name of the class inside or Rails will complain about a missing class.
+h4. Co kryje się w nazwie
 
-Internally Rails only uses the migration's number (the timestamp) to identify them. Prior to Rails 2.1 the migration number started at 1 and was incremented each time a migration was generated. With multiple developers it was easy for these to clash requiring you to rollback migrations and renumber them. With Rails 2.1 this is largely avoided by using the creation time of the migration to identify them. You can revert to the old numbering scheme by adding the following line to +config/application.rb+.
+Każda klasa migracji jest przechowywana w oddzielnym pliku w katalogu
++db/migrate+. Nazwa pliku posiada format +YYYYMMDDHHMMSS_create_products.rb+, zawierającym znacznik czasowy (w czasie UTC) oraz - po podkreślniku - nazwę migracji. Nazwa taka musi się zgadzać z migracją, którą plik zawiera, np:
++20080906120000_create_products+ powinna definiować migrację CreateProducts, a
++20080906120001_add_details_to_products+ - migrację AddDetailsToProducts. Jeśli z jakichś przyczyn zmienisz nazwę pliku, MUSISZ poprawić także nazwę klasy - w przeciwnym wypadku Railsy będą informowały Cię o braku wymaganej klasy.
 
-<ruby>
-config.active_record.timestamped_migrations = false
-</ruby>
+Railsy wykorzystują jedynie numer migracji (czyli jej znacznik czasowy) do jej identyfikacji. Wersje wcześniejsze niż 2.1 numerowały migracje liczbami naturalnymi począwszy od 1, przypisując każdej nowej migracji kolejną liczbę. W przypadku pracy w zespołach kolizje oznaczeń były nieuniknione, co wymagało wycofania zmian i przenumerowania wszystkich migracji. Od wersji 2.1 rozwiązano ten problem identyfikując migrację poprzez datę jej utworzenia. Można przywrócić starszy sposób numeracji, ustawiając w pliku +environment.rb+ zmienną +config.active_record.timestamped_migrations+ na wartość +false+.
 
-The combination of timestamps and recording which migrations have been run allows Rails to handle common situations that occur with multiple developers.
+Dzięki nowemu sposobowi numeracji oraz monitorowaniu które migracje już zostały wykonane, Railsy rozwiązują wiele częstych problemów powstających przy pracy zespołowej nad jednym projektem.
 
-For example Alice adds migrations +20080906120000+ and +20080906123000+ and Bob adds +20080906124500+ and runs it. Alice finishes her changes and checks in her migrations and Bob pulls down the latest changes. Rails knows that it has not run Alice's two migrations so +rake db:migrate+ would run them (even though Bob's migration with a later timestamp has been run), and similarly migrating down would not run their +down+ methods.
+Przykładowo, Ania tworzy migracje +20080906120000+ i +20080906123000+, a Bartek tworzy +20080906124500+ i ją wykonuje. Ania kończy wprowadzać zmiany, a Bartek wycofuje swoją migrację. Railsy wiedzą, że migracje Ani nie zostały wykonane, więc +rake db:migrate+ wykona je (pomimo tego, że późniejsza migracja stworzona przez Bartka już została wykonana). Analogicznie, polecenie wycofania migracji pominie niewykonane jeszcze migracje Ani.
 
-Of course this is no substitution for communication within the team. For example, if Alice's migration removed a table that Bob's migration assumed to exist, then trouble would certainly strike.
+Oczywiście nie zastąpi to w pełni komunikacji wewnątrz zespołu. Na przykład, jeśli migracja Ani usunęła tabelę wykorzystywaną przez migrację Bartka, problem i tak wystąpi.
 
-h4. Changing Migrations
+h4. Zmiany w migracjach
 
-Occasionally you will make a mistake when writing a migration. If you have already run the migration then you cannot just edit the migration and run the migration again: Rails thinks it has already run the migration and so will do nothing when you run +rake db:migrate+. You must rollback the migration (for example with +rake db:rollback+), edit your migration and then run +rake db:migrate+ to run the corrected version.
+Czasem popełnisz błąd podczas tworzenia migracji. Jeśli już ją wykonałeś, nie
+możesz po prostu jej wyedytować i wykonać ją ponownie: Railsy uznają, że została już wykonana i kolejne wpisanie komendy +rake db:migrate+ nie zaowocuje wprowadzeniem poprawek. Musisz w tym celu wycofać migrację (np. komendą +rake db:rollback+), poprawić błędy w migracji i ponownie ją wykonać poleceniem +rake db:migrate+.
 
-In general editing existing migrations is not a good idea: you will be creating extra work for yourself and your co-workers and cause major headaches if the existing version of the migration has already been run on production machines. Instead you should write a new migration that performs the changes you require. Editing a freshly generated migration that has not yet been committed to source control (or more generally which has not been propagated beyond your development machine) is relatively harmless. Just use some common sense.
+Ogólnie rzecz biorąc, edycja istniejących migracji nie jest dobrym pomysłem: dodajesz tym samym pracy sobie i swoim współpracownikom. Może to być przyczyną poważnych kłopotów, jeżeli Twoja migracja została już uruchomiona na docelowym serwerze. Lepszym rozwiązaniem jest stworzenie nowej migracji, która wprowadzi wymagane zmiany. Edycja świeżo utworzonej migracji, która nie została jeszcze przekazana na serwer docelowy jest stosunkowo bezpieczna.
 
-h3. Creating a Migration
+h3. Tworzenie migracji
 
-h4. Creating a Model
+h4. Tworzenie modelu
 
-The model and scaffold generators will create migrations appropriate for adding a new model. This migration will already contain instructions for creating the relevant table. If you tell Rails what columns you want then statements for adding those will also be created. For example, running
+Generatory modelu i rusztowania (_scaffold_) utworzą migrację odpowiednią dla tworzonego modelu. Migracja taka zawiera od razu instrukcje potrzebne do utworzenia powiązanej z danym modelem tablicy. Jeśli powiesz Railsom jakie kolumny powinny znaleźć się w tej tabeli, do migracji zostaną dodane odpowiednie formuły. Przykładowo, wykonanie polecenia 
 
-<shell>
-rails generate model Product name:string description:text
-</shell>
++ruby script/generate model Product name:string description:text+ 
 
-will create a migration that looks like this
+spowoduje stworzenie następującej migracji:
 
 <ruby>
 class CreateProducts < ActiveRecord::Migration
@@ -131,18 +143,15 @@ class CreateProducts < ActiveRecord::Migration
 end
 </ruby>
 
-You can append as many column name/type pairs as you want. By default +t.timestamps+ (which creates the +updated_at+ and +created_at+ columns that
-are automatically populated by Active Record) will be added for you.
+Możesz dołączyć tyle par kolumna/typ ile potrzebujesz. Domyślnie zostaną dodane znaczniki czasu +t.timestamps+ (które powodują automatyczne utworzenie przez moduł Active Record kolumn +updated_at+ i +created_at+).
 
-h4. Creating a Standalone Migration
+h4. Tworzenie samodzielnej migracji
 
-If you are creating migrations for other purposes (for example to add a column to an existing table) then you can use the migration generator:
+Jeśli tworzysz migracje dla innych celów (np. aby dodać kolumnę do istniejącej już tabeli), możesz skorzystać z generatora migracji:
 
-<shell>
-rails generate migration AddPartNumberToProducts
-</shell>
++ruby script/generate migration AddPartNumberToProducts+
 
-This will create an empty but appropriately named migration:
+Ta komenda utworzy pustą, lecz odpowiednio nazwaną i skonstruowaną migrację:
 
 <ruby>
 class AddPartNumberToProducts < ActiveRecord::Migration
@@ -154,13 +163,11 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 </ruby>
 
-If the migration name is of the form "AddXXXToYYY" or "RemoveXXXFromYYY" and is followed by a list of column names and types then a migration containing the appropriate +add_column+ and +remove_column+ statements will be created.
+Jeśli nazwa podana w poleceniu generatora migracji jest formatu AddXXXToYYY lub RemoveXXXFromYYY i po niej wymieniona jest lista kolumn i ich typów, to w wyniku utworzona zostanie migracja z odpowiednimi poleceniami dodania/usunięcia kolumny, przykładowo:
 
-<shell>
-rails generate migration AddPartNumberToProducts part_number:string
-</shell>
++ruby script/generate migration AddPartNumberToProducts part_number:string+
 
-will generate
+wygeneruje migrację:
 
 <ruby>
 class AddPartNumberToProducts < ActiveRecord::Migration
@@ -174,13 +181,11 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 </ruby>
 
-Similarly,
+Analogicznie, komenda
 
-<shell>
-rails generate migration RemovePartNumberFromProducts part_number:string
-</shell>
++ruby script/generate migration RemovePartNumberFromProducts part_number:string+
 
-generates
+generuje
 
 <ruby>
 class RemovePartNumberFromProducts < ActiveRecord::Migration
@@ -194,13 +199,11 @@ class RemovePartNumberFromProducts < ActiveRecord::Migration
 end
 </ruby>
 
-You are not limited to one magically generated column, for example
+Przy tworzeniu migracji nie musisz ograniczać się do jednej kolumny, na przykład:
 
-<shell>
-rails generate migration AddDetailsToProducts part_number:string price:decimal
-</shell>
++ruby script/generate migration AddDetailsToProducts part_number:string price:decimal+
 
-generates
+wygeneruje migrację:
 
 <ruby>
 class AddDetailsToProducts < ActiveRecord::Migration
@@ -216,15 +219,16 @@ class AddDetailsToProducts < ActiveRecord::Migration
 end
 </ruby>
 
-As always, what has been generated for you is just a starting point. You can add or remove from it as you see fit.
 
-h3. Writing a Migration
+Jak zwykle, wygenerowana migracja jest dopiero punktem startowym Twojej pracy. Możesz ją dalej modyfikować, dodając lub usuwając elementy.
 
-Once you have created your migration using one of the generators it's time to get to work!
+h3. Pisanie migracji
 
-h4. Creating a Table
+Jeśli już utworzyłeś migrację przy pomocy jednego z generatorów, najwyższy czas zabrać się do pracy!
 
-Migration method +create_table+ will be one of your workhorses. A typical use would be
+h4. Tworzenie tabeli
+
++create_table+ jest jedną z najbardziej podstawowych komend. Jej typowe użycie ilustruje przykład:
 
 <ruby>
 create_table :products do |t|
@@ -232,9 +236,9 @@ create_table :products do |t|
 end
 </ruby>
 
-which creates a +products+ table with a column called +name+ (and as discussed below, an implicit +id+ column).
+Przykład ten generuje tabelę +products+ z kolumną o nazwie +name+ (i, jak to omówimy w dalszej części, domyślną kolumną +id+).
 
-The object yielded to the block allows you create columns on the table. There are two ways of doing this: The first (traditional) form looks like
+Obiekt przekazany (yielded) do bloku pozwala na tworzenie kolumn tabeli. Są na to dwa sposoby. Pierwszy z nich wygląda tak:
 
 <ruby>
 create_table :products do |t|
@@ -242,7 +246,9 @@ create_table :products do |t|
 end
 </ruby>
 
-the second form, the so called "sexy" migration, drops the somewhat redundant +column+ method. Instead, the +string+, +integer+, etc. methods create a column of that type. Subsequent parameters are the same.
+Drugi sposób, tzw. "seksowne" migracje, nie korzysta z nadmiarowej metody
++column+. Zamiast niej wykorzystać można metody +string+, +integer+ itp.,
+które tworzą kolumny odpowiednich typów. Pozostałe parametry są identyczne do parametrów metody +column+.
 
 <ruby>
 create_table :products do |t|
@@ -250,19 +256,20 @@ create_table :products do |t|
 end
 </ruby>
 
-By default +create_table+ will create a primary key called +id+. You can change the name of the primary key with the +:primary_key+ option (don't forget to update the corresponding model) or if you don't want a primary key at all (for example for a HABTM join table) you can pass +:id => false+. If you need to pass database specific options you can place an SQL fragment in the +:options+ option. For example
+Domyślnie +create_table+ stworzy klucz główny nazwany +id+. Możesz zmienić jego nazwę korzystając z opcji +:primiary_key+ (nie zapomnij poprawić powiązanego z tabelą modelu) lub, jeśli nie chcesz w ogóle klucza głównego (np. dla tabeli HABTM, realizującej relację typu wiele-do-wielu) możesz dodać +id => false+. Jeśli chcesz dodać opcję specyficzną dla konkretnego typu bazy danych, możesz umieścić fragment kodu SQL wewnątrz parametru +:options+. Na przykład:
 
 <ruby>
 create_table :products, :options => "ENGINE=BLACKHOLE" do |t|
   t.string :name, :null => false
 end
 </ruby>
+Opcja ta doda +ENGINE=BLACKHOLE+ do kodu SQL użytego do tworzenia tabeli (dla MySQL domyślny parametr to "ENGINE=InnoDB").
 
-will append +ENGINE=BLACKHOLE+ to the SQL statement used to create the table (when using MySQL the default is +ENGINE=InnoDB+).
+Typy obsługiwane przez moduł Active Record to +:primary_key+, +:string+, +:text+, +:integer+, +:float+, +:decimal+, +:datetime+, +:timestamp+, +:time+, +:date+, +:binary+, +:boolean+.
 
-The types supported by Active Record are +:primary_key+, +:string+, +:text+, +:integer+, +:float+, +:decimal+, +:datetime+, +:timestamp+, +:time+, +:date+, +:binary+, +:boolean+.
-
-These will be mapped onto an appropriate underlying database type, for example with MySQL +:string+ is mapped to +VARCHAR(255)+. You can create columns of types not supported by Active Record when using the non-sexy syntax, for example
+Zostaną one zrealizowane poprzez odpowiednie dla bazy danych typy danych, np.
+w MySQL +:string+ zostanie przetłumaczony na +VARCHAR(255)+. Możesz tworzyć
+kolumny innych niż wymienione typów pod warunkiem, że nie używasz "seksownej" składni, przykładowo:
 
 <ruby>
 create_table :products do |t|
@@ -270,11 +277,11 @@ create_table :products do |t|
 end
 </ruby>
 
-This may however hinder portability to other databases.
+Może to jednak uniemożliwić poprawne przeniesienie migracji na inny typ bazy danych.
 
-h4. Changing Tables
+h4. Zmienianie tabel
 
-A close cousin of +create_table+ is +change_table+, used for changing existing tables. It is used in a similar fashion to +create_table+ but the object yielded to the block knows more tricks. For example
+Bliskim kuzynem +create_table+ jest +change_table+. Komenda ta służy do zmiany istniejących już tabel i używana jest w analogiczny sposób jak +create_table+, jednak w jej wypadku obiekt przekazany do bloku daje o wiele większe możliwości. Przykładowo:
 
 <ruby>
 change_table :products do |t|
@@ -284,7 +291,8 @@ change_table :products do |t|
   t.rename :upccode, :upc_code
 end
 </ruby>
-removes the +description+ and +name+ columns, creates a +part_number+ column and adds an index on it. Finally it renames the +upccode+ column.   This is the same as doing
+
+Ta komenda usuwa kolumnę +description+, dodaje kolumnę +part_number+ i tworzy na niej indeks. Ostatnia metoda powoduje zmianę nazwy kolumny +upccode+ na +upc_code+. Ten sam efekt można osiągnąć również następującym sposobem:
 
 <ruby>
 remove_column :products, :description
@@ -294,27 +302,27 @@ add_index :products, :part_number
 rename_column :products, :upccode, :upc_code
 </ruby>
 
-You don't have to keep repeating the table name and it groups all the statements related to modifying one particular table. The individual transformation names are also shorter, for example +remove_column+ becomes just +remove+ and +add_index+ becomes just +index+.
+Stosując pierwszą składnię nie musisz powtarzać przy każdej komendzie nazwy tabeli - grupujesz wszystkie wykonane na niej operacje w jedną komendę. Dodatkowo nazwy transformacji są krótsze: +remove_column+ zastępuje samo +remove+ a +add_index+ - po prostu +index+.
 
-h4. Special Helpers
+h4. Specjalne helpery
 
-Active Record provides some shortcuts for common functionality. It is for example very common to add both the +created_at+ and +updated_at+ columns and so there is a method that does exactly that:
+Moduł Active Record zapewnia kilka skrótów do najczęściej używanych opcji. Bardzo częste jest na przykład dodawanie kolumn +created_at+ i +updated_at+, więc stworzono specjalną metodę, która to ułatwia:
 
 <ruby>
 create_table :products do |t|
   t.timestamps
 end
 </ruby>
-will create a new products table with those two columns (plus the +id+ column) whereas
+Ten zapis spowoduje stworzenie nowej tabeli +products+ z oboma wspomnianymi kolumnami, podczas gdy:
 
 <ruby>
 change_table :products do |t|
   t.timestamps
 end
 </ruby>
-adds those columns to an existing table.
+spowoduje dodanie tych kolumn do istniejącej tabeli.
 
-The other helper is called +references+ (also available as +belongs_to+). In its simplest form it just adds some readability
+Inny helper nazywa się +references+ (można też używać nazwy +belongs_to+). W najprostrzej postaci, poprawia on po prostu czytelność:
 
 <ruby>
 create_table :products do |t|
@@ -322,24 +330,23 @@ create_table :products do |t|
 end
 </ruby>
 
-will create a +category_id+ column of the appropriate type. Note that you pass the model name, not the column name. Active Record adds the +_id+ for you. If you have polymorphic +belongs_to+ associations then +references+ will add both of the columns required:
+Ten zapis stworzy kolumnę +category_id+ odpowiedniego typu. Zwróc uwagę na fakt, że w kodzie podajemy nazwę modelu, a nie kolumny. Moduł Active Record sam dodaje przyrostek +_id+. Jeśli potrzebujesz polimorficznych asocjacji, to +references+ doda obie potrzebne kolumny:
 
 <ruby>
 create_table :products do |t|
   t.references :attachment, :polymorphic => {:default => 'Photo'}
 end
 </ruby>
-will add an +attachment_id+ column and a string +attachment_type+ column with a default value of 'Photo'.
+Ten zapis spowoduje dodanie kolumny +attachment_id+ oraz drugiej kolumny +attachment_type+ typu string, o domyślnej wartości Photo.
 
-NOTE: The +references+ helper does not actually create foreign key constraints for you. You will need to use +execute+ for that or a plugin that adds "foreign key support":#active-record-and-referential-integrity.
+NOTE: Helper +references+ nie tworzy  <<foreign_key,kluczy obcych>>. Aby je dodać, musisz użyć metody +execute+ lub skorzystać z wtyczki poszerzającej funkcjonalność modułu Active Record.
 
-If the helpers provided by Active Record aren't enough you can use the +execute+ function to execute arbitrary SQL.
+Jeśli helpery udostępniane przez moduł Active Record nie wystarczają do Twoich potrzeb, możesz użyc funkcji +execute+ by wywołać kod SQL.
+Aby zapoznać się z detalami i przykładami tworzenia własnych metod polecam dokumentację API, zwłaszcza "ActiveRecord::ConnectionAdapters::SchemaStatements":http//api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html (opis metod dostępnych w metodach +up+ i +down+), "ActiveRecord::ConnectionAdapters::TableDefinition":http//api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html (metody dostępne na obiekcie przekazanym przy pomocy komendy +create_table+) i "ActiveRecord::ConnectionAdapters::Table":http//api.rubyonrails.com/classes/ActiveRecord/ConnectionAdapters/Table.html (metody na obiekcie przekazanym przez +change_table+).
 
-For more details and examples of individual methods check the API documentation, in particular the documentation for "<tt>ActiveRecord::ConnectionAdapters::SchemaStatements</tt>":http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html (which provides the methods available in the +up+ and +down+ methods),  "<tt>ActiveRecord::ConnectionAdapters::TableDefinition</tt>":http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/TableDefinition.html (which provides the methods available on the object yielded by +create_table+) and "<tt>ActiveRecord::ConnectionAdapters::Table</tt>":http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/Table.html (which provides the methods available on the object yielded by +change_table+).
+h4. Tworzenie metody down
 
-h4. Writing Your +down+ Method
-
-The +down+ method of your migration should revert the transformations done by the +up+ method. In other words the database schema should be unchanged if you do an +up+ followed by a +down+. For example if you create a table in the +up+ method you should drop it in the +down+ method. It is wise to do things in precisely the reverse order to in the +up+ method. For example
+Metoda +down+ Twojej migracji powinna odwrócić transformacje wywołane przez metodę +up+. Innymi słowy, baza nie powinna ulec zmianie, jeśli wywołamy metodę +up+ a po niej metodę +down+. Na przykład, jeśli w metodzie +up+ tworzymy tabelę, to w metodzie +down+ powinniśmy ją usunąć. Rozsądnie jest w metodzie +down+ odwoływać wszystkie polecenia w dokładnie odwrotnej kolejności niż zostały one wywołane. Na przykład:
 
 <ruby>
 class ExampleMigration < ActiveRecord::Migration
@@ -349,18 +356,13 @@ class ExampleMigration < ActiveRecord::Migration
       t.references :category
     end
     #add a foreign key
-    execute <<-SQL
-      ALTER TABLE products
-        ADD CONSTRAINT fk_products_categories
-        FOREIGN KEY (category_id)
-        REFERENCES categories(id)
-    SQL
-
+    execute "ALTER TABLE products ADD CONSTRAINT fk_products_categories FOREIGN KEY (category_id) REFERENCES categories(id)"
+    
     add_column :users, :home_page_url, :string
-
+    
     rename_column :users, :email, :email_address
   end
-
+  
   def self.down
     rename_column :users, :email_address, :email
     remove_column :users, :home_page_url
@@ -369,66 +371,62 @@ class ExampleMigration < ActiveRecord::Migration
   end
 end
 </ruby>
-Sometimes your migration will do something which is just plain irreversible, for example it might destroy some data. In cases like those when you can't reverse the migration you can raise +IrreversibleMigration+ from your +down+ method. If someone tries to revert your migration an error message will be
-displayed saying that it can't be done.
+Czasem Twoja migracja wykona transformację, która jest nieodwracalna, na przykład usunie jakieś dane. W takim przypadku, możesz wywołać IrreverisbleMigration ze swojej metody +down+. W przypadku próby odwrócenia Twojej migracji wyświetlony zostanie komunikat informujący o braku możliwości cofnięcia migracji.
 
+h3. Wykonywanie migracji
 
-h3. Running Migrations
+Railsy zapewniają zestaw zadań Rake służących do działań na migracjach, sprowadzających się do wykonania określonych zestawów migracji. Prawdopodobnie najważniejszym zadaniem Rake jest +db:migrate+. W swojej najbardziej podstawowej formie wykonuje ona metodę +up+ dla każdej migracji, która nie została jeszcze wywołana. Jeśli nie ma takich migracji, polecenie po prostu kończy swoje działanie.
 
-Rails provides a set of rake tasks to work with migrations which boils down to running certain sets of migrations. The very first migration related rake task you use will probably be +db:migrate+. In its most basic form it just runs the +up+ method for all the migrations that have not yet been run. If there are no such migrations it exits.
+Warto zauważyć, że wywołanie +db:migrate+ powoduje również uruchomienie zadania +db:schema:dump+, które zmienia zawartość pliku +db/schema.rb+ tak, by odpowiadał on aktualnej strukturze bazy.
 
-Note that running the +db:migrate+ also invokes the +db:schema:dump+ task, which will update your db/schema.rb file to match the structure of your database.
-
-If you specify a target version, Active Record will run the required migrations (up or down) until it has reached the specified version. The
-version is the numerical prefix on the migration's filename. For example to migrate to version 20080906120000 run
-
+Jeśli sprecyzujesz docelową wersję migracji, moduł Active Record wykona (lub odwoła) migracje wymagane do osiągnięcia żądanej przez Ciebie wersji. Pod pojęciem wersji rozumiemy prefiks nazwy pliku migracji, zawierający stempel czasowy jego utworzenia. Na przykład, aby migrować do wersji 20080906120000, wykonamy polecenie:
 <shell>
 rake db:migrate VERSION=20080906120000
 </shell>
 
-If this is greater than the current version (i.e. it is migrating upwards) this will run the +up+ method on all migrations up to and including 20080906120000, if migrating downwards this will run the +down+ method on all the migrations down to, but not including, 20080906120000.
+Jeśli podana wersja jest późniejsza niż obecna, polecenie spowoduje wywołanie metod +up+ kolejnych migracji aż do migracji 20080906120000 włącznie. W przeciwnym wypadku, wszystkie późniejsze niż wskazana migracje zostaną wycofane metodą +down+.
 
-h4. Rolling Back
+h4. Wycofywanie migracji
 
-A common task is to rollback the last migration, for example if you made a mistake in it and wish to correct it. Rather than tracking down the version number associated with the previous migration you can run
+Częstym zadaniem jest wycofanie ostatniej migracji, na przykład po to, by poprawić znaleziony w niej błąd. Zamiast wpisywać numer poprzedniej wersji, możemy po prostu wycofać ostatnią zmianę poleceniem:
 
 <shell>
 rake db:rollback
 </shell>
 
-This will run the +down+ method from the latest migration. If you need to undo several migrations you can provide a +STEP+ parameter:
+Wykonana zostanie metoda +down+ ostatniej migracji. Jeśli potrzebujesz wycofać więcej migracji, możesz dodać parametr +STEP+:
 
 <shell>
 rake db:rollback STEP=3
 </shell>
 
-will run the +down+ method from the last 3 migrations.
+Tym sposobem wykonasz metodę +down+ dla trzech ostatnich migracji.
 
-The +db:migrate:redo+ task is a shortcut for doing a rollback and then migrating back up again. As with the +db:rollback+ task you can use the +STEP+ parameter if you need to go more than one version back, for example
+Zadanie +dr:migrate:redo+ jest skrótowym zapisem wycofania i ponownego wykonania migracji. Podobnie jak w przypadku +db:rollback+, możesz dodać parametr +STEP+ jeśli chcesz powtórzyć więcej niż jedną migrację, np:
 
 <shell>
 rake db:migrate:redo STEP=3
 </shell>
 
-Neither of these Rake tasks do anything you could not do with +db:migrate+, they are simply more convenient since you do not need to explicitly specify the version to migrate to.
+Żadne z powyższych zadań Rake nie wykonuje niczego, czego nie można osiągnąć przy pomocy podstawowego polecenia +db:migrate+. Są to po prostu wygodniejsze sposoby pracy na migracjach, nie wymagają bowiem podawania wprost docelowej wersji migracji.
 
-Lastly, the +db:reset+ task will drop the database, recreate it and load the current schema into it.
+Ostatnim poleceniem jest +db:reset+. Służy ono do usunięcia całej bazy danych, ponownego jej stworzenia i przywrócenia obecnego schematu.
 
-NOTE: This is not the same as running all the migrations - see the section on "schema.rb":#schema-dumping-and-you.
+NOTE: Polecenie to nie jest idenyczne z wprowadzeniem wszystkich migracji - szczegóły znajdziesz w sekcji "schema.rb":#schema-dumping-and-you.
 
-h4. Being Specific
+h4. Wywoływanie konkretnej migracji
 
-If you need to run a specific migration up or down the +db:migrate:up+ and +db:migrate:down+ tasks will do that. Just specify the appropriate version and the corresponding migration will have its +up+ or +down+ method invoked, for example
+Jeśli chcesz wywołać metodę +up+ lub +down+ konkretnej migracji, możesz w tym celu użyć komend +db:migrate:up+ i +db:migrate:down+. Wystarczy podać dokładną wersję migracji, a jej metoda +up+ albo +down+ zostanie wykonana. Na przykład
 
 <shell>
 rake db:migrate:up VERSION=20080906120000
 </shell>
 
-will run the +up+ method from the 20080906120000 migration. These tasks check whether the migration has already run, so for example +db:migrate:up VERSION=20080906120000+ will do nothing if Active Record believes that 20080906120000 has already been run.
+wywoła metodę +up+ dla migracji 20080906120000. Zadanie to sprawdza najpierw czy podana migracja została wcześniej wykonana, więc np. komenda +db:migrate:up VERSION=20080906120000+ nie spowoduje żadnych zmian, jeśli moduł Active Record uzna, że ta migracja jest już wywołana.
 
-h4. Being Talkative
+4. Komunikaty
 
-By default migrations tell you exactly what they're doing and how long it took. A migration creating a table and adding an index might produce output like this
+Domyślnie migracja informuje Cię dokładnie o wykonywanej obecnie transformacji oraz o czasie który był potrzebny do wykonania ukończonych zadań. Migracja tworząca tabelę i indeks może wygenerować na przykład taki komunikat:
 
 <shell>
 20080906170109 CreateProducts: migrating
@@ -439,13 +437,13 @@ By default migrations tell you exactly what they're doing and how long it took. 
 20080906170109 CreateProducts: migrated (0.0059s)
 </shell>
 
-Several methods are provided that allow you to control all this:
+Istnieje kilka metod służących do kontroli komunikatów zwrotnych:
 
-* +suppress_messages+ suppresses any output generated by its block
-* +say+ outputs text (the second argument controls whether it is indented or not)
-* +say_with_time+ outputs text along with how long it took to run its block. If the block returns an integer it assumes it is the number of rows affected.
+* +suppress_messages+ zawiesza wszystkie komunikaty generowane przez dany blok
+* +say+ wyświetla tekst (drugi parametr służy do określenia czy tekst ma być w nowej linii czy nie)
+* +say_with_time+ wyświetla wskazany tekst oraz czas potrzebny na wykonanie bloku. Jeśli blok zwróci liczbę typu integer, metoda traktuje ją jako liczbę wierszy zmodyfikowanych przez ten blok.
 
-For example, this migration
+Na przykład migracja:
 
 <ruby>
 class CreateProducts < ActiveRecord::Migration
@@ -472,33 +470,33 @@ class CreateProducts < ActiveRecord::Migration
 end
 </ruby>
 
-generates the following output
+wygeneruje następujący komunikat:
 
 <shell>
 20080906170109 CreateProducts: migrating
-  Created a table
+-- Created a table
    -> and an index!
-  Waiting for a while
+-- Waiting for a while
    -> 10.0001s
    -> 250 rows
 20080906170109 CreateProducts: migrated (10.0097s)
 </shell>
 
-If you just want Active Record to shut up then running +rake db:migrate VERBOSE=false+ will suppress any output.
+Jeśli chcesz po prostu zupełnie "uciszyć" moduł Active Record, możesz wykorzystać komendę +rake db:migrate VERBOSE=false+.
 
-h3. Using Models in Your Migrations
+h3. Użycie modeli w migracjach
 
-When creating or updating data in a migration it is often tempting to use one of your models. After all they exist to provide easy access to the underlying data. This can be done but some caution should be observed.
+Podczas tworzenia czy aktualizacji danych zawsze kusi wykorzystanie jednego z modeli. W zasadzie po to przecież tworzymy modele, by ułatwić dostęp do danych. Można to wykonać, zachowując jednak pewien warunek. 
 
-Consider for example a migration that uses the +Product+ model to update a row in the corresponding table. Alice later updates the +Product+ model, adding a new column and a validation on it. Bob comes back from holiday, updates the source and runs outstanding migrations with +rake db:migrate+, including the one that used the +Product+ model. When the migration runs the source is up to date and so the +Product+ model has the validation added by Alice. The database however is still old and so does not have that column and an error ensues because that validation is on a column that does not yet exist.
+Wyobraźmy sobie na przykład migrację korzystającą z modelu Product w celu aktualizacji wiersza powiązanej z nim tabeli. Następnie Ania zmienia model Product, dodając nową kolumnę i walidację dla niej. Gdy Bartek wraca z wakacji, aktualizuje kod źródłowy i wpisując komendę +rake db:migrate+ wykonuje wszystkie migracje, włącznie z migracją korzystającą z modelu Product. Ponieważ Bartek zaktualizował kod źródłowy, model Product zawiera nową walidację stworzoną przez Anię, podczas gdy baza nie posiada nowej kolumny. Spowoduje to błąd - walidacja będzie się odnosić do nieistniejącej kolumny.
 
-Frequently I just want to update rows in the database without writing out the SQL by hand: I'm not using anything specific to the model. One pattern for this is to define a copy of the model inside the migration itself, for example:
+Często chcę po prostu zaktualizować wiersze danych w bazie bez konieczności ręcznego wpisywania kodu SQL; nie wykorzystuję żadnych specyficznych dla danego modelu cech. Jednym z rozwiązań jest w takim wypadku stworzenie kopii modelu wewnątrz samej migracji, na przykład:
 
 <ruby>
 class AddPartNumberToProducts < ActiveRecord::Migration
   class Product < ActiveRecord::Base
   end
-
+  
   def self.up
     ...
   end
@@ -508,17 +506,17 @@ class AddPartNumberToProducts < ActiveRecord::Migration
   end
 end
 </ruby>
-The migration has its own minimal copy of the +Product+ model and no longer cares about the +Product+ model defined in the application.
+Migracja posiada swoją własną kopię modelu Product i nie odnosi się już do modelu zdefiniowanego w aplikacji.
 
-h4. Dealing with Changing Models
+h4. Praca na zmieniających się modelach
 
-For performance reasons information about the columns a model has is cached. For example if you add a column to a table and then try and use the corresponding model to insert a new row it may try to use the old column information. You can force Active Record to re-read the column information with the +reset_column_information+ method, for example
+Dla poprawy wydajności, informacja o kolumnach w modelu jest cache'owana. Na przykład, jeśli dodasz kolumnę do tabeli a potem spróbujesz użyć powiązanego modelu w celu dodania nowego rekordu, może on użyć starej informacji o kolumnach. Możesz zmusić moduł Active Record do ponownego odczytania informacji o kolumnach korzystając z metody +reset_column_information+. Na przykład:
 
 <ruby>
 class AddPartNumberToProducts < ActiveRecord::Migration
   class Product < ActiveRecord::Base
   end
-
+  
   def self.up
     add_column :product, :part_number, :string
     Product.reset_column_information
@@ -531,24 +529,23 @@ class AddPartNumberToProducts < ActiveRecord::Migration
 end
 </ruby>
 
+h3. Zrzuty schematów
 
-h3. Schema Dumping and You
+h4. Po co tworzyć pliki schematów?
 
-h4. What are Schema Files for?
+Migracje, jakkolwiek potężnym narzędziem by były, nie są wiarygodnym źródłem wiedzy o schemacie bazy. Ta rola należy do pliku +schema.rb+ lub pliku SQL, generowanym przez moduł Active Record poprzez odpytywanie bazy danych. Nie zostały one stworzone z myślą o edycji, ich zadanie to po prostu reprezentacja aktualnego schematu bazy.
 
-Migrations, mighty as they may be, are not the authoritative source for your database schema. That role falls to either +db/schema.rb+ or an SQL file which Active Record generates by examining the database. They are not designed to be edited, they just represent the current state of the database.
+Aby utworzyć nową kopię aplikacji nie musimy powtarzać wszystkich wykonanych migracji. Znacznie szybciej i prościej jest wczytać do bazy opis docelowego schematu.
 
-There is no need (and it is error prone) to deploy a new instance of an app by replaying the entire migration history. It is much simpler and faster to just load into the database a description of the current schema.
+Przykładowo, w celu utworzenia bazy do testów, należy pobrać zrzut aktualnego schematu bazy (do pliku +schema.rb+ lub +development.sql+) a następnie wczytać go do bazy testowej.
 
-For example, this is how the test database is created: the current development database is dumped (either to +db/schema.rb+ or +db/development.sql+) and then loaded into the test database.
+Pliki ze schematami są także przydatne, by szybko sprawdzić atrybuty obiektu Active Record. Ta informacja nie jest zapisana w kodzie modelu, często wynika z w wielu kolejnych migracji, ale jej podsumowanie jest dostępne w pliku schematu. Warta polecenia jest wtyczka "annotate_models":http//agilewebdevelopment.com/plugins/annotate_models, dodająca na górze każdego modelu komentarze podsumowujące jego schemat.
 
-Schema files are also useful if you want a quick look at what attributes an Active Record object has. This information is not in the model's code and is frequently spread across several migrations but is all summed up in the schema file. The "annotate_models":http://agilewebdevelopment.com/plugins/annotate_models plugin, which automatically adds (and updates) comments at the top of each model summarizing the schema, may also be of interest.
+h4. Typy zrzutów schematu 
 
-h4. Types of Schema Dumps
+Są dwa sposoby na zapisanie zrzutu schematu bazy. Który z nich zostanie wykorzystany, zależy od zapisu w pliku konfiguracyjnym +config/environment.rb+. Odpowiedzialna za to jest zmienna +config.active_record.schema_format+, przyjmująca wartości +:sql+ lub +:ruby+.
 
-There are two ways to dump the schema. This is set in +config/environment.rb+ by the +config.active_record.schema_format+ setting, which may be either +:sql+ or +:ruby+.
-
-If +:ruby+ is selected then the schema is stored in +db/schema.rb+. If you look at this file you'll find that it looks an awful lot like one very big migration:
+Jeśli zmienna ma przypisaną wartość +:ruby+, schemat bazy jest zapisywany w pliku +db/schema.rb+. Jeśli przyjrzeć się temu plikowi, można odnieść wrażenie, że to zapis jednej, wielkiej migracji.
 
 <ruby>
 ActiveRecord::Schema.define(:version => 20080906171750) do
@@ -568,28 +565,30 @@ ActiveRecord::Schema.define(:version => 20080906171750) do
 end
 </ruby>
 
-In many ways this is exactly what it is. This file is created by inspecting the database and expressing its structure using +create_table+, +add_index+, and so on. Because this is database independent it could be loaded into any database that Active Record supports. This could be very useful if you were to distribute an application that is able to run against multiple databases.
+Pod wieloma względami tak właśnie jest. Ten plik jest tworzony poprzez odpytywanie bazy danych i zapisanie jej struktury za pomocą kolejnych poleceń +create_table+, +add_index+ itd. Plik taki może zostać wczytany do dowolnej bazy danych, ponieważ polecenia te są niezmienne dla wszystkich obsługiwanych przez moduł Active Record baz. To może być bardzo użyteczne, jeśli chcesz stworzyć aplikację działającą na kilku bazach danych.
 
-There is however a trade-off: +db/schema.rb+ cannot express database specific items such as foreign key constraints, triggers or stored procedures. While in a migration you can execute custom SQL statements, the schema dumper cannot reconstitute those statements from the database. If you are using features like this then you should set the schema format to +:sql+.
+Wykorzystanie pliku +schema.rb+ ma też swoje wady. Nie są w nim zapisywane
+informacje o funkcjach specyficznych tylko dla danego typu bazy, takich jak
+klucze opcje, triggery czy procedury składowane. O ile możesz ich używać podczas migracji, nie da się ich odtworzyć w zrzucie schematu. Jeśli korzystasz z takich opcji, powinieneś zmienić zawartość zmiennej konfiguracyjnej na +:sql+.
 
-Instead of using Active Record's schema dumper the database's structure will be dumped using a tool specific to that database (via the +db:structure:dump+ Rake task) into +db/#{Rails.env}_structure.sql+. For example for PostgreSQL the +pg_dump+ utility is used and for MySQL this file will contain the output of +SHOW CREATE TABLE+ for the various tables. Loading this schema is simply a question of executing the SQL statements contained inside.
+W takim przypadku, zamiast korzystać z wbudowanego narzędzia modułu Active Record, schematy zapisywane są przez narzędzia stworzone dla danego typu bazy danych (poprzez polecenie +db:structure:dump+) do pliku +db/#\{RAILS_ENV\}_structure.sql+. Na przykład dla bazy PostgreSQL używane jest narzędzie +pg_dump+, a dla MySQL w pliku zapisywane są wyniki pytań SHOW CREATE TABLE dla kolejnych tabel. Wczytanie tak zapisanego schematu bazy sprowadza się do wykonania kodu SQL zapisanego we wskazanym pliku.
 
-By definition this will be a perfect copy of the database's structure but this will usually prevent loading the schema into a database other than the one used to create it.
+Z założenia taki zrzut schematu umożliwia stworzenie idealnej kopii bazy danych. Niestety zwykle uniemożliwia to przeniesienie schematu na bazę innego typu.
 
-h4. Schema Dumps and Source Control
+h4. Kontrola wersji zrzutów schematów
 
-Because schema dumps are the authoritative source for your database schema, it is strongly recommended that you check them into source control.
+Ponieważ pliki schematu powinny być wiarygodnym źródłem wiedzy o bazie danych, zalecane jest włączenie ich do systemu kontroli wersji, by umożliwić wgląd w historię zmian bazy.
 
-h3. Active Record and Referential Integrity
+h3. Active Record i integralność referencyjna
 
-The Active Record way claims that intelligence belongs in your models, not in the database. As such, features such as triggers or foreign key constraints, which push some of that intelligence back into the database, are not heavily used.
+Korzystanie z modułu Active Record powoduje przeniesienie części logiki z bazy danych do modeli. W związku z tym narzędzie takie jak triggery czy klucze obce, które tworzą dodatkową logikę wewnątrz bazy danych nie są zbyt często używane.
 
-Validations such as +validates_uniqueness_of+ are one way in which models can enforce data integrity. The +:dependent+ option on associations allows models to automatically destroy child objects when the parent is destroyed. Like anything which operates at the application level these cannot guarantee referential integrity and so some people augment them with foreign key constraints.
+Walidacje takie jak +validates_uniqueness_of+ są jednym ze sposobów na wymuszenie integralności danych przez model. Opcja asocjacji +:dependent+ pozwala modelowi automatycznie niszczyć obiekty potomne w przypadku usunięcia ich rodzica. Jak wszystkie opcje działające na poziomie aplikacji, wspomniane sposoby nie gwarantują zachowania integralności referencyjnej. Jest przyczyna dla której niektórzy wspierają je dodatkowo kluczami obcymi zawartymi w bazie danych.
 
-Although Active Record does not provide any tools for working directly with such features, the +execute+ method can be used to execute arbitrary SQL. There are also a number of plugins such as "foreign_key_migrations":http://github.com/harukizaemon/redhillonrails/tree/master/foreign_key_migrations/ which add foreign key support to Active Record (including support for dumping foreign keys in +db/schema.rb+).
+Chociaż moduł Active Record nie zapewnia narzędzi do bezpośredniej obsługi kluczy obcych, można w tym celu wykorzystać metodę +execute+. Są także dostępne różne wtyczki, takie jak "redhillonrails":http//agilewebdevelopment.com/plugins/search?search=redhillonrails, które poszerzają możliwości modułu Active Record o obsługę kluczy obcych (m.in. umożliwiają zapisywanie ich w schemacie bazy w pliku +schema.rb+).
 
 h3. Changelog
 
-"Lighthouse ticket":http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/6
+"Lighthouse ticket":http//rails.lighthouseapp.com/projects/16213-rails-guides/tickets/6
 
-* September 14, 2008: initial version by "Frederick Cheung":credits.html#fcheung
+* September 14, 2008: initial version by "Frederick Cheung":../authors.html#fcheung
