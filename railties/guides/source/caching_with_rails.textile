@@ -373,15 +373,15 @@ Także nowy plugin "Cache money": http://github.com/nkallen/cache-money/tree/mas
 
 h3. Referencje 
 
-* "Scaling Rails Screencasts": http://railslab.newrelic.com/scaling-rails 
-* "RailsEnvy, Rails Caching Tutorial Part 1": http://www.railsenvy.com/2007/2/28/rails-caching-tutorial 
-* "RailsEnvy, Rails Caching Tutorial Part 2": http://www.railsenvy.com/2007/3/20/ruby-on-rails-caching-tutorial-part-2 
-* "ActiveSupport: dokumentacja Cache": http://api.rubyonrails.org/classes/ActiveSupport/Cache.html 
-* "Rails 2.1 zintegrowane Cachowanie tutorial": http://thewebfellas.com/blog/2008/6/9/rails-2-1-now-with-better-integrated-caching 
+* "Scaling Rails Screencasts":http://railslab.newrelic.com/scaling-rails 
+* "RailsEnvy, Rails Caching Tutorial Part 1":http://www.railsenvy.com/2007/2/28/rails-caching-tutorial 
+* "RailsEnvy, Rails Caching Tutorial Part 2":http://www.railsenvy.com/2007/3/20/ruby-on-rails-caching-tutorial-part-2 
+* "ActiveSupport: dokumentacja Cache":http://api.rubyonrails.org/classes/ActiveSupport/Cache.html 
+* "Rails 2.1 zintegrowane Cachowanie tutorial":http://thewebfellas.com/blog/2008/6/9/rails-2-1-now-with-better-integrated-caching 
 
 h3. Changelog
  
-"Bilet Lighthouse": http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/10-guide-to-caching 
+"Bilet Lighthouse":http://rails.lighthouseapp.com/projects/16213-rails-guides/tickets/10-guide-to-caching 
 
 * 02 maja 2009: Formatowanie. 
 * 26 kwietnia 2009: Czyszczenie i poprawa literówek w zaproponowanych patchach. 
