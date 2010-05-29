@@ -58,7 +58,8 @@ module RailsGuides
     end
 
     def title_to_idx(title)
-      idx = title.strip.downcase.gsub(/\s+|_/, '-').delete('^a-z0-9-').sub(/^[^a-z]*/, '')
+      idx = title.strip.downcase.gsub(/\s+|_/, '-').delete('^a-z0-9-').gsub(/[^a-z-]/, '')
+      #idx = title.strip.downcase.gsub(/\s+|_/, '-').delete('^a-z0-9-').sub(/^[^a-z]*/, '')
       if warnings && idx.blank?
         puts "BLANK ID: please put an explicit ID for section #{title}, as in h5(#my-id)"
       end
