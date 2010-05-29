@@ -24,7 +24,7 @@ to jest tylko najbardziej typowy sposób pracy kontrolera.
 
 Kontroler może być zatem traktowany jako pośrednik między modelami a widokami. Udostępnia on dane modelu do widoku, który następnie wyświetla dane użytkownikowi. I w drugą stronę - kontroler zapisuje bądź uaktualnia dane w modelu pobierając je od użytkownika. 
 
-NOTE: Aby dowiedzieć się więcej o procesie routingu, zajrzyj do "Routingu w Ruby on Rails":routing_outside_in.html.
+NOTE: Aby dowiedzieć się więcej o procesie routingu, zajrzyj do "Routingu w Ruby on Rails":routing.html.
 
 h3. Metody i akcje
 
@@ -124,7 +124,7 @@ Tablica asocjacyjna +params+ nie musi być ograniczona do jednego wymiaru. Może
 GET /clients?ids[]=1&ids[]=2&ids[]=3
 </pre>
 
-NOTE: Rzeczywisty URL w tym przykładzie byłby zakodowany jako "/clients?ids%5b%5d=1&ids%5b%5d=2&ids%5b%5b=3", jako że znaki [ i ] nie są dozwolone w adresach URL. Najczęściej nie będziesz się musiał o to martwić, ponieważ przeglądarka będzie dbać o to za ciebie, a Railsy, gdy otrzymają taki ciąg, będą dekodować to z powrotem. Ale jeśli kiedyś znajdziesz się w konieczności, by wysłać takie żądanie do serwera ręcznie, musisz o tym pamiętać.
+NOTE: Rzeczywisty URL w tym przykładzie byłby zakodowany jako +/clients?ids%5b%5d=1&ids%5b%5d=2&ids%5b%5b=3+, jako że znaki +[+ i +]+ nie są dozwolone w adresach URL. Najczęściej nie będziesz się musiał o to martwić, ponieważ przeglądarka będzie dbać o to za ciebie, a Railsy, gdy otrzymają taki ciąg, będą dekodować to z powrotem. Ale jeśli kiedyś znajdziesz się w konieczności, by wysłać takie żądanie do serwera ręcznie, musisz o tym pamiętać.
 
 Wartość +params[:ids]+ będzie teraz wynosić +["1", "2", "3"]+. Zauważ, że
 wartości parametru są zawsze łańcuchami znaków). Railsy nie próbują odgadywać ani rzutować typu.
@@ -756,15 +756,7 @@ Ta metoda będzie czytać i przesyłać strumieniowo plik w blokach po 4 Kb, uni
 
 WARNING: Bądź ostrożny kiedy używasz (lub po prostu nie używaj) zewnętrznych danych (parametrów, cookis, itp) do zlokalizowania pliku na dysku, jest to ryzykowne z punktu widzenia bezpieczeństwa i może pozwolić komuś na uzyskanie dostępu do plików które nie są przeznaczone do oglądania.
 
-TIP: Nie zaleca się przesyłania statycznych plików przez Railsy, jeśli możesz
-zamiast tego trzymaj je w folderze publicznym na twoim serwerze. O wiele
-bardziej efektywne jest umożliwienie użytkownikowi pobierania pliku
-bezpośrednio za pomocą serwera Apache lub innego serwera www, ponieważ
-utrzymywane żądanie przechodzi niepotrzebnie przez cały stos Railsów. Jednak
-jeśli potrzebujesz aby z jakiegoś powodu żądanie przeszło przez Railsy możesz
-ustawić opcję +:x_sendfile+ na +true+, wówczas Railsy pozwolą serwerowi www
-obsłużyć wysyłanie pliku do użytkownika, uwalniając od tego proces Railsów.
-Pamiętaj, że Twój serwer www musi obsługiwać nagłówek +X-Sendfile+, oraz musisz uważać, aby nie używać wejścia użytkownika w sposób, który pozwoli komuś na pobieranie przypadkowych plików.
+TIP: Nie zaleca się przesyłania statycznych plików przez Railsy, jeśli możesz zamiast tego trzymaj je w folderze publicznym na twoim serwerze. O wiele bardziej efektywne jest umożliwienie użytkownikowi pobierania pliku bezpośrednio za pomocą serwera Apache lub innego serwera www, ponieważ utrzymywane żądanie przechodzi niepotrzebnie przez cały stos Railsów. Jednak jeśli potrzebujesz aby z jakiegoś powodu żądanie przeszło przez Railsy możesz ustawić opcję +:x_sendfile+ na +true+, wówczas Railsy pozwolą serwerowi www obsłużyć wysyłanie pliku do użytkownika, uwalniając od tego proces Railsów.  Pamiętaj, że Twój serwer www musi obsługiwać nagłówek +X-Sendfile+, oraz musisz uważać, aby nie używać wejścia użytkownika w sposób, który pozwoli komuś na pobieranie przypadkowych plików.  
 
 h4. Pobieranie plików w aplkacjach RESTful
 
