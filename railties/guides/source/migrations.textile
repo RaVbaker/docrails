@@ -2,7 +2,9 @@ h2. Migracje
 
 Migracje są wygodnym sposobem, by w zorganizowany sposób modyfikować bazę
 danych. Mógłbyś oczywiście edytować fragmenty kodu SQL ręcznie, ale musiałbyś
-potem samemu zatroszczyć się o to, by poinformować innych projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia +rake db:migrate+. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
+potem samemu zatroszczyć się o to, by poinformować innych projektantów o konieczności wykonania potrzebnych zmian. Musiałbyś też pilnować jakie zmiany należy wprowadzić na serwerze, na którym działa ostateczna wersja tworzonego serwisu. 
+
+Moduł Active Record śledzi migracje, które zostały już wykonane, więc jedyne co musisz wykonać ze swojej strony, to wprowadzenie zmian w kodzie i wykonanie polecenia +rake db:migrate+. Moduł Active Record sam zdecyduje, które migracje powinny zostać wykonane. Zaktualizuje on też schemat bazy danych zawarty w pliku db/schema.rb tak, by odpowiadał on aktualnej strukturze Twojej bazy.
 
 Migracje pozwalają na opisanie zmian bazy danych w Rubim. Dzięki temu,
 podobnie jak większość funkcji modułu Active Record, nie zależą one od
@@ -18,7 +20,7 @@ W poniższym przewodniku dowiesz się wszystkiego o migracjach. W szczególnośc
 endprologue.
 
 
-h3. Anatomia migracji łłł
+h3. Anatomia migracji
 
 Zanim zagłębimy się w detale migracji, przedstawiam kilka przykładów ilustrujących ich możliwości:
 
@@ -64,9 +66,10 @@ domyślnie zawierało ono wartość false dla nowych użytkowników, ale użytko
 juz zarejestrowani są zgłoszeni do otrzymywania aktualności, więc możemy użyć
 modelu +User+ do ustawienia dla nich flagi +reveive_newsletter+ jako +true+.
  
-NOTE: <<models,Ostrzeżenie>> dotyczące używania modeli w migracjach.
+NOTE: Przeczytaj "uwagi":#uycie-modeli-w-migracjach dotyczące używania modeli w migracjach.
 
 h4. Migracje są klasami
+
 Migracja jest podklasą klasy ActiveRecord::Migration, która posiada
 zaimplementowane dwie metody: +up+ (wykonaj żądane transformacje) i +down+
 (wycofaj je).
@@ -85,7 +88,8 @@ Moduł Active Record udostępnia metody, służące do typowych operacji na baza
 
 
 Jeśli chcesz wykonać zadanie specyficzne tylko dla Twojego typu bazy danych
-(np. utworzyć <<foreign_key,klucz obcy>>), możesz do tego celu wykorzystać
+(np. utworzyć "klucz obcy":#active-record-i-integralno-referencyjna), 
+możesz do tego celu wykorzystać
 funkcję +execute+, która umożliwia Ci wykonanie kodu SQL. Migracja jest zwykłą klasą Ruby, więc nie musisz ograniczać się do tych funkcji. Przykładowo, możesz po dodaniu kolumny dopisać kod odpowiedzialny za przypisanie jej odpowiedniej wartości we wszystkich istniejących rekordach.
 
 W bazach danych obsługujących transakcje zmieniające schemat bazy danych

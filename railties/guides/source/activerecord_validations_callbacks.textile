@@ -16,8 +16,6 @@ endprologue.
 
 h3. Cykl życia obiektu
 
-h3. Cykl 
-
 Podczas normalnego użytkowania aplikacji Railsowej obiekty mogą być tworzone, aktualizowane oraz niszczone. Moduł Active Record oferuje zakotwiczenia do poszczególnych cyklów życia obiektu tak abyś mógł kontrolować aplikację i jej dane.
 
 Walidacje zapewniają, że tylko poprawne dane są przechowywane w bazie danych. Callbacks i observers pozwalają wywołać logikę przed lub po zmianach stanu obiektu.
@@ -343,15 +341,15 @@ end
 
 Poza +:only_integer+, helper +validates_umericality_of+ akceptuje również następujące opcje do dodania ograniczeń dla akceptowanych wartości:
 
-* +:greater_than+ - określa że wartość musi być większa niż dostarczona wartość. Domyślna wiadomość błędu dla tej opcji to "must be greater than %{count}"  ("musi być większa niż %{count}" ).
-* +:greater_than_or_equal_to+ - określa że wartość musi być większa lub równa dostarczonej liczby. Domyślna wiadomość błędu dla tej opcji to "_musi być większa lub równa {{liczba}}" ("_must be greater than or equal to {{count}}").
-* +:equal_to+ - określa że wartość musi być równa dostarczonej liczbie. Domyślna wiadomość błędu dla tej opcji to "musi być równa {{liczba}}" ("must be equal to {{count}}").
-* +:less_than+ - określa ze wartość musi być mniejsza niż dostarczona liczba. Domyślna wiadomość błędu tej opcji to "musi być mniejsza niż {{liczba}}" ("must be less than {{count}}").
-* +:less_than_or_equal_to+ - określa ze wartość musi być mniejsza lub równa dostarczonej liczbie. Domyślna wiadomość błędu tej opcji to "musi być mniejsza lub równa {{liczba}}" ("must be less or equal to {{count}}").
-* +:odd+ - określa że liczba musi być nieparzysta jeśli ustawiona opcja jest na +true+. Domyślna wiadomość błędu tej opcji to "musi być nieparzysta" ("must be odd").
-* +:even+ - określa że liczba musi być parzysta jeśli ustawiona opcja jest na +true+. Domyślna wiadomość błędu tej opcji to "musi być parzysta" ("must be even").
+* +:greater_than+ - określa że wartość musi być większa niż dostarczona wartość. Domyślna wiadomość błędu dla tej opcji to _must be greater than %{count}_  (musi być większa niż %{count}).
+* +:greater_than_or_equal_to+ - określa że wartość musi być większa lub równa dostarczonej liczby. Domyślna wiadomość błędu dla tej opcji to _must be greater than or equal to %{count}_ (musi być większa lub równa %{liczba}).
+* +:equal_to+ - określa że wartość musi być równa dostarczonej liczbie. Domyślna wiadomość błędu dla tej opcji to _must be equal to %{count}_ (musi być równa %{liczba}).
+* +:less_than+ - określa ze wartość musi być mniejsza niż dostarczona liczba. Domyślna wiadomość błędu tej opcji to _must be less than %{count}_ (musi być mniejsza niż %{liczba}).
+* +:less_than_or_equal_to+ - określa ze wartość musi być mniejsza lub równa dostarczonej liczbie. Domyślna wiadomość błędu tej opcji to _must be less or equal to %{count}_ (musi być mniejsza lub równa %{liczba}).
+* +:odd+ - określa że liczba musi być nieparzysta jeśli ustawiona opcja jest na +true+. Domyślna wiadomość błędu tej opcji to _must be odd_ (musi być nieparzysta).
+* +:even+ - określa że liczba musi być parzysta jeśli ustawiona opcja jest na +true+. Domyślna wiadomość błędu tej opcji to _must be even_ (musi być parzysta).
 
-Domyślna wiadomość błędu dla +validates_numericality_of+ to "to nie liczba" ("is not a number").
+Domyślna wiadomość błędu dla +validates_numericality_of+ to _is not a number_ (nie jest liczbą).
 
 h4. +validates_presence_of+
 
@@ -374,7 +372,7 @@ end
 
 Kiedy +false.blank?+ jest +true+, a chcemy zwalidować obecność typu logicznego powinniśmy użyć +validates_presence_of :field_name, :in => [true, false]+.
 
-Domyślna wiadomość błędu dla +validates_presence_of+ to "nie może być pusty" ("can't be empty").
+Domyślna wiadomość błędu dla +validates_presence_of+ to _can't be empty_ (nie może być pusty).
 
 h4. +validates_uniqueness_of+
 
@@ -407,7 +405,7 @@ end
 
 Zauważ że niektóre bazy danych są tak skonfigurowane aby przeprowadzać również przeszukiwania case-insensitive .
 
-Domyślna wiadomość błędu dla +validates_uniqueness_of+ to "już jest zajęty/-a" ("has already been taken").
+Domyślna wiadomość błędu dla +validates_uniqueness_of+ to _has already been taken_ (już jest zajęty/-a).
 
 h4. +validates_each+
 
@@ -423,7 +421,7 @@ end
 
 Blok otrzymuje model, nazwę atrybutu i jego wartość. Można zrobić wszystko aby poszukać poprawnych danych wewnątrz bloku. Jeśli walidacja zawiedzie, można dodać wiadomość błędu do modelu, czyniąc go niepoprawnym.
 
-.h3 Wspólne opcje walidacji
+h3. Wspólne opcje walidacji
 
 Są pewne wspólne opcje których mogą używać wszystkie helpery walidacji. Wszystkie są tu omówione prócz +:if+ oraz +:unless+, które omówione są później w rozdziale Walidacja warunkowa.
 
@@ -446,10 +444,10 @@ h4. +:allow_blank+
 class Topic < ActiveRecord: :Base
    validates_length_of :title, :is => 5, :allow_blank => true
 end
-</ruby>
 
 Topic.create("title" => "").valid # => true
 Topic.create("title" => nil).valid # => true
+</ruby>
 
 h4. +:message+
 
@@ -472,7 +470,7 @@ class Person < ActiveRecord: :Base
 end
 </ruby>
 
-.h3 Walidacja Warunkowa
+h3. Walidacja Warunkowa
 
 Czasami dobrze jest przeprowadzić walidację obiektu nawet gdy dane twierdzenie jest spełnione. Można to zrobić używając opcji +:if+ oraz +:unless+, które mogą przyjąć symbol, łańcuch znaków lub +Proc+. Można użyć +:if+ kiedy chcemy sprecyzować kiedy walidacja powinna nastąpić. Precyzując kiedy walidacja nie powinna następować używamy opcji +:unless+.
 
@@ -499,7 +497,7 @@ class Person < ActiveRecord: :Base
 end
 </ruby>
 
-h4. Używanie +Proc+ w opcjach +:if= oraz +:unless+
+h4. Używanie +Proc+ w opcjach +:if+ oraz +:unless+
 
 Na koniec można powiązać opcje +:if+ oraz +:unless+ z wymienionym obiektem +Proc+. Używając obiektu +Proc+ można napisać warunek w linii kodu zamiast korzystać z osobnej metody. Ta opcja jest idealna dla jedno liniowych kodów.
 
@@ -510,7 +508,7 @@ class Account < ActiveRecord: :Base
 end
 </ruby>
 
-.h3 Tworzenie Standardowych Metod Walidacji
+h3. Tworzenie Standardowych Metod Walidacji
 
 Kiedy wbudowane helpery walidacji już nie są wystarczające, można stworzyć własne metody walidacji.
 
@@ -552,11 +550,11 @@ class Movie < ActiveRecord: :Base
 end
 </ruby>
 
-.h3 Praca z Błędami Walidacji
+h3. Praca z Błędami Walidacji
 
 Dodatkowo dla metod +valid?+ i +invalid?+ omówionych wcześniej, Railsy przewidują wiele metod pracy ze zbiorami +errors+ i badania walidacji obiektów.
 
-Tu następuje lista najczęściej używanych metod. Proszę się odnosić do dokumentacji +ActiveRecord: :Errors+ dla pełnej listy dostępnych metod.
+Tu następuje lista najczęściej używanych metod. Proszę się odnosić do dokumentacji +ActiveRecord::Errors+ dla pełnej listy dostępnych metod.
 
 h4. +errors.add_to_base+
 
