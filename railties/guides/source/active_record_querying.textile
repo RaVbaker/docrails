@@ -343,7 +343,7 @@ Client.all(:conditions =>
   ["created_at >= ? AND created_at <= ?", params[:start_date], params[:end_date]])
 </ruby>
 
-Tak jak w języku Ruby. Jeśli chcesz używać skróconej składni sprawdź punkt „Warunki tablic asocjacyjnych”:#warunki-tablic-asocjacyjnych w przewodniku.
+Tak jak w języku Ruby. Jeśli chcesz używać skróconej składni sprawdź punkt "Warunki tablic asocjacyjnych":#warunki-tablic-asocjacyjnych w przewodniku.
 
 h4. Warunki tablic asocjacyjnych
 
@@ -741,7 +741,7 @@ h3. Zachłanne ładowanie asocjacji
 
 Zachłanne ładowanie to mechanizm ładujący rekordy asocjacyjne obiektów zwróconych przez +Model.find+ używając jak najmniejszej ilości zapytań.
 
-<strong>N <plus> 1 problem zapytania</strong>
+<strong>Problem N <plus> 1 zapytań</strong>
 
 Rozważmy następujący kod, który wyszukuje 10 klientów i wypisuje ich kody pocztowe:
 
@@ -755,7 +755,7 @@ end
 
 Ten kod wygląda dobrze na pierwszy rzut oka, ale problem leży w liczbie realizowanych zapytań. Powyższy kod realizuje 1 (do znalezienia 10 klientów) <plus> 10 ( jedno dla każdego klienta do załadowania adresu) = <strong>11</strong> zapytań.
 
-<strong>Rozwiązanie dla N <plus> 1 problem zapytania</strong>
+<strong>Rozwiązanie dla problemu N <plus> 1 zapytań</strong>
 
 Moduł Active Record umożliwia określenie wszystkich asocjacji, które mają być ładowane. Jest to możliwe dzięki ustaleniu opcji +:include+ wywołania +Model.find+. Stosując +:include+, moduł Active Record zapewnia ładowanie wszystkich określonych asocjacji używając najmniejszej możliwej liczby zapytań.
 
@@ -883,9 +883,9 @@ Client.exists?
 
 Powyższe zapytanie zwróci +false+ jeśli tabela +clients+ jest pusta, w przeciwnym razie zwróci +true+.
 
-h3. Obliczenia
+h3. Kalkulacje
 
-Ten rozdział używa zliczania(count) jako przykładowej metody we wstępie, ale opisane opcje mogą być stosowane do wszystkich podpunktów.
+W tej sekcji używana jest medota +count+ jako przkład kalkulacji, ale opisane opcje mogą być stosowane do wszystkich pozostałych przypadków.
 
 <tt>count</tt> przyjmuje warunki w taki sam sposób jak +exists?+:
 
@@ -961,7 +961,7 @@ Jeśli chcesz znaleźć sumę pola dla wszystkich rekordów w tabeli użyć meto
 Client.sum("orders_count")
 </ruby>
 
-Opcje znajdziesz w rozdziale "Calculations":#calculations.
+Opcje znajdziesz w rozdziale "Kalkulacje":#kalkulacje.
 
 h3. Changelog
 
