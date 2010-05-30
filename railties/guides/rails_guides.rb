@@ -4,6 +4,8 @@ $:.unshift pwd
 # Loading Action Pack requires rack and erubis.
 require 'rubygems'
 
+Encoding.default_internal = "utf-8"
+
 begin
   # Guides generation in the Rails repo.
   as_lib = File.join(pwd, "../../activesupport/lib")
