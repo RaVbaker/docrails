@@ -24,16 +24,16 @@
   <% end %>
   <div id="topNav">
     <div class="wrapper">
-      <strong>More at <a href="http://rubyonrails.org/">rubyonrails.org:</a> </strong>
-      <a href="http://rubyonrails.org/">Overview</a> |
-      <a href="http://rubyonrails.org/download">Download</a> |
-      <a href="http://rubyonrails.org/deploy">Deploy</a> |
-      <a href="http://rails.lighthouseapp.com/projects/8994-ruby-on-rails/overview">Code</a> |
-      <a href="http://rubyonrails.org/screencasts">Screencasts</a> |
-      <a href="http://rubyonrails.org/documentation">Documentation</a> |
-      <a href="http://rubyonrails.org/ecosystem">Ecosystem</a> |
-      <a href="http://rubyonrails.org/community">Community</a> |
-      <a href="http://weblog.rubyonrails.org/">Blog</a>
+      <strong>Więcej na <a href="http://rubyonrails.pl/">rubyonrails.pl:</a> </strong>
+      <a href="http://rubyonrails.pl/">Start</a> |
+      <a href="http://rubyonrails.pl/pobierz">Pobierz</a> |
+      <a href="http://rubyonrails.pl/wdrozenie">Wdrożenie</a> |
+      <a href="http://rails.lighthouseapp.com/projects/8994-ruby-on-rails/overview">Kod (en)</a> |
+      <a href="http://rubyonrails.pl/screencasty">Screencasty</a> |
+      <a href="http://rubyonrails.pl/dokumentacja">Dokumentacja</a> |
+      <a href="http://rubyonrails.pl/ekosystem">Ekosystem</a> |
+      <a href="http://rubyonrails.pl/forum">Forum</a> |
+      <a href="irc://irc.eu.freenode.net/rubyonrails.pl">IRC</a>
     </div>
   </div>
   <div id="header">
@@ -41,52 +41,54 @@
       <h1><a href="index.html" title="Return to home page">Guides.rubyonrails.org</a></h1>
       <p class="hide"><a href="#mainCol">Skip navigation</a>.</p>
       <ul class="nav">
-        <li><a href="index.html">Home</a></li>
-        <li class="index"><a href="index.html" onclick="guideMenu(); return false;" id="guidesMenu">Guides Index</a>
+        <li><a href="index.html">Start</a></li>
+        <li class="index"><a href="index.html" onclick="guideMenu(); return false;" id="guidesMenu">Skorowidz</a>
           <div id="guides" class="clearfix" style="display: none;">
             <hr />
             <dl class="L">
-              <dt>Start Here</dt>
-              <dd><a href="getting_started.html">Getting Started with Rails</a></dd>
-              <dt>Models</dt>
-              <dd><a href="migrations.html">Rails Database Migrations</a></dd>
-              <dd><a href="activerecord_validations_callbacks.html">Active Record Validations and Callbacks</a></dd>
-              <dd><a href="association_basics.html">Active Record Associations</a></dd>
-              <dd><a href="active_record_querying.html">Active Record Query Interface</a></dd>
-              <dt>Views</dt>
-              <dd><a href="layouts_and_rendering.html">Layouts and Rendering in Rails</a></dd>
-              <dd><a href="form_helpers.html">Action View Form Helpers</a></dd>
-              <dt>Controllers</dt>
-              <dd><a href="action_controller_overview.html">Action Controller Overview</a></dd>
-              <dd><a href="routing.html">Rails Routing from the Outside In</a></dd>
+
+
+              <dt>Na początek</dt>
+              <dd><a href="getting_started.html">Zaczynamy z Ruby on Rails</a></dd>
+              <dt>Modele</dt>
+              <dd><a href="migrations.html">Migracje schematu bazy danych</a></dd>
+              <dd><a href="activerecord_validations_callbacks.html">Walidacje i callbacki w module Active Record</a></dd>
+              <dd><a href="association_basics.html">Asocjacje modułu Active Record</a></dd>
+              <dd><a href="active_record_querying.html">Zapytania w module Active Record</a></dd>
+              <dt>Widoki</dt>
+              <dd><a href="layouts_and_rendering.html">Layouty oraz renderowanie</a></dd>
+              <dd><a href="form_helpers.html">Helpery formularzy modułu Action View</a></dd>
+              <dt>Kontrolery</dt>
+              <dd><a href="action_controller_overview.html">Podstawowe informacje o module Action Controller</a></dd>
+              <dd><a href="routing.html">Routing w Ruby on Rails</a></dd>
             </dl>
             <dl class="R">
-              <dt>Digging Deeper</dt>
-              <dd><a href="i18n.html">Rails Internationalization API</a></dd>
-              <dd><a href="action_mailer_basics.html">Action Mailer Basics</a></dd>
-              <dd><a href="testing.html">Testing Rails Applications</a></dd>
-              <dd><a href="security.html">Securing Rails Applications</a></dd>
-              <dd><a href="debugging_rails_applications.html">Debugging Rails Applications</a></dd>
-              <dd><a href="performance_testing.html">Performance Testing Rails Applications</a></dd>
-              <dd><a href="configuring.html">Configuring Rails Applications</a></dd>
-              <dd><a href="command_line.html">Rails Command Line Tools and Rake Tasks</a></dd>
-              <dd><a href="caching_with_rails.html">Caching with Rails</a></dd>
+              <dt>W głąb Railsów</dt>
+              <dd><a href="i18n.html">Obsługa I18N w Ruby on Rails</a></dd>
+              <dd><a href="action_mailer_basics.html">Podstawowe informacje o module Action Mailer</a></dd>
+              <dd><a href="testing.html">Testowanie aplikacji railsowej</a></dd>
+              <dd><a href="security.html">Bezpieczeństwo w Ruby on Rails</a></dd>
+              <dd><a href="debugging_rails_applications.html">Debugowanie w Ruby on Rails</a></dd>
+              <dd><a href="performance_testing.html">Testowanie wydajności aplikacji railsowej</a></dd>
+              <dd><a href="configuring.html">Konfiguracja aplikacji</a></dd>
+              <dd><a href="command_line.html">Narzędzia linii poleceń oraz zadania Rake</a></dd>
+              <dd><a href="caching_with_rails.html">Cache'owanie w Ruby on Rails</a></dd>
               <dd><a href="contributing_to_rails.html">Contributing to Rails</a></dd>
 
-              <dt>Extending Rails</dt>
-              <dd><a href="plugins.html">The Basics of Creating Rails Plugins</a></dd>
+              <dt>Rozszerzanie platformy</dt>
+              <dd><a href="plugins.html">Podstawy tworzenia pluginów dla Ruby on Rails</a></dd>
               <dd><a href="rails_on_rack.html">Rails on Rack</a></dd>
               <dd><a href="generators.html">Adding a Generator to Your Plugin</a></dd>
 
-              <dt>Release Notes</dt>
+              <dt>Uwagi</dt>
               <dd><a href="3_0_release_notes.html">Ruby on Rails 3.0 Release Notes</a></dd>
               <dd><a href="2_3_release_notes.html">Ruby on Rails 2.3 Release Notes</a></dd>
               <dd><a href="2_2_release_notes.html">Ruby on Rails 2.2 Release Notes</a></dd>
             </dl>
           </div>
         </li>
-        <li><a href="contribute.html">Contribute</a></li>
-        <li><a href="credits.html">Credits</a></li>
+        <li><a href="contribute.html">Przyłącz się!</a></li>
+        <li><a href="credits.html">Autorzy</a></li>
       </ul>
     </div>
   </div>
