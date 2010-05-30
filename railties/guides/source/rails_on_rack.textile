@@ -13,8 +13,6 @@ WARNING: Ten przewodnik zakłada praktyczną znajomość założeń frameworka R
 
 h3. Wprowadzenie do Rack
 
-bq. Rack provides a minimal, modular and adaptable interface for developing web applications in Ruby. By wrapping HTTP requests and responses in the simplest way possible, it unifies and distills the API for web servers, web frameworks, and software in between (the so-called middleware) into a single method call.
-
 bq. Rack dostarcza minimalnego, modułowego i adaptowalnego interfejsu do rozwijania aplikacji webowych w Rubym. Poprzez żądania i odpowiedzi HTTP w najprostszej możliwej postaci unifikuje i łączy w sobie API dla serwerów WWW, frameworków webowych i oprogramowania pośredniczącego (tzw. middleware software) w jedną metodę zapytania.
 
 - "Dokumentacja Rack API":http://rack.rubyforge.org/doc/
