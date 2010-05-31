@@ -29,7 +29,7 @@ W Internecie istnieje kilka dobrych darmowych źródeł pomocnych w nauce język
 * "Mr. Neigborly's Humble Little Ruby Book":http://www.humblelittlerubybook.com/
 * "Programming Ruby":http://www.rubycentral.com/book/
 * "Why's (Poignant) Guide to Ruby":http://poignantguide.net/ruby/
-* "Wprowadzenie do języka Ruby (po polsku)":http://www.apohllo.pl/dydaktyka/ruby/intro/
+* "Wprowadzenie do języka Ruby (po polsku)":http://www.apohllo.pl/dydaktyka/ruby/intro
 
 h3. Co to są Railsy?
 
